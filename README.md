@@ -47,15 +47,15 @@ graph TD
 
     subgraph "The L++ Frame (Runtime Engine)"
         Frame[Logic Interpreter & State Machine]
-        Policy[Policy Evaluator (GATES)]
+        Policy["Policy Evaluator (GATES)"]
     end
 
     Frame -->|Consults| Policy
     Frame -->|Dispatches Command| Dispatcher[Action Dispatcher]
 
     subgraph "The Compute Layer (Volatile Flesh)"
-        Dispatcher -->|Executes| UnitA[Compute Unit A\n(e.g., AI Generated API Call)]
-        Dispatcher -->|Executes| UnitB[Compute Unit B\n(e.g., Legacy System Wrapper)]
+        Dispatcher -->|Executes| UnitA["Compute Unit A\n(e.g., AI Generated API Call)"]
+        Dispatcher -->|Executes| UnitB["Compute Unit B\n(e.g., Legacy System Wrapper)"]
     end
 
     UnitA -->|Standard I/O Result| Frame
