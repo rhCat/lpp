@@ -1,16 +1,17 @@
 """
 L++ TLA+ Generator and Validator
 
-Generates TLA+ specifications from L++ blueprints for formal verification.
+Universal adaptor that generates TLA+ specifications from any L++ blueprint.
+Automatically extracts domains from context_schema (enums, numbers, strings).
 Can validate using TLC model checker if available.
 """
 
 import json
+import re
 import subprocess
 import tempfile
-import os
 from pathlib import Path
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, Dict
 
 
 class TLAValidationError(Exception):
@@ -18,19 +19,104 @@ class TLAValidationError(Exception):
     pass
 
 
-def generate_tla(bp: dict) -> str:
+def _extract_domains(bp: dict) -> Dict[str, dict]:
     """
-    Generate TLA+ specification from blueprint.
+    Extract type domains from blueprint context_schema.
+
+    Returns dict mapping property name to domain info:
+        {
+            "prop_name": {
+                "type": "number" | "string" | "enum" | "boolean",
+                "enum_values": [...] if enum,
+                "domain_name": "PropNameDomain" for TLA+
+            }
+        }
+    """
+    domains = {}
+    context_schema = bp.get("context_schema", {})
+    properties = context_schema.get("properties", {})
+
+    for prop, spec in properties.items():
+        ptype = spec.get("type", "string")
+        enum_vals = spec.get("enum", [])
+
+        domain_info = {
+            "type": ptype,
+            "nullable": True,  # All L++ context values can be NULL
+        }
+
+        if enum_vals:
+            # Has explicit enum - create named domain
+            domain_info["type"] = "enum"
+            domain_info["enum_values"] = enum_vals
+            # Create TLA+ safe domain name (PascalCase)
+            domain_info["domain_name"] = _to_pascal_case(prop) + "Domain"
+        elif ptype == "number":
+            domain_info["domain_name"] = "BoundedInt"
+        elif ptype == "boolean":
+            domain_info["domain_name"] = "BOOLEAN"
+        else:
+            # String without enum - any string (use STRING placeholder)
+            domain_info["domain_name"] = None  # Will use TRUE check
+
+        domains[prop] = domain_info
+
+    return domains
+
+
+def _to_pascal_case(name: str) -> str:
+    """Convert snake_case or kebab-case to PascalCase."""
+    parts = re.split(r'[-_]', name)
+    return ''.join(p.capitalize() for p in parts)
+
+
+def _to_tla_safe(name: str) -> str:
+    """Make identifier TLA+ safe (alphanumeric + underscore)."""
+    return re.sub(r'[^a-zA-Z0-9_]', '_', name)
+
+
+def _escape_tla_string(s: str) -> str:
+    """
+    Escape a string for TLA+ string literal.
+    Handles special characters that conflict with TLA+ operators.
+    """
+    # "/" conflicts with TLA+ division - use "div" for division operator
+    if s == "/":
+        return "div"
+    # Escape backslashes and quotes
+    s = s.replace("\\", "\\\\")
+    s = s.replace('"', '\\"')
+    return s
+
+
+def generate_tla(
+    bp: dict,
+    int_min: int = -10,
+    int_max: int = 10,
+    max_history: int = 5
+) -> str:
+    """
+    Generate TLA+ specification from any L++ blueprint.
+
+    Automatically extracts:
+    - States from states dict
+    - Events from transitions
+    - Domains from context_schema (numbers, enums, strings)
+    - Gates and their expressions
 
     Args:
         bp: Blueprint dictionary
+        int_min: Minimum integer value for bounded model checking
+        int_max: Maximum integer value for bounded model checking
+        max_history: Maximum event history length
 
     Returns:
         TLA+ specification as string
     """
     lines = []
 
-    name = bp.get("id", "Blueprint").replace("-", "_").replace(" ", "_")
+    # Extract blueprint components
+    name = _to_tla_safe(bp.get("id", "Blueprint"))
     states = list(bp.get("states", {}).keys())
     entry = bp.get("entry_state", states[0] if states else "init")
     terminal = bp.get("terminal_states", [])
@@ -39,6 +125,9 @@ def generate_tla(bp: dict) -> str:
     context_schema = bp.get("context_schema", {})
     properties = context_schema.get("properties", {})
 
+    # Extract domains from schema
+    domains = _extract_domains(bp)
+
     # Module header
     lines.append(
         "---------------------------- "
@@ -46,12 +135,48 @@ def generate_tla(bp: dict) -> str:
     )
     lines.append(f"\\* L++ Blueprint: {bp.get('name', 'Unnamed')}")
     lines.append(f"\\* Version: {bp.get('version', '0.0.0')}")
-    lines.append("\\* Auto-generated TLA+ specification")
+    lines.append("\\* Auto-generated TLA+ specification (universal adaptor)")
     lines.append("")
     lines.append("EXTENDS Integers, Sequences, TLC")
     lines.append("")
 
-    # Constants
+    # Bounds for state space
+    lines.append(
+        "\\* =========================================================")
+    lines.append("\\* BOUNDS - Constrain state space for model checking")
+    lines.append(
+        "\\* =========================================================")
+    lines.append(f"INT_MIN == {int_min}")
+    lines.append(f"INT_MAX == {int_max}")
+    lines.append(f"MAX_HISTORY == {max_history}")
+    lines.append("BoundedInt == INT_MIN..INT_MAX")
+    lines.append("")
+
+    # NULL constant
+    lines.append("\\* NULL constant for uninitialized values")
+    lines.append("CONSTANT NULL")
+    lines.append("")
+
+    # Generate domain sets for enums (dynamically from schema)
+    enum_domains = {
+        prop: info for prop, info in domains.items()
+        if info.get("type") == "enum"
+    }
+    if enum_domains:
+        lines.append(
+            "\\* =========================================================")
+        lines.append("\\* DOMAINS - Auto-extracted from context_schema")
+        lines.append(
+            "\\* =========================================================")
+        for prop, info in enum_domains.items():
+            enum_vals = info["enum_values"]
+            # Escape values for TLA+
+            escaped = [f'"{_escape_tla_string(v)}"' for v in enum_vals]
+            domain_name = info["domain_name"]
+            lines.append(f"{domain_name} == {{{', '.join(escaped)}}}")
+        lines.append("")
+
+    # States
     lines.append("\\* States")
     state_set = ", ".join(f'"{s}"' for s in states)
     lines.append(f"States == {{{state_set}}}")
@@ -59,6 +184,7 @@ def generate_tla(bp: dict) -> str:
 
     # Events from transitions
     events = set(t.get("on_event", "") for t in transitions)
+    events.discard("")  # Remove empty
     event_set = ", ".join(f'"{e}"' for e in sorted(events))
     lines.append(f"Events == {{{event_set}}}")
     lines.append("")
@@ -75,27 +201,45 @@ def generate_tla(bp: dict) -> str:
     lines.append("VARIABLES")
     lines.append("    state,           \\* Current state")
     for prop in properties.keys():
-        lines.append(f"    {prop},           \\* Context variable")
+        safe_prop = _to_tla_safe(prop)
+        desc = properties[prop].get("description", "Context variable")
+        lines.append(f"    {safe_prop},           \\* {desc}")
     lines.append("    event_history    \\* Trace of events")
     lines.append("")
 
-    var_list = ["state"] + list(properties.keys()) + ["event_history"]
+    var_list = ["state"] + [_to_tla_safe(p) for p in properties.keys()] + \
+        ["event_history"]
     lines.append(f"vars == <<{', '.join(var_list)}>>")
     lines.append("")
 
-    # Type invariant
-    lines.append("\\* Type invariant")
+    # Type invariant (structural correctness)
+    lines.append("\\* Type invariant - structural correctness")
     lines.append("TypeInvariant ==")
     lines.append("    /\\ state \\in States")
-    lines.append("    /\\ event_history \\in Seq(Events)")
-    for prop, spec in properties.items():
-        ptype = spec.get("type", "string")
-        if ptype == "number":
-            lines.append(f"    /\\ {prop} \\in Int \\cup {{NULL}}")
-        elif ptype == "string":
-            lines.append(f"    /\\ {prop} \\in STRING \\cup {{NULL}}")
+    for prop, info in domains.items():
+        safe_prop = _to_tla_safe(prop)
+        domain_name = info.get("domain_name")
+        if domain_name:
+            lines.append(
+                f"    /\\ ({safe_prop} \\in {domain_name}) \\/ "
+                f"({safe_prop} = NULL)"
+            )
         else:
-            lines.append(f"    /\\ TRUE  \\* {prop}")
+            # String without enum - accept anything
+            lines.append(f"    /\\ TRUE  \\* {safe_prop}: any string or NULL")
+    lines.append("")
+
+    # State constraint (bounds exploration)
+    lines.append("\\* State constraint - limits TLC exploration depth")
+    lines.append("StateConstraint ==")
+    lines.append("    /\\ Len(event_history) <= MAX_HISTORY")
+    for prop, info in domains.items():
+        safe_prop = _to_tla_safe(prop)
+        if info.get("type") == "number":
+            lines.append(
+                f"    /\\ ({safe_prop} = NULL) \\/ "
+                f"({safe_prop} \\in BoundedInt)"
+            )
     lines.append("")
 
     # Initial state
@@ -103,7 +247,8 @@ def generate_tla(bp: dict) -> str:
     lines.append("Init ==")
     lines.append(f'    /\\ state = "{entry}"')
     for prop in properties.keys():
-        lines.append(f"    /\\ {prop} = NULL")
+        safe_prop = _to_tla_safe(prop)
+        lines.append(f"    /\\ {safe_prop} = NULL")
     lines.append("    /\\ event_history = <<>>")
     lines.append("")
 
@@ -129,7 +274,7 @@ def generate_tla(bp: dict) -> str:
         for gid in gate_ids:
             gate = gates.get(gid, {})
             expr = gate.get("expression", "TRUE")
-            tla_expr = _python_to_tla(expr, properties)
+            tla_expr = _python_to_tla(expr, properties, domains)
             lines.append(f"    /\\ {tla_expr}  \\* gate: {gid}")
 
         # State transition
@@ -137,7 +282,8 @@ def generate_tla(bp: dict) -> str:
 
         # Context unchanged (simplified - real impl would track mutations)
         for prop in properties.keys():
-            lines.append(f"    /\\ {prop}' = {prop}")
+            safe_prop = _to_tla_safe(prop)
+            lines.append(f"    /\\ {safe_prop}' = {safe_prop}")
 
         # Event history
         lines.append(
@@ -189,55 +335,98 @@ def generate_tla(bp: dict) -> str:
     return "\n".join(lines)
 
 
-def _python_to_tla(expr: str, properties: dict) -> str:
+def _python_to_tla(
+    expr: str,
+    properties: dict,
+    domains: Optional[Dict[str, dict]] = None
+) -> str:
     """
-    Convert Python expression to TLA+ expression (best effort).
-    """
-    import re
+    Universal Python to TLA+ expression converter.
 
+    Handles:
+    - None/null checks -> NULL
+    - Boolean operators (and, or, not)
+    - Comparison operators (==, !=, <, >, <=, >=)
+    - 'in' membership tests -> \\in {set} or \\in DomainName
+    - String literals ('x' or "x") -> "x"
+    - Special characters (/ -> div in string literals)
+    - Domain-aware: uses domain names when available
+    """
     tla = expr
+    domains = domains or {}
 
-    # Handle 'in' operator for tuples/sets first (before other replacements)
-    # e.g., "op in
-    # ('+', '-', '*', '/')" -> "op \\in {\"+\", \"-\", \"*\", \"/\"}"
+    # First, convert Python string literals to TLA+ format
+    # Handle both single and double quoted strings
+    def convert_string_literal(m):
+        s = m.group(1) or m.group(2)  # Group 1 is single-quoted, 2 is double
+        # Escape special TLA+ characters
+        escaped = _escape_tla_string(s)
+        return f'"{escaped}"'
+
+    # Single-quoted strings: 'value'
+    tla = re.sub(r"'([^']*)'(?!')", convert_string_literal, tla)
+
+    # Handle 'in' operator for tuples/lists/sets
+    # If we have a domain for the variable, use the domain name
     in_pattern = r"(\w+)\s+in\s+\(([^)]+)\)"
 
     def replace_in(m):
         var = m.group(1)
         items = m.group(2)
-        # Convert Python strings to TLA+ strings
-        items = re.sub(r"'([^']*)'", r'"\1"', items)
+        # Check if this variable has a known domain
+        if var in domains and domains[var].get("domain_name"):
+            domain_name = domains[var]["domain_name"]
+            return f"{var} \\in {domain_name}"
+        # Otherwise, build inline set
         return f"{var} \\in {{{items}}}"
+
     tla = re.sub(in_pattern, replace_in, tla)
 
-    # Simple translations
-    tla = tla.replace(" is not None", " /= NULL")
-    tla = tla.replace(" is None", " = NULL")
-    tla = tla.replace(" and ", " /\\ ")
-    tla = tla.replace(" or ", " \\/ ")
-    tla = tla.replace("not ", "~")
-    tla = tla.replace(" == ", " = ")
-    tla = tla.replace(" != ", " /= ")
-    tla = tla.replace("True", "TRUE")
-    tla = tla.replace("False", "FALSE")
-    tla = tla.replace("_state", "state")
+    # Also handle list syntax: x in ['a', 'b']
+    list_pattern = r"(\w+)\s+in\s+\[([^\]]+)\]"
+    tla = re.sub(list_pattern, replace_in, tla)
 
-    # Handle remaining parentheses
-    # Don't convert all ) to } - only for set literals
+    # Python to TLA+ operator translations
+    translations = [
+        (" is not None", " /= NULL"),
+        (" is None", " = NULL"),
+        (" and ", " /\\ "),
+        (" or ", " \\/ "),
+        ("not ", "~"),
+        (" == ", " = "),
+        (" != ", " /= "),
+        (" >= ", " >= "),
+        (" <= ", " <= "),
+        (" > ", " > "),
+        (" < ", " < "),
+        ("True", "TRUE"),
+        ("False", "FALSE"),
+        ("_state", "state"),  # L++ uses _state for current state
+    ]
+
+    for py_op, tla_op in translations:
+        tla = tla.replace(py_op, tla_op)
 
     return tla
 
 
-def generate_cfg(bp: dict, check_deadlock: bool = True) -> str:
+def generate_cfg(bp: dict, check_deadlock: bool = False) -> str:
     """
     Generate TLC configuration file.
+
+    Note: CHECK_DEADLOCK defaults to FALSE because L++ state machines
+    may intentionally allow states with no outgoing transitions.
     """
     lines = []
-    name = bp.get("id", "Blueprint").replace("-", "_").replace(" ", "_")
+    name = _to_tla_safe(bp.get("id", "Blueprint"))
 
     lines.append(f"\\* TLC Configuration for {name}")
+    lines.append("\\* Bounded model checking configuration")
     lines.append("")
     lines.append("SPECIFICATION Spec")
+    lines.append("")
+    lines.append("\\* State constraint to bound exploration")
+    lines.append("CONSTRAINT StateConstraint")
     lines.append("")
     lines.append("INVARIANT TypeInvariant")
     lines.append("INVARIANT AlwaysValidState")
@@ -250,8 +439,8 @@ def generate_cfg(bp: dict, check_deadlock: bool = True) -> str:
 
     lines.append("")
     lines.append("\\* Constants")
-    lines.append("CONSTANT NULL = NULL")
-    lines.append("CONSTANT STRING = STRING")
+    lines.append("CONSTANT")
+    lines.append("NULL = NULL")
 
     return "\n".join(lines)
 
@@ -276,7 +465,7 @@ def validate_with_tlc(
     tla_spec = generate_tla(bp)
     cfg_spec = generate_cfg(bp)
 
-    name = bp.get("id", "Blueprint").replace("-", "_").replace(" ", "_")
+    name = _to_tla_safe(bp.get("id", "Blueprint"))
 
     # Write to temp files
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -322,18 +511,27 @@ def validate_with_tlc(
             return False, f"TLC error: {str(e)}"
 
 
-def save_tla(bp: dict, output_dir: str) -> Tuple[str, str]:
+def save_tla(
+    bp: dict,
+    output_dir: str,
+    int_min: int = -10,
+    int_max: int = 10,
+    max_history: int = 5
+) -> Tuple[str, str]:
     """
     Save TLA+ spec and config to files.
 
     Args:
         bp: Blueprint dictionary
         output_dir: Directory to save files
+        int_min: Minimum integer bound
+        int_max: Maximum integer bound
+        max_history: Maximum event history length
 
     Returns:
         Tuple of (tla_path, cfg_path)
     """
-    name = bp.get("id", "Blueprint").replace("-", "_").replace(" ", "_")
+    name = _to_tla_safe(bp.get("id", "Blueprint"))
 
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
@@ -341,7 +539,7 @@ def save_tla(bp: dict, output_dir: str) -> Tuple[str, str]:
     tla_path = output_path / f"{name}.tla"
     cfg_path = output_path / f"{name}.cfg"
 
-    tla_path.write_text(generate_tla(bp))
+    tla_path.write_text(generate_tla(bp, int_min, int_max, max_history))
     cfg_path.write_text(generate_cfg(bp))
 
     return str(tla_path), str(cfg_path)
@@ -358,6 +556,13 @@ Options:
     --output, -o DIR    Save TLA+ files to directory
     --validate, -v      Run TLC validation (requires TLC installed)
     --tlc PATH          Path to TLC executable
+    --int-min N         Minimum integer value (default: -10)
+    --int-max N         Maximum integer value (default: 10)
+    --max-history N     Maximum event history length (default: 5)
+
+Bounds control state space explosion:
+    Small bounds (e.g., -3..3, history=3) = fast checking, limited coverage
+    Large bounds (e.g., -100..100, history=10) = thorough but slow
 
 Examples:
     python -m frame_py.tla_validator blueprint.json
@@ -374,6 +579,9 @@ Examples:
     output_dir = None
     do_validate = False
     tlc_path = "tlc"
+    int_min = -10
+    int_max = 10
+    max_history = 5
 
     i = 1
     while i < len(sys.argv):
@@ -386,6 +594,15 @@ Examples:
             i += 1
         elif arg == "--tlc" and i + 1 < len(sys.argv):
             tlc_path = sys.argv[i + 1]
+            i += 2
+        elif arg == "--int-min" and i + 1 < len(sys.argv):
+            int_min = int(sys.argv[i + 1])
+            i += 2
+        elif arg == "--int-max" and i + 1 < len(sys.argv):
+            int_max = int(sys.argv[i + 1])
+            i += 2
+        elif arg == "--max-history" and i + 1 < len(sys.argv):
+            max_history = int(sys.argv[i + 1])
             i += 2
         elif not arg.startswith("-"):
             bp_path = arg
@@ -401,11 +618,16 @@ Examples:
     with open(bp_path) as f:
         bp = json.load(f)
 
+    # Print bounds info
+    print(
+        f"Bounds: integers [{int_min}..{int_max}], history max {max_history}")
+
     # Generate TLA+
-    tla_spec = generate_tla(bp)
+    tla_spec = generate_tla(bp, int_min, int_max, max_history)
 
     if output_dir:
-        tla_path, cfg_path = save_tla(bp, output_dir)
+        tla_path, cfg_path = save_tla(
+            bp, output_dir, int_min, int_max, max_history)
         print(f"TLA+ spec saved to: {tla_path}")
         print(f"TLC config saved to: {cfg_path}")
     else:
