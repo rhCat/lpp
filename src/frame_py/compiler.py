@@ -6,8 +6,8 @@ Transforms declarative blueprints into code using the four atomic operations.
 """
 
 import json
-# from pathlib import Path
-# from typing import Any
+
+from frame_py.validator import validate_blueprint
 
 
 def compile_blueprint(blueprint_path: str, output_path: str = None) -> str:
@@ -48,6 +48,9 @@ def compile_blueprint_dict(blueprint: dict) -> str:
 
 def _generate_code(bp: dict) -> str:
     """Generate Python code from a blueprint dictionary."""
+    # Validate first
+    validate_blueprint(bp)
+
     lines = []
 
     # Header
