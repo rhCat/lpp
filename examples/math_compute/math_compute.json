@@ -1,0 +1,194 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "calculator",
+  "name": "L++ Calculator",
+  "version": "1.0.0",
+  "description": "A math compute represented as a state machine with L++ logic operations",
+
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Waiting for input"
+    },
+    "has_operand_a": {
+      "name": "Has First Operand",
+      "description": "First number entered, waiting for operator"
+    },
+    "has_operator": {
+      "name": "Has Operator",
+      "description": "Operator selected, waiting for second number"
+    },
+    "has_operand_b": {
+      "name": "Has Second Operand",
+      "description": "Second number entered, ready to compute"
+    },
+    "showing_result": {
+      "name": "Showing Result",
+      "description": "Displaying computation result"
+    },
+    "error": {
+      "name": "Error",
+      "description": "Error state (e.g., division by zero)"
+    }
+  },
+
+  "entry_state": "idle",
+  "terminal_states": [],
+
+  "gates": {
+    "is_divide_by_zero": {
+      "id": "is_divide_by_zero",
+      "type": "expression",
+      "expression": "operator == '/' and operand_b == 0",
+      "description": "Check for division by zero"
+    },
+    "is_not_divide_by_zero": {
+      "id": "is_not_divide_by_zero",
+      "type": "expression",
+      "expression": "not (operator == '/' and operand_b == 0)",
+      "description": "Safe to divide"
+    },
+    "has_result": {
+      "id": "has_result",
+      "type": "expression",
+      "expression": "result is not None",
+      "description": "Check if result exists for chaining"
+    }
+  },
+
+  "actions": {
+    "store_operand_a": {
+      "id": "store_operand_a",
+      "type": "set",
+      "target": "operand_a",
+      "value_from": "event.payload.value",
+      "description": "Store first operand from event"
+    },
+    "store_operator": {
+      "id": "store_operator",
+      "type": "set",
+      "target": "operator",
+      "value_from": "event.payload.op",
+      "description": "Store operator from event"
+    },
+    "store_operand_b": {
+      "id": "store_operand_b",
+      "type": "set",
+      "target": "operand_b",
+      "value_from": "event.payload.value",
+      "description": "Store second operand from event"
+    },
+    "compute_result": {
+      "id": "compute_result",
+      "type": "compute",
+      "compute_unit": "math:calculate",
+      "input_map": {
+        "a": "operand_a",
+        "b": "operand_b",
+        "op": "operator"
+      },
+      "output_map": {
+        "result": "result"
+      },
+      "description": "Perform the arithmetic operation"
+    },
+    "set_error_div_zero": {
+      "id": "set_error_div_zero",
+      "type": "set",
+      "target": "error",
+      "value": "Division by zero",
+      "description": "Set division by zero error"
+    },
+    "clear_all": {
+      "id": "clear_all",
+      "type": "set",
+      "target": "operand_a",
+      "value": null,
+      "description": "Clear first operand"
+    },
+    "chain_result_to_a": {
+      "id": "chain_result_to_a",
+      "type": "set",
+      "target": "operand_a",
+      "value_from": "result",
+      "description": "Use result as next operand_a for chaining"
+    }
+  },
+
+  "transitions": [
+    {
+      "id": "t_enter_number_idle",
+      "from": "idle",
+      "to": "has_operand_a",
+      "on_event": "NUMBER",
+      "gates": [],
+      "actions": ["store_operand_a"],
+      "description": "Enter first number from idle"
+    },
+    {
+      "id": "t_select_operator",
+      "from": "has_operand_a",
+      "to": "has_operator",
+      "on_event": "OPERATOR",
+      "gates": [],
+      "actions": ["store_operator"],
+      "description": "Select operator after first number"
+    },
+    {
+      "id": "t_enter_operand_b",
+      "from": "has_operator",
+      "to": "has_operand_b",
+      "on_event": "NUMBER",
+      "gates": [],
+      "actions": ["store_operand_b"],
+      "description": "Enter second number"
+    },
+    {
+      "id": "t_equals_success",
+      "from": "has_operand_b",
+      "to": "showing_result",
+      "on_event": "EQUALS",
+      "gates": ["is_not_divide_by_zero"],
+      "actions": ["compute_result"],
+      "description": "Compute and show result"
+    },
+    {
+      "id": "t_equals_div_zero",
+      "from": "has_operand_b",
+      "to": "error",
+      "on_event": "EQUALS",
+      "gates": ["is_divide_by_zero"],
+      "actions": ["set_error_div_zero"],
+      "description": "Division by zero error"
+    },
+    {
+      "id": "t_chain_operation",
+      "from": "showing_result",
+      "to": "has_operator",
+      "on_event": "OPERATOR",
+      "gates": [],
+      "actions": ["chain_result_to_a", "store_operator"],
+      "description": "Chain result into next operation"
+    },
+    {
+      "id": "t_clear_from_any",
+      "from": "*",
+      "to": "idle",
+      "on_event": "CLEAR",
+      "gates": [],
+      "actions": ["clear_all"],
+      "description": "Clear and return to idle"
+    }
+  ],
+
+  "context_schema": {
+    "type": "object",
+    "properties": {
+      "operand_a": {"type": "number"},
+      "operand_b": {"type": "number"},
+      "operator": {"type": "string", "enum": ["+", "-", "*", "/"]},
+      "result": {"type": "number"},
+      "error": {"type": "string"}
+    }
+  }
+}
