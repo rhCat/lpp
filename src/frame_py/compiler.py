@@ -166,13 +166,27 @@ def _generate_code(bp: dict) -> str:
     lines.append("# COMPILED OPERATOR")
     lines.append("# " + "=" * 70)
     lines.append("")
+
+    # Build initial context from context_schema
+    context_schema = bp.get("context_schema", {})
+    properties = context_schema.get("properties", {})
+    init_ctx = {"_state": "ENTRY_STATE"}  # placeholder
+    for prop in properties.keys():
+        init_ctx[prop] = None
+
+    # Generate context initialization
+    ctx_items = ["'_state': ENTRY_STATE"]
+    for prop in properties.keys():
+        ctx_items.append(f"{repr(prop)}: None")
+    ctx_init = "{" + ", ".join(ctx_items) + "}"
+
     lines.append("class Operator:")
     lines.append('    """')
     lines.append(f"    Compiled L++ Operator: {bp.get('name', 'Unnamed')}")
     lines.append('    """')
     lines.append("")
     lines.append("    def __init__(self, compute_registry: dict = None):")
-    lines.append("        self.context = {'_state': ENTRY_STATE}")
+    lines.append(f"        self.context = {ctx_init}")
     lines.append("        self.traces: list[TransitionTrace] = []")
     lines.append("        self.compute_registry = compute_registry or {}")
     lines.append("")
@@ -206,30 +220,32 @@ def _generate_code(bp: dict) -> str:
     lines.append(
         "            return False, current, 'Already in terminal state'")
     lines.append("")
-    lines.append("        # Find matching transition")
+    lines.append("        # Build evaluation scope")
+    lines.append("        scope = dict(self.context)")
+    lines.append(
+        "        scope['event'] = {'name': event_name, 'payload': payload}")
+    lines.append("")
+    lines.append("        # Find matching transition (checks gates)")
     lines.append("        trans = None")
     lines.append("        for t in TRANSITIONS:")
     lines.append("            if t['on_event'] != event_name:")
     lines.append("                continue")
-    lines.append("            if t['from'] == '*' or t['from'] == current:")
+    lines.append("            if t['from'] != '*' and t['from'] != current:")
+    lines.append("                continue")
+    lines.append("            # Check gates")
+    lines.append("            gates_pass = True")
+    lines.append("            for gate_id in t.get('gates', []):")
+    lines.append("                expr = GATES.get(gate_id, 'True')")
+    lines.append("                if not atom_EVALUATE(expr, scope):")
+    lines.append("                    gates_pass = False")
+    lines.append("                    break")
+    lines.append("            if gates_pass:")
     lines.append("                trans = t")
     lines.append("                break")
     lines.append("")
     lines.append("        if not trans:")
     lines.append(
         "            return False, current, f'No transition for {event_name}'")
-    lines.append("")
-    lines.append("        # Build evaluation scope")
-    lines.append("        scope = dict(self.context)")
-    lines.append(
-        "        scope['event'] = {'name': event_name, 'payload': payload}")
-    lines.append("")
-    lines.append("        # EVALUATE: Check gates")
-    lines.append("        for gate_id in trans['gates']:")
-    lines.append("            expr = GATES.get(gate_id, 'True')")
-    lines.append("            if not atom_EVALUATE(expr, scope):")
-    lines.append(
-        "                return False, current, f'Gate {gate_id} blocked'")
     lines.append("")
     lines.append("        # Execute actions")
     lines.append("        for action_id in trans['actions']:")
@@ -305,7 +321,7 @@ def _generate_code(bp: dict) -> str:
     # Reset
     lines.append("    def reset(self):")
     lines.append('        """Reset to initial state."""')
-    lines.append("        self.context = {'_state': ENTRY_STATE}")
+    lines.append(f"        self.context = {ctx_init}")
     lines.append("        self.traces = []")
     lines.append("")
     lines.append("")
