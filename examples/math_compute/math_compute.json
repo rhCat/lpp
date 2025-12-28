@@ -13,27 +13,26 @@
   "entry_state": "has_operand",
 
   "gates": {
-    "has_a": {
-      "expression": "a is not None"
-    },
-    "has_b": {
-      "expression": "b is not None"
-    },
-    "has_op": {
-      "expression": "op in ('+', '-', '*', '/')"
-    },
-    "no_a": {
-      "expression": "a is None"
-    },
-    "can_compute": {
-      "expression": "a is not None and b is not None and op in ('+', '-', '*', '/')"
-    },
-    "is_div_zero": {
-      "expression": "op == '/' and b == 0"
-    },
-    "safe_compute": {
-      "expression": "a is not None and b is not None and op in ('+', '-', '*', '/') and not (op == '/' and b == 0)"
-    }
+    "has_a": { "expression": "a is not None" },
+    "has_b": { "expression": "b is not None" },
+    "has_op": { "expression": "op in ('+', '-', '*', '/')" },
+    "no_a": { "expression": "a is None" },
+    "no_b": { "expression": "b is None" },
+    "is_error": { "expression": "_state == 'error'" },
+    "is_has_operator": { "expression": "_state == 'has_operator'" },
+    "can_compute": { "expression": "a is not None and b is not None and op in ('+', '-', '*', '/')" },
+    "is_div_zero": { "expression": "op == '/' and b == 0" },
+    "safe_compute": { "expression": "a is not None and b is not None and op in ('+', '-', '*', '/') and not (op == '/' and b == 0)" }
+  },
+
+  "display": {
+    "rules": [
+      { "gate": "is_error", "template": "ERROR: {error}" },
+      { "gate": "is_has_operator", "template": "{a} {op} _" },
+      { "gate": "has_b", "template": "{a} {op} {b}" },
+      { "gate": "has_a", "template": "{a}" },
+      { "template": "0" }
+    ]
   },
 
   "actions": {
