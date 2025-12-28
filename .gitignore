@@ -3,6 +3,9 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# test result files
+**/results
+
 # Mac stuff
 **/.__**
 .vscode

@@ -244,11 +244,13 @@ def _generate_code(bp: dict) -> str:
     lines.append("                    value = action['value']")
     lines.append("                elif action.get('value_from'):")
     lines.append(
-        "                    value = _resolve_path(action['value_from'], scope)")
+        "                    value = _resolve_path("
+        "action['value_from'], scope)")
     lines.append("                else:")
     lines.append("                    value = None")
     lines.append(
-        "                self.context = atom_MUTATE(self.context, target, value)")
+        "                self.context = atom_MUTATE("
+        "self.context, target, value)")
     lines.append("")
     lines.append("            elif action['type'] == 'compute':")
     lines.append("                # DISPATCH")
@@ -259,25 +261,29 @@ def _generate_code(bp: dict) -> str:
     lines.append("                    inp = {")
     lines.append("                        k: _resolve_path(v, scope)")
     lines.append(
-        "                        for k, v in action.get('input_map', {}).items()")
+        "                        for k, v in action.get("
+        "'input_map', {}).items()")
     lines.append("                    }")
     lines.append("                    result = atom_DISPATCH(")
     lines.append(
         "                        sys_id, op_id, inp, self.compute_registry")
     lines.append("                    )")
     lines.append(
-        "                    for ctx_path, res_key in action.get('output_map', {}).items():")
+        "                    for ctx_path, res_key in action.get("
+        "'output_map', {}).items():")
     lines.append("                        if res_key in result:")
     lines.append("                            self.context = atom_MUTATE(")
     lines.append(
-        "                                self.context, ctx_path, result[res_key]")
+        "                                self.context, ctx_path,"
+        " result[res_key]")
     lines.append("                            )")
     lines.append("")
     lines.append("        # TRANSITION")
     lines.append(
         "        new_state, trace = atom_TRANSITION(current, trans['to'])")
     lines.append(
-        "        self.context = atom_MUTATE(self.context, '_state', new_state)")
+        "        self.context = atom_MUTATE("
+        "self.context, '_state', new_state)")
     lines.append("        self.traces.append(trace)")
     lines.append("")
     lines.append("        return True, new_state, None")

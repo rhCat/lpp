@@ -7,6 +7,7 @@ Structure:
     lpp_core.py    - The Four Atomic Operations (Assembly Language)
     schema.py      - Blueprint Definitions (Immutable)
     loader.py      - JSON Parser & Validator
+    compiler.py    - JSON to Python Compiler
     orchestrator.py - The Thin Conductor
 """
 
@@ -48,6 +49,12 @@ from .loader import (
 )
 
 # ==========================================================================
+# COMPILER
+# ==========================================================================
+
+from .compiler import compile_blueprint, compile_blueprint_dict
+
+# ==========================================================================
 # ORCHESTRATOR
 # ==========================================================================
 
@@ -82,6 +89,10 @@ __all__ = [
     'load_blueprint_from_json',
     'BlueprintLoader',
     'BlueprintValidationError',
+
+    # Compiler
+    'compile_blueprint',
+    'compile_blueprint_dict',
 
     # Orchestrator
     'run_frame',
