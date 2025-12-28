@@ -89,22 +89,14 @@ def format_display(calc) -> str:
     if state == "error":
         return f"ERROR: {ctx.get('error', 'Unknown')}"
 
-    if state == "showing_result":
-        result = ctx.get("result")
-        if isinstance(result, float) and result.is_integer():
-            return str(int(result))
-        return str(result)
+    # Show 'a' as the display value (either operand or result)
+    a = ctx.get("a")
+    b = ctx.get("b")
 
-    if state == "has_operand_b":
-        return str(ctx.get("operand_b", 0))
-
-    if state == "has_operator":
-        a = ctx.get("operand_a", 0)
-        op = ctx.get("operator", "")
-        return f"{a} {op} _"
-
-    if state == "has_operand_a":
-        return str(ctx.get("operand_a", 0))
+    if b is not None:
+        return str(int(b) if isinstance(b, float) and b.is_integer() else b)
+    if a is not None:
+        return str(int(a) if isinstance(a, float) and a.is_integer() else a)
 
     return "0"
 
@@ -114,31 +106,21 @@ def format_expression(calc) -> str:
     ctx = calc.context
     state = calc.state
 
-    # Handle states explicitly
-    if state == "idle":
-        return "0"
-
     if state == "error":
         return f"Error: {ctx.get('error', 'Unknown')}"
 
     parts = []
+    a, b, op = ctx.get("a"), ctx.get("b"), ctx.get("op")
 
-    if ctx.get("operand_a") is not None:
-        parts.append(str(ctx["operand_a"]))
+    if a is not None:
+        parts.append(str(a))
 
-    if ctx.get("operator") and state in (
-        "has_operator", "has_operand_b", "showing_result"
-    ):
-        parts.append(ctx["operator"])
-
-    if ctx.get("operand_b") is not None and state in (
-        "has_operand_b", "showing_result"
-    ):
-        parts.append(str(ctx["operand_b"]))
-
-    if ctx.get("result") is not None and state == "showing_result":
-        parts.append("=")
-        parts.append(str(ctx["result"]))
+    if op and state == "has_operator":
+        parts.append(op)
+        parts.append("_")
+    elif op and b is not None:
+        parts.append(op)
+        parts.append(str(b))
 
     return " ".join(parts) if parts else "0"
 
@@ -146,11 +128,10 @@ def format_expression(calc) -> str:
 def show_state(calc):
     """Show detailed state info."""
     print(f"\n  State: {calc.state}")
-    print(f"  operand_a: {calc.context.get('operand_a')}")
-    print(f"  operator:  {calc.context.get('operator')}")
-    print(f"  operand_b: {calc.context.get('operand_b')}")
-    print(f"  result:    {calc.context.get('result')}")
-    print(f"  error:     {calc.context.get('error')}")
+    print(f"  a:     {calc.context.get('a')}")
+    print(f"  op:    {calc.context.get('op')}")
+    print(f"  b:     {calc.context.get('b')}")
+    print(f"  error: {calc.context.get('error')}")
     print()
 
 

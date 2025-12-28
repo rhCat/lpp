@@ -123,7 +123,7 @@ def run_tests(create_operator):
     calc.dispatch("OPERATOR", {"op": "+"})
     calc.dispatch("NUMBER", {"value": 4})
     ok, state, err = calc.dispatch("EQUALS")
-    actual = calc.get("result")
+    actual = calc.get("a")  # result stored in 'a'
     test["actual"] = actual
     test["state"] = state
     test["passed"] = (actual == test["expected"])
@@ -131,13 +131,13 @@ def run_tests(create_operator):
           f"{'PASS' if test['passed'] else 'FAIL'}")
     results["tests"].append(test)
 
-    # Test 2: Chain operation
-    test = {"name": "8 * 2 = 16 (chained)", "expected": 16, "passed": False}
+    # Test 2: Chain operation (9 * 2 = 18, since previous result is 9)
+    test = {"name": "9 * 2 = 18 (chained)", "expected": 18, "passed": False}
     print(f"\n>> Test 2: {test['name']}")
     calc.dispatch("OPERATOR", {"op": "*"})
     calc.dispatch("NUMBER", {"value": 2})
     ok, state, err = calc.dispatch("EQUALS")
-    actual = calc.get("result")
+    actual = calc.get("a")  # result stored in 'a'
     test["actual"] = actual
     test["state"] = state
     test["passed"] = (actual == test["expected"])
@@ -145,8 +145,8 @@ def run_tests(create_operator):
           f"{'PASS' if test['passed'] else 'FAIL'}")
     results["tests"].append(test)
 
-    # Test 3: Division by zero (should be blocked by gate)
-    test = {"name": "10 / 0 = ERROR", "expected_state": "has_operand_b",
+    # Test 3: Division by zero (should transition to error state)
+    test = {"name": "10 / 0 = ERROR", "expected_state": "error",
             "passed": False}
     print(f"\n>> Test 3: {test['name']}")
     calc.reset()
@@ -155,9 +155,9 @@ def run_tests(create_operator):
     calc.dispatch("NUMBER", {"value": 0})
     ok, state, err = calc.dispatch("EQUALS")
     test["actual_state"] = state
-    test["error"] = err
-    test["passed"] = (state == test["expected_state"] and not ok)
-    print(f"   State: {state}, Error: {err}, "
+    test["error"] = calc.get("error")
+    test["passed"] = (state == test["expected_state"])
+    print(f"   State: {state}, Error: {test['error']}, "
           f"{'PASS' if test['passed'] else 'FAIL'}")
     results["tests"].append(test)
 
@@ -169,7 +169,7 @@ def run_tests(create_operator):
     calc.dispatch("OPERATOR", {"op": "-"})
     calc.dispatch("NUMBER", {"value": 37})
     ok, state, err = calc.dispatch("EQUALS")
-    actual = calc.get("result")
+    actual = calc.get("a")  # result stored in 'a'
     test["actual"] = actual
     test["state"] = state
     test["passed"] = (actual == test["expected"])
@@ -185,7 +185,7 @@ def run_tests(create_operator):
     calc.dispatch("OPERATOR", {"op": "*"})
     calc.dispatch("NUMBER", {"value": 6})
     ok, state, err = calc.dispatch("EQUALS")
-    actual = calc.get("result")
+    actual = calc.get("a")  # result stored in 'a'
     test["actual"] = actual
     test["state"] = state
     test["passed"] = (actual == test["expected"])
@@ -201,7 +201,7 @@ def run_tests(create_operator):
     calc.dispatch("OPERATOR", {"op": "/"})
     calc.dispatch("NUMBER", {"value": 12})
     ok, state, err = calc.dispatch("EQUALS")
-    actual = calc.get("result")
+    actual = calc.get("a")  # result stored in 'a'
     test["actual"] = actual
     test["state"] = state
     test["passed"] = (actual == test["expected"])

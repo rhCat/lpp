@@ -102,6 +102,14 @@ def _generate_code(bp: dict) -> str:
     lines.append("}")
     lines.append("")
 
+    # Display rules
+    display_rules = bp.get("display", {}).get("rules", [])
+    lines.append("DISPLAY_RULES = [")
+    for rule in display_rules:
+        lines.append(f"    {repr(rule)},")
+    lines.append("]")
+    lines.append("")
+
     # Actions
     lines.append("ACTIONS = {")
     for action_id, action in bp.get("actions", {}).items():
@@ -316,6 +324,25 @@ def _generate_code(bp: dict) -> str:
     lines.append('        """Set a value in context by path."""')
     lines.append(
         "        self.context = atom_MUTATE(self.context, path, value)")
+    lines.append("")
+
+    # Display method - evaluate display rules from blueprint
+    lines.append("    def display(self) -> str:")
+    lines.append(
+        '        """Evaluate display rules and return formatted string."""')
+    lines.append("        for rule in DISPLAY_RULES:")
+    lines.append("            gate = rule.get('gate')")
+    lines.append("            if gate:")
+    lines.append("                expr = GATES.get(gate, 'False')")
+    lines.append("                if not atom_EVALUATE(expr, self.context):")
+    lines.append("                    continue")
+    lines.append("            # Gate passed or no gate, format template")
+    lines.append("            template = rule.get('template', '')")
+    lines.append("            try:")
+    lines.append("                return template.format(**self.context)")
+    lines.append("            except (KeyError, ValueError):")
+    lines.append("                return template")
+    lines.append("        return ''")
     lines.append("")
 
     # Reset
