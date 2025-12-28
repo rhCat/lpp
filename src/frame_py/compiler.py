@@ -6,17 +6,24 @@ Transforms declarative blueprints into code using the four atomic operations.
 """
 
 import json
+# from typing import Optional
 
 from frame_py.validator import validate_blueprint
 
 
-def compile_blueprint(blueprint_path: str, output_path: str = None) -> str:
+def compile_blueprint(
+    blueprint_path: str,
+    output_path: str = None,
+    tla_output_dir: str = None
+) -> str:
     """
     Compile a JSON blueprint into a Python operator script.
 
     Args:
         blueprint_path: Path to the JSON blueprint file
         output_path: Optional path to write the compiled script
+        tla_output_dir: Optional directory to save
+        TLA+ spec for formal verification
 
     Returns:
         The generated Python code as a string
@@ -30,20 +37,32 @@ def compile_blueprint(blueprint_path: str, output_path: str = None) -> str:
         with open(output_path, "w") as f:
             f.write(code)
 
+    # Generate TLA+ spec if requested
+    if tla_output_dir:
+        from frame_py.tla_validator import save_tla
+        save_tla(bp, tla_output_dir)
+
     return code
 
 
-def compile_blueprint_dict(blueprint: dict) -> str:
+def compile_blueprint_dict(blueprint: dict, tla_output_dir: str = None) -> str:
     """
     Compile a blueprint dictionary into Python code.
 
     Args:
         blueprint: The blueprint as a dictionary
+        tla_output_dir: Optional directory to save TLA+ spec
 
     Returns:
         The generated Python code as a string
     """
-    return _generate_code(blueprint)
+    code = _generate_code(blueprint)
+
+    if tla_output_dir:
+        from frame_py.tla_validator import save_tla
+        save_tla(blueprint, tla_output_dir)
+
+    return code
 
 
 def _generate_code(bp: dict) -> str:

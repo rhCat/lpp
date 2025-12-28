@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 
 # test result files
-**/results
+**/examples/**
 
 # Mac stuff
 **/.__**
