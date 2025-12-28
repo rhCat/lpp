@@ -2,7 +2,7 @@
   "$schema": "lpp/v0.1",
   "id": "calculator",
   "name": "L++ Calculator",
-  "version": "2.0.0",
+  "version": "1.0.0",
 
   "states": {
     "has_operand": { "description": "Has operand(s), waiting for operator or =" },
@@ -13,16 +13,16 @@
   "entry_state": "has_operand",
 
   "gates": {
-    "has_a": { "expression": "a is not None" },
-    "has_b": { "expression": "b is not None" },
-    "has_op": { "expression": "op in ('+', '-', '*', '/')" },
-    "no_a": { "expression": "a is None" },
-    "no_b": { "expression": "b is None" },
-    "is_error": { "expression": "_state == 'error'" },
-    "is_has_operator": { "expression": "_state == 'has_operator'" },
-    "can_compute": { "expression": "a is not None and b is not None and op in ('+', '-', '*', '/')" },
-    "is_div_zero": { "expression": "op == '/' and b == 0" },
-    "safe_compute": { "expression": "a is not None and b is not None and op in ('+', '-', '*', '/') and not (op == '/' and b == 0)" }
+    "has_a": { "type": "expression", "expression": "a is not None" },
+    "has_b": { "type": "expression", "expression": "b is not None" },
+    "has_op": { "type": "expression", "expression": "op in ('+', '-', '*', '/')" },
+    "no_a": { "type": "expression", "expression": "a is None" },
+    "no_b": { "type": "expression", "expression": "b is None" },
+    "is_error": { "type": "expression", "expression": "_state == 'error'" },
+    "is_has_operator": { "type": "expression", "expression": "_state == 'has_operator'" },
+    "can_compute": { "type": "expression", "expression": "a is not None and b is not None and op in ('+', '-', '*', '/')" },
+    "is_div_zero": { "type": "expression", "expression": "op == '/' and b == 0" },
+    "safe_compute": { "type": "expression", "expression": "a is not None and b is not None and op in ('+', '-', '*', '/') and not (op == '/' and b == 0)" }
   },
 
   "display": {
@@ -84,20 +84,25 @@
     }
   },
 
+  "terminal_states": [],
+
   "transitions": [
     {
+      "id": "t_set_operator",
       "from": "has_operand",
       "to": "has_operator",
       "on_event": "OPERATOR",
       "actions": ["set_operator"]
     },
     {
+      "id": "t_set_b",
       "from": "has_operator",
       "to": "has_operand",
       "on_event": "NUMBER",
       "actions": ["set_b"]
     },
     {
+      "id": "t_set_a",
       "from": "has_operand",
       "to": "has_operand",
       "on_event": "NUMBER",
@@ -105,6 +110,7 @@
       "actions": ["set_a"]
     },
     {
+      "id": "t_compute",
       "from": "has_operand",
       "to": "has_operand",
       "on_event": "EQUALS",
@@ -112,6 +118,7 @@
       "actions": ["compute", "clear_b", "clear_op"]
     },
     {
+      "id": "t_div_zero",
       "from": "has_operand",
       "to": "error",
       "on_event": "EQUALS",
@@ -119,6 +126,7 @@
       "actions": ["set_error"]
     },
     {
+      "id": "t_clear",
       "from": "*",
       "to": "has_operand",
       "on_event": "CLEAR",

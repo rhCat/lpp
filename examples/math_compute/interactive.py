@@ -4,6 +4,7 @@
     Type numbers, operators (+,-,*,/), = to compute
 """
 
+from frame_py.compiler import compile_blueprint
 import sys
 import importlib.util
 from pathlib import Path
@@ -11,7 +12,6 @@ from pathlib import Path
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE.parent.parent / "src"))
 
-from frame_py.compiler import compile_blueprint
 
 REGISTRY = {
     ("math", "calculate"): lambda p: (

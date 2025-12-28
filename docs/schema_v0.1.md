@@ -15,11 +15,12 @@ An L++ Blueprint is a JSON document that defines a complete, deterministic state
   "name": "string",
   "version": "string",
   "description": "string",
-  "context": { },
+  "context_schema": { },
   "states": { },
   "transitions": [ ],
   "gates": { },
   "actions": { },
+  "display": { },
   "entry_state": "string",
   "terminal_states": [ ]
 }
@@ -34,13 +35,14 @@ An L++ Blueprint is a JSON document that defines a complete, deterministic state
 | `name` | string | Yes | Human-readable name |
 | `version` | string | Yes | Blueprint version (semver) |
 | `description` | string | No | Blueprint description |
-| `context` | object | Yes | Initial context schema and defaults |
+| `context_schema` | object | Yes | Context properties schema (for initialization) |
 | `states` | object | Yes | State definitions |
 | `transitions` | array | Yes | Transition rules |
 | `gates` | object | No | Gate (guard condition) definitions |
 | `actions` | object | Yes | Action definitions |
+| `display` | object | No | Display rules for UI rendering |
 | `entry_state` | string | Yes | Initial state identifier |
-| `terminal_states` | array | Yes | List of terminal state identifiers |
+| `terminal_states` | array | Yes | List of terminal state identifiers (can be empty `[]`) |
 
 ---
 
@@ -57,7 +59,7 @@ Moves the machine from one state to another.
   "id": "t1",
   "from": "state_a",
   "to": "state_b",
-  "on": "EVENT_NAME",
+  "on_event": "EVENT_NAME",
   "gates": ["gate_id"],
   "actions": ["action_id"]
 }
@@ -65,10 +67,10 @@ Moves the machine from one state to another.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `id` | string | Yes | Unique transition identifier |
+| `id` | string | Yes | Unique transition identifier (for audit trails) |
 | `from` | string | Yes | Source state ID (or `"*"` for any state) |
 | `to` | string | Yes | Target state ID |
-| `on` | string | Yes | Event name that triggers this transition |
+| `on_event` | string | Yes | Event name that triggers this transition |
 | `gates` | array | No | Gate IDs to evaluate (all must pass) |
 | `actions` | array | No | Action IDs to execute on transition |
 
@@ -89,9 +91,9 @@ A boolean guard condition that must pass for a transition to occur.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `type` | string | Yes | `"expression"` (inline) or `"compute"` (external unit) |
-| `expression` | string | Conditional | Boolean expression (if type=expression) |
-| `compute_unit` | string | Conditional | Compute unit ID (if type=compute) |
+| `type` | enum | Yes | `"expression"` (inline eval) or `"compute"` (external unit) |
+| `expression` | string | Conditional | Boolean expression (required if type=expression) |
+| `compute_unit` | string | Conditional | Compute unit ID (required if type=compute) |
 | `description` | string | No | Human-readable description |
 
 #### Expression Syntax
@@ -246,29 +248,54 @@ Parallel execution branches that must synchronize.
 
 ---
 
-## Context
+## Context Schema
 
-The context is the mutable state container. Define its schema:
+The context schema defines properties that will be initialized (all to `null` by default) and tracked:
 
 ```json
 {
-  "context": {
-    "$schema": {
-      "type": "object",
-      "properties": {
-        "user_id": { "type": "string" },
-        "amount": { "type": "number" },
-        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] }
-      },
-      "required": ["user_id"]
-    },
-    "$defaults": {
-      "status": "pending",
-      "amount": 0
+  "context_schema": {
+    "properties": {
+      "user_id": { "type": "string" },
+      "amount": { "type": "number" },
+      "status": { "type": "string", "enum": ["pending", "approved", "rejected"] }
     }
   }
 }
 ```
+
+All properties are initialized to `null` at startup. The compiler uses this to build the initial context.
+
+---
+
+## Display Rules
+
+Display rules define how to render the current state for UI purposes. Rules are evaluated in order; first matching gate wins.
+
+```json
+{
+  "display": {
+    "rules": [
+      { "gate": "is_error", "template": "ERROR: {error}" },
+      { "gate": "has_value", "template": "{value}" },
+      { "template": "0" }
+    ]
+  }
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `rules` | array | Yes | Ordered list of display rules |
+
+### Display Rule
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `gate` | string | No | Gate ID to evaluate (if omitted, rule always matches) |
+| `template` | string | Yes | Format string with `{field}` placeholders from context |
+
+The compiled operator provides a `display()` method that evaluates rules and returns the formatted string.
 
 ---
 
@@ -339,17 +366,11 @@ Events trigger transitions. Standard event structure:
   "version": "1.0.0",
   "description": "Simple order approval with amount threshold",
   
-  "context": {
-    "$schema": {
-      "type": "object",
-      "properties": {
-        "order_id": { "type": "string" },
-        "amount": { "type": "number" },
-        "approved_by": { "type": "string" }
-      }
-    },
-    "$defaults": {
-      "approved_by": null
+  "context_schema": {
+    "properties": {
+      "order_id": { "type": "string" },
+      "amount": { "type": "number" },
+      "approved_by": { "type": "string" }
     }
   },
   
@@ -417,34 +438,34 @@ Events trigger transitions. Standard event structure:
       "id": "auto_approve",
       "from": "pending",
       "to": "auto_approved",
-      "on": "SUBMIT",
+      "on_event": "SUBMIT",
       "gates": ["is_under_threshold"]
     },
     {
       "id": "require_review",
       "from": "pending", 
       "to": "manual_review",
-      "on": "SUBMIT",
+      "on_event": "SUBMIT",
       "gates": ["is_over_threshold"]
     },
     {
       "id": "finalize_auto",
       "from": "auto_approved",
       "to": "approved",
-      "on": "$ENTER"
+      "on_event": "$ENTER"
     },
     {
       "id": "manual_approve",
       "from": "manual_review",
       "to": "approved",
-      "on": "APPROVE",
+      "on_event": "APPROVE",
       "actions": ["set_approver"]
     },
     {
       "id": "manual_reject",
       "from": "manual_review",
       "to": "rejected",
-      "on": "REJECT"
+      "on_event": "REJECT"
     }
   ]
 }
@@ -465,4 +486,4 @@ Events trigger transitions. Standard event structure:
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 0.1 | 2024-01 | Initial specification |
+| 0.1 | 2024-01 | Initial specification || 0.1.1 | 2024-12 | Clarifications: `on` → `on_event`, `context` → `context_schema`, added `display.rules` |
