@@ -297,6 +297,9 @@ def _generate_code(bp: dict) -> str:
     lines.append(
         "                self.context = atom_MUTATE("
         "self.context, target, value)")
+    lines.append(
+        "                scope.update(self.context)  "
+        "# Sync scope for chained actions")
     lines.append("")
     lines.append("            elif action['type'] == 'compute':")
     lines.append("                # DISPATCH")
@@ -323,6 +326,9 @@ def _generate_code(bp: dict) -> str:
         "                                self.context, ctx_path,"
         " result[res_key]")
     lines.append("                            )")
+    lines.append(
+        "                    scope.update(self.context)  "
+        "# Sync scope for chained actions")
     lines.append("")
     lines.append("        # TRANSITION")
     lines.append(
