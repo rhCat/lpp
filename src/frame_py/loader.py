@@ -188,7 +188,7 @@ class BlueprintLoader:
                 id=trans_id,
                 from_state=raw_trans["from"],
                 to_state=raw_trans["to"],
-                on_event=raw_trans["on"],
+                on_event=raw_trans["on_event"],
                 gates=tuple(raw_trans.get("gates", [])),
                 actions=tuple(raw_trans.get("actions", [])),
                 description=raw_trans.get("description"),

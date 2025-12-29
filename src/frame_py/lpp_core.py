@@ -37,7 +37,7 @@ class TransitionTrace(NamedTuple):
 def atom_EVALUATE(expression: str, context_data: dict) -> bool:
     """
     Atomic unit to evaluate a boolean expression against a data context.
-    Uses basic Python eval() restricted to the context_data dictionary.
+    Uses the safe expression evaluator for deterministic, secure execution.
 
     Args:
         expression: A Python boolean expression (e.g., "amount > 1000")
@@ -46,22 +46,19 @@ def atom_EVALUATE(expression: str, context_data: dict) -> bool:
     Returns:
         True if expression evaluates truthy, False otherwise
 
-    Note:
-        For production deployments, replace this implementation with a
-        secure parser (like simpleeval) to prevent arbitrary code execution.
-        For the core logic demonstration, eval() is the most basic primitive.
+    Security:
+        Uses safe_eval which only allows:
+        - Boolean logic: and, or, not
+        - Comparisons: ==, !=, <, >, <=, >=
+        - Membership: in, not in
+        - Null checks: is None, is not None
+        - Context variable access
+        - Literals: numbers, strings, True, False, None
+
+        Blocked: imports, builtins, time, random, file access, etc.
     """
-    try:
-        # Pass context_data as both globals and locals so variables
-        # in the expression resolve directly against keys.
-        # __builtins__ is set to None to restrict access to built-in functions.
-        result = eval(expression, {"__builtins__": None}, context_data)
-        return bool(result)
-    except Exception as e:
-        # In a deterministic system, a failed evaluation returns False.
-        # The orchestrator handles error states if needed.
-        print(f"[L++ CORE WARNING] Evaluation failed for '{expression}': {e}")
-        return False
+    from .safe_eval import safe_eval_bool
+    return safe_eval_bool(expression, context_data)
 
 
 # =========================================================================
