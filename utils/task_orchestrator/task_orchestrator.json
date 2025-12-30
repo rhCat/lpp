@@ -1,0 +1,534 @@
+{
+  "$schema": "lpp/v0.1.2",
+  "id": "task_orchestrator",
+  "name": "Hierarchical Task Orchestrator",
+  "version": "2.0.0",
+  "description": "Hierarchical feature analysis with atomic compute units.",
+
+  "context_schema": {
+    "properties": {
+      "api_key": { "type": "string" },
+      "api_base": { "type": "string" },
+      "model": { "type": "string" },
+      "task": { "type": "string", "description": "Root task" },
+      "feature_tree": { "type": "object", "description": "Hierarchical tree" },
+      "current_path": { "type": "array", "description": "Path to node" },
+      "current_feature": { "type": "object", "description": "Active feature" },
+      "depth": { "type": "number", "description": "Current depth" },
+      "max_depth": { "type": "number", "description": "Max depth" },
+      "is_leaf": { "type": "boolean", "description": "Node is atomic" },
+      "leaf_queue": { "type": "array", "description": "Leaves to execute" },
+      "leaf_count": { "type": "number" },
+      "exec_count": { "type": "number", "description": "Executed count" },
+      "tools_needed": { "type": "array" },
+      "tools_pending": { "type": "number" },
+      "tools_built": { "type": "array" },
+      "exec_log": { "type": "array", "description": "Execution log" },
+      "reflection": { "type": "string" },
+      "evaluation": { "type": "object" },
+      "is_complete": { "type": "boolean" },
+      "iteration": { "type": "number" },
+      "max_iterations": { "type": "number" },
+      "workspace_path": { "type": "string" },
+      "error": { "type": "string" }
+    }
+  },
+
+  "states": {
+    "idle": { "description": "Awaiting task" },
+    "analyzing": { "description": "Root analysis" },
+    "expanding": { "description": "Expand sub-features" },
+    "planning": { "description": "Plan leaf execution" },
+    "building": { "description": "Build tools" },
+    "executing": { "description": "Execute leaf" },
+    "traversing": { "description": "Next leaf" },
+    "reflecting": { "description": "Reflect on progress" },
+    "evaluating": { "description": "Evaluate completion" },
+    "complete": { "description": "Done" },
+    "error": { "description": "Error" }
+  },
+
+  "entry_state": "idle",
+  "terminal_states": ["complete"],
+
+  "gates": {
+    "has_task": {
+      "type": "expression",
+      "expression": "task is not None and task != ''"
+    },
+    "has_tree": {
+      "type": "expression",
+      "expression": "feature_tree is not None"
+    },
+    "can_expand": {
+      "type": "expression",
+      "expression": "depth < max_depth and is_leaf == False"
+    },
+    "is_atomic": {
+      "type": "expression",
+      "expression": "is_leaf == True or depth >= max_depth"
+    },
+    "needs_tools": {
+      "type": "expression",
+      "expression": "tools_pending is not None and tools_pending > 0"
+    },
+    "no_tools": {
+      "type": "expression",
+      "expression": "tools_pending is None or tools_pending == 0"
+    },
+    "has_more": {
+      "type": "expression",
+      "expression": "exec_count < leaf_count"
+    },
+    "all_done": {
+      "type": "expression",
+      "expression": "exec_count >= leaf_count"
+    },
+    "is_complete": {
+      "type": "expression",
+      "expression": "is_complete == True"
+    },
+    "not_complete": {
+      "type": "expression",
+      "expression": "is_complete is None or is_complete == False"
+    },
+    "within_iter": {
+      "type": "expression",
+      "expression": "iteration < max_iterations"
+    },
+    "max_iter": {
+      "type": "expression",
+      "expression": "iteration >= max_iterations"
+    },
+    "has_error": {
+      "type": "expression",
+      "expression": "error is not None"
+    },
+    "no_error": {
+      "type": "expression",
+      "expression": "error is None"
+    }
+  },
+
+  "actions": {
+    "init": {
+      "type": "compute",
+      "compute_unit": "orch:init",
+      "input_map": {},
+      "output_map": {
+        "api_key": "api_key",
+        "api_base": "api_base",
+        "model": "model",
+        "max_depth": "max_depth",
+        "max_iterations": "max_iterations",
+        "iteration": "iteration",
+        "workspace_path": "workspace_path"
+      }
+    },
+    "set_task": {
+      "type": "set",
+      "target": "task",
+      "value_from": "event.payload.task"
+    },
+    "analyze_root": {
+      "type": "compute",
+      "compute_unit": "orch:analyze_root",
+      "input_map": {
+        "api_key": "api_key",
+        "api_base": "api_base",
+        "model": "model",
+        "task": "task"
+      },
+      "output_map": {
+        "feature_tree": "feature_tree",
+        "current_path": "current_path",
+        "current_feature": "current_feature",
+        "depth": "depth",
+        "is_leaf": "is_leaf",
+        "error": "error"
+      }
+    },
+    "expand": {
+      "type": "compute",
+      "compute_unit": "orch:expand",
+      "input_map": {
+        "api_key": "api_key",
+        "api_base": "api_base",
+        "model": "model",
+        "feature_tree": "feature_tree",
+        "current_path": "current_path",
+        "current_feature": "current_feature",
+        "depth": "depth",
+        "max_depth": "max_depth"
+      },
+      "output_map": {
+        "feature_tree": "feature_tree",
+        "current_feature": "current_feature",
+        "depth": "depth",
+        "is_leaf": "is_leaf",
+        "error": "error"
+      }
+    },
+    "collect": {
+      "type": "compute",
+      "compute_unit": "orch:collect",
+      "input_map": { "feature_tree": "feature_tree" },
+      "output_map": {
+        "leaf_queue": "leaf_queue",
+        "leaf_count": "leaf_count",
+        "exec_count": "exec_count",
+        "error": "error"
+      }
+    },
+    "plan_leaf": {
+      "type": "compute",
+      "compute_unit": "orch:plan_leaf",
+      "input_map": {
+        "api_key": "api_key",
+        "api_base": "api_base",
+        "model": "model",
+        "leaf_queue": "leaf_queue",
+        "exec_count": "exec_count",
+        "workspace_path": "workspace_path"
+      },
+      "output_map": {
+        "current_feature": "current_feature",
+        "tools_needed": "tools_needed",
+        "tools_pending": "tools_pending",
+        "error": "error"
+      }
+    },
+    "build": {
+      "type": "compute",
+      "compute_unit": "orch:build",
+      "input_map": {
+        "api_key": "api_key",
+        "api_base": "api_base",
+        "model": "model",
+        "tools_needed": "tools_needed",
+        "tools_pending": "tools_pending",
+        "tools_built": "tools_built",
+        "workspace_path": "workspace_path"
+      },
+      "output_map": {
+        "tools_needed": "tools_needed",
+        "tools_pending": "tools_pending",
+        "tools_built": "tools_built",
+        "error": "error"
+      }
+    },
+    "exec_leaf": {
+      "type": "compute",
+      "compute_unit": "orch:exec_leaf",
+      "input_map": {
+        "api_key": "api_key",
+        "api_base": "api_base",
+        "model": "model",
+        "current_feature": "current_feature",
+        "leaf_queue": "leaf_queue",
+        "exec_count": "exec_count",
+        "exec_log": "exec_log",
+        "workspace_path": "workspace_path"
+      },
+      "output_map": {
+        "leaf_queue": "leaf_queue",
+        "exec_count": "exec_count",
+        "exec_log": "exec_log",
+        "error": "error"
+      }
+    },
+    "next_leaf": {
+      "type": "compute",
+      "compute_unit": "orch:next_leaf",
+      "input_map": {
+        "leaf_queue": "leaf_queue",
+        "exec_count": "exec_count",
+        "leaf_count": "leaf_count"
+      },
+      "output_map": {
+        "current_feature": "current_feature",
+        "tools_pending": "tools_pending",
+        "error": "error"
+      }
+    },
+    "reflect": {
+      "type": "compute",
+      "compute_unit": "orch:reflect",
+      "input_map": {
+        "api_key": "api_key",
+        "api_base": "api_base",
+        "model": "model",
+        "task": "task",
+        "feature_tree": "feature_tree",
+        "exec_log": "exec_log",
+        "iteration": "iteration"
+      },
+      "output_map": {
+        "reflection": "reflection",
+        "feature_tree": "feature_tree",
+        "error": "error"
+      }
+    },
+    "evaluate": {
+      "type": "compute",
+      "compute_unit": "orch:evaluate",
+      "input_map": {
+        "api_key": "api_key",
+        "api_base": "api_base",
+        "model": "model",
+        "task": "task",
+        "feature_tree": "feature_tree",
+        "exec_log": "exec_log",
+        "reflection": "reflection",
+        "iteration": "iteration",
+        "max_iterations": "max_iterations"
+      },
+      "output_map": {
+        "evaluation": "evaluation",
+        "is_complete": "is_complete",
+        "error": "error"
+      }
+    },
+    "incr": {
+      "type": "compute",
+      "compute_unit": "orch:incr",
+      "input_map": { "iteration": "iteration" },
+      "output_map": { "iteration": "iteration" }
+    },
+    "reset_exec": {
+      "type": "compute",
+      "compute_unit": "orch:reset_exec",
+      "input_map": {},
+      "output_map": {
+        "exec_count": "exec_count",
+        "tools_pending": "tools_pending"
+      }
+    },
+    "clear_err": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    }
+  },
+
+  "transitions": [
+    {
+      "id": "t_start",
+      "from": "idle",
+      "to": "idle",
+      "on_event": "START",
+      "actions": ["init"]
+    },
+    {
+      "id": "t_submit",
+      "from": "idle",
+      "to": "analyzing",
+      "on_event": "SUBMIT",
+      "actions": ["set_task", "analyze_root"]
+    },
+    {
+      "id": "t_ana_expand",
+      "from": "analyzing",
+      "to": "expanding",
+      "on_event": "DONE",
+      "gates": ["has_tree", "can_expand", "no_error"],
+      "actions": ["expand"]
+    },
+    {
+      "id": "t_ana_atomic",
+      "from": "analyzing",
+      "to": "planning",
+      "on_event": "DONE",
+      "gates": ["has_tree", "is_atomic", "no_error"],
+      "actions": ["collect", "plan_leaf"]
+    },
+    {
+      "id": "t_ana_err",
+      "from": "analyzing",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": ["has_error"]
+    },
+    {
+      "id": "t_exp_more",
+      "from": "expanding",
+      "to": "expanding",
+      "on_event": "DONE",
+      "gates": ["can_expand", "no_error"],
+      "actions": ["expand"]
+    },
+    {
+      "id": "t_exp_done",
+      "from": "expanding",
+      "to": "planning",
+      "on_event": "DONE",
+      "gates": ["is_atomic", "no_error"],
+      "actions": ["collect", "plan_leaf"]
+    },
+    {
+      "id": "t_exp_err",
+      "from": "expanding",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": ["has_error"]
+    },
+    {
+      "id": "t_plan_build",
+      "from": "planning",
+      "to": "building",
+      "on_event": "DONE",
+      "gates": ["needs_tools", "no_error"],
+      "actions": ["build"]
+    },
+    {
+      "id": "t_plan_exec",
+      "from": "planning",
+      "to": "executing",
+      "on_event": "DONE",
+      "gates": ["no_tools", "no_error"],
+      "actions": ["exec_leaf"]
+    },
+    {
+      "id": "t_plan_err",
+      "from": "planning",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": ["has_error"]
+    },
+    {
+      "id": "t_bld_more",
+      "from": "building",
+      "to": "building",
+      "on_event": "DONE",
+      "gates": ["needs_tools", "no_error"],
+      "actions": ["build"]
+    },
+    {
+      "id": "t_bld_done",
+      "from": "building",
+      "to": "executing",
+      "on_event": "DONE",
+      "gates": ["no_tools", "no_error"],
+      "actions": ["exec_leaf"]
+    },
+    {
+      "id": "t_bld_err",
+      "from": "building",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": ["has_error"]
+    },
+    {
+      "id": "t_exec_next",
+      "from": "executing",
+      "to": "traversing",
+      "on_event": "DONE",
+      "gates": ["has_more", "no_error"],
+      "actions": ["next_leaf"]
+    },
+    {
+      "id": "t_exec_done",
+      "from": "executing",
+      "to": "reflecting",
+      "on_event": "DONE",
+      "gates": ["all_done", "no_error"],
+      "actions": ["reflect"]
+    },
+    {
+      "id": "t_exec_err",
+      "from": "executing",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": ["has_error"]
+    },
+    {
+      "id": "t_trav_build",
+      "from": "traversing",
+      "to": "building",
+      "on_event": "DONE",
+      "gates": ["needs_tools", "no_error"],
+      "actions": ["build"]
+    },
+    {
+      "id": "t_trav_exec",
+      "from": "traversing",
+      "to": "executing",
+      "on_event": "DONE",
+      "gates": ["no_tools", "no_error"],
+      "actions": ["exec_leaf"]
+    },
+    {
+      "id": "t_trav_err",
+      "from": "traversing",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": ["has_error"]
+    },
+    {
+      "id": "t_refl_ok",
+      "from": "reflecting",
+      "to": "evaluating",
+      "on_event": "DONE",
+      "gates": ["no_error"],
+      "actions": ["evaluate", "incr"]
+    },
+    {
+      "id": "t_refl_err",
+      "from": "reflecting",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": ["has_error"]
+    },
+    {
+      "id": "t_eval_complete",
+      "from": "evaluating",
+      "to": "complete",
+      "on_event": "DONE",
+      "gates": ["is_complete", "no_error"]
+    },
+    {
+      "id": "t_eval_continue",
+      "from": "evaluating",
+      "to": "expanding",
+      "on_event": "DONE",
+      "gates": ["not_complete", "within_iter", "no_error"],
+      "actions": ["reset_exec", "expand"]
+    },
+    {
+      "id": "t_eval_max",
+      "from": "evaluating",
+      "to": "complete",
+      "on_event": "DONE",
+      "gates": ["max_iter"]
+    },
+    {
+      "id": "t_eval_err",
+      "from": "evaluating",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": ["has_error"]
+    },
+    {
+      "id": "t_recover",
+      "from": "error",
+      "to": "idle",
+      "on_event": "RETRY",
+      "actions": ["clear_err"]
+    },
+    {
+      "id": "t_reset",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+
+  "display": {
+    "rules": [
+      { "gate": "has_error", "template": "ERR: {error}" },
+      { "gate": "is_complete", "template": "DONE: {evaluation}" },
+      { "gate": "has_task", "template": "{task} D:{depth} I:{iteration}" },
+      { "template": "Ready" }
+    ]
+  }
+}
