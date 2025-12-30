@@ -8,7 +8,7 @@ __pycache__/
 **/examples/**/result
 **/utils/**/results
 **/utils/**/result
-
+.DS_Store
 
 
 # Mac stuff
