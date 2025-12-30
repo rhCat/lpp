@@ -30,7 +30,7 @@ L++ separates Eternal Logic (The Bone - JSON blueprints) from Volatile Compute
 (The Flesh - implementation).
 The four atomic operators are:
 1. TRANSITION - Move between states
-2. GATE - Boolean guard conditions  
+2. GATE - Boolean guard conditions
 3. ACTION - Side effects (set, compute, emit)
 4. FORK/JOIN - Parallel execution
 
