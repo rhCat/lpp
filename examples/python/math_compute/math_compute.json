@@ -1,0 +1,145 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "calculator",
+  "name": "L++ Calculator",
+  "version": "1.0.0",
+
+  "states": {
+    "has_operand": { "description": "Has operand(s), waiting for operator or =" },
+    "has_operator": { "description": "Has operator, waiting for next operand" },
+    "error": { "description": "Error state" }
+  },
+
+  "entry_state": "has_operand",
+
+  "gates": {
+    "has_a": { "type": "expression", "expression": "a is not None" },
+    "has_b": { "type": "expression", "expression": "b is not None" },
+    "has_op": { "type": "expression", "expression": "op in ('+', '-', '*', '/')" },
+    "no_a": { "type": "expression", "expression": "a is None" },
+    "no_b": { "type": "expression", "expression": "b is None" },
+    "is_error": { "type": "expression", "expression": "_state == 'error'" },
+    "is_has_operator": { "type": "expression", "expression": "_state == 'has_operator'" },
+    "can_compute": { "type": "expression", "expression": "a is not None and b is not None and op in ('+', '-', '*', '/')" },
+    "is_div_zero": { "type": "expression", "expression": "op == '/' and b == 0" },
+    "safe_compute": { "type": "expression", "expression": "a is not None and b is not None and op in ('+', '-', '*', '/') and not (op == '/' and b == 0)" }
+  },
+
+  "display": {
+    "rules": [
+      { "gate": "is_error", "template": "ERROR: {error}" },
+      { "gate": "is_has_operator", "template": "{a} {op} _" },
+      { "gate": "has_b", "template": "{a} {op} {b}" },
+      { "gate": "has_a", "template": "{a}" },
+      { "template": "0" }
+    ]
+  },
+
+  "actions": {
+    "set_a": {
+      "type": "set",
+      "target": "a",
+      "value_from": "event.payload.value"
+    },
+    "set_b": {
+      "type": "set",
+      "target": "b",
+      "value_from": "event.payload.value"
+    },
+    "set_operator": {
+      "type": "set",
+      "target": "op",
+      "value_from": "event.payload.op"
+    },
+    "compute": {
+      "type": "compute",
+      "compute_unit": "math:calculate",
+      "input_map": { "a": "a", "b": "b", "op": "op" },
+      "output_map": { "a": "result" }
+    },
+    "clear_b": {
+      "type": "set",
+      "target": "b",
+      "value": null
+    },
+    "clear_op": {
+      "type": "set",
+      "target": "op",
+      "value": null
+    },
+    "set_error": {
+      "type": "set",
+      "target": "error",
+      "value": "Division by zero"
+    },
+    "clear_a": {
+      "type": "set",
+      "target": "a",
+      "value": null
+    },
+    "clear_error": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    }
+  },
+
+  "terminal_states": [],
+
+  "transitions": [
+    {
+      "id": "t_set_operator",
+      "from": "has_operand",
+      "to": "has_operator",
+      "on_event": "OPERATOR",
+      "actions": ["set_operator"]
+    },
+    {
+      "id": "t_set_b",
+      "from": "has_operator",
+      "to": "has_operand",
+      "on_event": "NUMBER",
+      "actions": ["set_b"]
+    },
+    {
+      "id": "t_set_a",
+      "from": "has_operand",
+      "to": "has_operand",
+      "on_event": "NUMBER",
+      "gates": ["no_a"],
+      "actions": ["set_a"]
+    },
+    {
+      "id": "t_compute",
+      "from": "has_operand",
+      "to": "has_operand",
+      "on_event": "EQUALS",
+      "gates": ["safe_compute"],
+      "actions": ["compute", "clear_b", "clear_op"]
+    },
+    {
+      "id": "t_div_zero",
+      "from": "has_operand",
+      "to": "error",
+      "on_event": "EQUALS",
+      "gates": ["is_div_zero"],
+      "actions": ["set_error"]
+    },
+    {
+      "id": "t_clear",
+      "from": "*",
+      "to": "has_operand",
+      "on_event": "CLEAR",
+      "actions": ["clear_a", "clear_b", "clear_op", "clear_error"]
+    }
+  ],
+
+  "context_schema": {
+    "properties": {
+      "a": { "type": "number", "description": "First operand / result" },
+      "b": { "type": "number", "description": "Second operand" },
+      "op": { "type": "string", "enum": ["+", "-", "*", "/"] },
+      "error": { "type": "string" }
+    }
+  }
+}
