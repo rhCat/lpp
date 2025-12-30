@@ -6,9 +6,35 @@ aggregation, and explainable ranking.
 Input: params dict. Output: result dict.
 """
 
+import time
 import json
+import re
+import hashlib
 from typing import Any, Dict, List
 from datetime import datetime
+
+try:
+    import requests
+    HAS_REQUESTS = True
+except ImportError:
+    HAS_REQUESTS = False
+
+try:
+    from bs4 import BeautifulSoup
+    HAS_BS4 = True
+except ImportError:
+    HAS_BS4 = False
+
+# Try new ddgs package first, fall back to old duckduckgo_search
+try:
+    from ddgs import DDGS
+    HAS_DDGS = True
+except ImportError:
+    try:
+        from duckduckgo_search import DDGS
+        HAS_DDGS = True
+    except ImportError:
+        HAS_DDGS = False
 
 
 # =========================================================================
@@ -17,23 +43,48 @@ from datetime import datetime
 
 QUIZ_TEMPLATES = {
     "headphones": [
-        {"id": "q1", "text": "Primary use?", "options": ["Music", "Gaming", "Calls", "Mixed"]},
-        {"id": "q2", "text": "Form factor?", "options": ["Over-ear", "On-ear", "In-ear", "Earbuds"]},
-        {"id": "q3", "text": "Noise canceling?", "options": ["Essential", "Nice-to-have", "Not needed"]},
-        {"id": "q4", "text": "Budget range?", "options": ["<$50", "$50-150", "$150-300", "$300+"]},
-        {"id": "q5", "text": "Wired or wireless?", "options": ["Wireless only", "Wired only", "Either"]}
+        {"id": "q1", "text": "Primary use?", "options": [
+            "Music", "Gaming", "Calls", "Mixed"]},
+        {"id": "q2", "text": "Form factor?", "options": [
+            "Over-ear", "On-ear", "In-ear", "Earbuds"]},
+        {"id": "q3", "text": "Noise canceling?", "options": [
+            "Essential", "Nice-to-have", "Not needed"]},
+        {"id": "q4", "text": "Budget range?", "options": [
+            "<$50", "$50-150", "$150-300", "$300+"]},
+        {"id": "q5", "text": "Wired or wireless?", "options": [
+            "Wireless only", "Wired only", "Either"]}
     ],
     "laptops": [
-        {"id": "q1", "text": "Primary use?", "options": ["Work", "Gaming", "Creative", "General"]},
-        {"id": "q2", "text": "Screen size?", "options": ["13-14in", "15-16in", "17in+"]},
-        {"id": "q3", "text": "Portability?", "options": ["Ultra-light", "Balanced", "Desktop replacement"]},
-        {"id": "q4", "text": "Budget range?", "options": ["<$500", "$500-1000", "$1000-2000", "$2000+"]},
-        {"id": "q5", "text": "OS preference?", "options": ["Windows", "macOS", "Linux", "No preference"]}
+        {"id": "q1", "text": "Primary use?", "options": [
+            "Work", "Gaming", "Creative", "General"]},
+        {"id": "q2", "text": "Screen size?",
+            "options": ["13-14in", "15-16in", "17in+"]},
+        {"id": "q3", "text": "Portability?", "options": [
+            "Ultra-light", "Balanced", "Desktop replacement"]},
+        {"id": "q4", "text": "Budget range?", "options": [
+            "<$500", "$500-1000", "$1000-2000", "$2000+"]},
+        {"id": "q5", "text": "OS preference?", "options": [
+            "Windows", "macOS", "Linux", "No preference"]}
+    ],
+    "shoes": [
+        {"id": "q1", "text": "Primary use?", "options": [
+            "Running", "Walking", "Training", "Casual", "Dress"]},
+        {"id": "q2", "text": "Terrain?", "options": [
+            "Road", "Trail", "Gym", "Office"]},
+        {"id": "q3", "text": "Foot width?", "options": [
+            "Narrow", "Standard", "Wide", "Not sure"]},
+        {"id": "q4", "text": "Budget range?", "options": [
+            "<$75", "$75-125", "$125-200", "$200+"]},
+        {"id": "q5", "text": "Waterproof?", "options": [
+            "Essential", "Nice-to-have", "Not needed"]}
     ],
     "default": [
-        {"id": "q1", "text": "What matters most?", "options": ["Price", "Quality", "Features", "Brand"]},
-        {"id": "q2", "text": "Budget range?", "options": ["Budget", "Mid-range", "Premium", "No limit"]},
-        {"id": "q3", "text": "Purchase urgency?", "options": ["ASAP", "This week", "This month", "Researching"]}
+        {"id": "q1", "text": "What matters most?", "options": [
+            "Price", "Quality", "Features", "Brand"]},
+        {"id": "q2", "text": "Budget range?", "options": [
+            "Budget", "Mid-range", "Premium", "No limit"]},
+        {"id": "q3", "text": "Purchase urgency?", "options": [
+            "ASAP", "This week", "This month", "Researching"]}
     ]
 }
 
@@ -106,128 +157,423 @@ def extract_preferences(params: Dict[str, Any]) -> Dict[str, Any]:
 
 
 # =========================================================================
-# PRODUCT FETCHING (Mock - replace with real API calls)
+# PRODUCT FETCHING (Real Web Search)
 # =========================================================================
 
-MOCK_PRODUCTS = {
-    "headphones": [
-        {
-            "id": "hp001", "name": "SoundPro X1", "brand": "AudioTech",
-            "price": 149.99, "rating": 4.5, "review_count": 1250,
-            "features": ["ANC", "40h battery", "Bluetooth 5.2"],
-            "form": "Over-ear", "wireless": True, "in_stock": True
-        },
-        {
-            "id": "hp002", "name": "BassMax 300", "brand": "BeatWave",
-            "price": 79.99, "rating": 4.2, "review_count": 3420,
-            "features": ["Deep bass", "25h battery", "Foldable"],
-            "form": "Over-ear", "wireless": True, "in_stock": True
-        },
-        {
-            "id": "hp003", "name": "ClearCall Pro", "brand": "VoiceTech",
-            "price": 199.99, "rating": 4.7, "review_count": 890,
-            "features": ["ANC", "Mic boom", "USB-C", "Teams certified"],
-            "form": "Over-ear", "wireless": True, "in_stock": False
-        },
-        {
-            "id": "hp004", "name": "Budget Buds", "brand": "ValueAudio",
-            "price": 29.99, "rating": 3.8, "review_count": 8900,
-            "features": ["IPX4", "6h battery", "Touch controls"],
-            "form": "Earbuds", "wireless": True, "in_stock": True
-        },
-        {
-            "id": "hp005", "name": "Studio Reference", "brand": "ProSound",
-            "price": 349.99, "rating": 4.9, "review_count": 420,
-            "features": ["Hi-Res", "Wired", "Replaceable pads"],
-            "form": "Over-ear", "wireless": False, "in_stock": True
-        }
-    ]
-}
+
+def _duckduckgo_search(query: str, num_results: int = 10, retries: int = 3) -> List[Dict]:
+    """Perform DuckDuckGo search using the duckduckgo_search library.
+
+    Hermetic: takes query string, returns list of result dicts.
+    Includes retry logic for rate limiting.
+    """
+    results = []
+
+    # Try the duckduckgo_search library with retries
+    if HAS_DDGS:
+        for attempt in range(retries):
+            try:
+                with DDGS() as ddgs:
+                    for r in ddgs.text(query, max_results=num_results):
+                        results.append({
+                            "title": r.get("title", ""),
+                            "url": r.get("href", ""),
+                            "snippet": r.get("body", "")
+                        })
+                if results:
+                    return results
+                # If no results, wait and retry
+                if attempt < retries - 1:
+                    time.sleep(1 + attempt)  # Increasing delay
+            except Exception as e:
+                print(f"[DDGS Attempt {attempt+1}] {e}")
+                if attempt < retries - 1:
+                    time.sleep(2 + attempt * 2)  # Longer delay on error
+
+    # Fallback: try HTML scraping (less reliable)
+    if not HAS_REQUESTS:
+        return results
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/120.0.0.0 Safari/537.36"
+    }
+
+    results = []
+    try:
+        # Use DuckDuckGo HTML version
+        url = f"https://html.duckduckgo.com/html/?q={requests.utils.quote(query)}"
+        resp = requests.get(url, headers=headers, timeout=15)
+        resp.raise_for_status()
+
+        if HAS_BS4:
+            soup = BeautifulSoup(resp.text, "html.parser")
+            # DuckDuckGo HTML results are in .result class
+            for result in soup.select(".result")[:num_results]:
+                title_el = result.select_one(".result__title")
+                link_el = result.select_one(".result__url")
+                snippet_el = result.select_one(".result__snippet")
+
+                # Get actual URL from link
+                a_tag = result.select_one("a.result__a")
+                href = ""
+                if a_tag:
+                    href = a_tag.get("href", "")
+                    # DuckDuckGo wraps URLs, extract the actual URL
+                    if "uddg=" in href:
+                        match = re.search(r'uddg=([^&]+)', href)
+                        if match:
+                            import urllib.parse
+                            href = urllib.parse.unquote(match.group(1))
+
+                title = title_el.get_text(strip=True) if title_el else ""
+                snippet = snippet_el.get_text(strip=True) if snippet_el else ""
+
+                if title and href:
+                    results.append({
+                        "title": title,
+                        "url": href,
+                        "snippet": snippet
+                    })
+    except Exception as e:
+        print(f"[Search Error] {e}")
+
+    return results
+
+
+def _google_search(query: str, num_results: int = 10) -> List[Dict]:
+    """Perform search and extract product-like results.
+
+    Hermetic: takes query string, returns list of result dicts.
+    Tries DuckDuckGo first (more reliable), falls back to Google.
+    """
+    # Try DuckDuckGo first
+    results = _duckduckgo_search(query, num_results)
+    if results:
+        return results
+
+    # Fallback to Google (may be blocked)
+    if not HAS_REQUESTS:
+        return []
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/120.0.0.0 Safari/537.36"
+    }
+
+    try:
+        url = f"https://www.google.com/search?q={requests.utils.quote(query)}&num={num_results}"
+        resp = requests.get(url, headers=headers, timeout=10)
+        resp.raise_for_status()
+
+        if HAS_BS4:
+            soup = BeautifulSoup(resp.text, "html.parser")
+            for g in soup.select("div.g")[:num_results]:
+                title_el = g.select_one("h3")
+                link_el = g.select_one("a")
+                snippet_el = g.select_one("div.VwiC3b")
+
+                if title_el and link_el:
+                    href = link_el.get("href", "")
+                    results.append({
+                        "title": title_el.get_text(strip=True),
+                        "url": href,
+                        "snippet": snippet_el.get_text(strip=True) if snippet_el else ""
+                    })
+    except Exception:
+        pass
+
+    return results
+
+
+def _parse_price(text: str) -> float:
+    """Extract price from text string."""
+    match = re.search(r'\$[\d,]+\.?\d*', text)
+    if match:
+        price_str = match.group().replace('$', '').replace(',', '')
+        try:
+            return float(price_str)
+        except ValueError:
+            pass
+    return 0.0
+
+
+def _extract_rating(text: str) -> float:
+    """Extract rating from text (e.g., '4.5 out of 5')."""
+    match = re.search(r'(\d\.?\d?)\s*(?:out of|/)\s*5', text.lower())
+    if match:
+        try:
+            return float(match.group(1))
+        except ValueError:
+            pass
+    match = re.search(r'(\d\.?\d?)\s*stars?', text.lower())
+    if match:
+        try:
+            return float(match.group(1))
+        except ValueError:
+            pass
+    return 4.0  # Default rating
+
+
+def _build_search_query(category: str, prefs: Dict) -> str:
+    """Build search query from category and preferences."""
+    terms = [f"best {category}"]
+
+    # Add preference-based terms
+    for key, val in prefs.items():
+        if isinstance(val, str) and val and key not in ("price_weight", "quality_weight"):
+            if "budget" in key.lower():
+                terms.append(val)
+            elif val.lower() not in ("not needed", "not sure", "no preference"):
+                terms.append(val)
+
+    terms.append("buy")
+    return " ".join(terms[:6])  # Limit query length
 
 
 def fetch_products(params: Dict[str, Any]) -> Dict[str, Any]:
-    """Fetch products from feeds/APIs (mock implementation)."""
-    category = params.get("category", "").lower()
-    prefs = params.get("preferences", {})
+    """Fetch products via Google Search.
 
-    products = MOCK_PRODUCTS.get(category, [])
-    if not products:
+    Hermetic: input params dict, output result dict.
+    Uses real search to find products matching category and preferences.
+    """
+    category = params.get("category", "").lower()
+    prefs = params.get("preferences") or {}
+
+    # Pagination params
+    offset = params.get("fetch_offset") or 0
+    limit = params.get("fetch_limit") or 10
+    existing = params.get("existing_products") or []
+    existing_links = params.get("existing_affiliate_links") or {}
+
+    if not category:
         return {
-            "products": [],
-            "affiliate_links": {},
-            "has_products": False,
+            "products": existing,
+            "affiliate_links": existing_links,
+            "has_products": len(existing) > 0,
+            "fetch_offset": offset,
+            "fetch_total": len(existing),
+            "has_more_products": False,
             "has_error": True,
-            "error": f"No products for: {category}"
+            "error": "No category specified"
         }
 
-    # Generate affiliate links
-    links = {}
-    for p in products:
-        links[p["id"]] = f"https://shop.example.com/aff/{p['id']}?ref=discovery"
+    # Build search query
+    query = _build_search_query(category, prefs)
+
+    # For pagination, modify query
+    if offset > 0:
+        query += f" page {(offset // limit) + 1}"
+
+    # Perform search with multiple query variations
+    search_results = _google_search(query, num_results=limit)
+
+    # Try alternative queries if no results
+    if not search_results:
+        alt_queries = [
+            f"best {category} to buy 2025",
+            f"{category} reviews recommendations",
+            f"top rated {category} buy online",
+            f"{category} shopping guide"
+        ]
+        for alt_q in alt_queries:
+            search_results = _google_search(alt_q, num_results=limit)
+            if search_results:
+                break
+            time.sleep(0.5)  # Brief delay between attempts
+
+    # Convert search results to product format
+    batch = []
+    for i, sr in enumerate(search_results):
+        pid = hashlib.md5(sr["url"].encode()).hexdigest()[:8]
+
+        # Extract product info from title/snippet
+        title = sr["title"]
+        snippet = sr["snippet"]
+
+        # Try to extract price and rating from snippet
+        price = _parse_price(snippet) or _parse_price(title)
+        rating = _extract_rating(snippet)
+
+        # Clean up title (remove site names)
+        name = re.sub(
+            r'\s*[-|]\s*(Amazon|eBay|Walmart|Best Buy|Target).*$', '', title, flags=re.I)
+        name = name[:60]  # Truncate long names
+
+        product = {
+            "id": f"g_{pid}_{offset + i}",
+            "name": name or f"{category.title()} Product {offset + i + 1}",
+            "brand": "Various",
+            "price": price if price > 0 else 99.99,
+            "rating": rating,
+            "review_count": 100,  # Unknown from search
+            "features": [category, "Search Result"],
+            "url": sr["url"],
+            "snippet": snippet[:200],
+            "in_stock": True,
+            "source": "Web Search"
+        }
+        batch.append(product)
+
+    # Merge with existing
+    products = existing + batch
+
+    # Generate affiliate links (placeholder)
+    links = dict(existing_links)
+    for p in batch:
+        original_url = p.get("url", "")
+        # In production, would use proper affiliate link generation
+        links[p["id"]] = original_url
+
+    new_offset = offset + len(batch)
+    # Estimate more results available if we got a full batch
+    has_more = len(batch) >= limit and new_offset < 50
 
     return {
         "products": products,
         "affiliate_links": links,
-        "has_products": True,
+        "has_products": len(products) > 0,
+        "fetch_offset": new_offset,
+        "fetch_total": new_offset + (limit if has_more else 0),
+        "has_more_products": has_more,
         "has_error": False,
         "error": None
     }
 
 
 # =========================================================================
-# REVIEW AGGREGATION
+# REVIEW AGGREGATION (Real Web Search)
 # =========================================================================
 
-MOCK_REVIEWS = {
-    "hp001": {
-        "volume": 1250, "recency": "2025-12", "avg_rating": 4.5,
-        "pros": ["Great ANC", "Comfortable", "Long battery"],
-        "cons": ["Bulky", "No wired option"],
-        "topics": {"sound": 0.85, "comfort": 0.78, "battery": 0.92},
-        "sources": ["Amazon", "BestBuy", "Reddit"]
-    },
-    "hp002": {
-        "volume": 3420, "recency": "2025-12", "avg_rating": 4.2,
-        "pros": ["Punchy bass", "Affordable", "Portable"],
-        "cons": ["Weak mids", "Plastic build"],
-        "topics": {"bass": 0.95, "value": 0.88, "durability": 0.65},
-        "sources": ["Amazon", "Walmart"]
-    },
-    "hp003": {
-        "volume": 890, "recency": "2025-11", "avg_rating": 4.7,
-        "pros": ["Crystal clear calls", "Premium build", "All-day comfort"],
-        "cons": ["Expensive", "Overkill for music"],
-        "topics": {"calls": 0.96, "comfort": 0.89, "work": 0.91},
-        "sources": ["Amazon", "Microsoft Store"]
-    },
-    "hp004": {
-        "volume": 8900, "recency": "2025-12", "avg_rating": 3.8,
-        "pros": ["Unbeatable price", "Decent sound", "Compact"],
-        "cons": ["Short battery", "Fit issues", "No ANC"],
-        "topics": {"value": 0.94, "convenience": 0.75, "sound": 0.62},
-        "sources": ["Amazon", "AliExpress"]
-    },
-    "hp005": {
-        "volume": 420, "recency": "2025-10", "avg_rating": 4.9,
-        "pros": ["Audiophile grade", "Flat response", "Build quality"],
-        "cons": ["Needs amp", "Not portable", "Pricey"],
-        "topics": {"accuracy": 0.98, "build": 0.95, "professional": 0.92},
-        "sources": ["Amazon", "Sweetwater", "Head-Fi"]
+
+def _search_reviews(product_name: str) -> Dict:
+    """Search for product reviews via Google.
+
+    Hermetic: takes product name, returns review summary dict.
+    """
+    if not HAS_REQUESTS or not product_name:
+        return _default_review()
+
+    query = f"{product_name} review pros cons"
+    results = _google_search(query, num_results=5)
+
+    if not results:
+        return _default_review()
+
+    # Aggregate info from search snippets
+    all_text = " ".join(r.get("snippet", "") for r in results)
+    sources = []
+
+    for r in results:
+        url = r.get("url", "")
+        if "amazon" in url.lower():
+            sources.append("Amazon")
+        elif "reddit" in url.lower():
+            sources.append("Reddit")
+        elif "youtube" in url.lower():
+            sources.append("YouTube")
+        elif "wirecutter" in url.lower():
+            sources.append("Wirecutter")
+        else:
+            # Extract domain
+            match = re.search(r'https?://(?:www\.)?([^/]+)', url)
+            if match:
+                sources.append(match.group(1)[:20])
+
+    # Extract potential pros (positive words near "pro" or positive sentiment)
+    pros = []
+    cons = []
+
+    # Simple keyword extraction
+    pos_words = ["great", "excellent", "good", "best", "comfortable", "quality",
+                 "durable", "fast", "easy", "value", "reliable", "sturdy"]
+    neg_words = ["bad", "poor", "cheap", "slow", "uncomfortable", "fragile",
+                 "expensive", "loud", "heavy", "complicated", "unreliable"]
+
+    text_lower = all_text.lower()
+    for word in pos_words:
+        if word in text_lower and len(pros) < 3:
+            pros.append(word.capitalize())
+    for word in neg_words:
+        if word in text_lower and len(cons) < 3:
+            cons.append(word.capitalize())
+
+    # Extract rating if found
+    rating = _extract_rating(all_text)
+
+    return {
+        "volume": len(results) * 100,
+        "recency": datetime.now().strftime("%Y-%m"),
+        "avg_rating": rating,
+        "pros": pros if pros else ["See reviews"],
+        "cons": cons if cons else ["See reviews"],
+        "topics": {},
+        "sources": list(set(sources))[:5]
     }
-}
+
+
+def _default_review() -> Dict:
+    """Return default review structure."""
+    return {
+        "volume": 0,
+        "recency": "N/A",
+        "avg_rating": 0,
+        "pros": [],
+        "cons": [],
+        "topics": {},
+        "sources": []
+    }
 
 
 def aggregate_reviews(params: Dict[str, Any]) -> Dict[str, Any]:
-    """Aggregate review insights from multiple sources."""
-    products = params.get("products", [])
+    """Aggregate review insights from search snippets.
+
+    Hermetic: input params dict, output result dict.
+    Extracts review insights from product snippets (already fetched).
+    """
+    products = params.get("products") or []
 
     reviews = {}
     for p in products:
         pid = p.get("id", "")
-        reviews[pid] = MOCK_REVIEWS.get(pid, {
-            "volume": 0, "recency": "N/A", "avg_rating": 0,
-            "pros": [], "cons": [], "topics": {}, "sources": []
-        })
+        name = p.get("name", "")
+        snippet = p.get("snippet", "")
+        url = p.get("url", "")
+
+        # Extract insights from existing snippet instead of new search
+        # This is much faster and doesn't hit rate limits
+        pros = []
+        cons = []
+
+        text_lower = snippet.lower()
+        pos_words = ["best", "great", "excellent", "comfortable", "durable",
+                     "fast", "lightweight", "responsive", "stable", "cushioned"]
+        neg_words = ["heavy", "expensive", "narrow", "stiff", "uncomfortable"]
+
+        for word in pos_words:
+            if word in text_lower and len(pros) < 3:
+                pros.append(word.capitalize())
+        for word in neg_words:
+            if word in text_lower and len(cons) < 3:
+                cons.append(word.capitalize())
+
+        # Extract source domain
+        sources = []
+        match = re.search(r'https?://(?:www\.)?([^/]+)', url)
+        if match:
+            sources.append(match.group(1))
+
+        reviews[pid] = {
+            "volume": 100,  # Estimated
+            "recency": datetime.now().strftime("%Y-%m"),
+            "avg_rating": _extract_rating(snippet),
+            "pros": pros if pros else ["See full review"],
+            "cons": cons if cons else ["See full review"],
+            "topics": {},
+            "sources": sources
+        }
 
     return {"reviews": reviews, "has_error": False, "error": None}
 
@@ -257,10 +603,12 @@ def rank_products(params: Dict[str, Any]) -> Dict[str, Any]:
         rv = reviews.get(pid, {})
 
         # Calculate component scores (0-1)
-        price_score = max(0, 1 - (p["price"] / max_price)) if max_price > 0 else 0.5
+        price_score = max(
+            0, 1 - (p["price"] / max_price)) if max_price > 0 else 0.5
         quality_score = p.get("rating", 0) / 5.0
         feature_score = min(1.0, len(p.get("features", [])) / 5.0)
-        review_score = min(1.0, rv.get("volume", 0) / 5000) * rv.get("avg_rating", 0) / 5.0
+        review_score = min(1.0, rv.get("volume", 0) / 5000) * \
+            rv.get("avg_rating", 0) / 5.0
 
         # Weighted total
         total = (pw * price_score + qw * quality_score +
@@ -394,11 +742,13 @@ def _determine_winners(products: list) -> dict:
         return winners
 
     # Price winner (lowest)
-    prices = [(p["id"], float(p["values"]["Price"].replace("$", ""))) for p in products]
+    prices = [(p["id"], float(p["values"]["Price"].replace("$", "")))
+              for p in products]
     winners["Price"] = min(prices, key=lambda x: x[1])[0]
 
     # Rating winner (highest)
-    ratings = [(p["id"], float(p["values"]["Rating"].split("/")[0])) for p in products]
+    ratings = [(p["id"], float(p["values"]["Rating"].split("/")[0]))
+               for p in products]
     winners["Rating"] = max(ratings, key=lambda x: x[1])[0]
 
     return winners
@@ -449,7 +799,10 @@ def reset(params: Dict[str, Any]) -> Dict[str, Any]:
         "has_products": False,
         "has_rankings": False,
         "has_selection": False,
-        "has_error": False
+        "has_error": False,
+        "fetch_offset": 0,
+        "fetch_total": 0,
+        "has_more_products": False
     }
 
 

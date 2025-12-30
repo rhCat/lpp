@@ -27,7 +27,11 @@
       "has_selection": { "type": "boolean", "description": "Product selected", "default": false },
       "is_last_question": { "type": "boolean", "description": "About to answer last question", "default": false },
       "has_error": { "type": "boolean", "description": "Error occurred", "default": false },
-      "error": { "type": "string" }
+      "error": { "type": "string" },
+      "fetch_offset": { "type": "number", "description": "Current fetch offset", "default": 0 },
+      "fetch_limit": { "type": "number", "description": "Products per batch", "default": 10 },
+      "fetch_total": { "type": "number", "description": "Total products available", "default": 0 },
+      "has_more_products": { "type": "boolean", "description": "More products to fetch", "default": false }
     }
   },
 
@@ -134,12 +138,41 @@
       "compute_unit": "shop:fetch_products",
       "input_map": {
         "category": "category",
-        "preferences": "preferences"
+        "preferences": "preferences",
+        "fetch_offset": "fetch_offset",
+        "fetch_limit": "fetch_limit",
+        "existing_products": "products",
+        "existing_affiliate_links": "affiliate_links"
       },
       "output_map": {
         "products": "products",
         "affiliate_links": "affiliate_links",
         "has_products": "has_products",
+        "fetch_offset": "fetch_offset",
+        "fetch_total": "fetch_total",
+        "has_more_products": "has_more_products",
+        "has_error": "has_error",
+        "error": "error"
+      }
+    },
+    "fetch_more_products": {
+      "type": "compute",
+      "compute_unit": "shop:fetch_products",
+      "input_map": {
+        "category": "category",
+        "preferences": "preferences",
+        "fetch_offset": "fetch_offset",
+        "fetch_limit": "fetch_limit",
+        "existing_products": "products",
+        "existing_affiliate_links": "affiliate_links"
+      },
+      "output_map": {
+        "products": "products",
+        "affiliate_links": "affiliate_links",
+        "has_products": "has_products",
+        "fetch_offset": "fetch_offset",
+        "fetch_total": "fetch_total",
+        "has_more_products": "has_more_products",
         "has_error": "has_error",
         "error": "error"
       }
@@ -258,7 +291,10 @@
         "has_products": "has_products",
         "has_rankings": "has_rankings",
         "has_selection": "has_selection",
-        "has_error": "has_error"
+        "has_error": "has_error",
+        "fetch_offset": "fetch_offset",
+        "fetch_total": "fetch_total",
+        "has_more_products": "has_more_products"
       }
     }
   },
@@ -293,6 +329,13 @@
       "to": "fetching",
       "on_event": "SKIP_QUIZ",
       "actions": ["extract_preferences", "fetch_products"]
+    },
+    {
+      "id": "t_fetch_more",
+      "from": "fetching",
+      "to": "fetching",
+      "on_event": "FETCH_MORE",
+      "actions": ["fetch_more_products"]
     },
     {
       "id": "t_fetch_done",

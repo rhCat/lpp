@@ -19,7 +19,7 @@ CONSTANT NULL
 \* States
 States == {"idle", "quizzing", "fetching", "analyzing", "ranking", "browsing", "comparing", "detail", "alerting", "error"}
 
-Events == {"ANSWER", "BACK", "CANCEL", "COMPARE", "CONFIRM", "DONE", "NEW_SEARCH", "REFINE", "RESET", "RETRY", "SELECT_CATEGORY", "SET_ALERT", "SKIP_QUIZ", "VIEW"}
+Events == {"ANSWER", "BACK", "CANCEL", "COMPARE", "CONFIRM", "DONE", "FETCH_MORE", "NEW_SEARCH", "REFINE", "RESET", "RETRY", "SELECT_CATEGORY", "SET_ALERT", "SKIP_QUIZ", "VIEW"}
 
 TerminalStates == {}
 
@@ -46,9 +46,13 @@ VARIABLES
     is_last_question,           \* About to answer last question
     has_error,           \* Error occurred
     error,           \* Context variable
+    fetch_offset,           \* Current fetch offset
+    fetch_limit,           \* Products per batch
+    fetch_total,           \* Total products available
+    has_more_products,           \* More products to fetch
     event_history    \* Trace of events
 
-vars == <<state, category, quiz_questions, quiz_answers, preferences, products, reviews, rankings, comparison, selected_product, alerts, affiliate_links, current_question_idx, quiz_question_count, has_category, quiz_complete, has_products, has_rankings, has_selection, is_last_question, has_error, error, event_history>>
+vars == <<state, category, quiz_questions, quiz_answers, preferences, products, reviews, rankings, comparison, selected_product, alerts, affiliate_links, current_question_idx, quiz_question_count, has_category, quiz_complete, has_products, has_rankings, has_selection, is_last_question, has_error, error, fetch_offset, fetch_limit, fetch_total, has_more_products, event_history>>
 
 \* Type invariant - structural correctness
 TypeInvariant ==
@@ -74,12 +78,19 @@ TypeInvariant ==
     /\ (is_last_question \in BOOLEAN) \/ (is_last_question = NULL)
     /\ (has_error \in BOOLEAN) \/ (has_error = NULL)
     /\ TRUE  \* error: any string or NULL
+    /\ (fetch_offset \in BoundedInt) \/ (fetch_offset = NULL)
+    /\ (fetch_limit \in BoundedInt) \/ (fetch_limit = NULL)
+    /\ (fetch_total \in BoundedInt) \/ (fetch_total = NULL)
+    /\ (has_more_products \in BOOLEAN) \/ (has_more_products = NULL)
 
 \* State constraint - limits TLC exploration depth
 StateConstraint ==
     /\ Len(event_history) <= MAX_HISTORY
     /\ (current_question_idx = NULL) \/ (current_question_idx \in BoundedInt)
     /\ (quiz_question_count = NULL) \/ (quiz_question_count \in BoundedInt)
+    /\ (fetch_offset = NULL) \/ (fetch_offset \in BoundedInt)
+    /\ (fetch_limit = NULL) \/ (fetch_limit \in BoundedInt)
+    /\ (fetch_total = NULL) \/ (fetch_total \in BoundedInt)
 
 \* Initial state
 Init ==
@@ -105,6 +116,10 @@ Init ==
     /\ is_last_question = NULL
     /\ has_error = NULL
     /\ error = NULL
+    /\ fetch_offset = NULL
+    /\ fetch_limit = NULL
+    /\ fetch_total = NULL
+    /\ has_more_products = NULL
     /\ event_history = <<>>
 
 \* Transitions
@@ -133,6 +148,10 @@ t_start ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "SELECT_CATEGORY")
 
 \* t_answer: quizzing --(ANSWER)--> quizzing
@@ -161,6 +180,10 @@ t_answer ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "ANSWER")
 
 \* t_quiz_done: quizzing --(ANSWER)--> fetching
@@ -189,6 +212,10 @@ t_quiz_done ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "ANSWER")
 
 \* t_skip_quiz: quizzing --(SKIP_QUIZ)--> fetching
@@ -216,7 +243,42 @@ t_skip_quiz ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "SKIP_QUIZ")
+
+\* t_fetch_more: fetching --(FETCH_MORE)--> fetching
+t_fetch_more ==
+    /\ state = "fetching"
+    /\ state' = "fetching"
+    /\ category' = category
+    /\ quiz_questions' = quiz_questions
+    /\ quiz_answers' = quiz_answers
+    /\ preferences' = preferences
+    /\ products' = products
+    /\ reviews' = reviews
+    /\ rankings' = rankings
+    /\ comparison' = comparison
+    /\ selected_product' = selected_product
+    /\ alerts' = alerts
+    /\ affiliate_links' = affiliate_links
+    /\ current_question_idx' = current_question_idx
+    /\ quiz_question_count' = quiz_question_count
+    /\ has_category' = has_category
+    /\ quiz_complete' = quiz_complete
+    /\ has_products' = has_products
+    /\ has_rankings' = has_rankings
+    /\ has_selection' = has_selection
+    /\ is_last_question' = is_last_question
+    /\ has_error' = has_error
+    /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
+    /\ event_history' = Append(event_history, "FETCH_MORE")
 
 \* t_fetch_done: fetching --(DONE)--> analyzing
 t_fetch_done ==
@@ -245,6 +307,10 @@ t_fetch_done ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "DONE")
 
 \* t_fetch_error: fetching --(DONE)--> error
@@ -273,6 +339,10 @@ t_fetch_error ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "DONE")
 
 \* t_analyze_done: analyzing --(DONE)--> ranking
@@ -301,6 +371,10 @@ t_analyze_done ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "DONE")
 
 \* t_analyze_error: analyzing --(DONE)--> error
@@ -329,6 +403,10 @@ t_analyze_error ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "DONE")
 
 \* t_rank_done: ranking --(DONE)--> browsing
@@ -358,6 +436,10 @@ t_rank_done ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "DONE")
 
 \* t_rank_error: ranking --(DONE)--> error
@@ -386,6 +468,10 @@ t_rank_error ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "DONE")
 
 \* t_view_detail: browsing --(VIEW)--> detail
@@ -413,6 +499,10 @@ t_view_detail ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "VIEW")
 
 \* t_start_compare: browsing --(COMPARE)--> comparing
@@ -440,6 +530,10 @@ t_start_compare ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "COMPARE")
 
 \* t_back_from_detail: detail --(BACK)--> browsing
@@ -467,6 +561,10 @@ t_back_from_detail ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "BACK")
 
 \* t_back_from_compare: comparing --(BACK)--> browsing
@@ -494,6 +592,10 @@ t_back_from_compare ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "BACK")
 
 \* t_detail_to_compare: detail --(COMPARE)--> comparing
@@ -521,6 +623,10 @@ t_detail_to_compare ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "COMPARE")
 
 \* t_set_alert_from_detail: detail --(SET_ALERT)--> alerting
@@ -548,6 +654,10 @@ t_set_alert_from_detail ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "SET_ALERT")
 
 \* t_set_alert_from_browse: browsing --(SET_ALERT)--> alerting
@@ -575,6 +685,10 @@ t_set_alert_from_browse ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "SET_ALERT")
 
 \* t_confirm_alert: alerting --(CONFIRM)--> detail
@@ -602,6 +716,10 @@ t_confirm_alert ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "CONFIRM")
 
 \* t_cancel_alert: alerting --(CANCEL)--> detail
@@ -629,6 +747,10 @@ t_cancel_alert ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "CANCEL")
 
 \* t_new_search: browsing --(NEW_SEARCH)--> idle
@@ -656,6 +778,10 @@ t_new_search ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "NEW_SEARCH")
 
 \* t_refine: browsing --(REFINE)--> quizzing
@@ -683,6 +809,10 @@ t_refine ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "REFINE")
 
 \* t_recover: error --(RETRY)--> idle
@@ -710,6 +840,10 @@ t_recover ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "RETRY")
 
 \* t_global_reset: * --(RESET)--> idle
@@ -737,6 +871,10 @@ t_global_reset ==
     /\ is_last_question' = is_last_question
     /\ has_error' = has_error
     /\ error' = error
+    /\ fetch_offset' = fetch_offset
+    /\ fetch_limit' = fetch_limit
+    /\ fetch_total' = fetch_total
+    /\ has_more_products' = has_more_products
     /\ event_history' = Append(event_history, "RESET")
 
 \* Next state relation
@@ -745,6 +883,7 @@ Next ==
     \/ t_answer
     \/ t_quiz_done
     \/ t_skip_quiz
+    \/ t_fetch_more
     \/ t_fetch_done
     \/ t_fetch_error
     \/ t_analyze_done
