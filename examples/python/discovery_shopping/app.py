@@ -6,23 +6,29 @@ Quick web interface on port 10001.
 Usage: python app.py
 """
 
-from src import COMPUTE_REGISTRY
-from frame_py.compiler import compile_blueprint
 import sys
+import uuid
 from pathlib import Path
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import parse_qs
+from http.cookies import SimpleCookie
 import importlib.util
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "src"))
 
+from frame_py.compiler import compile_blueprint
+from src import COMPUTE_REGISTRY
 
 HERE = Path(__file__).parent
 PORT = 10001
 
+# Session storage - each session gets its own operator
+SESSIONS = {}
+MAX_SESSIONS = 100  # Limit to prevent memory issues
+
 
 def compile_and_load():
-    """Compile blueprint and return operator."""
+    """Compile blueprint and return operator factory."""
     blueprint = str(HERE / "discovery_shopping.json")
     out = HERE / "results" / "discovery_shopping_compiled.py"
     out.parent.mkdir(exist_ok=True)
@@ -31,7 +37,21 @@ def compile_and_load():
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     reg = {tuple(k.split(":")): fn for k, fn in COMPUTE_REGISTRY.items()}
-    return mod.create_operator(reg)
+    return mod, reg
+
+
+def get_or_create_operator(session_id: str, mod, reg):
+    """Get existing operator for session or create new one."""
+    global SESSIONS
+    if session_id not in SESSIONS:
+        # Clean up old sessions if too many
+        if len(SESSIONS) >= MAX_SESSIONS:
+            # Remove oldest half
+            keys = list(SESSIONS.keys())[:MAX_SESSIONS // 2]
+            for k in keys:
+                del SESSIONS[k]
+        SESSIONS[session_id] = mod.create_operator(reg)
+    return SESSIONS[session_id]
 
 
 HTML = """<!DOCTYPE html>
@@ -65,21 +85,109 @@ HTML = """<!DOCTYPE html>
         .winner {{ color: #4CAF50; font-weight: 600; }}
         .error {{ background: #ffebee; color: #c62828; }}
         a {{ color: #2196F3; }}
+        /* Loading overlay */
+        .loading-overlay {{
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }}
+        .loading-overlay.active {{ display: flex; }}
+        .spinner {{
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top-color: #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }}
+        @keyframes spin {{
+            to {{ transform: rotate(360deg); }}
+        }}
+        .loading-text {{
+            color: white;
+            font-size: 1.2em;
+            margin-top: 20px;
+            text-align: center;
+        }}
+        .loading-subtext {{
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9em;
+            margin-top: 8px;
+        }}
     </style>
 </head>
 <body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">🔍 Searching...</div>
+        <div class="loading-subtext">This may take a moment</div>
+    </div>
     <h1>🛒 Discovery Shopping</h1>
     <div class="state">{state}</div>
     {content}
+    <script>
+        document.querySelectorAll('form').forEach(form => {{
+            form.addEventListener('submit', function(e) {{
+                const event = form.querySelector('input[name="event"]');
+                if (event) {{
+                    const val = event.value.toUpperCase();
+                    const overlay = document.getElementById('loadingOverlay');
+                    const text = overlay.querySelector('.loading-text');
+                    const subtext = overlay.querySelector('.loading-subtext');
+                    
+                    if (val === 'SELECT_CATEGORY') {{
+                        text.textContent = '🔍 Searching products...';
+                        subtext.textContent = 'Finding the best deals for you';
+                        overlay.classList.add('active');
+                    }} else if (val === 'FETCH_MORE') {{
+                        text.textContent = '📦 Loading more products...';
+                        subtext.textContent = 'Fetching additional results';
+                        overlay.classList.add('active');
+                    }} else if (val === 'DONE' || val === 'ANSWER' || val === 'SKIP_QUIZ') {{
+                        text.textContent = '⏳ Processing...';
+                        subtext.textContent = 'Please wait';
+                        overlay.classList.add('active');
+                    }} else if (val === 'VIEW') {{
+                        text.textContent = '📄 Loading details...';
+                        subtext.textContent = 'Fetching product information';
+                        overlay.classList.add('active');
+                    }}
+                }}
+            }});
+        }});
+    </script>
 </body>
 </html>"""
 
 
 class Handler(BaseHTTPRequestHandler):
-    op = None
+    mod = None
+    reg = None
 
     def log_message(self, *args):
         pass
+
+    def _get_session_id(self):
+        """Get or create session ID from cookie."""
+        cookie = SimpleCookie(self.headers.get("Cookie", ""))
+        if "session" in cookie:
+            return cookie["session"].value
+        return None
+
+    def _get_operator(self):
+        """Get operator for current session."""
+        session_id = self._get_session_id()
+        if not session_id:
+            session_id = str(uuid.uuid4())
+        return session_id, get_or_create_operator(session_id, Handler.mod, Handler.reg)
 
     def do_GET(self):
         self._render()
@@ -97,20 +205,24 @@ class Handler(BaseHTTPRequestHandler):
         if "product_ids" in params:
             payload["product_ids"] = params["product_ids"][0].split(",")
 
+        session_id, op = self._get_operator()
         if event:
-            Handler.op.dispatch(event, payload)
+            op.dispatch(event, payload)
 
         self.send_response(303)
         self.send_header("Location", "/")
+        self.send_header("Set-Cookie", f"session={session_id}; Path=/; HttpOnly")
         self.end_headers()
 
     def _render(self):
-        ctx = Handler.op.context
-        state = Handler.op.state
+        session_id, op = self._get_operator()
+        ctx = op.context
+        state = op.state
         content = self._content(state, ctx)
         html = HTML.format(state=state, content=content)
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Set-Cookie", f"session={session_id}; Path=/; HttpOnly")
         self.end_headers()
         self.wfile.write(html.encode())
 
@@ -136,26 +248,40 @@ class Handler(BaseHTTPRequestHandler):
 
         if state in ("fetching", "analyzing", "ranking"):
             if state == "fetching":
-                count = len(ctx.get("products", []))
-                total = ctx.get("fetch_total", count)
-                offset = ctx.get("fetch_offset", count)
+                count = len(ctx.get("products", []) or [])
+                total = ctx.get("fetch_total", count) or count
+                offset = ctx.get("fetch_offset", count) or count
                 has_more = ctx.get("has_more_products", False)
                 pct = int(offset / total * 100) if total > 0 else 100
 
+                # Reset button always available (RESET works from any state)
+                reset_btn = '''<form method="POST" style="display:inline;margin-left:10px;">
+                    <input type="hidden" name="event" value="RESET">
+                    <button type="submit" class="secondary">← Start Over</button></form>'''
+
+                if count == 0 and not has_more:
+                    # No products found
+                    return f'''<div class="card"><h2>😕 No Products Found</h2>
+                        <p>Try a different search term or category.</p>
+                        <form method="POST"><input type="hidden" name="event" value="RESET">
+                        <button type="submit" class="success">← Try Again</button></form></div>'''
+
                 progress = f'''<div style="background:#e0e0e0;border-radius:8px;overflow:hidden;margin:10px 0;">
                     <div style="background:#4CAF50;height:24px;width:{pct}%;transition:width 0.3s;"></div></div>
-                    <p>📦 Fetched {offset}/{total} products ({pct}%)</p>'''
+                    <p>📦 Found {count} products</p>'''
 
                 if has_more:
                     return f'''<div class="card"><h2>🔍 Searching Products...</h2>{progress}
                         <form method="POST" style="display:inline"><input type="hidden" name="event" value="FETCH_MORE">
-                        <button type="submit">Load Next 50 →</button></form>
+                        <button type="submit">Load More →</button></form>
                         <form method="POST" style="display:inline"><input type="hidden" name="event" value="DONE">
-                        <button type="submit" class="success">Continue with {count} →</button></form></div>'''
+                        <button type="submit" class="success">Continue with {count} →</button></form>
+                        {reset_btn}</div>'''
                 else:
                     return f'''<div class="card"><h2>✅ Search Complete!</h2>{progress}
-                        <form method="POST"><input type="hidden" name="event" value="DONE">
-                        <button type="submit" class="success">Analyze Reviews →</button></form></div>'''
+                        <form method="POST" style="display:inline"><input type="hidden" name="event" value="DONE">
+                        <button type="submit" class="success">Analyze Reviews →</button></form>
+                        {reset_btn}</div>'''
             else:
                 msg = {"analyzing": "🔍 Reviews analyzed!",
                        "ranking": "🎯 Rankings ready!"}[state]
@@ -235,10 +361,11 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
-    Handler.op = compile_and_load()
+    Handler.mod, Handler.reg = compile_and_load()
     server = HTTPServer(("0.0.0.0", PORT), Handler)
-    print(f"\n🛒 Discovery Shopping")
+    print(f"\n🛒 Discovery Shopping (Multi-session)")
     print(f"   http://localhost:{PORT}")
+    print(f"   Max sessions: {MAX_SESSIONS}")
     print("   Ctrl+C to stop\n")
     try:
         server.serve_forever()

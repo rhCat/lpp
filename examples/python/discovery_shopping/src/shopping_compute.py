@@ -26,6 +26,9 @@ except ImportError:
     HAS_BS4 = False
 
 # Try new ddgs package first, fall back to old duckduckgo_search
+import warnings
+warnings.filterwarnings("ignore", message=".*duckduckgo_search.*renamed.*")
+
 try:
     from ddgs import DDGS
     HAS_DDGS = True
@@ -161,7 +164,7 @@ def extract_preferences(params: Dict[str, Any]) -> Dict[str, Any]:
 # =========================================================================
 
 
-def _duckduckgo_search(query: str, num_results: int = 10, retries: int = 3) -> List[Dict]:
+def _duckduckgo_search(query: str, num_results: int = 10, retries: int = 2) -> List[Dict]:
     """Perform DuckDuckGo search using the duckduckgo_search library.
 
     Hermetic: takes query string, returns list of result dicts.
@@ -169,11 +172,11 @@ def _duckduckgo_search(query: str, num_results: int = 10, retries: int = 3) -> L
     """
     results = []
 
-    # Try the duckduckgo_search library with retries
+    # Try the duckduckgo_search library with retries (reduced for faster failure)
     if HAS_DDGS:
         for attempt in range(retries):
             try:
-                with DDGS() as ddgs:
+                with DDGS(timeout=10) as ddgs:  # 10 second timeout
                     for r in ddgs.text(query, max_results=num_results):
                         results.append({
                             "title": r.get("title", ""),
@@ -182,13 +185,13 @@ def _duckduckgo_search(query: str, num_results: int = 10, retries: int = 3) -> L
                         })
                 if results:
                     return results
-                # If no results, wait and retry
+                # If no results, wait briefly and retry
                 if attempt < retries - 1:
-                    time.sleep(1 + attempt)  # Increasing delay
+                    time.sleep(0.5)  # Short delay
             except Exception as e:
                 print(f"[DDGS Attempt {attempt+1}] {e}")
                 if attempt < retries - 1:
-                    time.sleep(2 + attempt * 2)  # Longer delay on error
+                    time.sleep(1)  # Short delay on error
 
     # Fallback: try HTML scraping (less reliable)
     if not HAS_REQUESTS:
@@ -204,7 +207,7 @@ def _duckduckgo_search(query: str, num_results: int = 10, retries: int = 3) -> L
     try:
         # Use DuckDuckGo HTML version
         url = f"https://html.duckduckgo.com/html/?q={requests.utils.quote(query)}"
-        resp = requests.get(url, headers=headers, timeout=15)
+        resp = requests.get(url, headers=headers, timeout=8)  # Reduced timeout
         resp.raise_for_status()
 
         if HAS_BS4:
@@ -318,19 +321,24 @@ def _extract_rating(text: str) -> float:
 
 
 def _build_search_query(category: str, prefs: Dict) -> str:
-    """Build search query from category and preferences."""
-    terms = [f"best {category}"]
-
-    # Add preference-based terms
-    for key, val in prefs.items():
-        if isinstance(val, str) and val and key not in ("price_weight", "quality_weight"):
-            if "budget" in key.lower():
-                terms.append(val)
-            elif val.lower() not in ("not needed", "not sure", "no preference"):
-                terms.append(val)
-
-    terms.append("buy")
-    return " ".join(terms[:6])  # Limit query length
+    """Build search query from category and preferences for product shopping."""
+    # Start with product-focused query - explicitly use shopping terms
+    terms = [f"best {category} to buy 2025"]
+    
+    # Add budget context
+    budget = prefs.get("budget_range", "")
+    if budget:
+        if "budget" in budget.lower() or "<$" in budget:
+            terms.append("under $100 affordable")
+        elif "premium" in budget.lower() or "$200" in budget or "no limit" in budget.lower():
+            terms.append("premium high-end")
+        elif "mid" in budget.lower():
+            terms.append("$50-150")
+    
+    # Add shopping intent terms - very explicit to avoid grammar sites
+    terms.append("product review buying guide")
+    
+    return " ".join(terms[:8])  # Limit query length
 
 
 def fetch_products(params: Dict[str, Any]) -> Dict[str, Any]:
@@ -370,19 +378,66 @@ def fetch_products(params: Dict[str, Any]) -> Dict[str, Any]:
     # Perform search with multiple query variations
     search_results = _google_search(query, num_results=limit)
 
-    # Try alternative queries if no results
-    if not search_results:
+    # Try alternative queries if no results - focus on shopping sites
+    if not search_results or len(search_results) < 3:
         alt_queries = [
-            f"best {category} to buy 2025",
-            f"{category} reviews recommendations",
-            f"top rated {category} buy online",
-            f"{category} shopping guide"
+            f"best {category} 2025 amazon reviews",
+            f"{category} buyer's guide top picks 2025",
         ]
-        for alt_q in alt_queries:
-            search_results = _google_search(alt_q, num_results=limit)
-            if search_results:
-                break
-            time.sleep(0.5)  # Brief delay between attempts
+        for alt_q in alt_queries[:2]:  # Only try 2 alternatives max
+            new_results = _google_search(alt_q, num_results=limit)
+            if new_results:
+                # Merge results, avoiding duplicates
+                existing_urls = {r["url"] for r in search_results}
+                for r in new_results:
+                    if r["url"] not in existing_urls:
+                        search_results.append(r)
+                        existing_urls.add(r["url"])
+                if len(search_results) >= limit:
+                    break
+            # No delay - speed is more important
+
+    # Filter out non-product results (Stack Exchange, Wikipedia definitions, forums, spam)
+    filtered_results = []
+    skip_domains = [
+        "stackexchange.com", "stackoverflow.com", "wikipedia.org", 
+        "dictionary.com", "merriam-webster.com", "wiktionary.org", 
+        "thesaurus.com", "vocabulary.com", "yourdictionary.com",
+        "grammarly.com/blog", "quora.com",
+        # Forum spam sites
+        "jlaforums.com", "craigslist.org", "kijiji.ca", "gumtree.com",
+        "offerup.com", "letgo.com", "mercari.com", "poshmark.com",
+        # Low quality results
+        "pinterest.com", "facebook.com", "twitter.com", "instagram.com",
+        "tiktok.com", "linkedin.com"
+    ]
+    # Also filter by title content - skip grammar/language questions and forum posts
+    skip_title_patterns = [
+        "vs. \"", "vs \"", "versus", "grammar", "english language",
+        "articles -", "usage -", "word choice", "phrase meaning",
+        "what is the difference", "which is correct",
+        "for sale -", "jla forums", "recent posts", "page "
+    ]
+    # Prefer quality review sites
+    quality_domains = [
+        "rtings.com", "wirecutter.com", "techradar.com", "tomsguide.com",
+        "cnet.com", "pcmag.com", "theverge.com", "engadget.com",
+        "howtogeek.com", "businessinsider.com", "forbes.com",
+        "amazon.com", "bestbuy.com", "walmart.com", "target.com"
+    ]
+    for sr in search_results:
+        url_lower = sr["url"].lower()
+        title_lower = sr["title"].lower()
+        # Skip if URL matches blocked domain
+        if any(skip in url_lower for skip in skip_domains):
+            continue
+        # Skip if title looks like a grammar/language question
+        if any(pattern in title_lower for pattern in skip_title_patterns):
+            continue
+        filtered_results.append(sr)
+    
+    # Only use filtered results - don't fall back to bad results
+    search_results = filtered_results[:limit]
 
     # Convert search results to product format
     batch = []
