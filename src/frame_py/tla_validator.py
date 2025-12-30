@@ -407,6 +407,9 @@ def _python_to_tla(
     for py_op, tla_op in translations:
         tla = tla.replace(py_op, tla_op)
 
+    # Handle len() -> Len() for TLA+ (case-sensitive)
+    tla = re.sub(r'\blen\(', 'Len(', tla)
+
     return tla
 
 
