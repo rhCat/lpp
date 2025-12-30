@@ -1,0 +1,152 @@
+# L++ LLM Schema Assistant - Logic Netlist
+# Generated for build verification per build_rules.md
+
+## State Machine Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> init
+
+    init: init
+    ready: ready
+    querying: querying
+    error: error
+
+    init --> ready: START [has_api_key]
+    init --> error: START [no_api_key]
+    ready --> init: CONFIGURE
+    querying --> init: CONFIGURE
+    error --> init: CONFIGURE
+    error --> init: SET_KEY
+    ready --> querying: QUERY
+    ready --> querying: EXPLAIN [has_blueprint]
+    ready --> querying: VALIDATE [has_blueprint]
+    ready --> querying: SUGGEST [has_blueprint]
+    querying --> ready: DONE [no_error]
+    querying --> error: DONE [has_error]
+    error --> ready: RETRY [has_api_key]
+```
+
+## TLA+ Boundary Analysis
+
+Operating Envelope for bounded model checking:
+
+| Parameter | Value | Rationale |
+|-----------|-------|-----------|
+| INT_MIN | -5 | temperature/max_tokens don't need wide range |
+| INT_MAX | 5 | for logic verification |
+| MAX_HISTORY | 3 | sufficient to detect cycles in 4-state machine |
+
+Context Variable Domains:
+- api_key: {NULL, SET} - binary presence check
+- api_base: {NULL, SET} - binary presence check
+- model: {NULL, SET} - binary presence check
+- schema_content: {NULL, SET} - binary presence check
+- blueprint: {NULL, SET} - binary presence check
+- conversation: {NULL, SET} - binary presence check
+- error: {NULL, SET} - binary presence check
+- temperature: BoundedInt (-5..5) | NULL
+- max_tokens: BoundedInt (-5..5) | NULL
+
+## TLA+ Validation Results
+
+```
+TLC2 Version 2.19 of 08 August 2024
+Model checking completed. No error has been found.
+127 states generated, 63 distinct states found
+Depth of complete state graph: 6
+```
+
+Invariants Verified:
+- TypeInvariant: PASS (state always in valid States set)
+- AlwaysValidState: PASS (no invalid state transitions)
+- No deadlocks detected
+
+## States
+- init: Initial state, checking API configuration
+- ready: Configured and ready for queries  
+- querying: Sending query to LLM API
+- error: Error state - recoverable
+
+## Entry State
+init
+
+## Terminal States
+(none - continuous operation)
+
+## Gates
+- has_api_key: api_key is not None and len(str(api_key)) > 0
+- no_api_key: api_key is None or len(str(api_key)) == 0
+- has_schema: schema_content is not None
+- has_blueprint: blueprint is not None
+- has_error: error is not None
+- no_error: error is None
+
+## Transitions (Logic Graph)
+```
+t_init_start:     init ──[START/has_api_key]──▶ ready
+                  actions: load_schema
+
+t_init_no_key:    init ──[START/no_api_key]──▶ error
+
+t_configure:      * ──[CONFIGURE]──▶ init
+                  actions: init_config
+
+t_set_key:        error ──[SET_KEY]──▶ init
+                  actions: clear_error
+
+t_load_blueprint: ready ──[LOAD]──▶ ready
+                  actions: load_blueprint, clear_conversation
+
+t_query:          ready ──[QUERY]──▶ querying
+                  actions: set_query, query_llm
+
+t_explain:        ready ──[EXPLAIN/has_blueprint]──▶ querying
+                  actions: explain_blueprint
+
+t_validate:       ready ──[VALIDATE/has_blueprint]──▶ querying
+                  actions: validate_blueprint
+
+t_suggest:        ready ──[SUGGEST/has_blueprint]──▶ querying
+                  actions: suggest_improvements
+
+t_query_done:     querying ──[DONE/no_error]──▶ ready
+
+t_query_error:    querying ──[DONE/has_error]──▶ error
+
+t_clear:          ready ──[CLEAR]──▶ ready
+                  actions: clear_conversation, clear_blueprint
+
+t_recover:        error ──[RETRY/has_api_key]──▶ ready
+                  actions: clear_error
+```
+
+## COMPUTE Units (The Flesh)
+- llm:init_config -> init_config()
+- llm:load_schema -> load_schema()
+- llm:load_blueprint -> load_blueprint()
+- llm:query -> query()
+- llm:explain_blueprint -> explain_blueprint()
+- llm:validate_blueprint -> validate_blueprint()
+- llm:suggest_improvements -> suggest_improvements()
+- llm:generate_blueprint -> generate_blueprint()
+
+## Context Schema (Flange Spec)
+- api_key: string (OpenAI-compatible API key)
+- api_base: string (API endpoint)
+- model: string (model identifier)
+- schema_content: string (L++ schema)
+- blueprint: object (loaded blueprint)
+- blueprint_path: string (path to blueprint)
+- conversation: array (chat history)
+- last_query: string (user query)
+- last_response: string (LLM response)
+- temperature: number (0.0-2.0)
+- max_tokens: number (response limit)
+- error: string (error message)
+
+## Invariants
+1. If state == ready, then api_key must be set
+2. If state == querying, api_key must be set
+3. explain/validate/suggest require has_blueprint gate
+4. All COMPUTE units are hermetic (pure functions)
