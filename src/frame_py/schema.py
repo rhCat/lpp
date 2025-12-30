@@ -27,14 +27,6 @@ class ActionType(Enum):
     SET = "set"
     COMPUTE = "compute"
     EMIT = "emit"
-    FORK = "fork"
-
-
-class JoinStrategy(Enum):
-    """Strategy for joining parallel branches."""
-    ALL = "all"
-    ANY = "any"
-    N_OF_M = "n_of_m"
 
 
 # =========================================================================
@@ -66,13 +58,6 @@ class Gate:
 # =========================================================================
 
 @dataclass(frozen=True)
-class ForkBranch:
-    """A branch in a FORK action."""
-    id: str
-    actions: tuple[str, ...] = field(default_factory=tuple)
-
-
-@dataclass(frozen=True)
 class Action:
     """
     An action is a side-effect operation executed during a transition.
@@ -94,13 +79,6 @@ class Action:
     # For EMIT actions
     event: Optional[str] = None
     payload_map: dict[str, str] = field(default_factory=dict)
-
-    # For FORK actions
-    branches: tuple[ForkBranch, ...] = field(default_factory=tuple)
-    join: JoinStrategy = JoinStrategy.ALL
-    join_count: Optional[int] = None
-    timeout_ms: Optional[int] = None
-    on_timeout: Optional[str] = None
 
     description: Optional[str] = None
 
@@ -217,11 +195,9 @@ __all__ = [
     # Enums
     'GateType',
     'ActionType',
-    'JoinStrategy',
     # Definitions
     'Gate',
     'Action',
-    'ForkBranch',
     'State',
     'Transition',
     'ContextSchema',

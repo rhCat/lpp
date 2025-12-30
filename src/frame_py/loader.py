@@ -19,8 +19,6 @@ from .schema import (
     GateType,
     Action,
     ActionType,
-    ForkBranch,
-    JoinStrategy,
     ContextSchema,
 )
 
@@ -216,21 +214,6 @@ class BlueprintLoader:
         for action_id, raw_action in self.raw.get("actions", {}).items():
             action_type = ActionType(raw_action.get("type", "set"))
 
-            # Parse branches for FORK actions
-            branches = tuple()
-            if action_type == ActionType.FORK:
-                branches = tuple(
-                    ForkBranch(
-                        id=b.get("id", f"branch_{i}"),
-                        actions=tuple(b.get("actions", []))
-                    )
-                    for i, b in enumerate(raw_action.get("branches", []))
-                )
-
-            # Parse join strategy
-            join_str = raw_action.get("join", "all")
-            join = JoinStrategy(join_str)
-
             actions[action_id] = Action(
                 id=action_id,
                 type=action_type,
@@ -245,12 +228,6 @@ class BlueprintLoader:
                 # EMIT
                 event=raw_action.get("event"),
                 payload_map=raw_action.get("payload_map", {}),
-                # FORK
-                branches=branches,
-                join=join,
-                join_count=raw_action.get("join_count"),
-                timeout_ms=raw_action.get("timeout_ms"),
-                on_timeout=raw_action.get("on_timeout"),
                 # Meta
                 description=raw_action.get("description"),
             )
