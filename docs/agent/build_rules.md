@@ -1,4 +1,4 @@
-# L++ Skill Construction Rules (v1.1)
+# L++ Skill Construction Rules (v1.2)
 
 ## Overview
 L++ (Logic Plus Plus) is a deterministic framework that separates Eternal Logic (The Bone) from Volatile Compute (The Flesh). Every "Skill" added to an agent must be constructed as a verifiable logic circuit.
@@ -10,11 +10,15 @@ L++ (Logic Plus Plus) is a deterministic framework that separates Eternal Logic 
 
 ## Mandatory Build Steps
 
+### 0. The Discovery: Skill Registry
+- **Action:** Before drafting, run `utils/skill_registry/interactive.py` to `scan` and `list` existing skills.
+- **Goal:** Identify existing "Flange Specs" (context schemas) to enable Logic Stacking. Do not rebuild what is already on the shelf.
+
 ### 1. The Bone: {skill_name}.json
 - Schema: Must strictly adhere to schema_v0.1.md.
 - Traceability: Every transition MUST have a unique id.
+- **Logic Stacking:** If this skill uses another skill, its `input_map` must align with the target's `context_schema` (The Flange).
 - Gate Rigor: Gates must be "Light." Move complex math/transformations to COMPUTE units.
-- Flange Spec: Define a context_schema with strict types for tool discovery.
 
 ### 2. The Flesh: src/{skill_name}_compute.py
 - Hermeticity: Functions must be pure. Input is params: dict, output is result: dict.
@@ -30,16 +34,17 @@ L++ (Logic Plus Plus) is a deterministic framework that separates Eternal Logic 
 - Logic Netlist: Maintain a structure.txt (raw logic graph dump) to verify the netlist before final extrusion.
 
 ## Agent Workflow (The "Pre-frontal" Loop)
-1. DRAFT: Generate/Update {skill_name}.json.
-2. VERIFY: Run `./build_skill.sh <dir> --validate`. 
+1. **DISCOVER:** Scan `utils/skill_registry` to learn existing tool Flanges.
+2. **DRAFT:** Generate/Update {skill_name}.json. Align I/O with existing skills for stacking.
+3. **VERIFY:** Run `./build_skill.sh <dir> --validate`. 
    - Define Operating Envelope using `--int-min`, `--int-max`, and `--history`.
    - Fix all deadlocks or invariant violations before proceeding.
-3. IMPLEMENT: Write hermetic functions in src/.
-4. EXTRUDE: Generate the minimal interactive.py wrapper.
-5. DOCUMENT: Run `./build_skill.sh <dir> --mermaid` to generate visuals for README.md.
-6. SIGN-OFF: Present the Mermaid diagram to the Human (Engineer of Record).
+4. **IMPLEMENT:** Write hermetic functions in src/.
+5. **EXTRUDE:** Generate the minimal interactive.py wrapper.
+6. **DOCUMENT:** Run `./build_skill.sh <dir> --mermaid` for README.md.
+7. **SIGN-OFF:** Present the Mermaid diagram to the Human (Engineer of Record).
 
 ## Engineering Philosophy
-- Logic over Text: Debate the state graph, not "vibes."
-- Determinism over Probability: Critical behavior belongs in the Bone, not the LLM prompt.
-- Transparency: If you cannot visualize the logic, the logic is broken.
+- **Logic Stacking:** Build small, verified unit operations and pipe them together.
+- **Logic over Text:** Debate the state graph, not "vibes."
+- **Determinism over Probability:** Critical behavior belongs in the Bone.
