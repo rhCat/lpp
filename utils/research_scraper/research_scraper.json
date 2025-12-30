@@ -1,0 +1,308 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "research_scraper",
+  "name": "Research Scraper",
+  "version": "1.0.1",
+  "description": "Scrape academic papers from arXiv, Semantic Scholar, and web",
+  "context_schema": {
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "Search query"
+      },
+      "source": {
+        "type": "string",
+        "enum": [
+          "arxiv",
+          "semantic_scholar",
+          "web"
+        ]
+      },
+      "maxResults": {
+        "type": "number",
+        "description": "Maximum results"
+      },
+      "results": {
+        "type": "array",
+        "description": "Search results"
+      },
+      "selectedId": {
+        "type": "string",
+        "description": "Selected paper ID"
+      },
+      "detail": {
+        "type": "object",
+        "description": "Full paper details"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "Ready for search query"
+    },
+    "hasResults": {
+      "description": "Results available"
+    },
+    "error": {
+      "description": "Error occurred"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [],
+  "gates": {
+    "hasQuery": {
+      "type": "expression",
+      "expression": "query is not None"
+    },
+    "hasResults": {
+      "type": "expression",
+      "expression": "results is not None"
+    },
+    "hasDetail": {
+      "type": "expression",
+      "expression": "detail is not None"
+    },
+    "hasError": {
+      "type": "expression",
+      "expression": "error is not None"
+    },
+    "noError": {
+      "type": "expression",
+      "expression": "error is None"
+    }
+  },
+  "actions": {
+    "setQuery": {
+      "type": "set",
+      "target": "query",
+      "value_from": "event.payload.query"
+    },
+    "setSourceArxiv": {
+      "type": "set",
+      "target": "source",
+      "value": "arxiv"
+    },
+    "setSourceScholar": {
+      "type": "set",
+      "target": "source",
+      "value": "semantic_scholar"
+    },
+    "setSourceWeb": {
+      "type": "set",
+      "target": "source",
+      "value": "web"
+    },
+    "setMaxResults": {
+      "type": "set",
+      "target": "maxResults",
+      "value_from": "event.payload.maxResults"
+    },
+    "searchArxiv": {
+      "type": "compute",
+      "compute_unit": "scraper:arxiv",
+      "input_map": {
+        "query": "query",
+        "maxResults": "maxResults"
+      },
+      "output_map": {
+        "results": "results",
+        "error": "error"
+      }
+    },
+    "searchSemanticScholar": {
+      "type": "compute",
+      "compute_unit": "scraper:semanticScholar",
+      "input_map": {
+        "query": "query",
+        "maxResults": "maxResults"
+      },
+      "output_map": {
+        "results": "results",
+        "error": "error"
+      }
+    },
+    "searchWeb": {
+      "type": "compute",
+      "compute_unit": "scraper:web",
+      "input_map": {
+        "query": "query",
+        "maxResults": "maxResults"
+      },
+      "output_map": {
+        "results": "results",
+        "error": "error"
+      }
+    },
+    "setSelectedId": {
+      "type": "set",
+      "target": "selectedId",
+      "value_from": "event.payload.id"
+    },
+    "setSourceFromPayload": {
+      "type": "set",
+      "target": "source",
+      "value_from": "event.payload.source"
+    },
+    "fetchDetail": {
+      "type": "compute",
+      "compute_unit": "scraper:fetchDetail",
+      "input_map": {
+        "id": "selectedId",
+        "source": "source"
+      },
+      "output_map": {
+        "detail": "detail",
+        "error": "error"
+      }
+    },
+    "clearResults": {
+      "type": "set",
+      "target": "results",
+      "value": null
+    },
+    "clearDetail": {
+      "type": "set",
+      "target": "detail",
+      "value": null
+    },
+    "clearError": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_search_arxiv",
+      "from": "idle",
+      "to": "hasResults",
+      "on_event": "SEARCH_ARXIV",
+      "actions": [
+        "setQuery",
+        "setMaxResults",
+        "setSourceArxiv",
+        "searchArxiv"
+      ]
+    },
+    {
+      "id": "t_search_scholar",
+      "from": "idle",
+      "to": "hasResults",
+      "on_event": "SEARCH_SCHOLAR",
+      "actions": [
+        "setQuery",
+        "setMaxResults",
+        "setSourceScholar",
+        "searchSemanticScholar"
+      ]
+    },
+    {
+      "id": "t_search_web",
+      "from": "idle",
+      "to": "hasResults",
+      "on_event": "SEARCH_WEB",
+      "actions": [
+        "setQuery",
+        "setMaxResults",
+        "setSourceWeb",
+        "searchWeb"
+      ]
+    },
+    {
+      "id": "t_select",
+      "from": "hasResults",
+      "to": "hasResults",
+      "on_event": "SELECT",
+      "actions": [
+        "setSelectedId",
+        "setSourceFromPayload",
+        "fetchDetail"
+      ]
+    },
+    {
+      "id": "t_search_new_arxiv",
+      "from": "hasResults",
+      "to": "hasResults",
+      "on_event": "SEARCH_ARXIV",
+      "actions": [
+        "clearDetail",
+        "setQuery",
+        "setMaxResults",
+        "setSourceArxiv",
+        "searchArxiv"
+      ]
+    },
+    {
+      "id": "t_search_new_scholar",
+      "from": "hasResults",
+      "to": "hasResults",
+      "on_event": "SEARCH_SCHOLAR",
+      "actions": [
+        "clearDetail",
+        "setQuery",
+        "setMaxResults",
+        "setSourceScholar",
+        "searchSemanticScholar"
+      ]
+    },
+    {
+      "id": "t_search_new_web",
+      "from": "hasResults",
+      "to": "hasResults",
+      "on_event": "SEARCH_WEB",
+      "actions": [
+        "clearDetail",
+        "setQuery",
+        "setMaxResults",
+        "setSourceWeb",
+        "searchWeb"
+      ]
+    },
+    {
+      "id": "t_clear",
+      "from": "hasResults",
+      "to": "idle",
+      "on_event": "CLEAR",
+      "actions": [
+        "clearResults",
+        "clearDetail"
+      ]
+    },
+    {
+      "id": "t_retry",
+      "from": "error",
+      "to": "idle",
+      "on_event": "RETRY",
+      "actions": [
+        "clearError"
+      ]
+    }
+  ],
+  "display": {
+    "rules": [
+      {
+        "gate": "hasError",
+        "template": "Error: {error}"
+      },
+      {
+        "gate": "hasDetail",
+        "template": "Viewing: {detail.title}"
+      },
+      {
+        "gate": "hasResults",
+        "template": "Found results for: {query}"
+      },
+      {
+        "gate": "hasQuery",
+        "template": "Searching: {query}"
+      },
+      {
+        "template": "Ready"
+      }
+    ]
+  }
+}

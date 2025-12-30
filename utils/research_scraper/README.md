@@ -1,0 +1,39 @@
+# Research Scraper
+
+L++ skill for searching academic papers from high-quality sources.
+
+## Sources
+
+- **arXiv**: Free preprint server for physics, math, CS, etc.
+- **Semantic Scholar**: AI-powered academic search engine
+- **Web**: DuckDuckGo fallback for general queries
+
+## Usage
+
+```bash
+cd utils/research_scraper
+python interactive.py
+```
+
+Commands:
+- `arxiv <query>` - Search arXiv
+- `scholar <query>` - Search Semantic Scholar
+- `web <query>` - Search DuckDuckGo
+- `select <idx>` - Fetch details for result
+- `detail` - Show current detail
+- `clear` - Reset state
+- `quit` - Exit
+
+## Dependencies
+
+```bash
+pip install requests beautifulsoup4
+```
+
+Note: Works without deps using urllib, but bs4 needed for web search.
+
+## Build
+
+```bash
+../../utils/build_skill.sh research_scraper --validate --mermaid
+```

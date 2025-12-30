@@ -1,0 +1,98 @@
+# Scholar Chatbot
+
+LLM-powered research assistant with deep search capabilities. Stacks `research_scraper` and `llm_assistant` flanges for Logic Stacking.
+
+## State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> idle
+
+    idle: idle
+    searching: searching
+    reviewing: reviewing
+    analyzing: analyzing
+    chatting: chatting
+    error: error
+
+    idle --> searching: SEARCH
+    searching --> reviewing: DONE
+    searching --> error: DONE
+    reviewing --> searching: SEARCH
+    reviewing --> analyzing: SELECT
+    analyzing --> chatting: DONE
+    analyzing --> error: DONE
+    chatting --> searching: SEARCH
+    chatting --> reviewing: BACK
+    reviewing --> idle: RESET
+    error --> idle: RETRY
+```
+
+## Workflow
+
+1. **SEARCH**: Query arXiv and Semantic Scholar
+2. **SELECT**: Choose papers for deep analysis (e.g., `0,1,2`)
+3. **SYNTHESIZE**: LLM generates research synthesis with citations
+4. **ASK**: Continue Q&A conversation about the research
+
+## Usage
+
+```bash
+export OPENAI_API_KEY="your-key"
+export OPENAI_API_BASE="https://api.openai.com/v1"  # or self-hosted
+export OPENAI_MODEL="gpt-4"
+
+cd utils/scholar_chat
+python interactive.py
+```
+
+Commands:
+- `search <query>` - Search academic sources
+- `select <0,1,2>` - Select papers by index for analysis
+- `ask <question>` - Ask follow-up questions
+- `back` - Return to paper selection
+- `reset` - Start over
+- `quit` - Exit
+
+## Example Session
+
+```
+[idle]> search transformer attention mechanism
+  [0] Attention Is All You Need (arxiv)
+  [1] BERT: Pre-training of Deep Bidirectional... (arxiv)
+  [2] Vision Transformer (arxiv)
+  ...
+
+[reviewing]> select 0,1,2
+  [LLM synthesizing 3 papers...]
+  
+  The transformer architecture introduced in [1] revolutionized...
+  
+  Q: How do vision transformers differ from text transformers?
+  Q: What are the computational trade-offs of self-attention?
+
+[chatting]> ask How does positional encoding work?
+  Positional encoding in transformers...
+```
+
+## Logic Stacking
+
+This skill stacks flanges from existing skills:
+
+| Flange Source | Fields Used |
+|---------------|-------------|
+| `research_scraper` | query, sources, searchResults, paperDetails |
+| `llm_assistant` | apiKey, apiBase, model, conversation |
+
+## Build
+
+```bash
+../../utils/build_skill.sh scholar_chat --validate --mermaid
+```
+
+## TLA+ Validation
+
+- States: 77
+- Distinct: 41
+- Depth: 6
+- Result: PASS
