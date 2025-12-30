@@ -1,6 +1,6 @@
 ---------------------------- MODULE lpp_visualizer ----------------------------
 \* L++ Blueprint: L++ Blueprint Visualizer
-\* Version: 1.0.0
+\* Version: 1.1.0
 \* Auto-generated TLA+ specification (universal adaptor)
 
 EXTENDS Integers, Sequences, TLC
@@ -8,9 +8,9 @@ EXTENDS Integers, Sequences, TLC
 \* =========================================================
 \* BOUNDS - Constrain state space for model checking
 \* =========================================================
-INT_MIN == -1
-INT_MAX == 1
-MAX_HISTORY == 2
+INT_MIN == -5
+INT_MAX == 5
+MAX_HISTORY == 3
 BoundedInt == INT_MIN..INT_MAX
 
 \* NULL constant for uninitialized values
@@ -19,7 +19,7 @@ CONSTANT NULL
 \* States
 States == {"idle", "loaded", "viewing", "exporting", "error"}
 
-Events == {"BACK", "CLEAR", "DESELECT", "EXPORT_README", "LOAD", "LOAD_FAILED", "SELECT", "TOGGLE_ACTIONS", "TOGGLE_GATES", "UNLOAD", "VIEW", "VIEW_GRAPH", "VIEW_MERMAID", "VIEW_TABLE", "ZOOM_IN", "ZOOM_OUT"}
+Events == {"BACK", "CLEAR", "DESELECT", "EXPORT_README", "LOAD", "LOAD_FAILED", "LOAD_TREE", "SELECT", "SET_TREE", "TOGGLE_ACTIONS", "TOGGLE_GATES", "UNLOAD", "UNLOAD_TREE", "VIEW", "VIEW_GRAPH", "VIEW_MERMAID", "VIEW_TABLE", "VIEW_TREE", "VIEW_TREE_MERMAID", "ZOOM_IN", "ZOOM_OUT"}
 
 TerminalStates == {}
 
@@ -36,10 +36,13 @@ VARIABLES
     output,           \* Generated visualization output
     readme_content,           \* Generated README markdown content
     export_path,           \* Path where README was exported
+    tree,           \* Hierarchical feature tree
+    tree_name,           \* Tree name for display
+    tree_output,           \* Rendered tree output
     error,           \* Error message if any
     event_history    \* Trace of events
 
-vars == <<state, blueprint, blueprint_name, blueprint_id, view_mode, selected_node, zoom_level, show_gates, show_actions, output, readme_content, export_path, error, event_history>>
+vars == <<state, blueprint, blueprint_name, blueprint_id, view_mode, selected_node, zoom_level, show_gates, show_actions, output, readme_content, export_path, tree, tree_name, tree_output, error, event_history>>
 
 \* Type invariant - structural correctness
 TypeInvariant ==
@@ -55,6 +58,9 @@ TypeInvariant ==
     /\ TRUE  \* output: any string or NULL
     /\ TRUE  \* readme_content: any string or NULL
     /\ TRUE  \* export_path: any string or NULL
+    /\ TRUE  \* tree: any string or NULL
+    /\ TRUE  \* tree_name: any string or NULL
+    /\ TRUE  \* tree_output: any string or NULL
     /\ TRUE  \* error: any string or NULL
 
 \* State constraint - limits TLC exploration depth
@@ -76,6 +82,9 @@ Init ==
     /\ output = NULL
     /\ readme_content = NULL
     /\ export_path = NULL
+    /\ tree = NULL
+    /\ tree_name = NULL
+    /\ tree_output = NULL
     /\ error = NULL
     /\ event_history = <<>>
 
@@ -95,6 +104,9 @@ t_load ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "LOAD")
 
@@ -113,6 +125,9 @@ t_load_error ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "LOAD_FAILED")
 
@@ -131,6 +146,9 @@ t_reload ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "LOAD")
 
@@ -149,6 +167,9 @@ t_reload_from_viewing ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "LOAD")
 
@@ -167,6 +188,9 @@ t_start_view ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "VIEW")
 
@@ -185,6 +209,9 @@ t_switch_to_graph ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "VIEW_GRAPH")
 
@@ -203,6 +230,9 @@ t_switch_to_table ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "VIEW_TABLE")
 
@@ -221,6 +251,9 @@ t_switch_to_mermaid ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "VIEW_MERMAID")
 
@@ -239,6 +272,9 @@ t_select ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "SELECT")
 
@@ -257,6 +293,9 @@ t_deselect ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "DESELECT")
 
@@ -275,6 +314,9 @@ t_zoom_in ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "ZOOM_IN")
 
@@ -293,6 +335,9 @@ t_zoom_out ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "ZOOM_OUT")
 
@@ -311,6 +356,9 @@ t_toggle_gates ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "TOGGLE_GATES")
 
@@ -329,6 +377,9 @@ t_toggle_actions ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "TOGGLE_ACTIONS")
 
@@ -347,6 +398,9 @@ t_back_to_loaded ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "BACK")
 
@@ -365,6 +419,9 @@ t_unload ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "UNLOAD")
 
@@ -383,6 +440,9 @@ t_unload_from_viewing ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "UNLOAD")
 
@@ -401,6 +461,9 @@ t_export_readme_from_loaded ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "EXPORT_README")
 
@@ -419,6 +482,9 @@ t_export_readme_from_viewing ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "EXPORT_README")
 
@@ -437,8 +503,140 @@ t_recover ==
     /\ output' = output
     /\ readme_content' = readme_content
     /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
     /\ error' = error
     /\ event_history' = Append(event_history, "CLEAR")
+
+\* t_load_tree: idle --(LOAD_TREE)--> loaded
+t_load_tree ==
+    /\ state = "idle"
+    /\ state' = "loaded"
+    /\ blueprint' = blueprint
+    /\ blueprint_name' = blueprint_name
+    /\ blueprint_id' = blueprint_id
+    /\ view_mode' = view_mode
+    /\ selected_node' = selected_node
+    /\ zoom_level' = zoom_level
+    /\ show_gates' = show_gates
+    /\ show_actions' = show_actions
+    /\ output' = output
+    /\ readme_content' = readme_content
+    /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
+    /\ error' = error
+    /\ event_history' = Append(event_history, "LOAD_TREE")
+
+\* t_set_tree: loaded --(SET_TREE)--> loaded
+t_set_tree ==
+    /\ state = "loaded"
+    /\ state' = "loaded"
+    /\ blueprint' = blueprint
+    /\ blueprint_name' = blueprint_name
+    /\ blueprint_id' = blueprint_id
+    /\ view_mode' = view_mode
+    /\ selected_node' = selected_node
+    /\ zoom_level' = zoom_level
+    /\ show_gates' = show_gates
+    /\ show_actions' = show_actions
+    /\ output' = output
+    /\ readme_content' = readme_content
+    /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
+    /\ error' = error
+    /\ event_history' = Append(event_history, "SET_TREE")
+
+\* t_view_tree: loaded --(VIEW_TREE)--> viewing
+t_view_tree ==
+    /\ state = "loaded"
+    /\ tree /= NULL  \* gate: has_tree
+    /\ state' = "viewing"
+    /\ blueprint' = blueprint
+    /\ blueprint_name' = blueprint_name
+    /\ blueprint_id' = blueprint_id
+    /\ view_mode' = view_mode
+    /\ selected_node' = selected_node
+    /\ zoom_level' = zoom_level
+    /\ show_gates' = show_gates
+    /\ show_actions' = show_actions
+    /\ output' = output
+    /\ readme_content' = readme_content
+    /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
+    /\ error' = error
+    /\ event_history' = Append(event_history, "VIEW_TREE")
+
+\* t_switch_to_tree: viewing --(VIEW_TREE)--> viewing
+t_switch_to_tree ==
+    /\ state = "viewing"
+    /\ tree /= NULL  \* gate: has_tree
+    /\ state' = "viewing"
+    /\ blueprint' = blueprint
+    /\ blueprint_name' = blueprint_name
+    /\ blueprint_id' = blueprint_id
+    /\ view_mode' = view_mode
+    /\ selected_node' = selected_node
+    /\ zoom_level' = zoom_level
+    /\ show_gates' = show_gates
+    /\ show_actions' = show_actions
+    /\ output' = output
+    /\ readme_content' = readme_content
+    /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
+    /\ error' = error
+    /\ event_history' = Append(event_history, "VIEW_TREE")
+
+\* t_switch_to_tree_mermaid: viewing --(VIEW_TREE_MERMAID)--> viewing
+t_switch_to_tree_mermaid ==
+    /\ state = "viewing"
+    /\ tree /= NULL  \* gate: has_tree
+    /\ state' = "viewing"
+    /\ blueprint' = blueprint
+    /\ blueprint_name' = blueprint_name
+    /\ blueprint_id' = blueprint_id
+    /\ view_mode' = view_mode
+    /\ selected_node' = selected_node
+    /\ zoom_level' = zoom_level
+    /\ show_gates' = show_gates
+    /\ show_actions' = show_actions
+    /\ output' = output
+    /\ readme_content' = readme_content
+    /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
+    /\ error' = error
+    /\ event_history' = Append(event_history, "VIEW_TREE_MERMAID")
+
+\* t_unload_tree: viewing --(UNLOAD_TREE)--> loaded
+t_unload_tree ==
+    /\ state = "viewing"
+    /\ state' = "loaded"
+    /\ blueprint' = blueprint
+    /\ blueprint_name' = blueprint_name
+    /\ blueprint_id' = blueprint_id
+    /\ view_mode' = view_mode
+    /\ selected_node' = selected_node
+    /\ zoom_level' = zoom_level
+    /\ show_gates' = show_gates
+    /\ show_actions' = show_actions
+    /\ output' = output
+    /\ readme_content' = readme_content
+    /\ export_path' = export_path
+    /\ tree' = tree
+    /\ tree_name' = tree_name
+    /\ tree_output' = tree_output
+    /\ error' = error
+    /\ event_history' = Append(event_history, "UNLOAD_TREE")
 
 \* Next state relation
 Next ==
@@ -462,6 +660,12 @@ Next ==
     \/ t_export_readme_from_loaded
     \/ t_export_readme_from_viewing
     \/ t_recover
+    \/ t_load_tree
+    \/ t_set_tree
+    \/ t_view_tree
+    \/ t_switch_to_tree
+    \/ t_switch_to_tree_mermaid
+    \/ t_unload_tree
 
 \* Specification
 Spec == Init /\ [][Next]_vars

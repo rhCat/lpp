@@ -181,6 +181,60 @@ def render_mermaid(params: Dict[str, Any]) -> Dict[str, Any]:
     return {"rendered": mermaid({"blueprint": bp})["mermaid"]}
 
 
+def render_tree(params: Dict[str, Any]) -> Dict[str, Any]:
+    """Render hierarchical tree as ASCII - delegates to readme_compute."""
+    tree = params.get("tree")
+    if not tree:
+        return {"rendered": "No tree provided"}
+
+    from .readme_compute import tree_ascii
+    return {"rendered": tree_ascii({
+        "tree": tree,
+        "show_status": params.get("show_status", True),
+        "show_desc": params.get("show_desc", False)
+    })["rendered"]}
+
+
+def render_tree_mermaid(params: Dict[str, Any]) -> Dict[str, Any]:
+    """Render hierarchical tree as Mermaid flowchart."""
+    tree = params.get("tree")
+    if not tree:
+        return {"rendered": "No tree provided"}
+
+    from .readme_compute import tree_mermaid
+    return {"rendered": tree_mermaid({
+        "tree": tree,
+        "title": params.get("title", "Feature Tree"),
+        "direction": params.get("direction", "TB")
+    })["mermaid"]}
+
+
+def load_tree(params: Dict[str, Any]) -> Dict[str, Any]:
+    """Load a hierarchical tree from JSON file or context."""
+    path = params.get("path")
+    tree_key = params.get("tree_key", "feature_tree")
+
+    if not path:
+        return {"tree": None, "error": "No path provided"}
+
+    try:
+        path = Path(path)
+        if not path.exists():
+            return {"tree": None, "error": f"File not found: {path}"}
+
+        with open(path) as f:
+            data = json.load(f)
+
+        # Check if it's a context dump or direct tree
+        tree = data.get(tree_key) if tree_key in data else data
+        if not tree:
+            return {"tree": None, "error": f"No tree found at key: {tree_key}"}
+
+        return {"tree": tree, "tree_name": tree.get("name", "Untitled"), "error": None}
+    except Exception as e:
+        return {"tree": None, "error": str(e)}
+
+
 # =============================================================================
 # COMPUTE REGISTRY - Maps compute_unit names to functions
 # =============================================================================
@@ -193,4 +247,8 @@ COMPUTE_REGISTRY = {
     "viz:render_graph": render_graph,
     "viz:render_table": render_table,
     "viz:render_mermaid": render_mermaid,
+    # Hierarchical tree visualization
+    "viz:load_tree": load_tree,
+    "viz:render_tree": render_tree,
+    "viz:render_tree_mermaid": render_tree_mermaid,
 }

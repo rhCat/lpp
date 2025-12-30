@@ -1,8 +1,8 @@
 {
-  "$schema": "lpp/v0.1",
+  "$schema": "lpp/v0.1.2",
   "id": "lpp_visualizer",
   "name": "L++ Blueprint Visualizer",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "L++ visualizing itself - a meta-example demonstrating self-reference",
 
   "context_schema": {
@@ -18,6 +18,9 @@
       "output": { "type": "string", "description": "Generated visualization output" },
       "readme_content": { "type": "string", "description": "Generated README markdown content" },
       "export_path": { "type": "string", "description": "Path where README was exported" },
+      "tree": { "type": "object", "description": "Hierarchical feature tree" },
+      "tree_name": { "type": "string", "description": "Tree name for display" },
+      "tree_output": { "type": "string", "description": "Rendered tree output" },
       "error": { "type": "string", "description": "Error message if any" }
     }
   },
@@ -89,6 +92,22 @@
     "has_transitions": {
       "type": "expression",
       "expression": "blueprint is not None and len(blueprint.transitions) > 0"
+    },
+    "has_tree": {
+      "type": "expression",
+      "expression": "tree is not None"
+    },
+    "no_tree": {
+      "type": "expression",
+      "expression": "tree is None"
+    },
+    "view_is_tree": {
+      "type": "expression",
+      "expression": "view_mode == 'tree'"
+    },
+    "view_is_tree_mermaid": {
+      "type": "expression",
+      "expression": "view_mode == 'tree_mermaid'"
     }
   },
 
@@ -179,6 +198,44 @@
       },
       "output_map": { "output": "rendered" }
     },
+    "load_tree": {
+      "type": "compute",
+      "compute_unit": "viz:load_tree",
+      "input_map": { "path": "event.payload.path", "tree_key": "event.payload.tree_key" },
+      "output_map": { "tree": "tree", "tree_name": "tree_name", "error": "error" }
+    },
+    "set_tree": {
+      "type": "set",
+      "target": "tree",
+      "value_from": "event.payload.tree"
+    },
+    "render_tree": {
+      "type": "compute",
+      "compute_unit": "viz:render_tree",
+      "input_map": { "tree": "tree", "show_status": "show_gates", "show_desc": "show_actions" },
+      "output_map": { "tree_output": "rendered" }
+    },
+    "render_tree_mermaid": {
+      "type": "compute",
+      "compute_unit": "viz:render_tree_mermaid",
+      "input_map": { "tree": "tree", "title": "tree_name" },
+      "output_map": { "tree_output": "rendered" }
+    },
+    "set_view_tree": {
+      "type": "set",
+      "target": "view_mode",
+      "value": "tree"
+    },
+    "set_view_tree_mermaid": {
+      "type": "set",
+      "target": "view_mode",
+      "value": "tree_mermaid"
+    },
+    "unload_tree": {
+      "type": "set",
+      "target": "tree",
+      "value": null
+    },
     "set_error": {
       "type": "set",
       "target": "error",
@@ -230,7 +287,8 @@
     "rules": [
       { "gate": "is_error", "template": "❌ ERROR: {error}" },
       { "gate": "is_idle", "template": "📂 No blueprint loaded. Use LOAD command." },
-      { "gate": "is_viewing", "template": "🔍 [{view_mode}] Viewing: {blueprint_name} | Zoom: {zoom_level}x" },
+      { "gate": "is_viewing", "template": "[{view_mode}] Viewing: {blueprint_name} | Zoom: {zoom_level}x" },
+      { "gate": "has_tree", "template": "[tree] {tree_name}" },
       { "gate": "is_loaded", "template": "✅ Loaded: {blueprint_name} ({blueprint_id})" },
       { "gate": "is_exporting", "template": "📤 Exporting..." },
       { "template": "L++ Visualizer" }
@@ -383,6 +441,51 @@
       "to": "idle",
       "on_event": "CLEAR",
       "actions": ["clear_error"]
+    },
+    {
+      "id": "t_load_tree",
+      "from": "idle",
+      "to": "loaded",
+      "on_event": "LOAD_TREE",
+      "actions": ["load_tree", "init_defaults"]
+    },
+    {
+      "id": "t_set_tree",
+      "from": "loaded",
+      "to": "loaded",
+      "on_event": "SET_TREE",
+      "actions": ["set_tree"]
+    },
+    {
+      "id": "t_view_tree",
+      "from": "loaded",
+      "to": "viewing",
+      "on_event": "VIEW_TREE",
+      "gates": ["has_tree"],
+      "actions": ["set_view_tree", "render_tree"]
+    },
+    {
+      "id": "t_switch_to_tree",
+      "from": "viewing",
+      "to": "viewing",
+      "on_event": "VIEW_TREE",
+      "gates": ["has_tree"],
+      "actions": ["set_view_tree", "render_tree"]
+    },
+    {
+      "id": "t_switch_to_tree_mermaid",
+      "from": "viewing",
+      "to": "viewing",
+      "on_event": "VIEW_TREE_MERMAID",
+      "gates": ["has_tree"],
+      "actions": ["set_view_tree_mermaid", "render_tree_mermaid"]
+    },
+    {
+      "id": "t_unload_tree",
+      "from": "viewing",
+      "to": "loaded",
+      "on_event": "UNLOAD_TREE",
+      "actions": ["unload_tree"]
     }
   ]
 }

@@ -5,7 +5,9 @@ Each function is a single-purpose, hermetic unit.
 Input: params dict. Output: result dict.
 """
 
+from email.mime import base
 import json
+from logging import log
 import os
 from pathlib import Path
 from typing import Any, Dict, List
@@ -21,7 +23,13 @@ except ImportError:
 # LLM UTILITY (Single Responsibility: Call LLM)
 # =========================================================================
 
-def _llm(key: str, base: str, model: str, prompt: str, temp: float = 0.7) -> str:
+def _llm(
+    key: str,
+    base: str,
+    model: str,
+    prompt: str,
+    temp: float = 0.7
+) -> str:
     """Atomic LLM call. Returns response text."""
     if not HAS_OPENAI:
         raise RuntimeError("openai not installed")
@@ -56,7 +64,10 @@ def init(params: Dict[str, Any]) -> Dict[str, Any]:
     """Initialize orchestrator config from environment."""
     return {
         "api_key": os.environ.get("OPENAI_API_KEY"),
-        "api_base": os.environ.get("OPENAI_API_BASE", "https://api.openai.com/v1"),
+        "api_base": os.environ.get(
+            "OPENAI_API_BASE",
+            "https://api.openai.com/v1"
+        ),
         "model": os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
         "max_depth": int(os.environ.get("ORCH_MAX_DEPTH", "3")),
         "max_iterations": int(os.environ.get("ORCH_MAX_ITER", "5")),
@@ -495,19 +506,21 @@ def reflect(params: Dict[str, Any]) -> Dict[str, Any]:
     """Reflect on execution progress."""
     task = params.get("task", "")
     tree = params.get("feature_tree", {})
-    log = params.get("exec_log", [])
+    logs = params.get("exec_log", [])
     iteration = params.get("iteration", 0)
 
-    done = [l for l in log if l.get("status") == "complete"]
+    done = [
+        ls for ls in logs if ls.get("status") == "complete"
+    ]
 
     prompt = f"""Reflect on task progress.
 
 TASK: {task}
 ITERATION: {iteration + 1}
-COMPLETED: {len(done)}/{len(log)} features
+COMPLETED: {len(done)}/{len(logs)} features
 
 EXECUTION LOG:
-{json.dumps(log[-5:], indent=2)}
+{json.dumps(logs[-5:], indent=2)}
 
 Provide:
 1. Progress assessment
@@ -539,12 +552,12 @@ Provide:
 def evaluate(params: Dict[str, Any]) -> Dict[str, Any]:
     """Evaluate task completion."""
     task = params.get("task", "")
-    log = params.get("exec_log", [])
+    logs = params.get("exec_log", [])
     reflection = params.get("reflection", "")
     iteration = params.get("iteration", 0)
     max_iter = params.get("max_iterations", 5)
 
-    done = [l for l in log if l.get("status") == "complete"]
+    done = [ls for ls in logs if ls.get("status") == "complete"]
 
     prompt = f"""Evaluate task completion.
 
