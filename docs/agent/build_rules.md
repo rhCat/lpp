@@ -15,7 +15,7 @@ L++ (Logic Plus Plus) is a deterministic framework that separates Eternal Logic 
 - **Goal:** Identify existing "Flange Specs" (context schemas) to enable Logic Stacking. Do not rebuild what is already on the shelf.
 
 ### 1. The Bone: {skill_name}.json
-- Schema: Must strictly adhere to schema_v0.1.md.
+- Schema: Must strictly adhere to `docs/schema/schema_v0.1.md`.
 - Traceability: Every transition MUST have a unique id.
 - **Logic Stacking:** If this skill uses another skill, its `input_map` must align with the target's `context_schema` (The Flange).
 - Gate Rigor: Gates must be "Light." Move complex math/transformations to COMPUTE units.
