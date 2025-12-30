@@ -1,0 +1,5 @@
+Build a fit-first discovery shopping app that starts with one product category and helps people find the best products for their needs using a quick preferences quiz + explainable matching.
+
+Instead of scraping everything, it pulls product, price, and availability from feeds/APIs/affiliate sources, and generates trustworthy review insights by aggregating allowed review signals (volume, recency, topics, pros/cons) with clear source links—without rehosting copyrighted content.
+
+The app ranks and compares items with transparent “why this” explanations, offers side-by-side comparisons and price/restock alerts, and monetizes via affiliate links (optionally a Pro subscription for advanced filters and tracking) while keeping trust high through provenance and bias transparency.
