@@ -1,9 +1,9 @@
 {
   "$schema": "lpp/v0.1",
-  "id": "decoded_compiler",
-  "name": "Decoded: compiler",
+  "id": "lpp_compiler",
+  "name": "L++ Blueprint Compiler",
   "version": "1.0.0",
-  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/compiler.py",
+  "description": "Compiles JSON blueprints into executable Python operator scripts",
   "context_schema": {
     "properties": {
       "error": {
@@ -11,89 +11,199 @@
       },
       "result": {
         "type": "object"
+      },
+      "blueprint_path": {
+        "type": "string"
+      },
+      "output_path": {
+        "type": "string"
+      },
+      "tla_output_dir": {
+        "type": "string"
+      },
+      "generated_code": {
+        "type": "string"
       }
     }
   },
   "states": {
     "idle": {
       "name": "Idle",
-      "description": "Initial state"
+      "description": "Ready to compile"
+    },
+    "loading": {
+      "name": "Loading",
+      "description": "Loading blueprint JSON"
+    },
+    "validating": {
+      "name": "Validating",
+      "description": "Validating blueprint structure"
+    },
+    "generating": {
+      "name": "Generating",
+      "description": "Generating Python code"
+    },
+    "writing": {
+      "name": "Writing",
+      "description": "Writing output files"
+    },
+    "generating_tla": {
+      "name": "Generating TLA+",
+      "description": "Generating TLA+ specification"
     },
     "complete": {
       "name": "Complete",
-      "description": "Terminal state"
+      "description": "Compilation complete"
+    },
+    "error": {
+      "name": "Error",
+      "description": "Compilation failed"
     }
   },
   "transitions": [
     {
-      "id": "t0",
+      "id": "t_compile",
       "from": "idle",
-      "to": "complete",
-      "on_event": "IDLE_DONE"
+      "to": "loading",
+      "on_event": "COMPILE"
     },
     {
-      "id": "t1",
+      "id": "t_loaded",
+      "from": "loading",
+      "to": "validating",
+      "on_event": "LOAD_DONE"
+    },
+    {
+      "id": "t_validated",
+      "from": "validating",
+      "to": "generating",
+      "on_event": "VALIDATION_PASSED"
+    },
+    {
+      "id": "t_generated",
+      "from": "generating",
+      "to": "writing",
+      "on_event": "GENERATE_DONE",
+      "gates": ["g_has_output_path"]
+    },
+    {
+      "id": "t_skip_write",
+      "from": "generating",
+      "to": "generating_tla",
+      "on_event": "GENERATE_DONE",
+      "gates": ["g_has_tla_dir"]
+    },
+    {
+      "id": "t_skip_all",
+      "from": "generating",
+      "to": "complete",
+      "on_event": "GENERATE_DONE"
+    },
+    {
+      "id": "t_written",
+      "from": "writing",
+      "to": "generating_tla",
+      "on_event": "WRITE_DONE",
+      "gates": ["g_has_tla_dir"]
+    },
+    {
+      "id": "t_skip_tla",
+      "from": "writing",
+      "to": "complete",
+      "on_event": "WRITE_DONE"
+    },
+    {
+      "id": "t_tla_done",
+      "from": "generating_tla",
+      "to": "complete",
+      "on_event": "TLA_DONE"
+    },
+    {
+      "id": "t_load_err",
+      "from": "loading",
+      "to": "error",
+      "on_event": "LOAD_ERROR"
+    },
+    {
+      "id": "t_validate_err",
+      "from": "validating",
+      "to": "error",
+      "on_event": "VALIDATION_FAILED"
+    },
+    {
+      "id": "t_gen_err",
+      "from": "generating",
+      "to": "error",
+      "on_event": "GENERATE_ERROR"
+    },
+    {
+      "id": "t_write_err",
+      "from": "writing",
+      "to": "error",
+      "on_event": "WRITE_ERROR"
+    },
+    {
+      "id": "t_tla_err",
+      "from": "generating_tla",
+      "to": "error",
+      "on_event": "TLA_ERROR"
+    },
+    {
+      "id": "t_reset",
       "from": "*",
       "to": "idle",
       "on_event": "RESET"
     }
   ],
   "gates": {
-    "g0": {
+    "g_has_blueprint_path": {
       "type": "expression",
-      "expression": "__name__ == '__main__'"
+      "expression": "blueprint_path is not None"
     },
-    "g1": {
+    "g_has_output_path": {
       "type": "expression",
-      "expression": "len(...) < 2"
+      "expression": "output_path is not None"
     },
-    "g2": {
+    "g_has_tla_dir": {
       "type": "expression",
-      "expression": "out_path"
+      "expression": "tla_output_dir is not None"
     }
   },
   "actions": {
-    "a0": {
+    "a_open_file": {
       "type": "compute",
       "compute_unit": "impl:open",
-      "description": "Inferred from function:compile_blueprint"
+      "description": "Open file for reading"
     },
-    "a1": {
+    "a_load_json": {
       "type": "compute",
       "compute_unit": "impl:json.load",
-      "description": "Inferred from function:compile_blueprint"
+      "description": "Load JSON from file"
     },
-    "a2": {
+    "a_validate": {
+      "type": "compute",
+      "compute_unit": "impl:validate_blueprint",
+      "description": "Validate blueprint"
+    },
+    "a_generate_code": {
       "type": "compute",
       "compute_unit": "impl:_generate_code",
-      "description": "Inferred from function:compile_blueprint"
+      "description": "Generate Python code"
     },
-    "a4": {
+    "a_write_file": {
       "type": "compute",
       "compute_unit": "impl:f.write",
-      "description": "Inferred from function:compile_blueprint"
+      "description": "Write output file"
     },
-    "a5": {
+    "a_save_tla": {
       "type": "compute",
       "compute_unit": "impl:save_tla",
-      "description": "Inferred from function:compile_blueprint"
+      "description": "Save TLA+ specification"
     }
   },
   "entry_state": "idle",
   "terminal_states": [
     "complete",
     "error"
-  ],
-  "_validation": {
-    "timestamp": "2025-12-31T06:02:15.117116Z",
-    "schema_valid": true,
-    "compiles": true,
-    "errors": [],
-    "metrics": {
-      "states": 2,
-      "transitions": 2,
-      "gates": 3,
-      "actions": 5
-    }
-  }
+  ]
 }

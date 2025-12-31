@@ -1,58 +1,73 @@
 ---------------------------- MODULE logic_decoder ----------------------------
 \* L++ Blueprint: Python Logic Decoder
 \* Version: 1.0.0
-\* TLAPS Seal Specification
+\* Auto-generated TLA+ specification (universal adaptor)
 
 EXTENDS Integers, Sequences, TLC
 
-\* Bounds for model checking
+\* =========================================================
+\* BOUNDS - Constrain state space for model checking
+\* =========================================================
+INT_MIN == -5
+INT_MAX == 5
 MAX_HISTORY == 3
+BoundedInt == INT_MIN..INT_MAX
+
+\* NULL constant for uninitialized values
 CONSTANT NULL
 
+\* States
 States == {"idle", "parsing", "analyzing", "inferring", "generating", "complete", "error"}
+
 Events == {"AUTO", "DECODE", "ERROR", "RESET"}
+
 TerminalStates == {}
 
 VARIABLES
-    state,
-    filePath,
-    sourceCode,
-    ast,
-    imports,
-    functions,
-    classes,
-    controlFlow,
-    inferredStates,
-    inferredTransitions,
-    inferredActions,
-    inferredGates,
-    blueprint,
-    blueprintJson,
-    analysisReport,
-    error
+    state,           \* Current state
+    filePath,           \* Context variable
+    sourceCode,           \* Context variable
+    ast,           \* Context variable
+    imports,           \* Context variable
+    functions,           \* Context variable
+    classes,           \* Context variable
+    controlFlow,           \* Context variable
+    inferredStates,           \* Context variable
+    inferredTransitions,           \* Context variable
+    inferredActions,           \* Context variable
+    inferredGates,           \* Context variable
+    blueprint,           \* Context variable
+    blueprintJson,           \* Context variable
+    analysisReport,           \* Context variable
+    error,           \* Context variable
+    event_history    \* Trace of events
 
-vars == <<state, filePath, sourceCode, ast, imports, functions, classes, controlFlow, inferredStates, inferredTransitions, inferredActions, inferredGates, blueprint, blueprintJson, analysisReport, error>>
+vars == <<state, filePath, sourceCode, ast, imports, functions, classes, controlFlow, inferredStates, inferredTransitions, inferredActions, inferredGates, blueprint, blueprintJson, analysisReport, error, event_history>>
 
-\* Type Invariant - Structural Correctness
+\* Type invariant - structural correctness
 TypeInvariant ==
     /\ state \in States
-    /\ TRUE  \* filePath
-    /\ TRUE  \* sourceCode
-    /\ TRUE  \* ast
-    /\ TRUE  \* imports
-    /\ TRUE  \* functions
-    /\ TRUE  \* classes
-    /\ TRUE  \* controlFlow
-    /\ TRUE  \* inferredStates
-    /\ TRUE  \* inferredTransitions
-    /\ TRUE  \* inferredActions
-    /\ TRUE  \* inferredGates
-    /\ TRUE  \* blueprint
-    /\ TRUE  \* blueprintJson
-    /\ TRUE  \* analysisReport
-    /\ TRUE  \* error
+    /\ TRUE  \* filePath: any string or NULL
+    /\ TRUE  \* sourceCode: any string or NULL
+    /\ TRUE  \* ast: any string or NULL
+    /\ TRUE  \* imports: any string or NULL
+    /\ TRUE  \* functions: any string or NULL
+    /\ TRUE  \* classes: any string or NULL
+    /\ TRUE  \* controlFlow: any string or NULL
+    /\ TRUE  \* inferredStates: any string or NULL
+    /\ TRUE  \* inferredTransitions: any string or NULL
+    /\ TRUE  \* inferredActions: any string or NULL
+    /\ TRUE  \* inferredGates: any string or NULL
+    /\ TRUE  \* blueprint: any string or NULL
+    /\ TRUE  \* blueprintJson: any string or NULL
+    /\ TRUE  \* analysisReport: any string or NULL
+    /\ TRUE  \* error: any string or NULL
 
-\* Initial State
+\* State constraint - limits TLC exploration depth
+StateConstraint ==
+    /\ Len(event_history) <= MAX_HISTORY
+
+\* Initial state
 Init ==
     /\ state = "idle"
     /\ filePath = NULL
@@ -70,69 +85,220 @@ Init ==
     /\ blueprintJson = NULL
     /\ analysisReport = NULL
     /\ error = NULL
+    /\ event_history = <<>>
 
 \* Transitions
 \* t1_load: idle --(DECODE)--> parsing
 t1_load ==
     /\ state = "idle"
     /\ state' = "parsing"
-    /\ UNCHANGED <<filePath, sourceCode, ast, imports, functions, classes, controlFlow, inferredStates, inferredTransitions, inferredActions, inferredGates, blueprint, blueprintJson, analysisReport, error>>
+    /\ filePath' = filePath
+    /\ sourceCode' = sourceCode
+    /\ ast' = ast
+    /\ imports' = imports
+    /\ functions' = functions
+    /\ classes' = classes
+    /\ controlFlow' = controlFlow
+    /\ inferredStates' = inferredStates
+    /\ inferredTransitions' = inferredTransitions
+    /\ inferredActions' = inferredActions
+    /\ inferredGates' = inferredGates
+    /\ blueprint' = blueprint
+    /\ blueprintJson' = blueprintJson
+    /\ analysisReport' = analysisReport
+    /\ error' = error
+    /\ event_history' = Append(event_history, "DECODE")
 
 \* t2_parse: parsing --(AUTO)--> analyzing
 t2_parse ==
     /\ state = "parsing"
     /\ state' = "analyzing"
-    /\ UNCHANGED <<filePath, sourceCode, ast, imports, functions, classes, controlFlow, inferredStates, inferredTransitions, inferredActions, inferredGates, blueprint, blueprintJson, analysisReport, error>>
+    /\ filePath' = filePath
+    /\ sourceCode' = sourceCode
+    /\ ast' = ast
+    /\ imports' = imports
+    /\ functions' = functions
+    /\ classes' = classes
+    /\ controlFlow' = controlFlow
+    /\ inferredStates' = inferredStates
+    /\ inferredTransitions' = inferredTransitions
+    /\ inferredActions' = inferredActions
+    /\ inferredGates' = inferredGates
+    /\ blueprint' = blueprint
+    /\ blueprintJson' = blueprintJson
+    /\ analysisReport' = analysisReport
+    /\ error' = error
+    /\ event_history' = Append(event_history, "AUTO")
 
 \* t3_analyze: analyzing --(AUTO)--> inferring
 t3_analyze ==
     /\ state = "analyzing"
     /\ state' = "inferring"
-    /\ UNCHANGED <<filePath, sourceCode, ast, imports, functions, classes, controlFlow, inferredStates, inferredTransitions, inferredActions, inferredGates, blueprint, blueprintJson, analysisReport, error>>
+    /\ filePath' = filePath
+    /\ sourceCode' = sourceCode
+    /\ ast' = ast
+    /\ imports' = imports
+    /\ functions' = functions
+    /\ classes' = classes
+    /\ controlFlow' = controlFlow
+    /\ inferredStates' = inferredStates
+    /\ inferredTransitions' = inferredTransitions
+    /\ inferredActions' = inferredActions
+    /\ inferredGates' = inferredGates
+    /\ blueprint' = blueprint
+    /\ blueprintJson' = blueprintJson
+    /\ analysisReport' = analysisReport
+    /\ error' = error
+    /\ event_history' = Append(event_history, "AUTO")
 
 \* t4_infer: inferring --(AUTO)--> generating
 t4_infer ==
     /\ state = "inferring"
     /\ state' = "generating"
-    /\ UNCHANGED <<filePath, sourceCode, ast, imports, functions, classes, controlFlow, inferredStates, inferredTransitions, inferredActions, inferredGates, blueprint, blueprintJson, analysisReport, error>>
+    /\ filePath' = filePath
+    /\ sourceCode' = sourceCode
+    /\ ast' = ast
+    /\ imports' = imports
+    /\ functions' = functions
+    /\ classes' = classes
+    /\ controlFlow' = controlFlow
+    /\ inferredStates' = inferredStates
+    /\ inferredTransitions' = inferredTransitions
+    /\ inferredActions' = inferredActions
+    /\ inferredGates' = inferredGates
+    /\ blueprint' = blueprint
+    /\ blueprintJson' = blueprintJson
+    /\ analysisReport' = analysisReport
+    /\ error' = error
+    /\ event_history' = Append(event_history, "AUTO")
 
 \* t5_generate: generating --(AUTO)--> complete
 t5_generate ==
     /\ state = "generating"
     /\ state' = "complete"
-    /\ UNCHANGED <<filePath, sourceCode, ast, imports, functions, classes, controlFlow, inferredStates, inferredTransitions, inferredActions, inferredGates, blueprint, blueprintJson, analysisReport, error>>
+    /\ filePath' = filePath
+    /\ sourceCode' = sourceCode
+    /\ ast' = ast
+    /\ imports' = imports
+    /\ functions' = functions
+    /\ classes' = classes
+    /\ controlFlow' = controlFlow
+    /\ inferredStates' = inferredStates
+    /\ inferredTransitions' = inferredTransitions
+    /\ inferredActions' = inferredActions
+    /\ inferredGates' = inferredGates
+    /\ blueprint' = blueprint
+    /\ blueprintJson' = blueprintJson
+    /\ analysisReport' = analysisReport
+    /\ error' = error
+    /\ event_history' = Append(event_history, "AUTO")
 
 \* t6_error_parse: parsing --(ERROR)--> error
 t6_error_parse ==
     /\ state = "parsing"
     /\ state' = "error"
-    /\ UNCHANGED <<filePath, sourceCode, ast, imports, functions, classes, controlFlow, inferredStates, inferredTransitions, inferredActions, inferredGates, blueprint, blueprintJson, analysisReport, error>>
+    /\ filePath' = filePath
+    /\ sourceCode' = sourceCode
+    /\ ast' = ast
+    /\ imports' = imports
+    /\ functions' = functions
+    /\ classes' = classes
+    /\ controlFlow' = controlFlow
+    /\ inferredStates' = inferredStates
+    /\ inferredTransitions' = inferredTransitions
+    /\ inferredActions' = inferredActions
+    /\ inferredGates' = inferredGates
+    /\ blueprint' = blueprint
+    /\ blueprintJson' = blueprintJson
+    /\ analysisReport' = analysisReport
+    /\ error' = error
+    /\ event_history' = Append(event_history, "ERROR")
 
 \* t7_error_analyze: analyzing --(ERROR)--> error
 t7_error_analyze ==
     /\ state = "analyzing"
     /\ state' = "error"
-    /\ UNCHANGED <<filePath, sourceCode, ast, imports, functions, classes, controlFlow, inferredStates, inferredTransitions, inferredActions, inferredGates, blueprint, blueprintJson, analysisReport, error>>
+    /\ filePath' = filePath
+    /\ sourceCode' = sourceCode
+    /\ ast' = ast
+    /\ imports' = imports
+    /\ functions' = functions
+    /\ classes' = classes
+    /\ controlFlow' = controlFlow
+    /\ inferredStates' = inferredStates
+    /\ inferredTransitions' = inferredTransitions
+    /\ inferredActions' = inferredActions
+    /\ inferredGates' = inferredGates
+    /\ blueprint' = blueprint
+    /\ blueprintJson' = blueprintJson
+    /\ analysisReport' = analysisReport
+    /\ error' = error
+    /\ event_history' = Append(event_history, "ERROR")
 
 \* t8_error_infer: inferring --(ERROR)--> error
 t8_error_infer ==
     /\ state = "inferring"
     /\ state' = "error"
-    /\ UNCHANGED <<filePath, sourceCode, ast, imports, functions, classes, controlFlow, inferredStates, inferredTransitions, inferredActions, inferredGates, blueprint, blueprintJson, analysisReport, error>>
+    /\ filePath' = filePath
+    /\ sourceCode' = sourceCode
+    /\ ast' = ast
+    /\ imports' = imports
+    /\ functions' = functions
+    /\ classes' = classes
+    /\ controlFlow' = controlFlow
+    /\ inferredStates' = inferredStates
+    /\ inferredTransitions' = inferredTransitions
+    /\ inferredActions' = inferredActions
+    /\ inferredGates' = inferredGates
+    /\ blueprint' = blueprint
+    /\ blueprintJson' = blueprintJson
+    /\ analysisReport' = analysisReport
+    /\ error' = error
+    /\ event_history' = Append(event_history, "ERROR")
 
 \* t9_reset: complete --(RESET)--> idle
 t9_reset ==
     /\ state = "complete"
     /\ state' = "idle"
-    /\ UNCHANGED <<filePath, sourceCode, ast, imports, functions, classes, controlFlow, inferredStates, inferredTransitions, inferredActions, inferredGates, blueprint, blueprintJson, analysisReport, error>>
+    /\ filePath' = filePath
+    /\ sourceCode' = sourceCode
+    /\ ast' = ast
+    /\ imports' = imports
+    /\ functions' = functions
+    /\ classes' = classes
+    /\ controlFlow' = controlFlow
+    /\ inferredStates' = inferredStates
+    /\ inferredTransitions' = inferredTransitions
+    /\ inferredActions' = inferredActions
+    /\ inferredGates' = inferredGates
+    /\ blueprint' = blueprint
+    /\ blueprintJson' = blueprintJson
+    /\ analysisReport' = analysisReport
+    /\ error' = error
+    /\ event_history' = Append(event_history, "RESET")
 
 \* t10_error_reset: error --(RESET)--> idle
 t10_error_reset ==
     /\ state = "error"
     /\ state' = "idle"
-    /\ UNCHANGED <<filePath, sourceCode, ast, imports, functions, classes, controlFlow, inferredStates, inferredTransitions, inferredActions, inferredGates, blueprint, blueprintJson, analysisReport, error>>
+    /\ filePath' = filePath
+    /\ sourceCode' = sourceCode
+    /\ ast' = ast
+    /\ imports' = imports
+    /\ functions' = functions
+    /\ classes' = classes
+    /\ controlFlow' = controlFlow
+    /\ inferredStates' = inferredStates
+    /\ inferredTransitions' = inferredTransitions
+    /\ inferredActions' = inferredActions
+    /\ inferredGates' = inferredGates
+    /\ blueprint' = blueprint
+    /\ blueprintJson' = blueprintJson
+    /\ analysisReport' = analysisReport
+    /\ error' = error
+    /\ event_history' = Append(event_history, "RESET")
 
-\* Next State Relation
+\* Next state relation
 Next ==
     \/ t1_load
     \/ t2_parse
@@ -145,28 +311,16 @@ Next ==
     \/ t9_reset
     \/ t10_error_reset
 
-\* Safety Invariant - Convergence Guarantee
-SafetyInvariant ==
-    state \in TerminalStates \/
-    \E e \in Events : ENABLED(Next)
+\* Specification
+Spec == Init /\ [][Next]_vars
 
-\* Temporal Specification
-Spec == Init /\ [][Next]_vars /\ WF_vars(Next)
+\* Safety: Always in valid state
+AlwaysValidState == state \in States
 
-\* =========================================================
-\* TLAPS THEOREMS - Axiomatic Certification
-\* =========================================================
+\* Liveness: No deadlock (always can make progress)
+NoDeadlock == <>(ENABLED Next)
 
-\* Theorem 1: Type Safety
-THEOREM TypeSafety == Spec => []TypeInvariant
-PROOF OMITTED  \* To be proven by TLAPS
+\* Reachability: Entry state is reachable
+EntryReachable == state = "idle"
 
-\* Theorem 2: Convergence (No unhandled deadlock)
-THEOREM Convergence == Spec => []SafetyInvariant
-PROOF OMITTED  \* To be proven by TLAPS
-
-\* Theorem 3: Terminal Reachability
-THEOREM TerminalReachable == Spec => <>(TRUE)
-PROOF OMITTED  \* To be proven by TLAPS
-
-============================================================================
+=============================================================================

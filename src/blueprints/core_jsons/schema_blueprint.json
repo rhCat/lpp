@@ -1,9 +1,9 @@
 {
   "$schema": "lpp/v0.1",
-  "id": "decoded_schema",
-  "name": "Decoded: schema",
+  "id": "lpp_schema",
+  "name": "L++ Blueprint Schema",
   "version": "1.0.0",
-  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/schema.py",
+  "description": "Schema types for blueprint structure including states, transitions, gates, and actions",
   "context_schema": {
     "properties": {
       "error": {
@@ -11,71 +11,113 @@
       },
       "result": {
         "type": "object"
+      },
+      "state_id": {
+        "type": "string"
+      },
+      "transitions": {
+        "type": "array"
       }
     }
   },
   "states": {
     "idle": {
       "name": "Idle",
-      "description": "Initial state"
+      "description": "Schema ready for queries"
     },
-    "loading": {
-      "name": "Loading",
-      "description": "From function: get_state"
+    "querying": {
+      "name": "Querying",
+      "description": "Processing a schema query"
     },
     "complete": {
       "name": "Complete",
-      "description": "Terminal state"
+      "description": "Query completed successfully"
+    },
+    "error": {
+      "name": "Error",
+      "description": "Query failed with error"
     }
   },
   "transitions": [
     {
-      "id": "t0",
+      "id": "t_query_state",
       "from": "idle",
-      "to": "loading",
-      "on_event": "IDLE_DONE"
+      "to": "querying",
+      "on_event": "GET_STATE"
     },
     {
-      "id": "t1",
-      "from": "loading",
+      "id": "t_query_transitions",
+      "from": "idle",
+      "to": "querying",
+      "on_event": "GET_TRANSITIONS"
+    },
+    {
+      "id": "t_query_gate",
+      "from": "idle",
+      "to": "querying",
+      "on_event": "GET_GATE"
+    },
+    {
+      "id": "t_query_action",
+      "from": "idle",
+      "to": "querying",
+      "on_event": "GET_ACTION"
+    },
+    {
+      "id": "t_done",
+      "from": "querying",
       "to": "complete",
-      "on_event": "LOADING_DONE"
+      "on_event": "QUERY_DONE"
     },
     {
-      "id": "t2",
+      "id": "t_err_not_found",
+      "from": "querying",
+      "to": "error",
+      "on_event": "NOT_FOUND"
+    },
+    {
+      "id": "t_reset",
       "from": "*",
       "to": "idle",
       "on_event": "RESET"
     }
   ],
-  "gates": {},
+  "gates": {
+    "g_state_exists": {
+      "type": "expression",
+      "expression": "state_id in states"
+    }
+  },
   "actions": {
-    "a0": {
+    "a_get_state": {
+      "type": "compute",
+      "compute_unit": "impl:states.get",
+      "description": "Get state by ID"
+    },
+    "a_get_transitions": {
+      "type": "compute",
+      "compute_unit": "impl:get_transitions_from",
+      "description": "Get transitions from a state"
+    },
+    "a_get_gate": {
+      "type": "compute",
+      "compute_unit": "impl:gates.get",
+      "description": "Get gate by ID"
+    },
+    "a_get_action": {
+      "type": "compute",
+      "compute_unit": "impl:actions.get",
+      "description": "Get action by ID"
+    },
+    "a_raise_key_error": {
       "type": "compute",
       "compute_unit": "impl:KeyError",
-      "description": "Inferred from function:get_state"
-    },
-    "a3": {
-      "type": "compute",
-      "compute_unit": "impl:result.append",
-      "description": "Inferred from function:get_transitions_from"
+      "description": "Raise KeyError for missing item"
     }
   },
   "entry_state": "idle",
   "terminal_states": [
     "complete",
     "error"
-  ],
-  "_validation": {
-    "timestamp": "2025-12-31T06:02:15.196620Z",
-    "schema_valid": true,
-    "compiles": true,
-    "errors": [],
-    "metrics": {
-      "states": 3,
-      "transitions": 3,
-      "gates": 0,
-      "actions": 2
-    }
-  }
+  ]
 }

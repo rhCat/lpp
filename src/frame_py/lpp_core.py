@@ -13,13 +13,46 @@ No classes, no objects, no external libraries.
 This is the absolute bedrock. The entire L++ universe, no matter how
 complex, will be built by an orchestrator loop just calling these
 four functions in different sequences.
+
+State Machine (from lpp_core_blueprint.json):
+    idle → evaluating|transitioning|mutating|dispatching → complete|error
+
+Error Handling:
+    Each atom returns (result, error) tuple where error is None on success.
+    This enables the orchestrator to trigger EVAL_ERROR, TRANS_ERROR, etc.
 """
 
 import datetime
-from typing import Any, Callable, Dict, NamedTuple
+from typing import Any, Callable, Dict, NamedTuple, Optional, Tuple
+
 
 # Type alias for hermetic compute unit function signature
 ComputeUnitFunc = Callable[[Dict[str, Any]], Dict[str, Any]]
+
+
+class AtomError(Exception):
+    """Base exception for atomic operation failures."""
+    pass
+
+
+class EvaluateError(AtomError):
+    """Error during atom_EVALUATE execution."""
+    pass
+
+
+class TransitionError(AtomError):
+    """Error during atom_TRANSITION execution."""
+    pass
+
+
+class MutateError(AtomError):
+    """Error during atom_MUTATE execution."""
+    pass
+
+
+class DispatchError(AtomError):
+    """Error during atom_DISPATCH execution."""
+    pass
 
 
 # A structured record of what happened, for the engine's internal history
@@ -28,13 +61,17 @@ class TransitionTrace(NamedTuple):
     timestamp: datetime.datetime
     from_id: str
     to_id: str
+    error: Optional[str] = None  # Error message if transition failed
 
 
 # =========================================================================
 # ATOM: EVALUATE (The Judge)
 # =========================================================================
 
-def atom_EVALUATE(expression: str, context_data: dict) -> bool:
+def atom_EVALUATE(
+    expression: str,
+    context_data: dict
+) -> Tuple[bool, Optional[str]]:
     """
     Atomic unit to evaluate a boolean expression against a data context.
     Uses the safe expression evaluator for deterministic, secure execution.
@@ -44,7 +81,13 @@ def atom_EVALUATE(expression: str, context_data: dict) -> bool:
         context_data: The data dictionary for variable resolution
 
     Returns:
-        True if expression evaluates truthy, False otherwise
+        Tuple of (result, error):
+        - result: True/False if successful, False on error
+        - error: None on success, error message string on failure
+
+    Transitions (blueprint):
+        idle → evaluating (EVALUATE)
+        evaluating → complete (EVAL_DONE) | error (EVAL_ERROR)
 
     Security:
         Uses safe_eval which only allows:
@@ -57,8 +100,18 @@ def atom_EVALUATE(expression: str, context_data: dict) -> bool:
 
         Blocked: imports, builtins, time, random, file access, etc.
     """
-    from .safe_eval import safe_eval_bool
-    return safe_eval_bool(expression, context_data)
+    # Gate: g_has_expression
+    if expression is None:
+        return False, "EVAL_ERROR: expression is None"
+
+    try:
+        from .safe_eval import safe_eval_bool
+        result, eval_error = safe_eval_bool(expression, context_data)
+        if eval_error:
+            return False, eval_error
+        return result, None  # EVAL_DONE
+    except Exception as e:
+        return False, f"EVAL_ERROR: {str(e)}"  # → error state
 
 
 # =========================================================================
@@ -67,8 +120,9 @@ def atom_EVALUATE(expression: str, context_data: dict) -> bool:
 
 def atom_TRANSITION(
     current_id: str,
-    target_id: str
-) -> tuple[str, TransitionTrace]:
+    target_id: str,
+    valid_states: Optional[set] = None
+) -> Tuple[Tuple[str, TransitionTrace], Optional[str]]:
     """
     Atomic unit to update the execution pointer.
     Performs the move and generates a kernel-level trace record.
@@ -76,16 +130,31 @@ def atom_TRANSITION(
     Args:
         current_id: The current state identifier
         target_id: The target state identifier
+        valid_states: Optional set of valid state IDs for validation
 
     Returns:
-        Tuple of (new_pointer, trace_record)
+        Tuple of ((new_pointer, trace_record), error):
         - new_pointer: The target_id (the new state)
         - trace_record: TransitionTrace for the engine's verifiable history
+        - error: None on success, error message on failure
+
+    Transitions (blueprint):
+        idle → transitioning (TRANSITION)
+        transitioning → complete (TRANS_DONE) | error (TRANS_ERROR)
 
     Note:
         The trace is for the engine's own internal history stack, NOT an
         external action log. The orchestrator decides what to do with it.
     """
+    error_msg = None
+
+    # Validate states if valid_states provided
+    if valid_states is not None:
+        if current_id not in valid_states:
+            error_msg = f"TRANS_ERROR: invalid current_id '{current_id}'"
+        elif target_id not in valid_states:
+            error_msg = f"TRANS_ERROR: invalid target_id '{target_id}'"
+
     # 1. Perform the core function: Define the new state pointer
     new_pointer = target_id
 
@@ -93,18 +162,23 @@ def atom_TRANSITION(
     trace = TransitionTrace(
         timestamp=datetime.datetime.now(datetime.timezone.utc),
         from_id=current_id,
-        to_id=target_id
+        to_id=target_id,
+        error=error_msg
     )
 
     # Return the new state AND the trace of the operation
-    return new_pointer, trace
+    return (new_pointer, trace), error_msg
 
 
 # =========================================================================
 # ATOM: MUTATE (The Scribe)
 # =========================================================================
 
-def atom_MUTATE(context_data: dict, path: str, value: Any) -> dict:
+def atom_MUTATE(
+    context_data: dict,
+    path: str,
+    value: Any
+) -> Tuple[dict, Optional[str]]:
     """
     Atomic unit to update the data context at a specific path.
     Returns a SHALLOW COPY of the newly updated context.
@@ -115,36 +189,49 @@ def atom_MUTATE(context_data: dict, path: str, value: Any) -> dict:
         value: The value to set at the path
 
     Returns:
-        A new dictionary with the value updated at path.
-        The original context_data is NOT modified.
+        Tuple of (new_context, error):
+        - new_context: New dictionary with the value updated at path
+        - error: None on success, error message on failure
+
+    Transitions (blueprint):
+        idle → mutating (MUTATE)
+        mutating → complete (MUTATE_DONE) | error (MUTATE_ERROR)
 
     Note:
         Uses shallow copy for efficiency. For absolute purity with nested
         shared references, deep copy could be used at the cost of performance.
     """
-    # Create a shallow copy to ensure the input dictionary is not modified
-    new_context = context_data.copy()
+    # Gate: g_valid_path
+    if path is None or len(path) == 0:
+        return context_data, "MUTATE_ERROR: path is None or empty"
 
-    keys = path.split('.')
-    current_level = new_context
+    try:
+        # Create a shallow copy to ensure the input dictionary is not modified
+        new_context = context_data.copy()
 
-    # Navigate down to the second-to-last key
-    for key in keys[:-1]:
-        if key not in current_level or not isinstance(
-            current_level[key], dict
-        ):
-            # If the path doesn't exist, create the intermediate dictionaries
-            current_level[key] = {}
-        else:
-            # Copy the nested dict to avoid mutating the original
-            current_level[key] = current_level[key].copy()
-        current_level = current_level[key]
+        keys = path.split('.')
+        current_level = new_context
 
-    # Set the value at the final key
-    final_key = keys[-1]
-    current_level[final_key] = value
+        # Navigate down to the second-to-last key
+        for key in keys[:-1]:
+            if key not in current_level or not isinstance(
+                current_level[key], dict
+            ):
+                # If the path doesn't exist, create intermediate dictionaries
+                current_level[key] = {}
+            else:
+                # Copy the nested dict to avoid mutating the original
+                current_level[key] = current_level[key].copy()
+            current_level = current_level[key]
 
-    return new_context
+        # Set the value at the final key
+        final_key = keys[-1]
+        current_level[final_key] = value
+
+        return new_context, None  # MUTATE_DONE
+
+    except Exception as e:
+        return context_data, f"MUTATE_ERROR: {str(e)}"  # → error state
 
 
 # =========================================================================
@@ -156,7 +243,7 @@ def atom_DISPATCH(
     operation_id: str,
     payload: dict,
     compute_registry: Dict[tuple, ComputeUnitFunc]
-) -> dict:
+) -> Tuple[dict, Optional[str]]:
     """
     Atomic unit to pass a payload across the boundary to a compute unit.
     Handles the lookup and standard I/O execution.
@@ -168,7 +255,13 @@ def atom_DISPATCH(
         compute_registry: Dict mapping (system_id, operation_id) to callables
 
     Returns:
-        The result payload from the compute unit, or an error dict
+        Tuple of (result_payload, error):
+        - result_payload: The result from compute unit, or error dict
+        - error: None on success, error message on failure
+
+    Transitions (blueprint):
+        idle → dispatching (DISPATCH)
+        dispatching → complete (DISPATCH_DONE) | error (DISPATCH_ERROR)
 
     Note:
         The Frame must never crash. All compute unit failures are caught
@@ -179,11 +272,12 @@ def atom_DISPATCH(
 
     if not compute_func:
         # Deterministic error handling: return a standard error payload
-        print(
-            f"[L++ CORE ERROR] No compute unit registered for "
+        error_msg = "DISPATCH_ERROR: No compute unit for " \
             f"{system_id}:{operation_id}"
-        )
-        return {"error": "COMPUTE_UNIT_NOT_FOUND", "status": "failed"}
+        print(f"[L++ CORE ERROR] {error_msg}")
+        return {
+            "error": "COMPUTE_UNIT_NOT_FOUND", "status": "failed"
+        }, error_msg
 
     try:
         # Execute the hermetic unit with standard I/O
@@ -195,14 +289,24 @@ def atom_DISPATCH(
 
         # Enforce the output contract: must be a dictionary
         if not isinstance(result_payload, dict):
-            return {"error": "INVALID_COMPUTE_OUTPUT_TYPE", "status": "failed"}
+            error_msg = "DISPATCH_ERROR: Invalid compute output type"
+            return {
+                "error": "INVALID_COMPUTE_OUTPUT_TYPE", "status": "failed"
+            }, error_msg
 
-        return result_payload
+        # Check if compute returned an error
+        if result_payload.get("status") == "failed":
+            error_msg = "DISPATCH_ERROR: " + \
+                f"{result_payload.get('error', 'unknown')}"
+            return result_payload, error_msg
+
+        return result_payload, None  # DISPATCH_DONE
 
     except Exception as e:
         # Catch any crashes in the volatile compute layer
+        error_msg = f"DISPATCH_ERROR: {str(e)}"
         print(f"[L++ CORE ERROR] Compute unit failed: {e}")
-        return {"error": str(e), "status": "failed"}
+        return {"error": str(e), "status": "failed"}, error_msg
 
 
 # =========================================================================
@@ -216,4 +320,9 @@ __all__ = [
     'atom_DISPATCH',
     'ComputeUnitFunc',
     'TransitionTrace',
+    'AtomError',
+    'EvaluateError',
+    'TransitionError',
+    'MutateError',
+    'DispatchError',
 ]

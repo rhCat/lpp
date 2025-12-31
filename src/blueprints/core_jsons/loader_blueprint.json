@@ -1,9 +1,9 @@
 {
   "$schema": "lpp/v0.1",
-  "id": "decoded_loader",
-  "name": "Decoded: loader",
+  "id": "lpp_loader",
+  "name": "L++ Blueprint Loader",
   "version": "1.0.0",
-  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/loader.py",
+  "description": "Loads and validates JSON blueprints into Blueprint schema objects",
   "context_schema": {
     "properties": {
       "error": {
@@ -11,161 +11,156 @@
       },
       "result": {
         "type": "object"
+      },
+      "blueprint_path": {
+        "type": "string"
+      },
+      "raw_data": {
+        "type": "object"
       }
     }
   },
   "states": {
     "idle": {
       "name": "Idle",
-      "description": "Initial state"
+      "description": "Waiting for blueprint load request"
+    },
+    "reading": {
+      "name": "Reading",
+      "description": "Reading blueprint file from disk"
+    },
+    "validating": {
+      "name": "Validating",
+      "description": "Validating blueprint structure and references"
     },
     "loading": {
       "name": "Loading",
-      "description": "From function: load"
+      "description": "Loading blueprint components into schema"
     },
     "complete": {
       "name": "Complete",
-      "description": "Terminal state"
+      "description": "Blueprint successfully loaded"
+    },
+    "error": {
+      "name": "Error",
+      "description": "Loading failed with error"
     }
   },
   "transitions": [
     {
       "id": "t0",
       "from": "idle",
-      "to": "loading",
-      "on_event": "IDLE_DONE"
+      "to": "reading",
+      "on_event": "LOAD_REQUEST"
     },
     {
       "id": "t1",
+      "from": "reading",
+      "to": "validating",
+      "on_event": "READ_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "validating",
+      "to": "loading",
+      "on_event": "VALIDATION_PASSED"
+    },
+    {
+      "id": "t3",
       "from": "loading",
       "to": "complete",
       "on_event": "LOADING_DONE"
     },
     {
-      "id": "t2",
+      "id": "t_err_read",
+      "from": "reading",
+      "to": "error",
+      "on_event": "READ_ERROR"
+    },
+    {
+      "id": "t_err_validate",
+      "from": "validating",
+      "to": "error",
+      "on_event": "VALIDATION_FAILED"
+    },
+    {
+      "id": "t_err_load",
+      "from": "loading",
+      "to": "error",
+      "on_event": "LOAD_ERROR"
+    },
+    {
+      "id": "t_reset",
       "from": "*",
       "to": "idle",
       "on_event": "RESET"
     }
   ],
-  "gates": {},
+  "gates": {
+    "g_has_path": {
+      "type": "expression",
+      "expression": "blueprint_path is not None"
+    },
+    "g_valid_json": {
+      "type": "expression",
+      "expression": "raw_data is not None"
+    }
+  },
   "actions": {
-    "a0": {
-      "type": "compute",
-      "compute_unit": "impl:self._validate_required_fields",
-      "description": "Inferred from function:load"
-    },
-    "a1": {
-      "type": "compute",
-      "compute_unit": "impl:self._validate_references",
-      "description": "Inferred from function:load"
-    },
-    "a2": {
-      "type": "compute",
-      "compute_unit": "impl:Blueprint",
-      "description": "Inferred from function:load"
-    },
-    "a3": {
-      "type": "compute",
-      "compute_unit": "impl:self.raw.get",
-      "description": "Inferred from function:load"
-    },
-    "a4": {
-      "type": "compute",
-      "compute_unit": "impl:self._load_states",
-      "description": "Inferred from function:load"
-    },
-    "a5": {
-      "type": "compute",
-      "compute_unit": "impl:self._load_transitions",
-      "description": "Inferred from function:load"
-    },
-    "a6": {
-      "type": "compute",
-      "compute_unit": "impl:frozenset",
-      "description": "Inferred from function:load"
-    },
-    "a7": {
-      "type": "compute",
-      "compute_unit": "impl:self._load_gates",
-      "description": "Inferred from function:load"
-    },
-    "a8": {
-      "type": "compute",
-      "compute_unit": "impl:self._load_actions",
-      "description": "Inferred from function:load"
-    },
-    "a9": {
-      "type": "compute",
-      "compute_unit": "impl:self._load_context_schema",
-      "description": "Inferred from function:load"
-    },
-    "a10": {
-      "type": "compute",
-      "compute_unit": "impl:isinstance",
-      "description": "Inferred from function:load_blueprint"
-    },
-    "a12": {
-      "type": "compute",
-      "compute_unit": "impl:Path",
-      "description": "Inferred from function:load_blueprint"
-    },
-    "a13": {
+    "a_read_file": {
       "type": "compute",
       "compute_unit": "impl:open",
-      "description": "Inferred from function:load_blueprint"
+      "description": "Read blueprint file from disk"
     },
-    "a14": {
+    "a_parse_json": {
       "type": "compute",
       "compute_unit": "impl:json.load",
-      "description": "Inferred from function:load_blueprint"
+      "description": "Parse JSON content"
     },
-    "a15": {
+    "a_validate_required": {
       "type": "compute",
-      "compute_unit": "impl:TypeError",
-      "description": "Inferred from function:load_blueprint"
+      "compute_unit": "impl:self._validate_required_fields",
+      "description": "Validate required blueprint fields"
     },
-    "a16": {
+    "a_validate_refs": {
       "type": "compute",
-      "compute_unit": "impl:type",
-      "description": "Inferred from function:load_blueprint"
+      "compute_unit": "impl:self._validate_references",
+      "description": "Validate internal references"
     },
-    "a17": {
+    "a_load_states": {
       "type": "compute",
-      "compute_unit": "impl:BlueprintLoader",
-      "description": "Inferred from function:load_blueprint"
+      "compute_unit": "impl:self._load_states",
+      "description": "Load state definitions"
     },
-    "a18": {
+    "a_load_transitions": {
       "type": "compute",
-      "compute_unit": "impl:loader.load",
-      "description": "Inferred from function:load_blueprint"
+      "compute_unit": "impl:self._load_transitions",
+      "description": "Load transition definitions"
     },
-    "a19": {
+    "a_load_gates": {
       "type": "compute",
-      "compute_unit": "impl:json.loads",
-      "description": "Inferred from function:load_blueprint_from_json"
+      "compute_unit": "impl:self._load_gates",
+      "description": "Load gate definitions"
     },
-    "a20": {
+    "a_load_actions": {
       "type": "compute",
-      "compute_unit": "impl:load_blueprint",
-      "description": "Inferred from function:load_blueprint_from_json"
+      "compute_unit": "impl:self._load_actions",
+      "description": "Load action definitions"
+    },
+    "a_load_schema": {
+      "type": "compute",
+      "compute_unit": "impl:self._load_context_schema",
+      "description": "Load context schema"
+    },
+    "a_create_blueprint": {
+      "type": "compute",
+      "compute_unit": "impl:Blueprint",
+      "description": "Create Blueprint object"
     }
   },
   "entry_state": "idle",
   "terminal_states": [
     "complete",
     "error"
-  ],
-  "_validation": {
-    "timestamp": "2025-12-31T06:02:15.131965Z",
-    "schema_valid": true,
-    "compiles": true,
-    "errors": [],
-    "metrics": {
-      "states": 3,
-      "transitions": 3,
-      "gates": 0,
-      "actions": 20
-    }
-  }
+  ]
 }

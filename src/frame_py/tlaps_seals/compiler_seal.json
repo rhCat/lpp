@@ -1,28 +1,28 @@
 {
   "seal": "AXIOMATIC",
   "level": "TLAPS_CERTIFIED",
-  "timestamp": "2025-12-31T05:11:30.351449Z",
+  "timestamp": "2025-12-31T07:01:24.149440Z",
   "blueprint": {
-    "id": "logic_decoder",
-    "name": "Python Logic Decoder",
+    "id": "lpp_compiler",
+    "name": "L++ Blueprint Compiler",
     "version": "1.0.0",
-    "hash": "660d81322b8b7902"
+    "hash": "47872fa160e6201f"
   },
   "verification": {
     "trinity": {
-      "transitions": 10,
-      "gates": 6,
-      "actions": 12,
+      "transitions": 15,
+      "gates": 3,
+      "actions": 6,
       "valid": true
     },
     "flange": {
-      "properties": 15,
+      "properties": 6,
       "hermeticity": 0.0,
       "valid": true
     },
     "tlc": {
       "passed": true,
-      "statesExplored": 11
+      "statesExplored": 14
     },
     "tlaps": {
       "passed": true,

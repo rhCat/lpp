@@ -1,28 +1,28 @@
 {
   "seal": "AXIOMATIC",
   "level": "TLAPS_CERTIFIED",
-  "timestamp": "2025-12-31T05:11:31.794575Z",
+  "timestamp": "2025-12-31T07:01:22.465848Z",
   "blueprint": {
-    "id": "llm_schema_assistant",
-    "name": "L++ LLM Schema Assistant",
+    "id": "lpp_safe_eval",
+    "name": "L++ Safe Evaluator",
     "version": "1.0.0",
-    "hash": "00883a909a37e430"
+    "hash": "4214f947acc79827"
   },
   "verification": {
     "trinity": {
-      "transitions": 13,
-      "gates": 6,
-      "actions": 11,
+      "transitions": 8,
+      "gates": 3,
+      "actions": 8,
       "valid": true
     },
     "flange": {
-      "properties": 12,
+      "properties": 5,
       "hermeticity": 0.0,
       "valid": true
     },
     "tlc": {
       "passed": true,
-      "statesExplored": 5
+      "statesExplored": 14
     },
     "tlaps": {
       "passed": true,

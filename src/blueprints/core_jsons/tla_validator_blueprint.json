@@ -1,9 +1,9 @@
 {
   "$schema": "lpp/v0.1",
-  "id": "decoded_tla_validator",
-  "name": "Decoded: tla_validator",
+  "id": "lpp_tla_validator",
+  "name": "L++ TLA+ Validator",
   "version": "1.0.0",
-  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/tla_validator.py",
+  "description": "Generates and validates TLA+ specifications from blueprints",
   "context_schema": {
     "properties": {
       "error": {
@@ -11,220 +11,171 @@
       },
       "result": {
         "type": "object"
+      },
+      "blueprint": {
+        "type": "object"
+      },
+      "tla_spec": {
+        "type": "string"
+      },
+      "output_dir": {
+        "type": "string"
       }
     }
   },
   "states": {
     "idle": {
       "name": "Idle",
-      "description": "Initial state"
+      "description": "Ready to generate TLA+"
+    },
+    "extracting": {
+      "name": "Extracting",
+      "description": "Extracting domains and types"
+    },
+    "generating": {
+      "name": "Generating",
+      "description": "Generating TLA+ specification"
     },
     "validating": {
       "name": "Validating",
-      "description": "From function: validate_with_tlc"
+      "description": "Running TLC model checker"
     },
     "saving": {
       "name": "Saving",
-      "description": "From function: save_tla"
+      "description": "Saving TLA+ files"
     },
     "complete": {
       "name": "Complete",
-      "description": "Terminal state"
+      "description": "TLA+ generation complete"
+    },
+    "error": {
+      "name": "Error",
+      "description": "Generation or validation failed"
     }
   },
   "transitions": [
     {
-      "id": "t0",
+      "id": "t_generate",
       "from": "idle",
-      "to": "validating",
-      "on_event": "IDLE_DONE"
+      "to": "extracting",
+      "on_event": "GENERATE"
     },
     {
-      "id": "t1",
+      "id": "t_extracted",
+      "from": "extracting",
+      "to": "generating",
+      "on_event": "EXTRACT_DONE"
+    },
+    {
+      "id": "t_generated",
+      "from": "generating",
+      "to": "validating",
+      "on_event": "GENERATE_DONE",
+      "gates": ["g_do_validate"]
+    },
+    {
+      "id": "t_skip_validate",
+      "from": "generating",
+      "to": "saving",
+      "on_event": "GENERATE_DONE"
+    },
+    {
+      "id": "t_validated",
       "from": "validating",
       "to": "saving",
-      "on_event": "VALIDATING_DONE"
+      "on_event": "VALIDATION_PASSED"
     },
     {
-      "id": "t2",
+      "id": "t_saved",
       "from": "saving",
       "to": "complete",
-      "on_event": "SAVING_DONE"
+      "on_event": "SAVE_DONE"
     },
     {
-      "id": "t3",
+      "id": "t_extract_err",
+      "from": "extracting",
+      "to": "error",
+      "on_event": "EXTRACT_ERROR"
+    },
+    {
+      "id": "t_gen_err",
+      "from": "generating",
+      "to": "error",
+      "on_event": "GENERATE_ERROR"
+    },
+    {
+      "id": "t_validate_err",
+      "from": "validating",
+      "to": "error",
+      "on_event": "VALIDATION_FAILED"
+    },
+    {
+      "id": "t_save_err",
+      "from": "saving",
+      "to": "error",
+      "on_event": "SAVE_ERROR"
+    },
+    {
+      "id": "t_reset",
       "from": "*",
       "to": "idle",
       "on_event": "RESET"
     }
   ],
   "gates": {
-    "g0": {
+    "g_has_blueprint": {
       "type": "expression",
-      "expression": "__name__ == '__main__'"
+      "expression": "blueprint is not None"
     },
-    "g1": {
+    "g_do_validate": {
       "type": "expression",
-      "expression": "len(...) < 2 or '-h' in sys.argv or '--help' in sys.argv"
+      "expression": "do_validate == True"
     },
-    "g2": {
+    "g_has_output_dir": {
       "type": "expression",
-      "expression": "arg in ... and ... < len(...)"
-    },
-    "g3": {
-      "type": "expression",
-      "expression": "arg in ..."
-    },
-    "g4": {
-      "type": "expression",
-      "expression": "arg == '--tlc' and ... < len(...)"
-    },
-    "g5": {
-      "type": "expression",
-      "expression": "arg == '--int-min' and ... < len(...)"
-    },
-    "g6": {
-      "type": "expression",
-      "expression": "arg == '--int-max' and ... < len(...)"
-    },
-    "g7": {
-      "type": "expression",
-      "expression": "arg == '--max-history' and ... < len(...)"
-    },
-    "g8": {
-      "type": "expression",
-      "expression": "..."
-    },
-    "g9": {
-      "type": "expression",
-      "expression": "..."
-    },
-    "g10": {
-      "type": "expression",
-      "expression": "output_dir"
-    },
-    "g11": {
-      "type": "expression",
-      "expression": "do_validate"
+      "expression": "output_dir is not None"
     }
   },
   "actions": {
-    "a0": {
+    "a_to_tla_safe": {
       "type": "compute",
       "compute_unit": "impl:_to_tla_safe",
-      "description": "Inferred from function:generate_tla"
+      "description": "Convert name to TLA+ safe identifier"
     },
-    "a1": {
-      "type": "compute",
-      "compute_unit": "impl:bp.get",
-      "description": "Inferred from function:generate_tla"
-    },
-    "a2": {
-      "type": "compute",
-      "compute_unit": "impl:list",
-      "description": "Inferred from function:generate_tla"
-    },
-    "a3": {
-      "type": "compute",
-      "compute_unit": "impl:bp.get.keys",
-      "description": "Inferred from function:generate_tla"
-    },
-    "a10": {
-      "type": "compute",
-      "compute_unit": "impl:context_schema.get",
-      "description": "Inferred from function:generate_tla"
-    },
-    "a11": {
+    "a_extract_domains": {
       "type": "compute",
       "compute_unit": "impl:_extract_domains",
-      "description": "Inferred from function:generate_tla"
+      "description": "Extract type domains from schema"
     },
-    "a12": {
-      "type": "compute",
-      "compute_unit": "impl:lines.append",
-      "description": "Inferred from function:generate_tla"
-    },
-    "a32": {
-      "type": "compute",
-      "compute_unit": "impl:domains.items",
-      "description": "Inferred from function:generate_tla"
-    },
-    "a33": {
-      "type": "compute",
-      "compute_unit": "impl:info.get",
-      "description": "Inferred from function:generate_tla"
-    },
-    "a37": {
-      "type": "compute",
-      "compute_unit": "impl:enum_domains.items",
-      "description": "Inferred from function:generate_tla"
-    },
-    "a38": {
+    "a_escape_string": {
       "type": "compute",
       "compute_unit": "impl:_escape_tla_string",
-      "description": "Inferred from function:generate_tla"
+      "description": "Escape string for TLA+"
     },
-    "a40": {
+    "a_generate_spec": {
       "type": "compute",
-      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 176}.join",
-      "description": "Inferred from function:generate_tla"
+      "compute_unit": "impl:generate_tla",
+      "description": "Generate TLA+ specification"
     },
-    "a43": {
+    "a_run_tlc": {
       "type": "compute",
-      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 181}.join",
-      "description": "Inferred from function:generate_tla"
+      "compute_unit": "impl:validate_with_tlc",
+      "description": "Run TLC model checker"
     },
-    "a46": {
+    "a_save_tla": {
       "type": "compute",
-      "compute_unit": "impl:set",
-      "description": "Inferred from function:generate_tla"
+      "compute_unit": "impl:save_tla",
+      "description": "Save TLA+ files to disk"
     },
-    "a47": {
+    "a_append_line": {
       "type": "compute",
-      "compute_unit": "impl:t.get",
-      "description": "Inferred from function:generate_tla"
-    },
-    "a48": {
-      "type": "compute",
-      "compute_unit": "impl:events.discard",
-      "description": "Inferred from function:generate_tla"
-    },
-    "a49": {
-      "type": "compute",
-      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 188}.join",
-      "description": "Inferred from function:generate_tla"
-    },
-    "a50": {
-      "type": "compute",
-      "compute_unit": "impl:sorted",
-      "description": "Inferred from function:generate_tla"
-    },
-    "a53": {
-      "type": "compute",
-      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 194}.join",
-      "description": "Inferred from function:generate_tla"
-    },
-    "a59": {
-      "type": "compute",
-      "compute_unit": "impl:properties.keys",
-      "description": "Inferred from function:generate_tla"
+      "compute_unit": "impl:lines.append",
+      "description": "Append line to spec"
     }
   },
   "entry_state": "idle",
   "terminal_states": [
     "complete",
     "error"
-  ],
-  "_validation": {
-    "timestamp": "2025-12-31T06:02:15.215876Z",
-    "schema_valid": true,
-    "compiles": true,
-    "errors": [],
-    "metrics": {
-      "states": 4,
-      "transitions": 4,
-      "gates": 12,
-      "actions": 20
-    }
-  }
+  ]
 }

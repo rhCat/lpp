@@ -1,9 +1,9 @@
 {
   "$schema": "lpp/v0.1",
-  "id": "decoded_validator",
-  "name": "Decoded: validator",
+  "id": "lpp_validator",
+  "name": "L++ Blueprint Validator",
   "version": "1.0.0",
-  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/validator.py",
+  "description": "Validates blueprint structure and semantic correctness",
   "context_schema": {
     "properties": {
       "error": {
@@ -11,101 +11,160 @@
       },
       "result": {
         "type": "object"
+      },
+      "blueprint": {
+        "type": "object"
+      },
+      "errors": {
+        "type": "array"
       }
     }
   },
   "states": {
     "idle": {
       "name": "Idle",
-      "description": "Initial state"
+      "description": "Ready to validate"
     },
-    "validating": {
-      "name": "Validating",
-      "description": "From function: validate_blueprint"
+    "checking_structure": {
+      "name": "Checking Structure",
+      "description": "Validating required fields"
+    },
+    "checking_states": {
+      "name": "Checking States",
+      "description": "Validating state definitions"
+    },
+    "checking_transitions": {
+      "name": "Checking Transitions",
+      "description": "Validating transition references"
+    },
+    "checking_gates": {
+      "name": "Checking Gates",
+      "description": "Validating gate expressions"
     },
     "complete": {
       "name": "Complete",
-      "description": "Terminal state"
+      "description": "Validation completed"
+    },
+    "error": {
+      "name": "Error",
+      "description": "Validation found errors"
     }
   },
   "transitions": [
     {
-      "id": "t0",
+      "id": "t_start",
       "from": "idle",
-      "to": "validating",
-      "on_event": "IDLE_DONE"
+      "to": "checking_structure",
+      "on_event": "VALIDATE"
     },
     {
-      "id": "t1",
-      "from": "validating",
+      "id": "t_structure_ok",
+      "from": "checking_structure",
+      "to": "checking_states",
+      "on_event": "STRUCTURE_OK"
+    },
+    {
+      "id": "t_states_ok",
+      "from": "checking_states",
+      "to": "checking_transitions",
+      "on_event": "STATES_OK"
+    },
+    {
+      "id": "t_transitions_ok",
+      "from": "checking_transitions",
+      "to": "checking_gates",
+      "on_event": "TRANSITIONS_OK"
+    },
+    {
+      "id": "t_gates_ok",
+      "from": "checking_gates",
       "to": "complete",
-      "on_event": "VALIDATING_DONE"
+      "on_event": "GATES_OK"
     },
     {
-      "id": "t2",
+      "id": "t_err_structure",
+      "from": "checking_structure",
+      "to": "error",
+      "on_event": "STRUCTURE_ERROR"
+    },
+    {
+      "id": "t_err_states",
+      "from": "checking_states",
+      "to": "error",
+      "on_event": "STATES_ERROR"
+    },
+    {
+      "id": "t_err_transitions",
+      "from": "checking_transitions",
+      "to": "error",
+      "on_event": "TRANSITIONS_ERROR"
+    },
+    {
+      "id": "t_err_gates",
+      "from": "checking_gates",
+      "to": "error",
+      "on_event": "GATES_ERROR"
+    },
+    {
+      "id": "t_reset",
       "from": "*",
       "to": "idle",
       "on_event": "RESET"
     }
   ],
-  "gates": {},
+  "gates": {
+    "g_has_id": {
+      "type": "expression",
+      "expression": "'id' in blueprint"
+    },
+    "g_has_states": {
+      "type": "expression",
+      "expression": "'states' in blueprint"
+    },
+    "g_has_entry": {
+      "type": "expression",
+      "expression": "'entry_state' in blueprint"
+    },
+    "g_no_errors": {
+      "type": "expression",
+      "expression": "len(errors) == 0"
+    }
+  },
   "actions": {
-    "a0": {
+    "a_check_required": {
+      "type": "compute",
+      "compute_unit": "impl:validate_required_fields",
+      "description": "Check required blueprint fields"
+    },
+    "a_check_states": {
+      "type": "compute",
+      "compute_unit": "impl:validate_states",
+      "description": "Validate state definitions"
+    },
+    "a_check_transitions": {
+      "type": "compute",
+      "compute_unit": "impl:validate_transitions",
+      "description": "Validate transition references"
+    },
+    "a_check_gates": {
+      "type": "compute",
+      "compute_unit": "impl:validate_gates",
+      "description": "Validate gate expressions"
+    },
+    "a_append_error": {
       "type": "compute",
       "compute_unit": "impl:errors.append",
-      "description": "Inferred from function:validate_blueprint"
+      "description": "Append validation error"
     },
-    "a2": {
-      "type": "compute",
-      "compute_unit": "impl:enumerate",
-      "description": "Inferred from function:validate_blueprint"
-    },
-    "a3": {
-      "type": "compute",
-      "compute_unit": "impl:bp.get",
-      "description": "Inferred from function:validate_blueprint"
-    },
-    "a4": {
-      "type": "compute",
-      "compute_unit": "impl:trans.get",
-      "description": "Inferred from function:validate_blueprint"
-    },
-    "a10": {
-      "type": "compute",
-      "compute_unit": "impl:bp.get.items",
-      "description": "Inferred from function:validate_blueprint"
-    },
-    "a12": {
-      "type": "compute",
-      "compute_unit": "impl:gate.get",
-      "description": "Inferred from function:validate_blueprint"
-    },
-    "a21": {
+    "a_raise_error": {
       "type": "compute",
       "compute_unit": "impl:BlueprintValidationError",
-      "description": "Inferred from function:validate_blueprint"
-    },
-    "a22": {
-      "type": "compute",
-      "compute_unit": "impl:{'_type': 'Constant', 'value': '\\n', 'kind': None, 'lineno': 81}.join",
-      "description": "Inferred from function:validate_blueprint"
+      "description": "Raise validation error"
     }
   },
   "entry_state": "idle",
   "terminal_states": [
     "complete",
     "error"
-  ],
-  "_validation": {
-    "timestamp": "2025-12-31T06:02:15.233442Z",
-    "schema_valid": true,
-    "compiles": true,
-    "errors": [],
-    "metrics": {
-      "states": 3,
-      "transitions": 3,
-      "gates": 0,
-      "actions": 8
-    }
-  }
+  ]
 }

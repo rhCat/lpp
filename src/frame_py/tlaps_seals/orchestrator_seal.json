@@ -1,28 +1,28 @@
 {
   "seal": "AXIOMATIC",
   "level": "TLAPS_CERTIFIED",
-  "timestamp": "2025-12-31T05:11:33.125472Z",
+  "timestamp": "2025-12-31T07:01:18.839912Z",
   "blueprint": {
-    "id": "research_scraper",
-    "name": "Research Scraper",
-    "version": "1.0.1",
-    "hash": "fb8345360ce2eae6"
+    "id": "lpp_orchestrator",
+    "name": "L++ Orchestrator",
+    "version": "1.0.0",
+    "hash": "5de86e0f3e582847"
   },
   "verification": {
     "trinity": {
       "transitions": 9,
-      "gates": 5,
-      "actions": 14,
+      "gates": 2,
+      "actions": 6,
       "valid": true
     },
     "flange": {
-      "properties": 7,
-      "hermeticity": 0.14285714285714285,
+      "properties": 5,
+      "hermeticity": 0.0,
       "valid": true
     },
     "tlc": {
       "passed": true,
-      "statesExplored": 9
+      "statesExplored": 16
     },
     "tlaps": {
       "passed": true,

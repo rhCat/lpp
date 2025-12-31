@@ -13,17 +13,45 @@ Replaces Python's eval() with a minimal subset that only understands:
 
 This ensures the "Judge" cannot be bribed by external chaos.
 No access to: imports, builtins, time, random, files, network.
+
+State Machine (from safe_eval_blueprint.json):
+    idle → parsing → validating → evaluating → complete
+             ↓           ↓            ↓
+           error       error        error
+
+Transitions:
+    EVALUATE: idle → parsing
+    PARSE_DONE: parsing → validating
+    PARSE_ERROR: parsing → error
+    VALIDATION_PASSED: validating → evaluating
+    UNSAFE_EXPRESSION: validating → error
+    EVAL_DONE: evaluating → complete
+    EVAL_ERROR: evaluating → error
+    RESET: * → idle
 """
 
 import re
 import ast
 import operator
-from typing import Any, Dict, Union
+from typing import Any, Dict, Union, Optional, Tuple
+from enum import Enum
+
+
+class SafeEvalState(Enum):
+    """Safe evaluator state machine states."""
+    IDLE = "idle"
+    PARSING = "parsing"
+    VALIDATING = "validating"
+    EVALUATING = "evaluating"
+    COMPLETE = "complete"
+    ERROR = "error"
 
 
 class SafeEvalError(Exception):
     """Raised when safe evaluation fails."""
-    pass
+    def __init__(self, message: str, state: SafeEvalState = None):
+        self.state = state or SafeEvalState.ERROR
+        super().__init__(message)
 
 
 # Allowed AST node types (whitelist approach)
@@ -396,7 +424,7 @@ class SafeEvaluator(ast.NodeVisitor):
             raise SafeEvalError(f"Error executing {func_name}(): {e}")
 
 
-def safe_eval(expression: str, context: Dict[str, Any]) -> Any:
+def safe_eval(expression: str, context: Dict[str, Any]) -> Tuple[Any, Optional[str]]:
     """
     Safely evaluate an L++ expression.
 
@@ -407,28 +435,27 @@ def safe_eval(expression: str, context: Dict[str, Any]) -> Any:
         context: Context dictionary with variable values
 
     Returns:
-        Result of expression evaluation
+        Tuple of (result, error):
+        - result: Result of expression evaluation, None on error
+        - error: None on success, error message on failure
 
-    Raises:
-        SafeEvalError: If expression is invalid
-        or contains disallowed constructs
+    State machine: idle → parsing → validating → evaluating → complete | error
 
     Examples:
         >>> safe_eval("a > 5", {"a": 10})
-        True
+        (True, None)
         >>> safe_eval("a is None", {"a": None})
-        True
-        >>> safe_eval("op in ('+', '-', '*', '/')", {"op": "+"})
-        True
-        >>> safe_eval("event.payload.value", \
-            {"event": {"payload": {"value": 42}}})
-        42
+        (True, None)
     """
     evaluator = SafeEvaluator(context)
-    return evaluator.evaluate(expression)
+    try:
+        result = evaluator.evaluate(expression)
+        return result, None  # EVAL_DONE → complete
+    except SafeEvalError as e:
+        return None, str(e)  # → error
 
 
-def safe_eval_bool(expression: str, context: Dict[str, Any]) -> bool:
+def safe_eval_bool(expression: str, context: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
     """
     Safely evaluate an expression and return boolean result.
 
@@ -439,18 +466,25 @@ def safe_eval_bool(expression: str, context: Dict[str, Any]) -> bool:
         context: Context dictionary
 
     Returns:
-        True if expression evaluates truthy, False otherwise
+        Tuple of (result, error):
+        - result: True if expression evaluates truthy, False otherwise
+        - error: None on success, error message on failure
+
+    State machine: idle → parsing → validating → evaluating → complete | error
     """
     try:
-        result = safe_eval(expression, context)
-        return bool(result)
+        result, error = safe_eval(expression, context)
+        if error:
+            print(f"[L++ SAFE EVAL WARNING] {error} in '{expression}'")
+            return False, error
+        return bool(result), None
     except SafeEvalError as e:
         # In deterministic system, failed evaluation = False
         print(f"[L++ SAFE EVAL WARNING] {e} in '{expression}'")
-        return False
+        return False, str(e)
     except Exception as e:
         print(f"[L++ SAFE EVAL ERROR] Unexpected: {e} in '{expression}'")
-        return False
+        return False, f"EVAL_ERROR: {str(e)}"
 
 
 # =========================================================================

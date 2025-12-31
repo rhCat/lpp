@@ -3,49 +3,137 @@ L++ Compiler
 
 Compiles JSON blueprints into executable Python operator scripts.
 Transforms declarative blueprints into code using the four atomic operations.
+
+State Machine (from compiler_blueprint.json):
+    idle → loading → validating → generating → writing → generating_tla → complete
+             ↓           ↓            ↓           ↓            ↓
+           error       error        error       error        error
+
+Transitions:
+    COMPILE: idle → loading
+    LOAD_DONE: loading → validating
+    LOAD_ERROR: loading → error
+    VALIDATION_PASSED: validating → generating
+    VALIDATION_FAILED: validating → error
+    GENERATE_DONE: generating → writing|generating_tla|complete
+    GENERATE_ERROR: generating → error
+    WRITE_DONE: writing → generating_tla|complete
+    WRITE_ERROR: writing → error
+    TLA_DONE: generating_tla → complete
+    TLA_ERROR: generating_tla → error
+    RESET: * → idle
 """
 
 import json
-# from typing import Optional
+from typing import Optional, Tuple
+from enum import Enum
 
 from frame_py.validator import validate_blueprint
+
+
+class CompilerState(Enum):
+    """Compiler state machine states."""
+    IDLE = "idle"
+    LOADING = "loading"
+    VALIDATING = "validating"
+    GENERATING = "generating"
+    WRITING = "writing"
+    GENERATING_TLA = "generating_tla"
+    COMPLETE = "complete"
+    ERROR = "error"
 
 
 def compile_blueprint(
     blueprint_path: str,
     output_path: str = None,
     tla_output_dir: str = None
-) -> str:
+) -> Tuple[Optional[str], Optional[str]]:
     """
     Compile a JSON blueprint into a Python operator script.
 
     Args:
         blueprint_path: Path to the JSON blueprint file
         output_path: Optional path to write the compiled script
-        tla_output_dir: Optional directory to save
-        TLA+ spec for formal verification
+        tla_output_dir: Optional directory to save TLA+ spec
 
     Returns:
-        The generated Python code as a string
+        Tuple of (code, error):
+        - code: Generated Python code on success, None on error
+        - error: None on success, error message on failure
+
+    State machine: idle → loading → validating → generating → writing → complete | error
     """
-    with open(blueprint_path, "r") as f:
-        bp = json.load(f)
+    state = CompilerState.IDLE
 
-    code = _generate_code(bp)
+    # =========================================================================
+    # COMPILE: idle → loading
+    # =========================================================================
+    state = CompilerState.LOADING
 
+    try:
+        with open(blueprint_path, "r") as f:
+            bp = json.load(f)
+    except FileNotFoundError:
+        return None, f"LOAD_ERROR: File not found: {blueprint_path}"
+    except json.JSONDecodeError as e:
+        return None, f"LOAD_ERROR: Invalid JSON: {e}"
+    except Exception as e:
+        return None, f"LOAD_ERROR: {str(e)}"
+
+    # =========================================================================
+    # LOAD_DONE: loading → validating
+    # =========================================================================
+    state = CompilerState.VALIDATING
+
+    try:
+        validate_blueprint(bp)
+    except Exception as e:
+        return None, f"VALIDATION_FAILED: {str(e)}"
+
+    # =========================================================================
+    # VALIDATION_PASSED: validating → generating
+    # =========================================================================
+    state = CompilerState.GENERATING
+
+    try:
+        code = _generate_code(bp)
+    except Exception as e:
+        return None, f"GENERATE_ERROR: {str(e)}"
+
+    # =========================================================================
+    # GENERATE_DONE: generating → writing (if output_path)
+    # =========================================================================
     if output_path:
-        with open(output_path, "w") as f:
-            f.write(code)
+        state = CompilerState.WRITING
+        try:
+            with open(output_path, "w") as f:
+                f.write(code)
+        except Exception as e:
+            return None, f"WRITE_ERROR: {str(e)}"
 
-    # Generate TLA+ spec if requested
+    # =========================================================================
+    # WRITE_DONE: writing → generating_tla (if tla_output_dir)
+    # =========================================================================
     if tla_output_dir:
-        from frame_py.tla_validator import save_tla
-        save_tla(bp, tla_output_dir)
+        state = CompilerState.GENERATING_TLA
+        try:
+            from frame_py.tla_validator import save_tla
+            save_tla(bp, tla_output_dir)
+        except Exception as e:
+            return None, f"TLA_ERROR: {str(e)}"
 
-    return code
+    # =========================================================================
+    # TLA_DONE / WRITE_DONE / GENERATE_DONE: → complete
+    # =========================================================================
+    state = CompilerState.COMPLETE
+
+    return code, None
 
 
-def compile_blueprint_dict(blueprint: dict, tla_output_dir: str = None) -> str:
+def compile_blueprint_dict(
+    blueprint: dict,
+    tla_output_dir: str = None
+) -> Tuple[Optional[str], Optional[str]]:
     """
     Compile a blueprint dictionary into Python code.
 
@@ -54,15 +142,34 @@ def compile_blueprint_dict(blueprint: dict, tla_output_dir: str = None) -> str:
         tla_output_dir: Optional directory to save TLA+ spec
 
     Returns:
-        The generated Python code as a string
+        Tuple of (code, error):
+        - code: Generated Python code on success, None on error
+        - error: None on success, error message on failure
     """
-    code = _generate_code(blueprint)
+    state = CompilerState.VALIDATING
+
+    try:
+        validate_blueprint(blueprint)
+    except Exception as e:
+        return None, f"VALIDATION_FAILED: {str(e)}"
+
+    state = CompilerState.GENERATING
+
+    try:
+        code = _generate_code(blueprint)
+    except Exception as e:
+        return None, f"GENERATE_ERROR: {str(e)}"
 
     if tla_output_dir:
-        from frame_py.tla_validator import save_tla
-        save_tla(blueprint, tla_output_dir)
+        state = CompilerState.GENERATING_TLA
+        try:
+            from frame_py.tla_validator import save_tla
+            save_tla(blueprint, tla_output_dir)
+        except Exception as e:
+            return None, f"TLA_ERROR: {str(e)}"
 
-    return code
+    state = CompilerState.COMPLETE
+    return code, None
 
 
 def _generate_code(bp: dict) -> str:
@@ -513,7 +620,11 @@ if __name__ == "__main__":
     bp_path = sys.argv[1]
     out_path = sys.argv[2] if len(sys.argv) > 2 else None
 
-    code = compile_blueprint(bp_path, out_path)
+    code, error = compile_blueprint(bp_path, out_path)
+
+    if error:
+        print(f"[L++ COMPILE ERROR] {error}")
+        sys.exit(1)
 
     if out_path:
         print(f"Compiled: {bp_path} -> {out_path}")

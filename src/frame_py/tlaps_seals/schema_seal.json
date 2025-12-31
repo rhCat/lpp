@@ -1,28 +1,28 @@
 {
   "seal": "AXIOMATIC",
   "level": "TLAPS_CERTIFIED",
-  "timestamp": "2025-12-31T05:11:29.106081Z",
+  "timestamp": "2025-12-31T07:01:17.650915Z",
   "blueprint": {
-    "id": "skill_registry",
-    "name": "Skill Registry",
+    "id": "lpp_schema",
+    "name": "L++ Blueprint Schema",
     "version": "1.0.0",
-    "hash": "8ae0c115830956ac"
+    "hash": "51048bd8718d6019"
   },
   "verification": {
     "trinity": {
-      "transitions": 9,
-      "gates": 6,
-      "actions": 7,
+      "transitions": 7,
+      "gates": 1,
+      "actions": 5,
       "valid": true
     },
     "flange": {
-      "properties": 5,
+      "properties": 4,
       "hermeticity": 0.0,
       "valid": true
     },
     "tlc": {
       "passed": true,
-      "statesExplored": 9
+      "statesExplored": 11
     },
     "tlaps": {
       "passed": true,

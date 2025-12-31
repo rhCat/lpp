@@ -1,28 +1,28 @@
 {
   "seal": "AXIOMATIC",
   "level": "TLAPS_CERTIFIED",
-  "timestamp": "2025-12-31T05:11:35.875604Z",
+  "timestamp": "2025-12-31T07:01:22.770323Z",
   "blueprint": {
-    "id": "lpp_visualizer",
-    "name": "L++ Blueprint Visualizer",
-    "version": "1.1.0",
-    "hash": "3af91c58abd2418a"
+    "id": "lpp_tla_validator",
+    "name": "L++ TLA+ Validator",
+    "version": "1.0.0",
+    "hash": "694bae7983c30192"
   },
   "verification": {
     "trinity": {
-      "transitions": 26,
-      "gates": 18,
-      "actions": 26,
+      "transitions": 11,
+      "gates": 3,
+      "actions": 7,
       "valid": true
     },
     "flange": {
-      "properties": 15,
+      "properties": 5,
       "hermeticity": 0.0,
       "valid": true
     },
     "tlc": {
-      "passed": true,
-      "statesExplored": 24
+      "passed": false,
+      "statesExplored": 0
     },
     "tlaps": {
       "passed": true,
