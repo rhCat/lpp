@@ -1,0 +1,18 @@
+# Include documentation
+include README.md
+include LICENSE
+include whitepaper.md
+
+# Include all JSON blueprints
+recursive-include src/blueprints *.json *.txt
+recursive-include src/frame_py/tlaps_seals *.json *.md
+
+# Include schema documentation
+recursive-include docs *.md
+
+# Exclude build artifacts
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *.so
+global-exclude .DS_Store
+global-exclude *.egg-info
