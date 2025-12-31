@@ -1,0 +1,99 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_compiler",
+  "name": "Decoded: compiler",
+  "version": "1.0.0",
+  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/compiler.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "complete",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {
+    "g0": {
+      "type": "expression",
+      "expression": "__name__ == '__main__'"
+    },
+    "g1": {
+      "type": "expression",
+      "expression": "len(...) < 2"
+    },
+    "g2": {
+      "type": "expression",
+      "expression": "out_path"
+    }
+  },
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:open",
+      "description": "Inferred from function:compile_blueprint"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:json.load",
+      "description": "Inferred from function:compile_blueprint"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:_generate_code",
+      "description": "Inferred from function:compile_blueprint"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:f.write",
+      "description": "Inferred from function:compile_blueprint"
+    },
+    "a5": {
+      "type": "compute",
+      "compute_unit": "impl:save_tla",
+      "description": "Inferred from function:compile_blueprint"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ],
+  "_validation": {
+    "timestamp": "2025-12-31T06:02:15.117116Z",
+    "schema_valid": true,
+    "compiles": true,
+    "errors": [],
+    "metrics": {
+      "states": 2,
+      "transitions": 2,
+      "gates": 3,
+      "actions": 5
+    }
+  }
+}

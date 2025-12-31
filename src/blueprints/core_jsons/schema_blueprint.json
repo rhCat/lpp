@@ -1,0 +1,81 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_schema",
+  "name": "Decoded: schema",
+  "version": "1.0.0",
+  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/schema.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "loading": {
+      "name": "Loading",
+      "description": "From function: get_state"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "loading",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "loading",
+      "to": "complete",
+      "on_event": "LOADING_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:KeyError",
+      "description": "Inferred from function:get_state"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:result.append",
+      "description": "Inferred from function:get_transitions_from"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ],
+  "_validation": {
+    "timestamp": "2025-12-31T06:02:15.196620Z",
+    "schema_valid": true,
+    "compiles": true,
+    "errors": [],
+    "metrics": {
+      "states": 3,
+      "transitions": 3,
+      "gates": 0,
+      "actions": 2
+    }
+  }
+}

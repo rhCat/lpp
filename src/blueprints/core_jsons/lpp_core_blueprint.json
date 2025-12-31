@@ -1,0 +1,116 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_lpp_core",
+  "name": "Decoded: lpp_core",
+  "version": "1.0.0",
+  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/lpp_core.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "complete",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:safe_eval_bool",
+      "description": "Inferred from function:atom_EVALUATE"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:TransitionTrace",
+      "description": "Inferred from function:atom_TRANSITION"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:datetime.datetime.now",
+      "description": "Inferred from function:atom_TRANSITION"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:context_data.copy",
+      "description": "Inferred from function:atom_MUTATE"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:path.split",
+      "description": "Inferred from function:atom_MUTATE"
+    },
+    "a5": {
+      "type": "compute",
+      "compute_unit": "impl:isinstance",
+      "description": "Inferred from function:atom_MUTATE"
+    },
+    "a6": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'current_level', 'ctx': {'_type': 'Load'}, 'lineno': 140}, 'slice': {'_type': 'Name', 'id': 'key', 'ctx': {'_type': 'Load'}, 'lineno': 140}, 'ctx': {'_type': 'Load'}, 'lineno': 140}.copy",
+      "description": "Inferred from function:atom_MUTATE"
+    },
+    "a7": {
+      "type": "compute",
+      "compute_unit": "impl:compute_registry.get",
+      "description": "Inferred from function:atom_DISPATCH"
+    },
+    "a8": {
+      "type": "compute",
+      "compute_unit": "impl:print",
+      "description": "Inferred from function:atom_DISPATCH"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:compute_func",
+      "description": "Inferred from function:atom_DISPATCH"
+    },
+    "a13": {
+      "type": "compute",
+      "compute_unit": "impl:str",
+      "description": "Inferred from function:atom_DISPATCH"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ],
+  "_validation": {
+    "timestamp": "2025-12-31T06:02:15.148181Z",
+    "schema_valid": true,
+    "compiles": true,
+    "errors": [],
+    "metrics": {
+      "states": 2,
+      "transitions": 2,
+      "gates": 0,
+      "actions": 11
+    }
+  }
+}

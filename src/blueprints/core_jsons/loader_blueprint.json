@@ -1,0 +1,171 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_loader",
+  "name": "Decoded: loader",
+  "version": "1.0.0",
+  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/loader.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "loading": {
+      "name": "Loading",
+      "description": "From function: load"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "loading",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "loading",
+      "to": "complete",
+      "on_event": "LOADING_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:self._validate_required_fields",
+      "description": "Inferred from function:load"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:self._validate_references",
+      "description": "Inferred from function:load"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:Blueprint",
+      "description": "Inferred from function:load"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:self.raw.get",
+      "description": "Inferred from function:load"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:self._load_states",
+      "description": "Inferred from function:load"
+    },
+    "a5": {
+      "type": "compute",
+      "compute_unit": "impl:self._load_transitions",
+      "description": "Inferred from function:load"
+    },
+    "a6": {
+      "type": "compute",
+      "compute_unit": "impl:frozenset",
+      "description": "Inferred from function:load"
+    },
+    "a7": {
+      "type": "compute",
+      "compute_unit": "impl:self._load_gates",
+      "description": "Inferred from function:load"
+    },
+    "a8": {
+      "type": "compute",
+      "compute_unit": "impl:self._load_actions",
+      "description": "Inferred from function:load"
+    },
+    "a9": {
+      "type": "compute",
+      "compute_unit": "impl:self._load_context_schema",
+      "description": "Inferred from function:load"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:isinstance",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a12": {
+      "type": "compute",
+      "compute_unit": "impl:Path",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a13": {
+      "type": "compute",
+      "compute_unit": "impl:open",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a14": {
+      "type": "compute",
+      "compute_unit": "impl:json.load",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a15": {
+      "type": "compute",
+      "compute_unit": "impl:TypeError",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a16": {
+      "type": "compute",
+      "compute_unit": "impl:type",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a17": {
+      "type": "compute",
+      "compute_unit": "impl:BlueprintLoader",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a18": {
+      "type": "compute",
+      "compute_unit": "impl:loader.load",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a19": {
+      "type": "compute",
+      "compute_unit": "impl:json.loads",
+      "description": "Inferred from function:load_blueprint_from_json"
+    },
+    "a20": {
+      "type": "compute",
+      "compute_unit": "impl:load_blueprint",
+      "description": "Inferred from function:load_blueprint_from_json"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ],
+  "_validation": {
+    "timestamp": "2025-12-31T06:02:15.131965Z",
+    "schema_valid": true,
+    "compiles": true,
+    "errors": [],
+    "metrics": {
+      "states": 3,
+      "transitions": 3,
+      "gates": 0,
+      "actions": 20
+    }
+  }
+}

@@ -1,0 +1,166 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_visualizer",
+  "name": "Decoded: visualizer",
+  "version": "1.0.0",
+  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/visualizer.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "complete",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {
+    "g0": {
+      "type": "expression",
+      "expression": "__name__ == '__main__'"
+    }
+  },
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:self.states.get.get",
+      "description": "Inferred from function:as_mermaid_logic"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:self.states.get",
+      "description": "Inferred from function:as_mermaid_logic"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:lines.append",
+      "description": "Inferred from function:as_mermaid_logic"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:enumerate",
+      "description": "Inferred from function:as_mermaid_logic"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:t.get",
+      "description": "Inferred from function:as_mermaid_logic"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 107}.join",
+      "description": "Inferred from function:as_mermaid_logic"
+    },
+    "a13": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 118}.join",
+      "description": "Inferred from function:as_mermaid_logic"
+    },
+    "a19": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': '\\n', 'kind': None, 'lineno': 133}.join",
+      "description": "Inferred from function:as_mermaid_logic"
+    },
+    "a20": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': ' \u2502 ', 'kind': None, 'lineno': 145}.join",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a21": {
+      "type": "compute",
+      "compute_unit": "impl:str.ljust",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a22": {
+      "type": "compute",
+      "compute_unit": "impl:str",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a23": {
+      "type": "compute",
+      "compute_unit": "impl:zip",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a24": {
+      "type": "compute",
+      "compute_unit": "impl:sum",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a26": {
+      "type": "compute",
+      "compute_unit": "impl:row",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a27": {
+      "type": "compute",
+      "compute_unit": "impl:sep.replace.replace.replace",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a28": {
+      "type": "compute",
+      "compute_unit": "impl:sep.replace.replace",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a29": {
+      "type": "compute",
+      "compute_unit": "impl:sep.replace",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a30": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 159}.join",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a32": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 160}.join",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a34": {
+      "type": "compute",
+      "compute_unit": "impl:output.append",
+      "description": "Inferred from function:as_ascii"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ],
+  "_validation": {
+    "timestamp": "2025-12-31T06:02:15.251464Z",
+    "schema_valid": true,
+    "compiles": true,
+    "errors": [],
+    "metrics": {
+      "states": 2,
+      "transitions": 2,
+      "gates": 1,
+      "actions": 20
+    }
+  }
+}

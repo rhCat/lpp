@@ -1,0 +1,146 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_orchestrator",
+  "name": "Decoded: orchestrator",
+  "version": "1.0.0",
+  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/orchestrator.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "processing": {
+      "name": "Processing",
+      "description": "From function: run_frame"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "processing",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "processing",
+      "to": "complete",
+      "on_event": "PROCESSING_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:context.get",
+      "description": "Inferred from function:run_frame"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:_find_transition",
+      "description": "Inferred from function:run_frame"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:dict",
+      "description": "Inferred from function:run_frame"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:blueprint.get_gate",
+      "description": "Inferred from function:run_frame"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:atom_EVALUATE",
+      "description": "Inferred from function:run_frame"
+    },
+    "a6": {
+      "type": "compute",
+      "compute_unit": "impl:blueprint.get_action",
+      "description": "Inferred from function:run_frame"
+    },
+    "a7": {
+      "type": "compute",
+      "compute_unit": "impl:_resolve_path",
+      "description": "Inferred from function:run_frame"
+    },
+    "a8": {
+      "type": "compute",
+      "compute_unit": "impl:atom_MUTATE",
+      "description": "Inferred from function:run_frame"
+    },
+    "a9": {
+      "type": "compute",
+      "compute_unit": "impl:action.compute_unit.split",
+      "description": "Inferred from function:run_frame"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:len",
+      "description": "Inferred from function:run_frame"
+    },
+    "a12": {
+      "type": "compute",
+      "compute_unit": "impl:action.input_map.items",
+      "description": "Inferred from function:run_frame"
+    },
+    "a13": {
+      "type": "compute",
+      "compute_unit": "impl:atom_DISPATCH",
+      "description": "Inferred from function:run_frame"
+    },
+    "a14": {
+      "type": "compute",
+      "compute_unit": "impl:action.output_map.items",
+      "description": "Inferred from function:run_frame"
+    },
+    "a16": {
+      "type": "compute",
+      "compute_unit": "impl:atom_TRANSITION",
+      "description": "Inferred from function:run_frame"
+    },
+    "a17": {
+      "type": "compute",
+      "compute_unit": "impl:traces.append",
+      "description": "Inferred from function:run_frame"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ],
+  "_validation": {
+    "timestamp": "2025-12-31T06:02:15.165338Z",
+    "schema_valid": true,
+    "compiles": true,
+    "errors": [],
+    "metrics": {
+      "states": 3,
+      "transitions": 3,
+      "gates": 0,
+      "actions": 15
+    }
+  }
+}

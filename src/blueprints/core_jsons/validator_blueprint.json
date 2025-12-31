@@ -1,0 +1,111 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_validator",
+  "name": "Decoded: validator",
+  "version": "1.0.0",
+  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/validator.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "validating": {
+      "name": "Validating",
+      "description": "From function: validate_blueprint"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "validating",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "validating",
+      "to": "complete",
+      "on_event": "VALIDATING_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:errors.append",
+      "description": "Inferred from function:validate_blueprint"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:enumerate",
+      "description": "Inferred from function:validate_blueprint"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:bp.get",
+      "description": "Inferred from function:validate_blueprint"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:trans.get",
+      "description": "Inferred from function:validate_blueprint"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:bp.get.items",
+      "description": "Inferred from function:validate_blueprint"
+    },
+    "a12": {
+      "type": "compute",
+      "compute_unit": "impl:gate.get",
+      "description": "Inferred from function:validate_blueprint"
+    },
+    "a21": {
+      "type": "compute",
+      "compute_unit": "impl:BlueprintValidationError",
+      "description": "Inferred from function:validate_blueprint"
+    },
+    "a22": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': '\\n', 'kind': None, 'lineno': 81}.join",
+      "description": "Inferred from function:validate_blueprint"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ],
+  "_validation": {
+    "timestamp": "2025-12-31T06:02:15.233442Z",
+    "schema_valid": true,
+    "compiles": true,
+    "errors": [],
+    "metrics": {
+      "states": 3,
+      "transitions": 3,
+      "gates": 0,
+      "actions": 8
+    }
+  }
+}
