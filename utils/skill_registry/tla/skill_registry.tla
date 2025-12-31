@@ -1,38 +1,53 @@
 ---------------------------- MODULE skill_registry ----------------------------
 \* L++ Blueprint: Skill Registry
 \* Version: 1.0.0
-\* TLAPS Seal Specification
+\* Auto-generated TLA+ specification (universal adaptor)
 
 EXTENDS Integers, Sequences, TLC
 
-\* Bounds for model checking
+\* =========================================================
+\* BOUNDS - Constrain state space for model checking
+\* =========================================================
+INT_MIN == -5
+INT_MAX == 5
 MAX_HISTORY == 3
+BoundedInt == INT_MIN..INT_MAX
+
+\* NULL constant for uninitialized values
 CONSTANT NULL
 
+\* States
 States == {"idle", "scanned", "viewing", "error"}
+
 Events == {"BACK", "EXPORT", "RESET", "RETRY", "SCAN", "SELECT"}
+
 TerminalStates == {}
 
 VARIABLES
-    state,
-    basePath,
-    skills,
-    selectedSkill,
-    registry,
-    error
+    state,           \* Current state
+    basePath,           \* Base path to scan for skills
+    skills,           \* List of discovered skill metadata
+    selectedSkill,           \* Currently selected skill details
+    registry,           \* Full registry export for agent context
+    error,           \* Error message
+    event_history    \* Trace of events
 
-vars == <<state, basePath, skills, selectedSkill, registry, error>>
+vars == <<state, basePath, skills, selectedSkill, registry, error, event_history>>
 
-\* Type Invariant - Structural Correctness
+\* Type invariant - structural correctness
 TypeInvariant ==
     /\ state \in States
-    /\ TRUE  \* basePath
-    /\ TRUE  \* skills
-    /\ TRUE  \* selectedSkill
-    /\ TRUE  \* registry
-    /\ TRUE  \* error
+    /\ TRUE  \* basePath: any string or NULL
+    /\ TRUE  \* skills: any string or NULL
+    /\ TRUE  \* selectedSkill: any string or NULL
+    /\ TRUE  \* registry: any string or NULL
+    /\ TRUE  \* error: any string or NULL
 
-\* Initial State
+\* State constraint - limits TLC exploration depth
+StateConstraint ==
+    /\ Len(event_history) <= MAX_HISTORY
+
+\* Initial state
 Init ==
     /\ state = "idle"
     /\ basePath = NULL
@@ -40,63 +55,109 @@ Init ==
     /\ selectedSkill = NULL
     /\ registry = NULL
     /\ error = NULL
+    /\ event_history = <<>>
 
 \* Transitions
 \* t_scan: idle --(SCAN)--> scanned
 t_scan ==
     /\ state = "idle"
     /\ state' = "scanned"
-    /\ UNCHANGED <<basePath, skills, selectedSkill, registry, error>>
+    /\ basePath' = basePath
+    /\ skills' = skills
+    /\ selectedSkill' = selectedSkill
+    /\ registry' = registry
+    /\ error' = error
+    /\ event_history' = Append(event_history, "SCAN")
 
 \* t_rescan: scanned --(SCAN)--> scanned
 t_rescan ==
     /\ state = "scanned"
     /\ state' = "scanned"
-    /\ UNCHANGED <<basePath, skills, selectedSkill, registry, error>>
+    /\ basePath' = basePath
+    /\ skills' = skills
+    /\ selectedSkill' = selectedSkill
+    /\ registry' = registry
+    /\ error' = error
+    /\ event_history' = Append(event_history, "SCAN")
 
 \* t_select: scanned --(SELECT)--> viewing
 t_select ==
     /\ state = "scanned"
     /\ state' = "viewing"
-    /\ UNCHANGED <<basePath, skills, selectedSkill, registry, error>>
+    /\ basePath' = basePath
+    /\ skills' = skills
+    /\ selectedSkill' = selectedSkill
+    /\ registry' = registry
+    /\ error' = error
+    /\ event_history' = Append(event_history, "SELECT")
 
 \* t_back: viewing --(BACK)--> scanned
 t_back ==
     /\ state = "viewing"
     /\ state' = "scanned"
-    /\ UNCHANGED <<basePath, skills, selectedSkill, registry, error>>
+    /\ basePath' = basePath
+    /\ skills' = skills
+    /\ selectedSkill' = selectedSkill
+    /\ registry' = registry
+    /\ error' = error
+    /\ event_history' = Append(event_history, "BACK")
 
 \* t_select_another: viewing --(SELECT)--> viewing
 t_select_another ==
     /\ state = "viewing"
     /\ state' = "viewing"
-    /\ UNCHANGED <<basePath, skills, selectedSkill, registry, error>>
+    /\ basePath' = basePath
+    /\ skills' = skills
+    /\ selectedSkill' = selectedSkill
+    /\ registry' = registry
+    /\ error' = error
+    /\ event_history' = Append(event_history, "SELECT")
 
 \* t_export: scanned --(EXPORT)--> scanned
 t_export ==
     /\ state = "scanned"
     /\ state' = "scanned"
-    /\ UNCHANGED <<basePath, skills, selectedSkill, registry, error>>
+    /\ basePath' = basePath
+    /\ skills' = skills
+    /\ selectedSkill' = selectedSkill
+    /\ registry' = registry
+    /\ error' = error
+    /\ event_history' = Append(event_history, "EXPORT")
 
 \* t_export_viewing: viewing --(EXPORT)--> viewing
 t_export_viewing ==
     /\ state = "viewing"
     /\ state' = "viewing"
-    /\ UNCHANGED <<basePath, skills, selectedSkill, registry, error>>
+    /\ basePath' = basePath
+    /\ skills' = skills
+    /\ selectedSkill' = selectedSkill
+    /\ registry' = registry
+    /\ error' = error
+    /\ event_history' = Append(event_history, "EXPORT")
 
 \* t_reset: scanned --(RESET)--> idle
 t_reset ==
     /\ state = "scanned"
     /\ state' = "idle"
-    /\ UNCHANGED <<basePath, skills, selectedSkill, registry, error>>
+    /\ basePath' = basePath
+    /\ skills' = skills
+    /\ selectedSkill' = selectedSkill
+    /\ registry' = registry
+    /\ error' = error
+    /\ event_history' = Append(event_history, "RESET")
 
 \* t_retry: error --(RETRY)--> idle
 t_retry ==
     /\ state = "error"
     /\ state' = "idle"
-    /\ UNCHANGED <<basePath, skills, selectedSkill, registry, error>>
+    /\ basePath' = basePath
+    /\ skills' = skills
+    /\ selectedSkill' = selectedSkill
+    /\ registry' = registry
+    /\ error' = error
+    /\ event_history' = Append(event_history, "RETRY")
 
-\* Next State Relation
+\* Next state relation
 Next ==
     \/ t_scan
     \/ t_rescan
@@ -108,28 +169,16 @@ Next ==
     \/ t_reset
     \/ t_retry
 
-\* Safety Invariant - Convergence Guarantee
-SafetyInvariant ==
-    state \in TerminalStates \/
-    \E e \in Events : ENABLED(Next)
+\* Specification
+Spec == Init /\ [][Next]_vars
 
-\* Temporal Specification
-Spec == Init /\ [][Next]_vars /\ WF_vars(Next)
+\* Safety: Always in valid state
+AlwaysValidState == state \in States
 
-\* =========================================================
-\* TLAPS THEOREMS - Axiomatic Certification
-\* =========================================================
+\* Liveness: No deadlock (always can make progress)
+NoDeadlock == <>(ENABLED Next)
 
-\* Theorem 1: Type Safety
-THEOREM TypeSafety == Spec => []TypeInvariant
-PROOF OMITTED  \* To be proven by TLAPS
+\* Reachability: Entry state is reachable
+EntryReachable == state = "idle"
 
-\* Theorem 2: Convergence (No unhandled deadlock)
-THEOREM Convergence == Spec => []SafetyInvariant
-PROOF OMITTED  \* To be proven by TLAPS
-
-\* Theorem 3: Terminal Reachability
-THEOREM TerminalReachable == Spec => <>(TRUE)
-PROOF OMITTED  \* To be proven by TLAPS
-
-============================================================================
+=============================================================================

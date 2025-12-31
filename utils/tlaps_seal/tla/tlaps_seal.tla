@@ -1,52 +1,72 @@
 ---------------------------- MODULE tlaps_seal ----------------------------
 \* L++ Blueprint: TLAPS Seal Certifier
 \* Version: 1.0.0
-\* TLAPS Seal Specification
+\* Auto-generated TLA+ specification (universal adaptor)
 
 EXTENDS Integers, Sequences, TLC
 
-\* Bounds for model checking
+\* =========================================================
+\* BOUNDS - Constrain state space for model checking
+\* =========================================================
+INT_MIN == -5
+INT_MAX == 5
 MAX_HISTORY == 3
+BoundedInt == INT_MIN..INT_MAX
+
+\* NULL constant for uninitialized values
 CONSTANT NULL
 
+\* =========================================================
+\* DOMAINS - Auto-extracted from context_schema
+\* =========================================================
+SealstatusDomain == {"pending", "tlc_verified", "tlaps_certified", "rejected"}
+
+\* States
 States == {"idle", "loading", "auditing", "generating_tla", "tlc_verifying", "tlc_verified", "tlaps_proving", "certified", "rejected", "error"}
+
 Events == {"AUTO", "CERTIFY", "ERROR", "PROVE", "RESET", "SEAL_TLC", "VIEW"}
+
 TerminalStates == {"certified", "rejected"}
 
 VARIABLES
-    state,
-    blueprintPath,
-    blueprint,
-    tlaPath,
-    tlaSpec,
-    tlcResult,
-    tlapsResult,
-    trinityAudit,
-    flangeAudit,
-    invariants,
-    sealStatus,
-    sealCertificate,
-    error
+    state,           \* Current state
+    blueprintPath,           \* Path to L++ blueprint JSON file
+    blueprint,           \* Loaded blueprint content
+    tlaPath,           \* Path to generated TLA+ specification
+    tlaSpec,           \* Generated TLA+ specification content
+    tlcResult,           \* TLC model checker verification result
+    tlapsResult,           \* TLAPS theorem prover result
+    trinityAudit,           \* Audit of Trinity (Transitions, Gates, Actions)
+    flangeAudit,           \* Context schema (Flange) validation result
+    invariants,           \* List of verified invariants
+    sealStatus,           \* Current certification status
+    sealCertificate,           \* Final seal certificate with metadata
+    error,           \* Error message if any
+    event_history    \* Trace of events
 
-vars == <<state, blueprintPath, blueprint, tlaPath, tlaSpec, tlcResult, tlapsResult, trinityAudit, flangeAudit, invariants, sealStatus, sealCertificate, error>>
+vars == <<state, blueprintPath, blueprint, tlaPath, tlaSpec, tlcResult, tlapsResult, trinityAudit, flangeAudit, invariants, sealStatus, sealCertificate, error, event_history>>
 
-\* Type Invariant - Structural Correctness
+\* Type invariant - structural correctness
 TypeInvariant ==
     /\ state \in States
-    /\ TRUE  \* blueprintPath
-    /\ TRUE  \* blueprint
-    /\ TRUE  \* tlaPath
-    /\ TRUE  \* tlaSpec
-    /\ TRUE  \* tlcResult
-    /\ TRUE  \* tlapsResult
-    /\ TRUE  \* trinityAudit
-    /\ TRUE  \* flangeAudit
-    /\ TRUE  \* invariants
-    /\ TRUE  \* sealStatus
-    /\ TRUE  \* sealCertificate
-    /\ TRUE  \* error
+    /\ TRUE  \* blueprintPath: any string or NULL
+    /\ TRUE  \* blueprint: any string or NULL
+    /\ TRUE  \* tlaPath: any string or NULL
+    /\ TRUE  \* tlaSpec: any string or NULL
+    /\ TRUE  \* tlcResult: any string or NULL
+    /\ TRUE  \* tlapsResult: any string or NULL
+    /\ TRUE  \* trinityAudit: any string or NULL
+    /\ TRUE  \* flangeAudit: any string or NULL
+    /\ TRUE  \* invariants: any string or NULL
+    /\ (sealStatus \in SealstatusDomain) \/ (sealStatus = NULL)
+    /\ TRUE  \* sealCertificate: any string or NULL
+    /\ TRUE  \* error: any string or NULL
 
-\* Initial State
+\* State constraint - limits TLC exploration depth
+StateConstraint ==
+    /\ Len(event_history) <= MAX_HISTORY
+
+\* Initial state
 Init ==
     /\ state = "idle"
     /\ blueprintPath = NULL
@@ -61,109 +81,278 @@ Init ==
     /\ sealStatus = NULL
     /\ sealCertificate = NULL
     /\ error = NULL
+    /\ event_history = <<>>
 
 \* Transitions
 \* t1_certify: idle --(CERTIFY)--> loading
 t1_certify ==
     /\ state = "idle"
     /\ state' = "loading"
-    /\ UNCHANGED <<blueprintPath, blueprint, tlaPath, tlaSpec, tlcResult, tlapsResult, trinityAudit, flangeAudit, invariants, sealStatus, sealCertificate, error>>
+    /\ blueprintPath' = blueprintPath
+    /\ blueprint' = blueprint
+    /\ tlaPath' = tlaPath
+    /\ tlaSpec' = tlaSpec
+    /\ tlcResult' = tlcResult
+    /\ tlapsResult' = tlapsResult
+    /\ trinityAudit' = trinityAudit
+    /\ flangeAudit' = flangeAudit
+    /\ invariants' = invariants
+    /\ sealStatus' = sealStatus
+    /\ sealCertificate' = sealCertificate
+    /\ error' = error
+    /\ event_history' = Append(event_history, "CERTIFY")
 
 \* t2_load: loading --(AUTO)--> auditing
 t2_load ==
     /\ state = "loading"
+    /\ error = NULL  \* gate: noError
     /\ state' = "auditing"
-    /\ error = NULL  \* Gate: noError
-    /\ UNCHANGED <<blueprintPath, blueprint, tlaPath, tlaSpec, tlcResult, tlapsResult, trinityAudit, flangeAudit, invariants, sealStatus, sealCertificate, error>>
+    /\ blueprintPath' = blueprintPath
+    /\ blueprint' = blueprint
+    /\ tlaPath' = tlaPath
+    /\ tlaSpec' = tlaSpec
+    /\ tlcResult' = tlcResult
+    /\ tlapsResult' = tlapsResult
+    /\ trinityAudit' = trinityAudit
+    /\ flangeAudit' = flangeAudit
+    /\ invariants' = invariants
+    /\ sealStatus' = sealStatus
+    /\ sealCertificate' = sealCertificate
+    /\ error' = error
+    /\ event_history' = Append(event_history, "AUTO")
 
 \* t3_audit: auditing --(AUTO)--> generating_tla
 t3_audit ==
     /\ state = "auditing"
+    /\ blueprint /= NULL  \* gate: hasBlueprint
+    /\ error = NULL  \* gate: noError
     /\ state' = "generating_tla"
-    /\ blueprint # NULL  \* Gate: hasBlueprint
-    /\ error = NULL  \* Gate: noError
-    /\ UNCHANGED <<blueprintPath, blueprint, tlaPath, tlaSpec, tlcResult, tlapsResult, trinityAudit, flangeAudit, invariants, sealStatus, sealCertificate, error>>
+    /\ blueprintPath' = blueprintPath
+    /\ blueprint' = blueprint
+    /\ tlaPath' = tlaPath
+    /\ tlaSpec' = tlaSpec
+    /\ tlcResult' = tlcResult
+    /\ tlapsResult' = tlapsResult
+    /\ trinityAudit' = trinityAudit
+    /\ flangeAudit' = flangeAudit
+    /\ invariants' = invariants
+    /\ sealStatus' = sealStatus
+    /\ sealCertificate' = sealCertificate
+    /\ error' = error
+    /\ event_history' = Append(event_history, "AUTO")
 
 \* t4_generate: generating_tla --(AUTO)--> tlc_verifying
 t4_generate ==
     /\ state = "generating_tla"
+    /\ trinityAudit /= NULL /\ trinityAudit["valid"]  \* gate: trinityValid
+    /\ flangeAudit /= NULL /\ flangeAudit["valid"]  \* gate: flangeValid
+    /\ error = NULL  \* gate: noError
     /\ state' = "tlc_verifying"
-    /\ trinityAudit # NULL /\ trinityAudit["valid"]  \* Gate: trinityValid
-    /\ flangeAudit # NULL /\ flangeAudit["valid"]  \* Gate: flangeValid
-    /\ error = NULL  \* Gate: noError
-    /\ UNCHANGED <<blueprintPath, blueprint, tlaPath, tlaSpec, tlcResult, tlapsResult, trinityAudit, flangeAudit, invariants, sealStatus, sealCertificate, error>>
+    /\ blueprintPath' = blueprintPath
+    /\ blueprint' = blueprint
+    /\ tlaPath' = tlaPath
+    /\ tlaSpec' = tlaSpec
+    /\ tlcResult' = tlcResult
+    /\ tlapsResult' = tlapsResult
+    /\ trinityAudit' = trinityAudit
+    /\ flangeAudit' = flangeAudit
+    /\ invariants' = invariants
+    /\ sealStatus' = sealStatus
+    /\ sealCertificate' = sealCertificate
+    /\ error' = error
+    /\ event_history' = Append(event_history, "AUTO")
 
 \* t5_tlc: tlc_verifying --(AUTO)--> tlc_verified
 t5_tlc ==
     /\ state = "tlc_verifying"
+    /\ tlaSpec /= NULL  \* gate: hasTlaSpec
+    /\ error = NULL  \* gate: noError
     /\ state' = "tlc_verified"
-    /\ tlaSpec # NULL  \* Gate: hasTlaSpec
-    /\ error = NULL  \* Gate: noError
-    /\ UNCHANGED <<blueprintPath, blueprint, tlaPath, tlaSpec, tlcResult, tlapsResult, trinityAudit, flangeAudit, invariants, sealStatus, sealCertificate, error>>
+    /\ blueprintPath' = blueprintPath
+    /\ blueprint' = blueprint
+    /\ tlaPath' = tlaPath
+    /\ tlaSpec' = tlaSpec
+    /\ tlcResult' = tlcResult
+    /\ tlapsResult' = tlapsResult
+    /\ trinityAudit' = trinityAudit
+    /\ flangeAudit' = flangeAudit
+    /\ invariants' = invariants
+    /\ sealStatus' = sealStatus
+    /\ sealCertificate' = sealCertificate
+    /\ error' = error
+    /\ event_history' = Append(event_history, "AUTO")
 
 \* t6_tlaps_start: tlc_verified --(PROVE)--> tlaps_proving
 t6_tlaps_start ==
     /\ state = "tlc_verified"
+    /\ tlcResult /= NULL /\ tlcResult["passed"]  \* gate: tlcPassed
     /\ state' = "tlaps_proving"
-    /\ tlcResult # NULL /\ tlcResult["passed"]  \* Gate: tlcPassed
-    /\ UNCHANGED <<blueprintPath, blueprint, tlaPath, tlaSpec, tlcResult, tlapsResult, trinityAudit, flangeAudit, invariants, sealStatus, sealCertificate, error>>
+    /\ blueprintPath' = blueprintPath
+    /\ blueprint' = blueprint
+    /\ tlaPath' = tlaPath
+    /\ tlaSpec' = tlaSpec
+    /\ tlcResult' = tlcResult
+    /\ tlapsResult' = tlapsResult
+    /\ trinityAudit' = trinityAudit
+    /\ flangeAudit' = flangeAudit
+    /\ invariants' = invariants
+    /\ sealStatus' = sealStatus
+    /\ sealCertificate' = sealCertificate
+    /\ error' = error
+    /\ event_history' = Append(event_history, "PROVE")
 
 \* t7_tlaps_complete: tlaps_proving --(AUTO)--> certified
 t7_tlaps_complete ==
     /\ state = "tlaps_proving"
+    /\ error = NULL  \* gate: noError
     /\ state' = "certified"
-    /\ error = NULL  \* Gate: noError
-    /\ UNCHANGED <<blueprintPath, blueprint, tlaPath, tlaSpec, tlcResult, tlapsResult, trinityAudit, flangeAudit, invariants, sealStatus, sealCertificate, error>>
+    /\ blueprintPath' = blueprintPath
+    /\ blueprint' = blueprint
+    /\ tlaPath' = tlaPath
+    /\ tlaSpec' = tlaSpec
+    /\ tlcResult' = tlcResult
+    /\ tlapsResult' = tlapsResult
+    /\ trinityAudit' = trinityAudit
+    /\ flangeAudit' = flangeAudit
+    /\ invariants' = invariants
+    /\ sealStatus' = sealStatus
+    /\ sealCertificate' = sealCertificate
+    /\ error' = error
+    /\ event_history' = Append(event_history, "AUTO")
 
 \* t8_quick_seal: tlc_verified --(SEAL_TLC)--> certified
 t8_quick_seal ==
     /\ state = "tlc_verified"
+    /\ tlcResult /= NULL /\ tlcResult["passed"]  \* gate: tlcPassed
     /\ state' = "certified"
-    /\ tlcResult # NULL /\ tlcResult["passed"]  \* Gate: tlcPassed
-    /\ UNCHANGED <<blueprintPath, blueprint, tlaPath, tlaSpec, tlcResult, tlapsResult, trinityAudit, flangeAudit, invariants, sealStatus, sealCertificate, error>>
+    /\ blueprintPath' = blueprintPath
+    /\ blueprint' = blueprint
+    /\ tlaPath' = tlaPath
+    /\ tlaSpec' = tlaSpec
+    /\ tlcResult' = tlcResult
+    /\ tlapsResult' = tlapsResult
+    /\ trinityAudit' = trinityAudit
+    /\ flangeAudit' = flangeAudit
+    /\ invariants' = invariants
+    /\ sealStatus' = sealStatus
+    /\ sealCertificate' = sealCertificate
+    /\ error' = error
+    /\ event_history' = Append(event_history, "SEAL_TLC")
 
 \* t9_audit_fail: auditing --(AUTO)--> rejected
 t9_audit_fail ==
     /\ state = "auditing"
+    /\ error /= NULL  \* gate: hasError
     /\ state' = "rejected"
-    /\ error # NULL  \* Gate: hasError
-    /\ UNCHANGED <<blueprintPath, blueprint, tlaPath, tlaSpec, tlcResult, tlapsResult, trinityAudit, flangeAudit, invariants, sealStatus, sealCertificate, error>>
+    /\ blueprintPath' = blueprintPath
+    /\ blueprint' = blueprint
+    /\ tlaPath' = tlaPath
+    /\ tlaSpec' = tlaSpec
+    /\ tlcResult' = tlcResult
+    /\ tlapsResult' = tlapsResult
+    /\ trinityAudit' = trinityAudit
+    /\ flangeAudit' = flangeAudit
+    /\ invariants' = invariants
+    /\ sealStatus' = sealStatus
+    /\ sealCertificate' = sealCertificate
+    /\ error' = error
+    /\ event_history' = Append(event_history, "AUTO")
 
 \* t10_tlc_fail: tlc_verifying --(AUTO)--> rejected
 t10_tlc_fail ==
     /\ state = "tlc_verifying"
+    /\ error /= NULL  \* gate: hasError
     /\ state' = "rejected"
-    /\ error # NULL  \* Gate: hasError
-    /\ UNCHANGED <<blueprintPath, blueprint, tlaPath, tlaSpec, tlcResult, tlapsResult, trinityAudit, flangeAudit, invariants, sealStatus, sealCertificate, error>>
+    /\ blueprintPath' = blueprintPath
+    /\ blueprint' = blueprint
+    /\ tlaPath' = tlaPath
+    /\ tlaSpec' = tlaSpec
+    /\ tlcResult' = tlcResult
+    /\ tlapsResult' = tlapsResult
+    /\ trinityAudit' = trinityAudit
+    /\ flangeAudit' = flangeAudit
+    /\ invariants' = invariants
+    /\ sealStatus' = sealStatus
+    /\ sealCertificate' = sealCertificate
+    /\ error' = error
+    /\ event_history' = Append(event_history, "AUTO")
 
 \* t11_tlaps_fail: tlaps_proving --(AUTO)--> rejected
 t11_tlaps_fail ==
     /\ state = "tlaps_proving"
+    /\ error /= NULL  \* gate: hasError
     /\ state' = "rejected"
-    /\ error # NULL  \* Gate: hasError
-    /\ UNCHANGED <<blueprintPath, blueprint, tlaPath, tlaSpec, tlcResult, tlapsResult, trinityAudit, flangeAudit, invariants, sealStatus, sealCertificate, error>>
+    /\ blueprintPath' = blueprintPath
+    /\ blueprint' = blueprint
+    /\ tlaPath' = tlaPath
+    /\ tlaSpec' = tlaSpec
+    /\ tlcResult' = tlcResult
+    /\ tlapsResult' = tlapsResult
+    /\ trinityAudit' = trinityAudit
+    /\ flangeAudit' = flangeAudit
+    /\ invariants' = invariants
+    /\ sealStatus' = sealStatus
+    /\ sealCertificate' = sealCertificate
+    /\ error' = error
+    /\ event_history' = Append(event_history, "AUTO")
 
 \* t12_error_any: * --(ERROR)--> error
 t12_error_any ==
-    /\ TRUE  \* Global transition
+    /\ TRUE  \* from any state
+    /\ error /= NULL  \* gate: hasError
     /\ state' = "error"
-    /\ error # NULL  \* Gate: hasError
-    /\ UNCHANGED <<blueprintPath, blueprint, tlaPath, tlaSpec, tlcResult, tlapsResult, trinityAudit, flangeAudit, invariants, sealStatus, sealCertificate, error>>
+    /\ blueprintPath' = blueprintPath
+    /\ blueprint' = blueprint
+    /\ tlaPath' = tlaPath
+    /\ tlaSpec' = tlaSpec
+    /\ tlcResult' = tlcResult
+    /\ tlapsResult' = tlapsResult
+    /\ trinityAudit' = trinityAudit
+    /\ flangeAudit' = flangeAudit
+    /\ invariants' = invariants
+    /\ sealStatus' = sealStatus
+    /\ sealCertificate' = sealCertificate
+    /\ error' = error
+    /\ event_history' = Append(event_history, "ERROR")
 
 \* t13_reset: * --(RESET)--> idle
 t13_reset ==
-    /\ TRUE  \* Global transition
+    /\ TRUE  \* from any state
     /\ state' = "idle"
-    /\ UNCHANGED <<blueprintPath, blueprint, tlaPath, tlaSpec, tlcResult, tlapsResult, trinityAudit, flangeAudit, invariants, sealStatus, sealCertificate, error>>
+    /\ blueprintPath' = blueprintPath
+    /\ blueprint' = blueprint
+    /\ tlaPath' = tlaPath
+    /\ tlaSpec' = tlaSpec
+    /\ tlcResult' = tlcResult
+    /\ tlapsResult' = tlapsResult
+    /\ trinityAudit' = trinityAudit
+    /\ flangeAudit' = flangeAudit
+    /\ invariants' = invariants
+    /\ sealStatus' = sealStatus
+    /\ sealCertificate' = sealCertificate
+    /\ error' = error
+    /\ event_history' = Append(event_history, "RESET")
 
 \* t14_view_cert: certified --(VIEW)--> certified
 t14_view_cert ==
     /\ state = "certified"
+    /\ tlapsResult /= NULL /\ tlapsResult["passed"]  \* gate: tlapsPassed
     /\ state' = "certified"
-    /\ tlapsResult # NULL /\ tlapsResult["passed"]  \* Gate: tlapsPassed
-    /\ UNCHANGED <<blueprintPath, blueprint, tlaPath, tlaSpec, tlcResult, tlapsResult, trinityAudit, flangeAudit, invariants, sealStatus, sealCertificate, error>>
+    /\ blueprintPath' = blueprintPath
+    /\ blueprint' = blueprint
+    /\ tlaPath' = tlaPath
+    /\ tlaSpec' = tlaSpec
+    /\ tlcResult' = tlcResult
+    /\ tlapsResult' = tlapsResult
+    /\ trinityAudit' = trinityAudit
+    /\ flangeAudit' = flangeAudit
+    /\ invariants' = invariants
+    /\ sealStatus' = sealStatus
+    /\ sealCertificate' = sealCertificate
+    /\ error' = error
+    /\ event_history' = Append(event_history, "VIEW")
 
-\* Next State Relation
+\* Next state relation
 Next ==
     \/ t1_certify
     \/ t2_load
@@ -180,28 +369,16 @@ Next ==
     \/ t13_reset
     \/ t14_view_cert
 
-\* Safety Invariant - Convergence Guarantee
-SafetyInvariant ==
-    state \in TerminalStates \/
-    \E e \in Events : ENABLED(Next)
+\* Specification
+Spec == Init /\ [][Next]_vars
 
-\* Temporal Specification
-Spec == Init /\ [][Next]_vars /\ WF_vars(Next)
+\* Safety: Always in valid state
+AlwaysValidState == state \in States
 
-\* =========================================================
-\* TLAPS THEOREMS - Axiomatic Certification
-\* =========================================================
+\* Reachability: Entry state is reachable
+EntryReachable == state = "idle"
 
-\* Theorem 1: Type Safety
-THEOREM TypeSafety == Spec => []TypeInvariant
-PROOF OMITTED  \* To be proven by TLAPS
+\* Terminal states are reachable
+TerminalReachable == <>(state = "certified" \/ state = "rejected")
 
-\* Theorem 2: Convergence (No unhandled deadlock)
-THEOREM Convergence == Spec => []SafetyInvariant
-PROOF OMITTED  \* To be proven by TLAPS
-
-\* Theorem 3: Terminal Reachability
-THEOREM TerminalReachable == Spec => <>(state = "certified" \/ state = "rejected")
-PROOF OMITTED  \* To be proven by TLAPS
-
-============================================================================
+=============================================================================
