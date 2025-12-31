@@ -1,0 +1,1365 @@
+================================================================================
+L++ CORE BLUEPRINTS - CONSOLIDATED
+Generated: 2025-12-31 06:41:08 UTC
+================================================================================
+
+--------------------------------------------------------------------------------
+FILE: compiler_blueprint.json
+ID: decoded_compiler
+NAME: Decoded: compiler
+--------------------------------------------------------------------------------
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_compiler",
+  "name": "Decoded: compiler",
+  "version": "1.0.0",
+  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/compiler.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "complete",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {
+    "g0": {
+      "type": "expression",
+      "expression": "__name__ == '__main__'"
+    },
+    "g1": {
+      "type": "expression",
+      "expression": "len(...) < 2"
+    },
+    "g2": {
+      "type": "expression",
+      "expression": "out_path"
+    }
+  },
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:open",
+      "description": "Inferred from function:compile_blueprint"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:json.load",
+      "description": "Inferred from function:compile_blueprint"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:_generate_code",
+      "description": "Inferred from function:compile_blueprint"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:f.write",
+      "description": "Inferred from function:compile_blueprint"
+    },
+    "a5": {
+      "type": "compute",
+      "compute_unit": "impl:save_tla",
+      "description": "Inferred from function:compile_blueprint"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ],
+  "_validation": {
+    "timestamp": "2025-12-31T06:02:15.117116Z",
+    "schema_valid": true,
+    "compiles": true,
+    "errors": [],
+    "metrics": {
+      "states": 2,
+      "transitions": 2,
+      "gates": 3,
+      "actions": 5
+    }
+  }
+}
+
+
+--------------------------------------------------------------------------------
+FILE: loader_blueprint.json
+ID: decoded_loader
+NAME: Decoded: loader
+--------------------------------------------------------------------------------
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_loader",
+  "name": "Decoded: loader",
+  "version": "1.0.0",
+  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/loader.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "loading": {
+      "name": "Loading",
+      "description": "From function: load"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "loading",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "loading",
+      "to": "complete",
+      "on_event": "LOADING_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:self._validate_required_fields",
+      "description": "Inferred from function:load"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:self._validate_references",
+      "description": "Inferred from function:load"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:Blueprint",
+      "description": "Inferred from function:load"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:self.raw.get",
+      "description": "Inferred from function:load"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:self._load_states",
+      "description": "Inferred from function:load"
+    },
+    "a5": {
+      "type": "compute",
+      "compute_unit": "impl:self._load_transitions",
+      "description": "Inferred from function:load"
+    },
+    "a6": {
+      "type": "compute",
+      "compute_unit": "impl:frozenset",
+      "description": "Inferred from function:load"
+    },
+    "a7": {
+      "type": "compute",
+      "compute_unit": "impl:self._load_gates",
+      "description": "Inferred from function:load"
+    },
+    "a8": {
+      "type": "compute",
+      "compute_unit": "impl:self._load_actions",
+      "description": "Inferred from function:load"
+    },
+    "a9": {
+      "type": "compute",
+      "compute_unit": "impl:self._load_context_schema",
+      "description": "Inferred from function:load"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:isinstance",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a12": {
+      "type": "compute",
+      "compute_unit": "impl:Path",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a13": {
+      "type": "compute",
+      "compute_unit": "impl:open",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a14": {
+      "type": "compute",
+      "compute_unit": "impl:json.load",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a15": {
+      "type": "compute",
+      "compute_unit": "impl:TypeError",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a16": {
+      "type": "compute",
+      "compute_unit": "impl:type",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a17": {
+      "type": "compute",
+      "compute_unit": "impl:BlueprintLoader",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a18": {
+      "type": "compute",
+      "compute_unit": "impl:loader.load",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a19": {
+      "type": "compute",
+      "compute_unit": "impl:json.loads",
+      "description": "Inferred from function:load_blueprint_from_json"
+    },
+    "a20": {
+      "type": "compute",
+      "compute_unit": "impl:load_blueprint",
+      "description": "Inferred from function:load_blueprint_from_json"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ],
+  "_validation": {
+    "timestamp": "2025-12-31T06:02:15.131965Z",
+    "schema_valid": true,
+    "compiles": true,
+    "errors": [],
+    "metrics": {
+      "states": 3,
+      "transitions": 3,
+      "gates": 0,
+      "actions": 20
+    }
+  }
+}
+
+
+--------------------------------------------------------------------------------
+FILE: lpp_core_blueprint.json
+ID: decoded_lpp_core
+NAME: Decoded: lpp_core
+--------------------------------------------------------------------------------
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_lpp_core",
+  "name": "Decoded: lpp_core",
+  "version": "1.0.0",
+  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/lpp_core.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "complete",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:safe_eval_bool",
+      "description": "Inferred from function:atom_EVALUATE"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:TransitionTrace",
+      "description": "Inferred from function:atom_TRANSITION"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:datetime.datetime.now",
+      "description": "Inferred from function:atom_TRANSITION"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:context_data.copy",
+      "description": "Inferred from function:atom_MUTATE"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:path.split",
+      "description": "Inferred from function:atom_MUTATE"
+    },
+    "a5": {
+      "type": "compute",
+      "compute_unit": "impl:isinstance",
+      "description": "Inferred from function:atom_MUTATE"
+    },
+    "a6": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'current_level', 'ctx': {'_type': 'Load'}, 'lineno': 140}, 'slice': {'_type': 'Name', 'id': 'key', 'ctx': {'_type': 'Load'}, 'lineno': 140}, 'ctx': {'_type': 'Load'}, 'lineno': 140}.copy",
+      "description": "Inferred from function:atom_MUTATE"
+    },
+    "a7": {
+      "type": "compute",
+      "compute_unit": "impl:compute_registry.get",
+      "description": "Inferred from function:atom_DISPATCH"
+    },
+    "a8": {
+      "type": "compute",
+      "compute_unit": "impl:print",
+      "description": "Inferred from function:atom_DISPATCH"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:compute_func",
+      "description": "Inferred from function:atom_DISPATCH"
+    },
+    "a13": {
+      "type": "compute",
+      "compute_unit": "impl:str",
+      "description": "Inferred from function:atom_DISPATCH"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ],
+  "_validation": {
+    "timestamp": "2025-12-31T06:02:15.148181Z",
+    "schema_valid": true,
+    "compiles": true,
+    "errors": [],
+    "metrics": {
+      "states": 2,
+      "transitions": 2,
+      "gates": 0,
+      "actions": 11
+    }
+  }
+}
+
+
+--------------------------------------------------------------------------------
+FILE: orchestrator_blueprint.json
+ID: decoded_orchestrator
+NAME: Decoded: orchestrator
+--------------------------------------------------------------------------------
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_orchestrator",
+  "name": "Decoded: orchestrator",
+  "version": "1.0.0",
+  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/orchestrator.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "processing": {
+      "name": "Processing",
+      "description": "From function: run_frame"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "processing",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "processing",
+      "to": "complete",
+      "on_event": "PROCESSING_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:context.get",
+      "description": "Inferred from function:run_frame"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:_find_transition",
+      "description": "Inferred from function:run_frame"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:dict",
+      "description": "Inferred from function:run_frame"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:blueprint.get_gate",
+      "description": "Inferred from function:run_frame"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:atom_EVALUATE",
+      "description": "Inferred from function:run_frame"
+    },
+    "a6": {
+      "type": "compute",
+      "compute_unit": "impl:blueprint.get_action",
+      "description": "Inferred from function:run_frame"
+    },
+    "a7": {
+      "type": "compute",
+      "compute_unit": "impl:_resolve_path",
+      "description": "Inferred from function:run_frame"
+    },
+    "a8": {
+      "type": "compute",
+      "compute_unit": "impl:atom_MUTATE",
+      "description": "Inferred from function:run_frame"
+    },
+    "a9": {
+      "type": "compute",
+      "compute_unit": "impl:action.compute_unit.split",
+      "description": "Inferred from function:run_frame"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:len",
+      "description": "Inferred from function:run_frame"
+    },
+    "a12": {
+      "type": "compute",
+      "compute_unit": "impl:action.input_map.items",
+      "description": "Inferred from function:run_frame"
+    },
+    "a13": {
+      "type": "compute",
+      "compute_unit": "impl:atom_DISPATCH",
+      "description": "Inferred from function:run_frame"
+    },
+    "a14": {
+      "type": "compute",
+      "compute_unit": "impl:action.output_map.items",
+      "description": "Inferred from function:run_frame"
+    },
+    "a16": {
+      "type": "compute",
+      "compute_unit": "impl:atom_TRANSITION",
+      "description": "Inferred from function:run_frame"
+    },
+    "a17": {
+      "type": "compute",
+      "compute_unit": "impl:traces.append",
+      "description": "Inferred from function:run_frame"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ],
+  "_validation": {
+    "timestamp": "2025-12-31T06:02:15.165338Z",
+    "schema_valid": true,
+    "compiles": true,
+    "errors": [],
+    "metrics": {
+      "states": 3,
+      "transitions": 3,
+      "gates": 0,
+      "actions": 15
+    }
+  }
+}
+
+
+--------------------------------------------------------------------------------
+FILE: safe_eval_blueprint.json
+ID: decoded_safe_eval
+NAME: Decoded: safe_eval
+--------------------------------------------------------------------------------
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_safe_eval",
+  "name": "Decoded: safe_eval",
+  "version": "1.0.0",
+  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/safe_eval.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "complete",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {
+    "g0": {
+      "type": "expression",
+      "expression": "__name__ == '__main__'"
+    },
+    "g1": {
+      "type": "expression",
+      "expression": "result == expected"
+    },
+    "g2": {
+      "type": "expression",
+      "expression": "failed > 0"
+    }
+  },
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:len",
+      "description": "Inferred from function:evaluate"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:print",
+      "description": "Inferred from function:evaluate"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:ast.parse",
+      "description": "Inferred from function:evaluate"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:SafeEvalError",
+      "description": "Inferred from function:evaluate"
+    },
+    "a5": {
+      "type": "compute",
+      "compute_unit": "impl:_validate_ast",
+      "description": "Inferred from function:evaluate"
+    },
+    "a6": {
+      "type": "compute",
+      "compute_unit": "impl:self._check_complexity",
+      "description": "Inferred from function:evaluate"
+    },
+    "a7": {
+      "type": "compute",
+      "compute_unit": "impl:self.visit",
+      "description": "Inferred from function:evaluate"
+    },
+    "a9": {
+      "type": "compute",
+      "compute_unit": "impl:_resolve_name",
+      "description": "Inferred from function:visit_Name"
+    },
+    "a11": {
+      "type": "compute",
+      "compute_unit": "impl:_resolve_attr",
+      "description": "Inferred from function:visit_Attribute"
+    },
+    "a14": {
+      "type": "compute",
+      "compute_unit": "impl:isinstance",
+      "description": "Inferred from function:visit_Subscript"
+    },
+    "a15": {
+      "type": "compute",
+      "compute_unit": "impl:obj.get",
+      "description": "Inferred from function:visit_Subscript"
+    },
+    "a21": {
+      "type": "compute",
+      "compute_unit": "impl:type",
+      "description": "Inferred from function:visit_Subscript"
+    },
+    "a34": {
+      "type": "compute",
+      "compute_unit": "impl:ops.get",
+      "description": "Inferred from function:visit_BinOp"
+    },
+    "a38": {
+      "type": "compute",
+      "compute_unit": "impl:op_func",
+      "description": "Inferred from function:visit_BinOp"
+    },
+    "a40": {
+      "type": "compute",
+      "compute_unit": "impl:zip",
+      "description": "Inferred from function:visit_Compare"
+    },
+    "a57": {
+      "type": "compute",
+      "compute_unit": "impl:tuple",
+      "description": "Inferred from function:visit_Tuple"
+    },
+    "a63": {
+      "type": "compute",
+      "compute_unit": "impl:SAFE_FUNCTIONS.get",
+      "description": "Inferred from function:visit_Call"
+    },
+    "a67": {
+      "type": "compute",
+      "compute_unit": "impl:func",
+      "description": "Inferred from function:visit_Call"
+    },
+    "a69": {
+      "type": "compute",
+      "compute_unit": "impl:SafeEvaluator",
+      "description": "Inferred from function:safe_eval"
+    },
+    "a70": {
+      "type": "compute",
+      "compute_unit": "impl:evaluator.evaluate",
+      "description": "Inferred from function:safe_eval"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ],
+  "_validation": {
+    "timestamp": "2025-12-31T06:02:15.180400Z",
+    "schema_valid": true,
+    "compiles": true,
+    "errors": [],
+    "metrics": {
+      "states": 2,
+      "transitions": 2,
+      "gates": 3,
+      "actions": 20
+    }
+  }
+}
+
+
+--------------------------------------------------------------------------------
+FILE: schema_blueprint.json
+ID: decoded_schema
+NAME: Decoded: schema
+--------------------------------------------------------------------------------
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_schema",
+  "name": "Decoded: schema",
+  "version": "1.0.0",
+  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/schema.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "loading": {
+      "name": "Loading",
+      "description": "From function: get_state"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "loading",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "loading",
+      "to": "complete",
+      "on_event": "LOADING_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:KeyError",
+      "description": "Inferred from function:get_state"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:result.append",
+      "description": "Inferred from function:get_transitions_from"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ],
+  "_validation": {
+    "timestamp": "2025-12-31T06:02:15.196620Z",
+    "schema_valid": true,
+    "compiles": true,
+    "errors": [],
+    "metrics": {
+      "states": 3,
+      "transitions": 3,
+      "gates": 0,
+      "actions": 2
+    }
+  }
+}
+
+
+--------------------------------------------------------------------------------
+FILE: tla_validator_blueprint.json
+ID: decoded_tla_validator
+NAME: Decoded: tla_validator
+--------------------------------------------------------------------------------
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_tla_validator",
+  "name": "Decoded: tla_validator",
+  "version": "1.0.0",
+  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/tla_validator.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "validating": {
+      "name": "Validating",
+      "description": "From function: validate_with_tlc"
+    },
+    "saving": {
+      "name": "Saving",
+      "description": "From function: save_tla"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "validating",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "validating",
+      "to": "saving",
+      "on_event": "VALIDATING_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "saving",
+      "to": "complete",
+      "on_event": "SAVING_DONE"
+    },
+    {
+      "id": "t3",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {
+    "g0": {
+      "type": "expression",
+      "expression": "__name__ == '__main__'"
+    },
+    "g1": {
+      "type": "expression",
+      "expression": "len(...) < 2 or '-h' in sys.argv or '--help' in sys.argv"
+    },
+    "g2": {
+      "type": "expression",
+      "expression": "arg in ... and ... < len(...)"
+    },
+    "g3": {
+      "type": "expression",
+      "expression": "arg in ..."
+    },
+    "g4": {
+      "type": "expression",
+      "expression": "arg == '--tlc' and ... < len(...)"
+    },
+    "g5": {
+      "type": "expression",
+      "expression": "arg == '--int-min' and ... < len(...)"
+    },
+    "g6": {
+      "type": "expression",
+      "expression": "arg == '--int-max' and ... < len(...)"
+    },
+    "g7": {
+      "type": "expression",
+      "expression": "arg == '--max-history' and ... < len(...)"
+    },
+    "g8": {
+      "type": "expression",
+      "expression": "..."
+    },
+    "g9": {
+      "type": "expression",
+      "expression": "..."
+    },
+    "g10": {
+      "type": "expression",
+      "expression": "output_dir"
+    },
+    "g11": {
+      "type": "expression",
+      "expression": "do_validate"
+    }
+  },
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:_to_tla_safe",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:bp.get",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:list",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:bp.get.keys",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:context_schema.get",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a11": {
+      "type": "compute",
+      "compute_unit": "impl:_extract_domains",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a12": {
+      "type": "compute",
+      "compute_unit": "impl:lines.append",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a32": {
+      "type": "compute",
+      "compute_unit": "impl:domains.items",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a33": {
+      "type": "compute",
+      "compute_unit": "impl:info.get",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a37": {
+      "type": "compute",
+      "compute_unit": "impl:enum_domains.items",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a38": {
+      "type": "compute",
+      "compute_unit": "impl:_escape_tla_string",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a40": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 176}.join",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a43": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 181}.join",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a46": {
+      "type": "compute",
+      "compute_unit": "impl:set",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a47": {
+      "type": "compute",
+      "compute_unit": "impl:t.get",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a48": {
+      "type": "compute",
+      "compute_unit": "impl:events.discard",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a49": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 188}.join",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a50": {
+      "type": "compute",
+      "compute_unit": "impl:sorted",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a53": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 194}.join",
+      "description": "Inferred from function:generate_tla"
+    },
+    "a59": {
+      "type": "compute",
+      "compute_unit": "impl:properties.keys",
+      "description": "Inferred from function:generate_tla"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ],
+  "_validation": {
+    "timestamp": "2025-12-31T06:02:15.215876Z",
+    "schema_valid": true,
+    "compiles": true,
+    "errors": [],
+    "metrics": {
+      "states": 4,
+      "transitions": 4,
+      "gates": 12,
+      "actions": 20
+    }
+  }
+}
+
+
+--------------------------------------------------------------------------------
+FILE: validator_blueprint.json
+ID: decoded_validator
+NAME: Decoded: validator
+--------------------------------------------------------------------------------
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_validator",
+  "name": "Decoded: validator",
+  "version": "1.0.0",
+  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/validator.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "validating": {
+      "name": "Validating",
+      "description": "From function: validate_blueprint"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "validating",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "validating",
+      "to": "complete",
+      "on_event": "VALIDATING_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:errors.append",
+      "description": "Inferred from function:validate_blueprint"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:enumerate",
+      "description": "Inferred from function:validate_blueprint"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:bp.get",
+      "description": "Inferred from function:validate_blueprint"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:trans.get",
+      "description": "Inferred from function:validate_blueprint"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:bp.get.items",
+      "description": "Inferred from function:validate_blueprint"
+    },
+    "a12": {
+      "type": "compute",
+      "compute_unit": "impl:gate.get",
+      "description": "Inferred from function:validate_blueprint"
+    },
+    "a21": {
+      "type": "compute",
+      "compute_unit": "impl:BlueprintValidationError",
+      "description": "Inferred from function:validate_blueprint"
+    },
+    "a22": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': '\\n', 'kind': None, 'lineno': 81}.join",
+      "description": "Inferred from function:validate_blueprint"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ],
+  "_validation": {
+    "timestamp": "2025-12-31T06:02:15.233442Z",
+    "schema_valid": true,
+    "compiles": true,
+    "errors": [],
+    "metrics": {
+      "states": 3,
+      "transitions": 3,
+      "gates": 0,
+      "actions": 8
+    }
+  }
+}
+
+
+--------------------------------------------------------------------------------
+FILE: visualizer_blueprint.json
+ID: decoded_visualizer
+NAME: Decoded: visualizer
+--------------------------------------------------------------------------------
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_visualizer",
+  "name": "Decoded: visualizer",
+  "version": "1.0.0",
+  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/visualizer.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "complete",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {
+    "g0": {
+      "type": "expression",
+      "expression": "__name__ == '__main__'"
+    }
+  },
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:self.states.get.get",
+      "description": "Inferred from function:as_mermaid_logic"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:self.states.get",
+      "description": "Inferred from function:as_mermaid_logic"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:lines.append",
+      "description": "Inferred from function:as_mermaid_logic"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:enumerate",
+      "description": "Inferred from function:as_mermaid_logic"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:t.get",
+      "description": "Inferred from function:as_mermaid_logic"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 107}.join",
+      "description": "Inferred from function:as_mermaid_logic"
+    },
+    "a13": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 118}.join",
+      "description": "Inferred from function:as_mermaid_logic"
+    },
+    "a19": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': '\\n', 'kind': None, 'lineno': 133}.join",
+      "description": "Inferred from function:as_mermaid_logic"
+    },
+    "a20": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': ' \u2502 ', 'kind': None, 'lineno': 145}.join",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a21": {
+      "type": "compute",
+      "compute_unit": "impl:str.ljust",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a22": {
+      "type": "compute",
+      "compute_unit": "impl:str",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a23": {
+      "type": "compute",
+      "compute_unit": "impl:zip",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a24": {
+      "type": "compute",
+      "compute_unit": "impl:sum",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a26": {
+      "type": "compute",
+      "compute_unit": "impl:row",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a27": {
+      "type": "compute",
+      "compute_unit": "impl:sep.replace.replace.replace",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a28": {
+      "type": "compute",
+      "compute_unit": "impl:sep.replace.replace",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a29": {
+      "type": "compute",
+      "compute_unit": "impl:sep.replace",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a30": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 159}.join",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a32": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 160}.join",
+      "description": "Inferred from function:as_ascii"
+    },
+    "a34": {
+      "type": "compute",
+      "compute_unit": "impl:output.append",
+      "description": "Inferred from function:as_ascii"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ],
+  "_validation": {
+    "timestamp": "2025-12-31T06:02:15.251464Z",
+    "schema_valid": true,
+    "compiles": true,
+    "errors": [],
+    "metrics": {
+      "states": 2,
+      "transitions": 2,
+      "gates": 1,
+      "actions": 20
+    }
+  }
+}
+
+
+================================================================================
+END OF CONSOLIDATED BLUEPRINTS
+================================================================================
