@@ -1,296 +1,412 @@
 """
-L++ Blueprint Loader
+L++ Compiled Operator: L++ Blueprint Loader
+Version: 1.0.0
+Description: Loads and validates JSON blueprints into Blueprint schema objects
 
-Parser and validator that ingests raw JSON, validates it against
-logic rules, and hydrates the schema objects.
+Auto-generated from JSON blueprint. Do not edit directly.
 """
 
-from __future__ import annotations
-
-import json
-from pathlib import Path
-from typing import Any, Union
-
-from .schema import (
-    Blueprint,
-    State,
-    Transition,
-    Gate,
-    GateType,
-    Action,
-    ActionType,
-    ContextSchema,
+from frame_py.lpp_core import (
+    atom_EVALUATE,
+    atom_TRANSITION,
+    atom_MUTATE,
+    atom_DISPATCH,
+    TransitionTrace,
 )
 
 
-class BlueprintValidationError(Exception):
-    """Error during blueprint validation."""
+# ======================================================================
+# BLUEPRINT CONSTANTS
+# ======================================================================
 
-    def __init__(self, message: str, path: str = ""):
-        self.path = path
-        full_msg = f"[{path}] {message}" if path else message
-        super().__init__(full_msg)
+BLUEPRINT_ID = 'lpp_loader'
+BLUEPRINT_NAME = 'L++ Blueprint Loader'
+BLUEPRINT_VERSION = '1.0.0'
+ENTRY_STATE = 'idle'
+TERMINAL_STATES = {'error', 'complete'}
+
+STATES = {
+    'idle': 'Idle',  # Waiting for blueprint load request
+    'reading': 'Reading',  # Reading blueprint file from disk
+    'validating': 'Validating',  # Validating blueprint structure and references
+    'loading': 'Loading',  # Loading blueprint components into schema
+    'complete': 'Complete',  # Blueprint successfully loaded
+    'error': 'Error',  # Loading failed with error
+}
+
+GATES = {
+    'g_has_path': 'blueprint_path is not None',
+    'g_valid_json': 'raw_data is not None',
+}
+
+DISPLAY_RULES = [
+]
+
+ACTIONS = {
+    'a_read_file': {
+        'type': 'compute',
+        'compute_unit': 'impl:open',
+    },
+    'a_parse_json': {
+        'type': 'compute',
+        'compute_unit': 'impl:json.load',
+    },
+    'a_validate_required': {
+        'type': 'compute',
+        'compute_unit': 'impl:self._validate_required_fields',
+    },
+    'a_validate_refs': {
+        'type': 'compute',
+        'compute_unit': 'impl:self._validate_references',
+    },
+    'a_load_states': {
+        'type': 'compute',
+        'compute_unit': 'impl:self._load_states',
+    },
+    'a_load_transitions': {
+        'type': 'compute',
+        'compute_unit': 'impl:self._load_transitions',
+    },
+    'a_load_gates': {
+        'type': 'compute',
+        'compute_unit': 'impl:self._load_gates',
+    },
+    'a_load_actions': {
+        'type': 'compute',
+        'compute_unit': 'impl:self._load_actions',
+    },
+    'a_load_schema': {
+        'type': 'compute',
+        'compute_unit': 'impl:self._load_context_schema',
+    },
+    'a_create_blueprint': {
+        'type': 'compute',
+        'compute_unit': 'impl:Blueprint',
+    },
+}
+
+TRANSITIONS = [
+    {
+        'id': 't0',
+        'from': 'idle',
+        'to': 'reading',
+        'on_event': 'LOAD_REQUEST',
+        'gates': [],
+        'actions': [],
+    },
+    {
+        'id': 't1',
+        'from': 'reading',
+        'to': 'validating',
+        'on_event': 'READ_DONE',
+        'gates': [],
+        'actions': [],
+    },
+    {
+        'id': 't2',
+        'from': 'validating',
+        'to': 'loading',
+        'on_event': 'VALIDATION_PASSED',
+        'gates': [],
+        'actions': [],
+    },
+    {
+        'id': 't3',
+        'from': 'loading',
+        'to': 'complete',
+        'on_event': 'LOADING_DONE',
+        'gates': [],
+        'actions': [],
+    },
+    {
+        'id': 't_err_read',
+        'from': 'reading',
+        'to': 'error',
+        'on_event': 'READ_ERROR',
+        'gates': [],
+        'actions': [],
+    },
+    {
+        'id': 't_err_validate',
+        'from': 'validating',
+        'to': 'error',
+        'on_event': 'VALIDATION_FAILED',
+        'gates': [],
+        'actions': [],
+    },
+    {
+        'id': 't_err_load',
+        'from': 'loading',
+        'to': 'error',
+        'on_event': 'LOAD_ERROR',
+        'gates': [],
+        'actions': [],
+    },
+    {
+        'id': 't_reset',
+        'from': '*',
+        'to': 'idle',
+        'on_event': 'RESET',
+        'gates': [],
+        'actions': [],
+    },
+]
 
 
-class BlueprintLoader:
+# ======================================================================
+# HELPER FUNCTIONS
+# ======================================================================
+
+def _resolve_path(path: str, data: dict):
+    """Resolve a dotted path in a dictionary."""
+    parts = path.split('.')
+    obj = data
+    for part in parts:
+        if isinstance(obj, dict):
+            obj = obj.get(part)
+        else:
+            return None
+        if obj is None:
+            return None
+    return obj
+
+
+# ======================================================================
+# COMPILED OPERATOR
+# ======================================================================
+
+class Operator:
     """
-    Loads and validates L++ blueprints from JSON.
+    Compiled L++ Operator: L++ Blueprint Loader
     """
 
-    REQUIRED_FIELDS = [
-        "$schema", "id", "name", "version",
-        "states", "transitions", "entry_state", "terminal_states"
-    ]
+    def __init__(self, compute_registry: dict = None):
+        self.context = {'_state': ENTRY_STATE, 'error': None, 'result': None, 'blueprint_path': None, 'raw_data': None}
+        self.traces: list[TransitionTrace] = []
+        self.compute_registry = compute_registry or {}
 
-    def __init__(self, raw: dict[str, Any]):
+    @property
+    def state(self) -> str:
+        return self.context.get('_state', ENTRY_STATE)
+
+    @property
+    def is_terminal(self) -> bool:
+        return self.state in TERMINAL_STATES
+
+    def dispatch(self, event_name: str, payload: dict = None):
         """
-        Initialize loader with raw JSON dict.
+        Dispatch an event to the operator.
 
         Args:
-            raw: The raw JSON dictionary
-        """
-        self.raw = raw
-        self._errors: list[str] = []
-
-    def load(self) -> Blueprint:
-        """
-        Load and validate the blueprint.
+            event_name: Name of the event
+            payload: Event payload data
 
         Returns:
-            Validated Blueprint object
-
-        Raises:
-            BlueprintValidationError: If validation fails
+            Tuple of (success, new_state, error)
         """
-        self._validate_required_fields()
-        self._validate_references()
+        payload = payload or {}
+        current = self.state
 
-        return Blueprint(
-            schema_version=self.raw["$schema"],
-            id=self.raw["id"],
-            name=self.raw["name"],
-            version=self.raw["version"],
-            description=self.raw.get("description"),
-            states=self._load_states(),
-            transitions=self._load_transitions(),
-            entry_state=self.raw["entry_state"],
-            terminal_states=frozenset(self.raw["terminal_states"]),
-            gates=self._load_gates(),
-            actions=self._load_actions(),
-            context_schema=self._load_context_schema(),
-        )
+        # Check terminal
+        if self.is_terminal:
+            return False, current, 'Already in terminal state'
 
-    def _validate_required_fields(self) -> None:
-        """Validate all required fields are present."""
-        for field in self.REQUIRED_FIELDS:
-            if field not in self.raw:
-                raise BlueprintValidationError(
-                    f"Missing required field: {field}",
-                    path="root"
-                )
+        # Build evaluation scope
+        scope = dict(self.context)
+        scope['event'] = {'name': event_name, 'payload': payload}
 
-    def _validate_references(self) -> None:
-        """Validate all internal references are valid."""
-        states = set(self.raw.get("states", {}).keys())
-        gates = set(self.raw.get("gates", {}).keys())
-        actions = set(self.raw.get("actions", {}).keys())
+        # Find matching transition (checks gates)
+        trans = None
+        for t in TRANSITIONS:
+            if t['on_event'] != event_name:
+                continue
+            if t['from'] != '*' and t['from'] != current:
+                continue
+            # Check gates
+            gates_pass = True
+            for gate_id in t.get('gates', []):
+                expr = GATES.get(gate_id, 'True')
+                if not atom_EVALUATE(expr, scope):
+                    gates_pass = False
+                    break
+            if gates_pass:
+                trans = t
+                break
 
-        # Validate entry_state
-        entry = self.raw["entry_state"]
-        if entry not in states:
-            raise BlueprintValidationError(
-                f"Entry state '{entry}' not defined",
-                path="entry_state"
-            )
+        if not trans:
+            return False, current, f'No transition for {event_name}'
 
-        # Validate terminal_states
-        for ts in self.raw["terminal_states"]:
-            if ts not in states:
-                raise BlueprintValidationError(
-                    f"Terminal state '{ts}' not defined",
-                    path="terminal_states"
-                )
+        # Execute actions
+        for action_id in trans['actions']:
+            action = ACTIONS.get(action_id)
+            if not action:
+                continue
 
-        # Validate transitions
-        for i, trans in enumerate(self.raw.get("transitions", [])):
-            path = f"transitions[{i}]"
+            if action['type'] == 'set':
+                # MUTATE
+                target = action.get('target')
+                if action.get('value') is not None:
+                    value = action['value']
+                elif action.get('value_from'):
+                    value = _resolve_path(action['value_from'], scope)
+                else:
+                    value = None
+                self.context = atom_MUTATE(self.context, target, value)
+                scope.update(self.context)  # Sync scope for chained actions
 
-            # from_state
-            from_s = trans.get("from", "")
-            if from_s != "*" and from_s not in states:
-                raise BlueprintValidationError(
-                    f"Unknown from_state: '{from_s}'",
-                    path=path
-                )
-
-            # to_state
-            to_s = trans.get("to", "")
-            if to_s not in states:
-                raise BlueprintValidationError(
-                    f"Unknown to_state: '{to_s}'",
-                    path=path
-                )
-
-            # gates
-            for gate_id in trans.get("gates", []):
-                if gate_id not in gates:
-                    raise BlueprintValidationError(
-                        f"Unknown gate: '{gate_id}'",
-                        path=path
+            elif action['type'] == 'compute':
+                # DISPATCH
+                unit = action.get('compute_unit', '')
+                parts = unit.split(':')
+                if len(parts) == 2:
+                    sys_id, op_id = parts
+                    inp = {
+                        k: _resolve_path(v, scope)
+                        for k, v in action.get('input_map', {}).items()
+                    }
+                    result = atom_DISPATCH(
+                        sys_id, op_id, inp, self.compute_registry
                     )
+                    for ctx_path, res_key in action.get('output_map', {}).items():
+                        if res_key in result:
+                            self.context = atom_MUTATE(
+                                self.context, ctx_path, result[res_key]
+                            )
+                    scope.update(self.context)  # Sync scope for chained actions
 
-            # actions
-            for action_id in trans.get("actions", []):
-                if action_id not in actions:
-                    raise BlueprintValidationError(
-                        f"Unknown action: '{action_id}'",
-                        path=path
-                    )
+        # TRANSITION
+        new_state, trace = atom_TRANSITION(current, trans['to'])
+        self.context = atom_MUTATE(self.context, '_state', new_state)
+        self.traces.append(trace)
 
-        # Validate state on_enter/on_exit actions
-        for state_id, state in self.raw.get("states", {}).items():
-            path = f"states.{state_id}"
-            for action_id in state.get("on_enter", []):
-                if action_id not in actions:
-                    raise BlueprintValidationError(
-                        f"Unknown on_enter action: '{action_id}'",
-                        path=path
-                    )
-            for action_id in state.get("on_exit", []):
-                if action_id not in actions:
-                    raise BlueprintValidationError(
-                        f"Unknown on_exit action: '{action_id}'",
-                        path=path
-                    )
+        return True, new_state, None
 
-    def _load_states(self) -> dict[str, State]:
-        """Load state definitions."""
-        states = {}
-        for state_id, raw_state in self.raw.get("states", {}).items():
-            states[state_id] = State(
-                id=state_id,
-                name=raw_state.get("name", state_id),
-                description=raw_state.get("description"),
-                on_enter=tuple(raw_state.get("on_enter", [])),
-                on_exit=tuple(raw_state.get("on_exit", [])),
-                metadata=raw_state.get("metadata", {}),
-            )
-        return states
+    def get(self, path: str):
+        """Get a value from context by path."""
+        return _resolve_path(path, self.context)
 
-    def _load_transitions(self) -> tuple[Transition, ...]:
-        """Load transition definitions."""
-        transitions = []
-        for i, raw_trans in enumerate(self.raw.get("transitions", [])):
-            trans_id = raw_trans.get("id", f"transition_{i}")
-            transitions.append(Transition(
-                id=trans_id,
-                from_state=raw_trans["from"],
-                to_state=raw_trans["to"],
-                on_event=raw_trans["on_event"],
-                gates=tuple(raw_trans.get("gates", [])),
-                actions=tuple(raw_trans.get("actions", [])),
-                description=raw_trans.get("description"),
-            ))
-        return tuple(transitions)
+    def set(self, path: str, value):
+        """Set a value in context by path."""
+        self.context = atom_MUTATE(self.context, path, value)
 
-    def _load_gates(self) -> dict[str, Gate]:
-        """Load gate definitions."""
-        gates = {}
-        for gate_id, raw_gate in self.raw.get("gates", {}).items():
-            gate_type = GateType(raw_gate.get("type", "expression"))
-            gates[gate_id] = Gate(
-                id=gate_id,
-                type=gate_type,
-                expression=raw_gate.get("expression"),
-                compute_unit=raw_gate.get("compute_unit"),
-                input_map=raw_gate.get("input_map", {}),
-                description=raw_gate.get("description"),
-            )
-        return gates
+    def display(self) -> str:
+        """Evaluate display rules and return formatted string."""
+        for rule in DISPLAY_RULES:
+            gate = rule.get('gate')
+            if gate:
+                expr = GATES.get(gate, 'False')
+                if not atom_EVALUATE(expr, self.context):
+                    continue
+            # Gate passed or no gate, format template
+            template = rule.get('template', '')
+            try:
+                return template.format(**self.context)
+            except (KeyError, ValueError):
+                return template
+        return ''
 
-    def _load_actions(self) -> dict[str, Action]:
-        """Load action definitions."""
-        actions = {}
-        for action_id, raw_action in self.raw.get("actions", {}).items():
-            action_type = ActionType(raw_action.get("type", "set"))
+    def reset(self):
+        """Reset to initial state."""
+        self.context = {'_state': ENTRY_STATE, 'error': None, 'result': None, 'blueprint_path': None, 'raw_data': None}
+        self.traces = []
 
-            actions[action_id] = Action(
-                id=action_id,
-                type=action_type,
-                # SET
-                target=raw_action.get("target"),
-                value=raw_action.get("value"),
-                value_from=raw_action.get("value_from"),
-                # COMPUTE
-                compute_unit=raw_action.get("compute_unit"),
-                input_map=raw_action.get("input_map", {}),
-                output_map=raw_action.get("output_map", {}),
-                # EMIT
-                event=raw_action.get("event"),
-                payload_map=raw_action.get("payload_map", {}),
-                # Meta
-                description=raw_action.get("description"),
-            )
-        return actions
+    def save_state(self, path: str = None):
+        """
+        Save current state to JSON file.
 
-    def _load_context_schema(self) -> ContextSchema:
-        """Load context schema definition."""
-        ctx = self.raw.get("context", {})
-        return ContextSchema(
-            schema=ctx.get("$schema", {}),
-            defaults=ctx.get("$defaults", {}),
-        )
+        Args:
+            path: File path (default: ./states/{id}.json)
 
+        Returns:
+            Path where state was saved
+        """
+        import json
+        from pathlib import Path
 
-# =========================================================================
-# PUBLIC API
-# =========================================================================
+        if not path:
+            states_dir = Path('./states')
+            states_dir.mkdir(exist_ok=True)
+            path = states_dir / f'{BLUEPRINT_ID}.json'
+        else:
+            path = Path(path)
+            path.parent.mkdir(parents=True, exist_ok=True)
 
-def load_blueprint(source: Union[str, Path, dict]) -> Blueprint:
-    """
-    Load a blueprint from various sources.
+        state_data = {
+            'blueprint_id': BLUEPRINT_ID,
+            'blueprint_version': BLUEPRINT_VERSION,
+            'context': self.context,
+            'traces': [
+                {
+                    'timestamp': t.timestamp.isoformat(),
+                    'from_id': t.from_id,
+                    'to_id': t.to_id,
+                }
+                for t in self.traces
+            ]
+        }
 
-    Args:
-        source: JSON file path, Path object, or raw dict
+        with open(path, 'w') as f:
+            json.dump(state_data, f, indent=2)
 
-    Returns:
-        Validated Blueprint object
+        return str(path)
 
-    Raises:
-        BlueprintValidationError: If validation fails
-        FileNotFoundError: If file doesn't exist
-        json.JSONDecodeError: If JSON is invalid
-    """
-    if isinstance(source, dict):
-        raw = source
-    elif isinstance(source, (str, Path)):
-        path = Path(source)
-        with open(path, 'r') as f:
-            raw = json.load(f)
-    else:
-        raise TypeError(f"Invalid source type: {type(source)}")
+    def load_state(self, path: str = None) -> bool:
+        """
+        Load state from JSON file.
 
-    loader = BlueprintLoader(raw)
-    return loader.load()
+        Args:
+            path: File path (default: ./states/{id}.json)
+
+        Returns:
+            True if loaded successfully, False otherwise
+        """
+        import json
+        from pathlib import Path
+        from datetime import datetime, timezone
+
+        if not path:
+            path = Path('./states') / f'{BLUEPRINT_ID}.json'
+        else:
+            path = Path(path)
+
+        if not path.exists():
+            return False
+
+        try:
+            with open(path, 'r') as f:
+                state_data = json.load(f)
+
+            # Validate blueprint ID matches
+            if state_data.get('blueprint_id') != BLUEPRINT_ID:
+                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
+                return False
+
+            self.context = state_data.get('context', {})
+
+            # Restore traces
+            self.traces = []
+            for t in state_data.get('traces', []):
+                self.traces.append(TransitionTrace(
+                    timestamp=datetime.fromisoformat(
+                        t['timestamp']
+                    ).replace(tzinfo=timezone.utc),
+                    from_id=t['from_id'],
+                    to_id=t['to_id'],
+                ))
+
+            return True
+        except Exception as e:
+            print(f'[L++ ERROR] Failed to load state: {e}')
+            return False
 
 
-def load_blueprint_from_json(json_str: str) -> Blueprint:
-    """
-    Load a blueprint from a JSON string.
-
-    Args:
-        json_str: JSON string
-
-    Returns:
-        Validated Blueprint object
-    """
-    raw = json.loads(json_str)
-    return load_blueprint(raw)
+def create_operator(compute_registry: dict = None) -> Operator:
+    """Factory function to create a new Operator instance."""
+    return Operator(compute_registry)
 
 
-__all__ = [
-    'BlueprintLoader',
-    'BlueprintValidationError',
-    'load_blueprint',
-    'load_blueprint_from_json',
-]
+if __name__ == '__main__':
+    print('L++ Compiled Operator: L++ Blueprint Loader')
+    print('States:', list(STATES.keys()))
+    print('Entry:', ENTRY_STATE)
+    print('Transitions:', len(TRANSITIONS))

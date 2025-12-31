@@ -1,9 +1,9 @@
 {
   "$schema": "lpp/v0.1",
-  "id": "decoded_visualizer",
-  "name": "Decoded: visualizer",
+  "id": "lpp_visualizer",
+  "name": "L++ Blueprint Visualizer",
   "version": "1.0.0",
-  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/visualizer.py",
+  "description": "Generates visual representations of blueprints (Mermaid, ASCII)",
   "context_schema": {
     "properties": {
       "error": {
@@ -11,156 +11,128 @@
       },
       "result": {
         "type": "object"
+      },
+      "blueprint": {
+        "type": "object"
+      },
+      "format": {
+        "type": "string",
+        "enum": ["mermaid", "ascii"]
+      },
+      "output": {
+        "type": "string"
       }
     }
   },
   "states": {
     "idle": {
       "name": "Idle",
-      "description": "Initial state"
+      "description": "Ready to visualize"
+    },
+    "loading": {
+      "name": "Loading",
+      "description": "Loading blueprint data"
+    },
+    "rendering": {
+      "name": "Rendering",
+      "description": "Rendering visualization"
     },
     "complete": {
       "name": "Complete",
-      "description": "Terminal state"
+      "description": "Visualization complete"
+    },
+    "error": {
+      "name": "Error",
+      "description": "Visualization failed"
     }
   },
   "transitions": [
     {
-      "id": "t0",
+      "id": "t_visualize",
       "from": "idle",
-      "to": "complete",
-      "on_event": "IDLE_DONE"
+      "to": "loading",
+      "on_event": "VISUALIZE"
     },
     {
-      "id": "t1",
+      "id": "t_loaded",
+      "from": "loading",
+      "to": "rendering",
+      "on_event": "LOAD_DONE"
+    },
+    {
+      "id": "t_rendered",
+      "from": "rendering",
+      "to": "complete",
+      "on_event": "RENDER_DONE"
+    },
+    {
+      "id": "t_load_err",
+      "from": "loading",
+      "to": "error",
+      "on_event": "LOAD_ERROR"
+    },
+    {
+      "id": "t_render_err",
+      "from": "rendering",
+      "to": "error",
+      "on_event": "RENDER_ERROR"
+    },
+    {
+      "id": "t_reset",
       "from": "*",
       "to": "idle",
       "on_event": "RESET"
     }
   ],
   "gates": {
-    "g0": {
+    "g_has_blueprint": {
       "type": "expression",
-      "expression": "__name__ == '__main__'"
+      "expression": "blueprint is not None"
+    },
+    "g_mermaid_format": {
+      "type": "expression",
+      "expression": "format == 'mermaid'"
+    },
+    "g_ascii_format": {
+      "type": "expression",
+      "expression": "format == 'ascii'"
     }
   },
   "actions": {
-    "a0": {
-      "type": "compute",
-      "compute_unit": "impl:self.states.get.get",
-      "description": "Inferred from function:as_mermaid_logic"
-    },
-    "a1": {
+    "a_load_states": {
       "type": "compute",
       "compute_unit": "impl:self.states.get",
-      "description": "Inferred from function:as_mermaid_logic"
+      "description": "Load state data"
     },
-    "a2": {
+    "a_render_mermaid": {
       "type": "compute",
-      "compute_unit": "impl:lines.append",
-      "description": "Inferred from function:as_mermaid_logic"
+      "compute_unit": "impl:as_mermaid_logic",
+      "description": "Render as Mermaid diagram"
     },
-    "a3": {
+    "a_render_ascii": {
+      "type": "compute",
+      "compute_unit": "impl:as_ascii",
+      "description": "Render as ASCII table"
+    },
+    "a_enumerate_transitions": {
       "type": "compute",
       "compute_unit": "impl:enumerate",
-      "description": "Inferred from function:as_mermaid_logic"
+      "description": "Enumerate transitions"
     },
-    "a4": {
+    "a_append_line": {
       "type": "compute",
-      "compute_unit": "impl:t.get",
-      "description": "Inferred from function:as_mermaid_logic"
+      "compute_unit": "impl:lines.append",
+      "description": "Append output line"
     },
-    "a10": {
+    "a_join_output": {
       "type": "compute",
-      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 107}.join",
-      "description": "Inferred from function:as_mermaid_logic"
-    },
-    "a13": {
-      "type": "compute",
-      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 118}.join",
-      "description": "Inferred from function:as_mermaid_logic"
-    },
-    "a19": {
-      "type": "compute",
-      "compute_unit": "impl:{'_type': 'Constant', 'value': '\\n', 'kind': None, 'lineno': 133}.join",
-      "description": "Inferred from function:as_mermaid_logic"
-    },
-    "a20": {
-      "type": "compute",
-      "compute_unit": "impl:{'_type': 'Constant', 'value': ' \u2502 ', 'kind': None, 'lineno': 145}.join",
-      "description": "Inferred from function:as_ascii"
-    },
-    "a21": {
-      "type": "compute",
-      "compute_unit": "impl:str.ljust",
-      "description": "Inferred from function:as_ascii"
-    },
-    "a22": {
-      "type": "compute",
-      "compute_unit": "impl:str",
-      "description": "Inferred from function:as_ascii"
-    },
-    "a23": {
-      "type": "compute",
-      "compute_unit": "impl:zip",
-      "description": "Inferred from function:as_ascii"
-    },
-    "a24": {
-      "type": "compute",
-      "compute_unit": "impl:sum",
-      "description": "Inferred from function:as_ascii"
-    },
-    "a26": {
-      "type": "compute",
-      "compute_unit": "impl:row",
-      "description": "Inferred from function:as_ascii"
-    },
-    "a27": {
-      "type": "compute",
-      "compute_unit": "impl:sep.replace.replace.replace",
-      "description": "Inferred from function:as_ascii"
-    },
-    "a28": {
-      "type": "compute",
-      "compute_unit": "impl:sep.replace.replace",
-      "description": "Inferred from function:as_ascii"
-    },
-    "a29": {
-      "type": "compute",
-      "compute_unit": "impl:sep.replace",
-      "description": "Inferred from function:as_ascii"
-    },
-    "a30": {
-      "type": "compute",
-      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 159}.join",
-      "description": "Inferred from function:as_ascii"
-    },
-    "a32": {
-      "type": "compute",
-      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 160}.join",
-      "description": "Inferred from function:as_ascii"
-    },
-    "a34": {
-      "type": "compute",
-      "compute_unit": "impl:output.append",
-      "description": "Inferred from function:as_ascii"
+      "compute_unit": "impl:join",
+      "description": "Join output lines"
     }
   },
   "entry_state": "idle",
   "terminal_states": [
     "complete",
     "error"
-  ],
-  "_validation": {
-    "timestamp": "2025-12-31T06:02:15.251464Z",
-    "schema_valid": true,
-    "compiles": true,
-    "errors": [],
-    "metrics": {
-      "states": 2,
-      "transitions": 2,
-      "gates": 1,
-      "actions": 20
-    }
-  }
+  ]
 }

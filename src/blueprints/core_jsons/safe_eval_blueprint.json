@@ -1,9 +1,9 @@
 {
   "$schema": "lpp/v0.1",
-  "id": "decoded_safe_eval",
-  "name": "Decoded: safe_eval",
+  "id": "lpp_safe_eval",
+  "name": "L++ Safe Evaluator",
   "version": "1.0.0",
-  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/safe_eval.py",
+  "description": "Safe expression evaluation with AST-based security",
   "context_schema": {
     "properties": {
       "error": {
@@ -11,164 +11,153 @@
       },
       "result": {
         "type": "object"
+      },
+      "expression": {
+        "type": "string"
+      },
+      "scope": {
+        "type": "object"
+      },
+      "ast_tree": {
+        "type": "object"
       }
     }
   },
   "states": {
     "idle": {
       "name": "Idle",
-      "description": "Initial state"
+      "description": "Ready to evaluate"
+    },
+    "parsing": {
+      "name": "Parsing",
+      "description": "Parsing expression into AST"
+    },
+    "validating": {
+      "name": "Validating",
+      "description": "Validating AST for safety"
+    },
+    "evaluating": {
+      "name": "Evaluating",
+      "description": "Evaluating safe AST"
     },
     "complete": {
       "name": "Complete",
-      "description": "Terminal state"
+      "description": "Evaluation completed"
+    },
+    "error": {
+      "name": "Error",
+      "description": "Evaluation failed"
     }
   },
   "transitions": [
     {
-      "id": "t0",
+      "id": "t_eval",
       "from": "idle",
-      "to": "complete",
-      "on_event": "IDLE_DONE"
+      "to": "parsing",
+      "on_event": "EVALUATE"
     },
     {
-      "id": "t1",
+      "id": "t_parsed",
+      "from": "parsing",
+      "to": "validating",
+      "on_event": "PARSE_DONE"
+    },
+    {
+      "id": "t_validated",
+      "from": "validating",
+      "to": "evaluating",
+      "on_event": "VALIDATION_PASSED"
+    },
+    {
+      "id": "t_done",
+      "from": "evaluating",
+      "to": "complete",
+      "on_event": "EVAL_DONE"
+    },
+    {
+      "id": "t_parse_err",
+      "from": "parsing",
+      "to": "error",
+      "on_event": "PARSE_ERROR"
+    },
+    {
+      "id": "t_unsafe",
+      "from": "validating",
+      "to": "error",
+      "on_event": "UNSAFE_EXPRESSION"
+    },
+    {
+      "id": "t_eval_err",
+      "from": "evaluating",
+      "to": "error",
+      "on_event": "EVAL_ERROR"
+    },
+    {
+      "id": "t_reset",
       "from": "*",
       "to": "idle",
       "on_event": "RESET"
     }
   ],
   "gates": {
-    "g0": {
+    "g_has_expression": {
       "type": "expression",
-      "expression": "__name__ == '__main__'"
+      "expression": "expression is not None and len(expression) > 0"
     },
-    "g1": {
+    "g_valid_ast": {
+      "type": "expression",
+      "expression": "ast_tree is not None"
+    },
+    "g_result_ok": {
       "type": "expression",
       "expression": "result == expected"
-    },
-    "g2": {
-      "type": "expression",
-      "expression": "failed > 0"
     }
   },
   "actions": {
-    "a0": {
-      "type": "compute",
-      "compute_unit": "impl:len",
-      "description": "Inferred from function:evaluate"
-    },
-    "a1": {
-      "type": "compute",
-      "compute_unit": "impl:print",
-      "description": "Inferred from function:evaluate"
-    },
-    "a3": {
+    "a_parse_ast": {
       "type": "compute",
       "compute_unit": "impl:ast.parse",
-      "description": "Inferred from function:evaluate"
+      "description": "Parse expression to AST"
     },
-    "a4": {
-      "type": "compute",
-      "compute_unit": "impl:SafeEvalError",
-      "description": "Inferred from function:evaluate"
-    },
-    "a5": {
+    "a_validate_ast": {
       "type": "compute",
       "compute_unit": "impl:_validate_ast",
-      "description": "Inferred from function:evaluate"
+      "description": "Validate AST is safe"
     },
-    "a6": {
+    "a_check_complexity": {
       "type": "compute",
       "compute_unit": "impl:self._check_complexity",
-      "description": "Inferred from function:evaluate"
+      "description": "Check expression complexity"
     },
-    "a7": {
+    "a_visit_node": {
       "type": "compute",
       "compute_unit": "impl:self.visit",
-      "description": "Inferred from function:evaluate"
+      "description": "Visit AST node"
     },
-    "a9": {
+    "a_resolve_name": {
       "type": "compute",
       "compute_unit": "impl:_resolve_name",
-      "description": "Inferred from function:visit_Name"
+      "description": "Resolve variable name"
     },
-    "a11": {
+    "a_resolve_attr": {
       "type": "compute",
       "compute_unit": "impl:_resolve_attr",
-      "description": "Inferred from function:visit_Attribute"
+      "description": "Resolve attribute access"
     },
-    "a14": {
-      "type": "compute",
-      "compute_unit": "impl:isinstance",
-      "description": "Inferred from function:visit_Subscript"
-    },
-    "a15": {
-      "type": "compute",
-      "compute_unit": "impl:obj.get",
-      "description": "Inferred from function:visit_Subscript"
-    },
-    "a21": {
-      "type": "compute",
-      "compute_unit": "impl:type",
-      "description": "Inferred from function:visit_Subscript"
-    },
-    "a34": {
-      "type": "compute",
-      "compute_unit": "impl:ops.get",
-      "description": "Inferred from function:visit_BinOp"
-    },
-    "a38": {
-      "type": "compute",
-      "compute_unit": "impl:op_func",
-      "description": "Inferred from function:visit_BinOp"
-    },
-    "a40": {
-      "type": "compute",
-      "compute_unit": "impl:zip",
-      "description": "Inferred from function:visit_Compare"
-    },
-    "a57": {
-      "type": "compute",
-      "compute_unit": "impl:tuple",
-      "description": "Inferred from function:visit_Tuple"
-    },
-    "a63": {
+    "a_safe_call": {
       "type": "compute",
       "compute_unit": "impl:SAFE_FUNCTIONS.get",
-      "description": "Inferred from function:visit_Call"
+      "description": "Get safe function"
     },
-    "a67": {
+    "a_raise_error": {
       "type": "compute",
-      "compute_unit": "impl:func",
-      "description": "Inferred from function:visit_Call"
-    },
-    "a69": {
-      "type": "compute",
-      "compute_unit": "impl:SafeEvaluator",
-      "description": "Inferred from function:safe_eval"
-    },
-    "a70": {
-      "type": "compute",
-      "compute_unit": "impl:evaluator.evaluate",
-      "description": "Inferred from function:safe_eval"
+      "compute_unit": "impl:SafeEvalError",
+      "description": "Raise safe eval error"
     }
   },
   "entry_state": "idle",
   "terminal_states": [
     "complete",
     "error"
-  ],
-  "_validation": {
-    "timestamp": "2025-12-31T06:02:15.180400Z",
-    "schema_valid": true,
-    "compiles": true,
-    "errors": [],
-    "metrics": {
-      "states": 2,
-      "transitions": 2,
-      "gates": 3,
-      "actions": 20
-    }
-  }
+  ]
 }

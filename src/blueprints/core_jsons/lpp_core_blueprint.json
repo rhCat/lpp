@@ -1,9 +1,9 @@
 {
   "$schema": "lpp/v0.1",
-  "id": "decoded_lpp_core",
-  "name": "Decoded: lpp_core",
+  "id": "lpp_core",
+  "name": "L++ Core Atoms",
   "version": "1.0.0",
-  "description": "Auto-decoded from /Users/ruihe/mnt/lpp/lpp/src/frame_py/lpp_core.py",
+  "description": "Core atomic operations: EVALUATE, TRANSITION, MUTATE, DISPATCH",
   "context_schema": {
     "properties": {
       "error": {
@@ -11,106 +11,192 @@
       },
       "result": {
         "type": "object"
+      },
+      "expression": {
+        "type": "string"
+      },
+      "scope": {
+        "type": "object"
+      },
+      "context_data": {
+        "type": "object"
       }
     }
   },
   "states": {
     "idle": {
       "name": "Idle",
-      "description": "Initial state"
+      "description": "Ready for atomic operation"
+    },
+    "evaluating": {
+      "name": "Evaluating",
+      "description": "Executing atom_EVALUATE"
+    },
+    "transitioning": {
+      "name": "Transitioning",
+      "description": "Executing atom_TRANSITION"
+    },
+    "mutating": {
+      "name": "Mutating",
+      "description": "Executing atom_MUTATE"
+    },
+    "dispatching": {
+      "name": "Dispatching",
+      "description": "Executing atom_DISPATCH"
     },
     "complete": {
       "name": "Complete",
-      "description": "Terminal state"
+      "description": "Operation completed"
+    },
+    "error": {
+      "name": "Error",
+      "description": "Operation failed"
     }
   },
   "transitions": [
     {
-      "id": "t0",
+      "id": "t_evaluate",
       "from": "idle",
-      "to": "complete",
-      "on_event": "IDLE_DONE"
+      "to": "evaluating",
+      "on_event": "EVALUATE"
     },
     {
-      "id": "t1",
+      "id": "t_transition",
+      "from": "idle",
+      "to": "transitioning",
+      "on_event": "TRANSITION"
+    },
+    {
+      "id": "t_mutate",
+      "from": "idle",
+      "to": "mutating",
+      "on_event": "MUTATE"
+    },
+    {
+      "id": "t_dispatch",
+      "from": "idle",
+      "to": "dispatching",
+      "on_event": "DISPATCH"
+    },
+    {
+      "id": "t_eval_done",
+      "from": "evaluating",
+      "to": "complete",
+      "on_event": "EVAL_DONE"
+    },
+    {
+      "id": "t_trans_done",
+      "from": "transitioning",
+      "to": "complete",
+      "on_event": "TRANS_DONE"
+    },
+    {
+      "id": "t_mutate_done",
+      "from": "mutating",
+      "to": "complete",
+      "on_event": "MUTATE_DONE"
+    },
+    {
+      "id": "t_dispatch_done",
+      "from": "dispatching",
+      "to": "complete",
+      "on_event": "DISPATCH_DONE"
+    },
+    {
+      "id": "t_eval_error",
+      "from": "evaluating",
+      "to": "error",
+      "on_event": "EVAL_ERROR"
+    },
+    {
+      "id": "t_trans_error",
+      "from": "transitioning",
+      "to": "error",
+      "on_event": "TRANS_ERROR"
+    },
+    {
+      "id": "t_mutate_error",
+      "from": "mutating",
+      "to": "error",
+      "on_event": "MUTATE_ERROR"
+    },
+    {
+      "id": "t_dispatch_error",
+      "from": "dispatching",
+      "to": "error",
+      "on_event": "DISPATCH_ERROR"
+    },
+    {
+      "id": "t_reset",
       "from": "*",
       "to": "idle",
       "on_event": "RESET"
     }
   ],
-  "gates": {},
+  "gates": {
+    "g_has_expression": {
+      "type": "expression",
+      "expression": "expression is not None"
+    },
+    "g_has_scope": {
+      "type": "expression",
+      "expression": "scope is not None"
+    },
+    "g_valid_path": {
+      "type": "expression",
+      "expression": "path is not None and len(path) > 0"
+    }
+  },
   "actions": {
-    "a0": {
+    "a_safe_eval": {
       "type": "compute",
       "compute_unit": "impl:safe_eval_bool",
-      "description": "Inferred from function:atom_EVALUATE"
+      "description": "Safely evaluate boolean expression"
     },
-    "a1": {
+    "a_create_trace": {
       "type": "compute",
       "compute_unit": "impl:TransitionTrace",
-      "description": "Inferred from function:atom_TRANSITION"
+      "description": "Create transition trace"
     },
-    "a2": {
+    "a_get_timestamp": {
       "type": "compute",
       "compute_unit": "impl:datetime.datetime.now",
-      "description": "Inferred from function:atom_TRANSITION"
+      "description": "Get current timestamp"
     },
-    "a3": {
+    "a_copy_context": {
       "type": "compute",
       "compute_unit": "impl:context_data.copy",
-      "description": "Inferred from function:atom_MUTATE"
+      "description": "Copy context data"
     },
-    "a4": {
+    "a_split_path": {
       "type": "compute",
       "compute_unit": "impl:path.split",
-      "description": "Inferred from function:atom_MUTATE"
+      "description": "Split path into parts"
     },
-    "a5": {
+    "a_check_type": {
       "type": "compute",
       "compute_unit": "impl:isinstance",
-      "description": "Inferred from function:atom_MUTATE"
+      "description": "Check type of value"
     },
-    "a6": {
-      "type": "compute",
-      "compute_unit": "impl:{'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'current_level', 'ctx': {'_type': 'Load'}, 'lineno': 140}, 'slice': {'_type': 'Name', 'id': 'key', 'ctx': {'_type': 'Load'}, 'lineno': 140}, 'ctx': {'_type': 'Load'}, 'lineno': 140}.copy",
-      "description": "Inferred from function:atom_MUTATE"
-    },
-    "a7": {
+    "a_get_compute_func": {
       "type": "compute",
       "compute_unit": "impl:compute_registry.get",
-      "description": "Inferred from function:atom_DISPATCH"
+      "description": "Get compute function from registry"
     },
-    "a8": {
-      "type": "compute",
-      "compute_unit": "impl:print",
-      "description": "Inferred from function:atom_DISPATCH"
-    },
-    "a10": {
+    "a_call_compute": {
       "type": "compute",
       "compute_unit": "impl:compute_func",
-      "description": "Inferred from function:atom_DISPATCH"
+      "description": "Call compute function"
     },
-    "a13": {
+    "a_log": {
       "type": "compute",
-      "compute_unit": "impl:str",
-      "description": "Inferred from function:atom_DISPATCH"
+      "compute_unit": "impl:print",
+      "description": "Log message"
     }
   },
   "entry_state": "idle",
   "terminal_states": [
     "complete",
     "error"
-  ],
-  "_validation": {
-    "timestamp": "2025-12-31T06:02:15.148181Z",
-    "schema_valid": true,
-    "compiles": true,
-    "errors": [],
-    "metrics": {
-      "states": 2,
-      "transitions": 2,
-      "gates": 0,
-      "actions": 11
-    }
-  }
+  ]
 }

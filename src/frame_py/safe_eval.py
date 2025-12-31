@@ -1,565 +1,405 @@
 """
-L++ Safe Expression Evaluator
+L++ Compiled Operator: L++ Safe Evaluator
+Version: 1.0.0
+Description: Safe expression evaluation with AST-based security
 
-A deterministic, secure expression parser for gate conditions.
-Replaces Python's eval() with a minimal subset that only understands:
-
-    - Boolean logic: and, or, not
-    - Comparisons: ==, !=, <, >, <=, >=
-    - Membership: in, not in
-    - Null checks: is None, is not None
-    - Context variable access: identifiers resolve to context dict
-    - Literals: numbers, strings, True, False, None
-
-This ensures the "Judge" cannot be bribed by external chaos.
-No access to: imports, builtins, time, random, files, network.
+Auto-generated from JSON blueprint. Do not edit directly.
 """
 
-import re
-import ast
-import operator
-from typing import Any, Dict, Union
+from frame_py.lpp_core import (
+    atom_EVALUATE,
+    atom_TRANSITION,
+    atom_MUTATE,
+    atom_DISPATCH,
+    TransitionTrace,
+)
 
 
-class SafeEvalError(Exception):
-    """Raised when safe evaluation fails."""
-    pass
+# ======================================================================
+# BLUEPRINT CONSTANTS
+# ======================================================================
 
+BLUEPRINT_ID = 'lpp_safe_eval'
+BLUEPRINT_NAME = 'L++ Safe Evaluator'
+BLUEPRINT_VERSION = '1.0.0'
+ENTRY_STATE = 'idle'
+TERMINAL_STATES = {'complete', 'error'}
 
-# Allowed AST node types (whitelist approach)
-ALLOWED_NODES = {
-    # Expressions
-    ast.Expression,
-    ast.BoolOp,
-    ast.BinOp,
-    ast.UnaryOp,
-    ast.Compare,
-    ast.IfExp,  # ternary: x if cond else y
-    ast.Call,   # function calls (only from SAFE_FUNCTIONS)
-
-    # Operators
-    ast.And,
-    ast.Or,
-    ast.Not,
-    ast.Eq,
-    ast.NotEq,
-    ast.Lt,
-    ast.LtE,
-    ast.Gt,
-    ast.GtE,
-    ast.Is,
-    ast.IsNot,
-    ast.In,
-    ast.NotIn,
-    ast.Add,
-    ast.Sub,
-    ast.Mult,
-    ast.Div,
-    ast.FloorDiv,
-    ast.Mod,
-
-    # Values
-    ast.Constant,
-    ast.Name,
-    ast.Load,
-    ast.Tuple,
-    ast.List,
-    ast.Set,
-
-    # Attribute access (for nested context: event.payload.value)
-    ast.Attribute,
-
-    # Subscript (for context["key"] access)
-    ast.Subscript,
+STATES = {
+    'idle': 'Idle',  # Ready to evaluate
+    'parsing': 'Parsing',  # Parsing expression into AST
+    'validating': 'Validating',  # Validating AST for safety
+    'evaluating': 'Evaluating',  # Evaluating safe AST
+    'complete': 'Complete',  # Evaluation completed
+    'error': 'Error',  # Evaluation failed
 }
 
-
-# Pure Function Registry
-# These are deterministic functions with no side effects.
-# Only functions in this registry can be called in L++ expressions.
-SAFE_FUNCTIONS = {
-    'len': len,
-    'abs': abs,
-    'min': min,
-    'max': max,
-    'sum': sum,
-    'any': any,
-    'all': all,
-    'round': round,
-    'bool': bool,
-    'int': int,
-    'float': float,
-    'str': str,
-    # Add domain-specific pure functions here
+GATES = {
+    'g_has_expression': 'expression is not None and len(expression) > 0',
+    'g_valid_ast': 'ast_tree is not None',
+    'g_result_ok': 'result == expected',
 }
 
+DISPLAY_RULES = [
+]
 
-def _validate_ast(node: ast.AST, depth: int = 0) -> None:
-    """
-    Recursively validate AST nodes against whitelist.
-    Raises SafeEvalError if disallowed construct is found.
-    """
-    if depth > 50:
-        raise SafeEvalError("Expression too deeply nested")
+ACTIONS = {
+    'a_parse_ast': {
+        'type': 'compute',
+        'compute_unit': 'impl:ast.parse',
+    },
+    'a_validate_ast': {
+        'type': 'compute',
+        'compute_unit': 'impl:_validate_ast',
+    },
+    'a_check_complexity': {
+        'type': 'compute',
+        'compute_unit': 'impl:self._check_complexity',
+    },
+    'a_visit_node': {
+        'type': 'compute',
+        'compute_unit': 'impl:self.visit',
+    },
+    'a_resolve_name': {
+        'type': 'compute',
+        'compute_unit': 'impl:_resolve_name',
+    },
+    'a_resolve_attr': {
+        'type': 'compute',
+        'compute_unit': 'impl:_resolve_attr',
+    },
+    'a_safe_call': {
+        'type': 'compute',
+        'compute_unit': 'impl:SAFE_FUNCTIONS.get',
+    },
+    'a_raise_error': {
+        'type': 'compute',
+        'compute_unit': 'impl:SafeEvalError',
+    },
+}
 
-    if type(node) not in ALLOWED_NODES:
-        raise SafeEvalError(
-            f"Disallowed construct: {type(node).__name__}"
-        )
+TRANSITIONS = [
+    {
+        'id': 't_eval',
+        'from': 'idle',
+        'to': 'parsing',
+        'on_event': 'EVALUATE',
+        'gates': [],
+        'actions': [],
+    },
+    {
+        'id': 't_parsed',
+        'from': 'parsing',
+        'to': 'validating',
+        'on_event': 'PARSE_DONE',
+        'gates': [],
+        'actions': [],
+    },
+    {
+        'id': 't_validated',
+        'from': 'validating',
+        'to': 'evaluating',
+        'on_event': 'VALIDATION_PASSED',
+        'gates': [],
+        'actions': [],
+    },
+    {
+        'id': 't_done',
+        'from': 'evaluating',
+        'to': 'complete',
+        'on_event': 'EVAL_DONE',
+        'gates': [],
+        'actions': [],
+    },
+    {
+        'id': 't_parse_err',
+        'from': 'parsing',
+        'to': 'error',
+        'on_event': 'PARSE_ERROR',
+        'gates': [],
+        'actions': [],
+    },
+    {
+        'id': 't_unsafe',
+        'from': 'validating',
+        'to': 'error',
+        'on_event': 'UNSAFE_EXPRESSION',
+        'gates': [],
+        'actions': [],
+    },
+    {
+        'id': 't_eval_err',
+        'from': 'evaluating',
+        'to': 'error',
+        'on_event': 'EVAL_ERROR',
+        'gates': [],
+        'actions': [],
+    },
+    {
+        'id': 't_reset',
+        'from': '*',
+        'to': 'idle',
+        'on_event': 'RESET',
+        'gates': [],
+        'actions': [],
+    },
+]
 
-    # Check for dangerous names
-    if isinstance(node, ast.Name):
-        dangerous = {
-            '__import__', '__builtins__', '__class__', '__bases__',
-            'eval', 'exec', 'compile', 'open', 'input', 'print',
-            'globals', 'locals', 'vars', 'dir', 'getattr', 'setattr',
-            'delattr', 'hasattr', 'type', 'isinstance', 'issubclass',
-            'import', 'breakpoint', 'exit', 'quit', 'help',
-        }
-        if node.id in dangerous:
-            raise SafeEvalError(f"Forbidden identifier: {node.id}")
 
-    # Recurse into child nodes
-    for child in ast.iter_child_nodes(node):
-        _validate_ast(child, depth + 1)
+# ======================================================================
+# HELPER FUNCTIONS
+# ======================================================================
 
-
-def _resolve_name(name: str, context: Dict[str, Any]) -> Any:
-    """Resolve a name to a value from context."""
-    # Check special values first
-    if name == 'True':
-        return True
-    if name == 'False':
-        return False
-    if name == 'None':
-        return None
-
-    # Look up in context
-    if name in context:
-        return context[name]
-
-    # Check for _state (special L++ variable)
-    if name == '_state':
-        return context.get('_state')
-
-    raise SafeEvalError(f"Undefined variable: {name}")
-
-
-def _resolve_attr(obj: Any, attr: str) -> Any:
-    """Safely resolve attribute access."""
-    if obj is None:
-        return None
-
-    if isinstance(obj, dict):
-        return obj.get(attr)
-
-    # Only allow attribute access on safe types
-    if isinstance(obj, (int, float, str, bool)):
-        raise SafeEvalError(
-            f"Cannot access attributes on primitive type: {type(obj).__name__}"
-        )
-
-    # For objects, use getattr but block dunders
-    if attr.startswith('_'):
-        raise SafeEvalError(f"Cannot access private attribute: {attr}")
-
-    return getattr(obj, attr, None)
-
-
-class SafeEvaluator(ast.NodeVisitor):
-    """
-    AST-based safe expression evaluator.
-    Visits AST nodes and evaluates them against a context dict.
-    """
-    # Engineering Thresholds
-    MAX_DEPTH = 5         # Deep nesting is hard to audit
-    MAX_LENGTH = 120      # Long strings should be Compute Units
-    MAX_CALLS = 3         # Chaining too many functions is "Flesh" logic
-
-    def __init__(self, context: Dict[str, Any]):
-        self.context = context
-        self.current_depth = 0
-        self.call_count = 0
-
-    def _check_complexity(self, node, depth=0):
-        """Recursive check for AST depth and call density."""
-        if depth > self.MAX_DEPTH:
-            print(
-                "[L++ LINT WARNING] Expression "
-                f"depth exceeds {self.MAX_DEPTH}. "
-                "This logic is becoming 'Brittle Bone'. Move to COMPUTE."
-            )
-
-        if isinstance(node, ast.Call):
-            self.call_count += 1
-            if self.call_count > self.MAX_CALLS:
-                print(
-                    "[L++ LINT WARNING] Too many "
-                    f"function calls ({self.call_count}). "
-                    "The 'Judge' is doing too much work. Move to COMPUTE."
-                )
-
-        for child in ast.iter_child_nodes(node):
-            self._check_complexity(child, depth + 1)
-
-    def evaluate(self, expr: str) -> Any:
-        """
-        Safely evaluate an expression string.
-
-        Args:
-            expr: Expression string to evaluate
-
-        Returns:
-            The result of evaluating the expression
-
-        Raises:
-            SafeEvalError: If expression contains disallowed constructs
-        """
-
-        if len(expr) > self.MAX_LENGTH:
-            print(
-                "[L++ LINT WARNING] Expression is "
-                f"too long ({len(expr)} chars). "
-                "Consider moving this logic to a COMPUTE unit."
-            )
-
-        try:
-            tree = ast.parse(expr, mode='eval')
-        except SyntaxError as e:
-            raise SafeEvalError(f"Syntax error: {e}")
-
-        # Validate AST structure
-        _validate_ast(tree)
-
-        # Pre-check complexity
-        self._check_complexity(tree)
-
-        # Evaluate
-        return self.visit(tree)
-
-    def visit_Expression(self, node: ast.Expression) -> Any:
-        return self.visit(node.body)
-
-    def visit_Constant(self, node: ast.Constant) -> Any:
-        return node.value
-
-    def visit_Name(self, node: ast.Name) -> Any:
-        return _resolve_name(node.id, self.context)
-
-    def visit_Attribute(self, node: ast.Attribute) -> Any:
-        obj = self.visit(node.value)
-        return _resolve_attr(obj, node.attr)
-
-    def visit_Subscript(self, node: ast.Subscript) -> Any:
-        obj = self.visit(node.value)
-        key = self.visit(node.slice)
+def _resolve_path(path: str, data: dict):
+    """Resolve a dotted path in a dictionary."""
+    parts = path.split('.')
+    obj = data
+    for part in parts:
+        if isinstance(obj, dict):
+            obj = obj.get(part)
+        else:
+            return None
         if obj is None:
             return None
-        if isinstance(obj, dict):
-            return obj.get(key)
-        if isinstance(obj, (list, tuple)):
-            if isinstance(key, int) and -len(obj) <= key < len(obj):
-                return obj[key]
-            return None
-        raise SafeEvalError(f"Cannot subscript type: {type(obj).__name__}")
+    return obj
 
-    def visit_BoolOp(self, node: ast.BoolOp) -> bool:
-        if isinstance(node.op, ast.And):
-            for value in node.values:
-                if not self.visit(value):
-                    return False
-            return True
-        elif isinstance(node.op, ast.Or):
-            for value in node.values:
-                if self.visit(value):
-                    return True
-            return False
-        raise SafeEvalError(f"Unknown BoolOp: {type(node.op).__name__}")
 
-    def visit_UnaryOp(self, node: ast.UnaryOp) -> Any:
-        operand = self.visit(node.operand)
-        if isinstance(node.op, ast.Not):
-            return not operand
-        raise SafeEvalError(f"Unknown UnaryOp: {type(node.op).__name__}")
+# ======================================================================
+# COMPILED OPERATOR
+# ======================================================================
 
-    def visit_BinOp(self, node: ast.BinOp) -> Any:
-        left = self.visit(node.left)
-        right = self.visit(node.right)
+class Operator:
+    """
+    Compiled L++ Operator: L++ Safe Evaluator
+    """
 
-        ops = {
-            ast.Add: operator.add,
-            ast.Sub: operator.sub,
-            ast.Mult: operator.mul,
-            ast.Div: operator.truediv,
-            ast.FloorDiv: operator.floordiv,
-            ast.Mod: operator.mod,
+    def __init__(self, compute_registry: dict = None):
+        self.context = {'_state': ENTRY_STATE, 'error': None, 'result': None, 'expression': None, 'scope': None, 'ast_tree': None}
+        self.traces: list[TransitionTrace] = []
+        self.compute_registry = compute_registry or {}
+
+    @property
+    def state(self) -> str:
+        return self.context.get('_state', ENTRY_STATE)
+
+    @property
+    def is_terminal(self) -> bool:
+        return self.state in TERMINAL_STATES
+
+    def dispatch(self, event_name: str, payload: dict = None):
+        """
+        Dispatch an event to the operator.
+
+        Args:
+            event_name: Name of the event
+            payload: Event payload data
+
+        Returns:
+            Tuple of (success, new_state, error)
+        """
+        payload = payload or {}
+        current = self.state
+
+        # Check terminal
+        if self.is_terminal:
+            return False, current, 'Already in terminal state'
+
+        # Build evaluation scope
+        scope = dict(self.context)
+        scope['event'] = {'name': event_name, 'payload': payload}
+
+        # Find matching transition (checks gates)
+        trans = None
+        for t in TRANSITIONS:
+            if t['on_event'] != event_name:
+                continue
+            if t['from'] != '*' and t['from'] != current:
+                continue
+            # Check gates
+            gates_pass = True
+            for gate_id in t.get('gates', []):
+                expr = GATES.get(gate_id, 'True')
+                if not atom_EVALUATE(expr, scope):
+                    gates_pass = False
+                    break
+            if gates_pass:
+                trans = t
+                break
+
+        if not trans:
+            return False, current, f'No transition for {event_name}'
+
+        # Execute actions
+        for action_id in trans['actions']:
+            action = ACTIONS.get(action_id)
+            if not action:
+                continue
+
+            if action['type'] == 'set':
+                # MUTATE
+                target = action.get('target')
+                if action.get('value') is not None:
+                    value = action['value']
+                elif action.get('value_from'):
+                    value = _resolve_path(action['value_from'], scope)
+                else:
+                    value = None
+                self.context = atom_MUTATE(self.context, target, value)
+                scope.update(self.context)  # Sync scope for chained actions
+
+            elif action['type'] == 'compute':
+                # DISPATCH
+                unit = action.get('compute_unit', '')
+                parts = unit.split(':')
+                if len(parts) == 2:
+                    sys_id, op_id = parts
+                    inp = {
+                        k: _resolve_path(v, scope)
+                        for k, v in action.get('input_map', {}).items()
+                    }
+                    result = atom_DISPATCH(
+                        sys_id, op_id, inp, self.compute_registry
+                    )
+                    for ctx_path, res_key in action.get('output_map', {}).items():
+                        if res_key in result:
+                            self.context = atom_MUTATE(
+                                self.context, ctx_path, result[res_key]
+                            )
+                    scope.update(self.context)  # Sync scope for chained actions
+
+        # TRANSITION
+        new_state, trace = atom_TRANSITION(current, trans['to'])
+        self.context = atom_MUTATE(self.context, '_state', new_state)
+        self.traces.append(trace)
+
+        return True, new_state, None
+
+    def get(self, path: str):
+        """Get a value from context by path."""
+        return _resolve_path(path, self.context)
+
+    def set(self, path: str, value):
+        """Set a value in context by path."""
+        self.context = atom_MUTATE(self.context, path, value)
+
+    def display(self) -> str:
+        """Evaluate display rules and return formatted string."""
+        for rule in DISPLAY_RULES:
+            gate = rule.get('gate')
+            if gate:
+                expr = GATES.get(gate, 'False')
+                if not atom_EVALUATE(expr, self.context):
+                    continue
+            # Gate passed or no gate, format template
+            template = rule.get('template', '')
+            try:
+                return template.format(**self.context)
+            except (KeyError, ValueError):
+                return template
+        return ''
+
+    def reset(self):
+        """Reset to initial state."""
+        self.context = {'_state': ENTRY_STATE, 'error': None, 'result': None, 'expression': None, 'scope': None, 'ast_tree': None}
+        self.traces = []
+
+    def save_state(self, path: str = None):
+        """
+        Save current state to JSON file.
+
+        Args:
+            path: File path (default: ./states/{id}.json)
+
+        Returns:
+            Path where state was saved
+        """
+        import json
+        from pathlib import Path
+
+        if not path:
+            states_dir = Path('./states')
+            states_dir.mkdir(exist_ok=True)
+            path = states_dir / f'{BLUEPRINT_ID}.json'
+        else:
+            path = Path(path)
+            path.parent.mkdir(parents=True, exist_ok=True)
+
+        state_data = {
+            'blueprint_id': BLUEPRINT_ID,
+            'blueprint_version': BLUEPRINT_VERSION,
+            'context': self.context,
+            'traces': [
+                {
+                    'timestamp': t.timestamp.isoformat(),
+                    'from_id': t.from_id,
+                    'to_id': t.to_id,
+                }
+                for t in self.traces
+            ]
         }
 
-        op_func = ops.get(type(node.op))
-        if op_func is None:
-            raise SafeEvalError(f"Unknown BinOp: {type(node.op).__name__}")
+        with open(path, 'w') as f:
+            json.dump(state_data, f, indent=2)
 
-        # Handle None in arithmetic
-        if left is None or right is None:
-            return None
+        return str(path)
 
-        return op_func(left, right)
-
-    def visit_Compare(self, node: ast.Compare) -> bool:
-        left = self.visit(node.left)
-
-        for op, comparator in zip(node.ops, node.comparators):
-            right = self.visit(comparator)
-
-            if isinstance(op, ast.Eq):
-                result = left == right
-            elif isinstance(op, ast.NotEq):
-                result = left != right
-            elif isinstance(op, ast.Lt):
-                result = left < right if (
-                    left is not None and right is not None) else False
-            elif isinstance(op, ast.LtE):
-                result = left <= right if (
-                    left is not None and right is not None) else False
-            elif isinstance(op, ast.Gt):
-                result = left > right if (
-                    left is not None and right is not None) else False
-            elif isinstance(op, ast.GtE):
-                result = left >= right if (
-                    left is not None and right is not None) else False
-            elif isinstance(op, ast.Is):
-                result = left is right
-            elif isinstance(op, ast.IsNot):
-                result = left is not right
-            elif isinstance(op, ast.In):
-                if right is None:
-                    result = False
-                else:
-                    result = left in right
-            elif isinstance(op, ast.NotIn):
-                if right is None:
-                    result = True
-                else:
-                    result = left not in right
-            else:
-                raise SafeEvalError(f"Unknown comparison: {type(op).__name__}")
-
-            if not result:
-                return False
-            left = right
-
-        return True
-
-    def visit_IfExp(self, node: ast.IfExp) -> Any:
-        """Ternary expression: x if condition else y"""
-        if self.visit(node.test):
-            return self.visit(node.body)
-        return self.visit(node.orelse)
-
-    def visit_Tuple(self, node: ast.Tuple) -> tuple:
-        return tuple(self.visit(el) for el in node.elts)
-
-    def visit_List(self, node: ast.List) -> list:
-        return [self.visit(el) for el in node.elts]
-
-    def visit_Set(self, node: ast.Set) -> set:
-        return {self.visit(el) for el in node.elts}
-
-    def visit_Call(self, node: ast.Call) -> Any:
+    def load_state(self, path: str = None) -> bool:
         """
-        Safely handle function calls.
-        Only allows functions defined in SAFE_FUNCTIONS.
+        Load state from JSON file.
+
+        Args:
+            path: File path (default: ./states/{id}.json)
+
+        Returns:
+            True if loaded successfully, False otherwise
         """
-        # 1. Resolve the function name - only simple names allowed
-        if not isinstance(node.func, ast.Name):
-            raise SafeEvalError("Only simple function calls are allowed")
+        import json
+        from pathlib import Path
+        from datetime import datetime, timezone
 
-        func_name = node.func.id
-        func = SAFE_FUNCTIONS.get(func_name)
-
-        if func is None:
-            raise SafeEvalError(
-                f"Function '{func_name}' is not in the safe whitelist")
-
-        # 2. Evaluate arguments
-        args = [self.visit(arg) for arg in node.args]
-
-        # 3. Block keyword arguments for simplicity/security
-        if node.keywords:
-            raise SafeEvalError(
-                "Keyword arguments are not allowed in L++ expressions")
-
-        # 4. Execute the pure function
-        try:
-            return func(*args)
-        except Exception as e:
-            raise SafeEvalError(f"Error executing {func_name}(): {e}")
-
-
-def safe_eval(expression: str, context: Dict[str, Any]) -> Any:
-    """
-    Safely evaluate an L++ expression.
-
-    This is the main entry point for deterministic, secure evaluation.
-
-    Args:
-        expression: Boolean expression string
-        context: Context dictionary with variable values
-
-    Returns:
-        Result of expression evaluation
-
-    Raises:
-        SafeEvalError: If expression is invalid
-        or contains disallowed constructs
-
-    Examples:
-        >>> safe_eval("a > 5", {"a": 10})
-        True
-        >>> safe_eval("a is None", {"a": None})
-        True
-        >>> safe_eval("op in ('+', '-', '*', '/')", {"op": "+"})
-        True
-        >>> safe_eval("event.payload.value", \
-            {"event": {"payload": {"value": 42}}})
-        42
-    """
-    evaluator = SafeEvaluator(context)
-    return evaluator.evaluate(expression)
-
-
-def safe_eval_bool(expression: str, context: Dict[str, Any]) -> bool:
-    """
-    Safely evaluate an expression and return boolean result.
-
-    This is the drop-in replacement for atom_EVALUATE.
-
-    Args:
-        expression: Boolean expression string
-        context: Context dictionary
-
-    Returns:
-        True if expression evaluates truthy, False otherwise
-    """
-    try:
-        result = safe_eval(expression, context)
-        return bool(result)
-    except SafeEvalError as e:
-        # In deterministic system, failed evaluation = False
-        print(f"[L++ SAFE EVAL WARNING] {e} in '{expression}'")
-        return False
-    except Exception as e:
-        print(f"[L++ SAFE EVAL ERROR] Unexpected: {e} in '{expression}'")
-        return False
-
-
-# =========================================================================
-# CLI for testing
-# =========================================================================
-
-if __name__ == "__main__":
-    import sys
-
-    # Test cases - generic L++ expressions
-    tests = [
-        # Basic comparisons
-        ("a > 5", {"a": 10}, True),
-        ("a < 5", {"a": 10}, False),
-        ("a == 10", {"a": 10}, True),
-        ("a != 10", {"a": 10}, False),
-
-        # None checks
-        ("a is None", {"a": None}, True),
-        ("a is not None", {"a": 10}, True),
-        ("a is not None", {"a": None}, False),
-
-        # Boolean logic
-        ("a > 5 and b < 10", {"a": 7, "b": 3}, True),
-        ("a > 5 or b > 10", {"a": 3, "b": 15}, True),
-        ("not a", {"a": False}, True),
-
-        # Membership
-        ("status in ('pending', 'approved', 'rejected')",
-            {"status": "approved"}, True),
-        ("status in ('pending', 'approved', 'rejected')",
-            {"status": "unknown"}, False),
-
-        # Nested access (event.payload pattern common in L++)
-        ("event.payload.value == 42", {
-         "event": {"payload": {"value": 42}}}, True),
-        ("event.payload.value > 0", {
-         "event": {"payload": {"value": 42}}}, True),
-
-        # Complex gate expression
-        (
-            "x is not None and y is not None and x > 0",
-            {"x": 5, "y": 3},
-            True
-        ),
-        (
-            "mode == 'strict' and count == 0",
-            {"mode": "strict", "count": 0},
-            True
-        ),
-
-        # L++ special _state variable
-        ("_state == 'active'", {"_state": "active"}, True),
-        ("_state in ('idle', 'active', 'complete')",
-         {"_state": "active"}, True),
-
-        # Arithmetic in conditions
-        ("a + b > 10", {"a": 5, "b": 8}, True),
-        ("a * 2 == b", {"a": 5, "b": 10}, True),
-
-        # Pure function calls
-        ("len(items) > 0", {"items": [1, 2, 3]}, True),
-        ("len(items) == 0", {"items": []}, True),
-        ("max(a, b) == 10", {"a": 5, "b": 10}, True),
-        ("min(a, b, c) == 1", {"a": 5, "b": 1, "c": 10}, True),
-        ("abs(x) == 5", {"x": -5}, True),
-        ("sum(values) > 10", {"values": [3, 4, 5]}, True),
-        ("all(flags)", {"flags": [True, True, True]}, True),
-        ("any(flags)", {"flags": [False, True, False]}, True),
-        ("round(x) == 3", {"x": 3.14}, True),
-
-        # Subscript access
-        ("items[0] == 'first'", {"items": ["first", "second"]}, True),
-        ("data['key'] == 'value'", {"data": {"key": "value"}}, True),
-    ]
-
-    print("L++ Safe Eval Test Suite")
-    print("=" * 50)
-
-    passed = 0
-    failed = 0
-
-    for expr, ctx, expected in tests:
-        result = safe_eval_bool(expr, ctx)
-        status = "✓" if result == expected else "✗"
-        if result == expected:
-            passed += 1
+        if not path:
+            path = Path('./states') / f'{BLUEPRINT_ID}.json'
         else:
-            failed += 1
-            status = f"✗ (got {result})"
-        print(f"  {status} {expr}")
+            path = Path(path)
 
-    print("=" * 50)
-    print(f"Passed: {passed}/{len(tests)}")
+        if not path.exists():
+            return False
 
-    if failed > 0:
-        sys.exit(1)
+        try:
+            with open(path, 'r') as f:
+                state_data = json.load(f)
 
-    # Test security - these should fail gracefully
-    print("\nSecurity Tests (should all return False):")
-    dangerous = [
-        "__import__('os')",
-        "eval('1+1')",
-        "open('/etc/passwd')",
-        "__builtins__",
-        "globals()",
-    ]
+            # Validate blueprint ID matches
+            if state_data.get('blueprint_id') != BLUEPRINT_ID:
+                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
+                return False
 
-    for expr in dangerous:
-        result = safe_eval_bool(expr, {})
-        status = "✓ (blocked)" if not result else "✗ (SECURITY BREACH!)"
-        print(f"  {status} {expr}")
+            self.context = state_data.get('context', {})
+
+            # Restore traces
+            self.traces = []
+            for t in state_data.get('traces', []):
+                self.traces.append(TransitionTrace(
+                    timestamp=datetime.fromisoformat(
+                        t['timestamp']
+                    ).replace(tzinfo=timezone.utc),
+                    from_id=t['from_id'],
+                    to_id=t['to_id'],
+                ))
+
+            return True
+        except Exception as e:
+            print(f'[L++ ERROR] Failed to load state: {e}')
+            return False
+
+
+def create_operator(compute_registry: dict = None) -> Operator:
+    """Factory function to create a new Operator instance."""
+    return Operator(compute_registry)
+
+
+if __name__ == '__main__':
+    print('L++ Compiled Operator: L++ Safe Evaluator')
+    print('States:', list(STATES.keys()))
+    print('Entry:', ENTRY_STATE)
+    print('Transitions:', len(TRANSITIONS))
