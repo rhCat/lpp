@@ -373,7 +373,8 @@ def _generate_code(bp: dict) -> str:
     lines.append("            gates_pass = True")
     lines.append("            for gate_id in t.get('gates', []):")
     lines.append("                expr = GATES.get(gate_id, 'True')")
-    lines.append("                if not atom_EVALUATE(expr, scope):")
+    lines.append("                gate_result, _ = atom_EVALUATE(expr, scope)")
+    lines.append("                if not gate_result:")
     lines.append("                    gates_pass = False")
     lines.append("                    break")
     lines.append("            if gates_pass:")
@@ -402,7 +403,7 @@ def _generate_code(bp: dict) -> str:
     lines.append("                else:")
     lines.append("                    value = None")
     lines.append(
-        "                self.context = atom_MUTATE("
+        "                self.context, _ = atom_MUTATE("
         "self.context, target, value)")
     lines.append(
         "                scope.update(self.context)  "
@@ -420,7 +421,7 @@ def _generate_code(bp: dict) -> str:
         "                        for k, v in action.get("
         "'input_map', {}).items()")
     lines.append("                    }")
-    lines.append("                    result = atom_DISPATCH(")
+    lines.append("                    result, _ = atom_DISPATCH(")
     lines.append(
         "                        sys_id, op_id, inp, self.compute_registry")
     lines.append("                    )")
@@ -428,7 +429,7 @@ def _generate_code(bp: dict) -> str:
         "                    for ctx_path, res_key in action.get("
         "'output_map', {}).items():")
     lines.append("                        if res_key in result:")
-    lines.append("                            self.context = atom_MUTATE(")
+    lines.append("                            self.context, _ = atom_MUTATE(")
     lines.append(
         "                                self.context, ctx_path,"
         " result[res_key]")
@@ -439,9 +440,9 @@ def _generate_code(bp: dict) -> str:
     lines.append("")
     lines.append("        # TRANSITION")
     lines.append(
-        "        new_state, trace = atom_TRANSITION(current, trans['to'])")
+        "        (new_state, trace), _ = atom_TRANSITION(current, trans['to'])")
     lines.append(
-        "        self.context = atom_MUTATE("
+        "        self.context, _ = atom_MUTATE("
         "self.context, '_state', new_state)")
     lines.append("        self.traces.append(trace)")
     lines.append("")
@@ -458,7 +459,7 @@ def _generate_code(bp: dict) -> str:
     lines.append("    def set(self, path: str, value):")
     lines.append('        """Set a value in context by path."""')
     lines.append(
-        "        self.context = atom_MUTATE(self.context, path, value)")
+        "        self.context, _ = atom_MUTATE(self.context, path, value)")
     lines.append("")
 
     # Display method - evaluate display rules from blueprint
@@ -469,7 +470,8 @@ def _generate_code(bp: dict) -> str:
     lines.append("            gate = rule.get('gate')")
     lines.append("            if gate:")
     lines.append("                expr = GATES.get(gate, 'False')")
-    lines.append("                if not atom_EVALUATE(expr, self.context):")
+    lines.append("                gate_result, _ = atom_EVALUATE(expr, self.context)")
+    lines.append("                if not gate_result:")
     lines.append("                    continue")
     lines.append("            # Gate passed or no gate, format template")
     lines.append("            template = rule.get('template', '')")

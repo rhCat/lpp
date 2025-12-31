@@ -10,7 +10,7 @@ __pycache__/
 **/utils/**/result
 **/utils/**/samples
 .DS_Store
-
+always_on/
 
 
 # Mac stuff
