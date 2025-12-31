@@ -1,426 +1,644 @@
 """
-L++ Compiled Operator: L++ TLA+ Validator
-Version: 1.0.0
-Description: Generates and validates TLA+ specifications from blueprints
+L++ TLA+ Generator and Validator
 
-Auto-generated from JSON blueprint. Do not edit directly.
+Universal adaptor that generates TLA+ specifications from any L++ blueprint.
+Automatically extracts domains from context_schema (enums, numbers, strings).
+Can validate using TLC model checker if available.
 """
 
-from frame_py.lpp_core import (
-    atom_EVALUATE,
-    atom_TRANSITION,
-    atom_MUTATE,
-    atom_DISPATCH,
-    TransitionTrace,
-)
+import json
+import re
+import subprocess
+import tempfile
+from pathlib import Path
+from typing import Optional, Tuple, Dict
 
 
-# ======================================================================
-# BLUEPRINT CONSTANTS
-# ======================================================================
-
-BLUEPRINT_ID = 'lpp_tla_validator'
-BLUEPRINT_NAME = 'L++ TLA+ Validator'
-BLUEPRINT_VERSION = '1.0.0'
-ENTRY_STATE = 'idle'
-TERMINAL_STATES = {'error', 'complete'}
-
-STATES = {
-    'idle': 'Idle',  # Ready to generate TLA+
-    'extracting': 'Extracting',  # Extracting domains and types
-    'generating': 'Generating',  # Generating TLA+ specification
-    'validating': 'Validating',  # Running TLC model checker
-    'saving': 'Saving',  # Saving TLA+ files
-    'complete': 'Complete',  # TLA+ generation complete
-    'error': 'Error',  # Generation or validation failed
-}
-
-GATES = {
-    'g_has_blueprint': 'blueprint is not None',
-    'g_do_validate': 'do_validate == True',
-    'g_has_output_dir': 'output_dir is not None',
-}
-
-DISPLAY_RULES = [
-]
-
-ACTIONS = {
-    'a_to_tla_safe': {
-        'type': 'compute',
-        'compute_unit': 'impl:_to_tla_safe',
-    },
-    'a_extract_domains': {
-        'type': 'compute',
-        'compute_unit': 'impl:_extract_domains',
-    },
-    'a_escape_string': {
-        'type': 'compute',
-        'compute_unit': 'impl:_escape_tla_string',
-    },
-    'a_generate_spec': {
-        'type': 'compute',
-        'compute_unit': 'impl:generate_tla',
-    },
-    'a_run_tlc': {
-        'type': 'compute',
-        'compute_unit': 'impl:validate_with_tlc',
-    },
-    'a_save_tla': {
-        'type': 'compute',
-        'compute_unit': 'impl:save_tla',
-    },
-    'a_append_line': {
-        'type': 'compute',
-        'compute_unit': 'impl:lines.append',
-    },
-}
-
-TRANSITIONS = [
-    {
-        'id': 't_generate',
-        'from': 'idle',
-        'to': 'extracting',
-        'on_event': 'GENERATE',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_extracted',
-        'from': 'extracting',
-        'to': 'generating',
-        'on_event': 'EXTRACT_DONE',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_generated',
-        'from': 'generating',
-        'to': 'validating',
-        'on_event': 'GENERATE_DONE',
-        'gates': ['g_do_validate'],
-        'actions': [],
-    },
-    {
-        'id': 't_skip_validate',
-        'from': 'generating',
-        'to': 'saving',
-        'on_event': 'GENERATE_DONE',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_validated',
-        'from': 'validating',
-        'to': 'saving',
-        'on_event': 'VALIDATION_PASSED',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_saved',
-        'from': 'saving',
-        'to': 'complete',
-        'on_event': 'SAVE_DONE',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_extract_err',
-        'from': 'extracting',
-        'to': 'error',
-        'on_event': 'EXTRACT_ERROR',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_gen_err',
-        'from': 'generating',
-        'to': 'error',
-        'on_event': 'GENERATE_ERROR',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_validate_err',
-        'from': 'validating',
-        'to': 'error',
-        'on_event': 'VALIDATION_FAILED',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_save_err',
-        'from': 'saving',
-        'to': 'error',
-        'on_event': 'SAVE_ERROR',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_reset',
-        'from': '*',
-        'to': 'idle',
-        'on_event': 'RESET',
-        'gates': [],
-        'actions': [],
-    },
-]
+class TLAValidationError(Exception):
+    """Raised when TLA+ validation fails."""
+    pass
 
 
-# ======================================================================
-# HELPER FUNCTIONS
-# ======================================================================
-
-def _resolve_path(path: str, data: dict):
-    """Resolve a dotted path in a dictionary."""
-    parts = path.split('.')
-    obj = data
-    for part in parts:
-        if isinstance(obj, dict):
-            obj = obj.get(part)
-        else:
-            return None
-        if obj is None:
-            return None
-    return obj
-
-
-# ======================================================================
-# COMPILED OPERATOR
-# ======================================================================
-
-class Operator:
+def _extract_domains(bp: dict) -> Dict[str, dict]:
     """
-    Compiled L++ Operator: L++ TLA+ Validator
+    Extract type domains from blueprint context_schema.
+
+    Returns dict mapping property name to domain info:
+        {
+            "prop_name": {
+                "type": "number" | "string" | "enum" | "boolean",
+                "enum_values": [...] if enum,
+                "domain_name": "PropNameDomain" for TLA+
+            }
+        }
     """
+    domains = {}
+    context_schema = bp.get("context_schema", {})
+    properties = context_schema.get("properties", {})
 
-    def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'error': None, 'result': None, 'blueprint': None, 'tla_spec': None, 'output_dir': None}
-        self.traces: list[TransitionTrace] = []
-        self.compute_registry = compute_registry or {}
+    for prop, spec in properties.items():
+        ptype = spec.get("type", "string")
+        enum_vals = spec.get("enum", [])
 
-    @property
-    def state(self) -> str:
-        return self.context.get('_state', ENTRY_STATE)
-
-    @property
-    def is_terminal(self) -> bool:
-        return self.state in TERMINAL_STATES
-
-    def dispatch(self, event_name: str, payload: dict = None):
-        """
-        Dispatch an event to the operator.
-
-        Args:
-            event_name: Name of the event
-            payload: Event payload data
-
-        Returns:
-            Tuple of (success, new_state, error)
-        """
-        payload = payload or {}
-        current = self.state
-
-        # Check terminal
-        if self.is_terminal:
-            return False, current, 'Already in terminal state'
-
-        # Build evaluation scope
-        scope = dict(self.context)
-        scope['event'] = {'name': event_name, 'payload': payload}
-
-        # Find matching transition (checks gates)
-        trans = None
-        for t in TRANSITIONS:
-            if t['on_event'] != event_name:
-                continue
-            if t['from'] != '*' and t['from'] != current:
-                continue
-            # Check gates
-            gates_pass = True
-            for gate_id in t.get('gates', []):
-                expr = GATES.get(gate_id, 'True')
-                if not atom_EVALUATE(expr, scope):
-                    gates_pass = False
-                    break
-            if gates_pass:
-                trans = t
-                break
-
-        if not trans:
-            return False, current, f'No transition for {event_name}'
-
-        # Execute actions
-        for action_id in trans['actions']:
-            action = ACTIONS.get(action_id)
-            if not action:
-                continue
-
-            if action['type'] == 'set':
-                # MUTATE
-                target = action.get('target')
-                if action.get('value') is not None:
-                    value = action['value']
-                elif action.get('value_from'):
-                    value = _resolve_path(action['value_from'], scope)
-                else:
-                    value = None
-                self.context = atom_MUTATE(self.context, target, value)
-                scope.update(self.context)  # Sync scope for chained actions
-
-            elif action['type'] == 'compute':
-                # DISPATCH
-                unit = action.get('compute_unit', '')
-                parts = unit.split(':')
-                if len(parts) == 2:
-                    sys_id, op_id = parts
-                    inp = {
-                        k: _resolve_path(v, scope)
-                        for k, v in action.get('input_map', {}).items()
-                    }
-                    result = atom_DISPATCH(
-                        sys_id, op_id, inp, self.compute_registry
-                    )
-                    for ctx_path, res_key in action.get('output_map', {}).items():
-                        if res_key in result:
-                            self.context = atom_MUTATE(
-                                self.context, ctx_path, result[res_key]
-                            )
-                    scope.update(self.context)  # Sync scope for chained actions
-
-        # TRANSITION
-        new_state, trace = atom_TRANSITION(current, trans['to'])
-        self.context = atom_MUTATE(self.context, '_state', new_state)
-        self.traces.append(trace)
-
-        return True, new_state, None
-
-    def get(self, path: str):
-        """Get a value from context by path."""
-        return _resolve_path(path, self.context)
-
-    def set(self, path: str, value):
-        """Set a value in context by path."""
-        self.context = atom_MUTATE(self.context, path, value)
-
-    def display(self) -> str:
-        """Evaluate display rules and return formatted string."""
-        for rule in DISPLAY_RULES:
-            gate = rule.get('gate')
-            if gate:
-                expr = GATES.get(gate, 'False')
-                if not atom_EVALUATE(expr, self.context):
-                    continue
-            # Gate passed or no gate, format template
-            template = rule.get('template', '')
-            try:
-                return template.format(**self.context)
-            except (KeyError, ValueError):
-                return template
-        return ''
-
-    def reset(self):
-        """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'error': None, 'result': None, 'blueprint': None, 'tla_spec': None, 'output_dir': None}
-        self.traces = []
-
-    def save_state(self, path: str = None):
-        """
-        Save current state to JSON file.
-
-        Args:
-            path: File path (default: ./states/{id}.json)
-
-        Returns:
-            Path where state was saved
-        """
-        import json
-        from pathlib import Path
-
-        if not path:
-            states_dir = Path('./states')
-            states_dir.mkdir(exist_ok=True)
-            path = states_dir / f'{BLUEPRINT_ID}.json'
-        else:
-            path = Path(path)
-            path.parent.mkdir(parents=True, exist_ok=True)
-
-        state_data = {
-            'blueprint_id': BLUEPRINT_ID,
-            'blueprint_version': BLUEPRINT_VERSION,
-            'context': self.context,
-            'traces': [
-                {
-                    'timestamp': t.timestamp.isoformat(),
-                    'from_id': t.from_id,
-                    'to_id': t.to_id,
-                }
-                for t in self.traces
-            ]
+        domain_info = {
+            "type": ptype,
+            "nullable": True,  # All L++ context values can be NULL
         }
 
-        with open(path, 'w') as f:
-            json.dump(state_data, f, indent=2)
-
-        return str(path)
-
-    def load_state(self, path: str = None) -> bool:
-        """
-        Load state from JSON file.
-
-        Args:
-            path: File path (default: ./states/{id}.json)
-
-        Returns:
-            True if loaded successfully, False otherwise
-        """
-        import json
-        from pathlib import Path
-        from datetime import datetime, timezone
-
-        if not path:
-            path = Path('./states') / f'{BLUEPRINT_ID}.json'
+        if enum_vals:
+            # Has explicit enum - create named domain
+            domain_info["type"] = "enum"
+            domain_info["enum_values"] = enum_vals
+            # Create TLA+ safe domain name (PascalCase)
+            domain_info["domain_name"] = _to_pascal_case(prop) + "Domain"
+        elif ptype == "number":
+            domain_info["domain_name"] = "BoundedInt"
+        elif ptype == "boolean":
+            domain_info["domain_name"] = "BOOLEAN"
         else:
-            path = Path(path)
+            # String without enum - any string (use STRING placeholder)
+            domain_info["domain_name"] = None  # Will use TRUE check
 
-        if not path.exists():
-            return False
+        domains[prop] = domain_info
 
+    return domains
+
+
+def _to_pascal_case(name: str) -> str:
+    """Convert snake_case or kebab-case to PascalCase."""
+    parts = re.split(r'[-_]', name)
+    return ''.join(p.capitalize() for p in parts)
+
+
+def _to_tla_safe(name: str) -> str:
+    """Make identifier TLA+ safe (alphanumeric + underscore)."""
+    return re.sub(r'[^a-zA-Z0-9_]', '_', name)
+
+
+def _escape_tla_string(s: str) -> str:
+    """
+    Escape a string for TLA+ string literal.
+    Handles special characters that conflict with TLA+ operators.
+    """
+    # "/" conflicts with TLA+ division - use "div" for division operator
+    if s == "/":
+        return "div"
+    # Escape backslashes and quotes
+    s = s.replace("\\", "\\\\")
+    s = s.replace('"', '\\"')
+    return s
+
+
+def generate_tla(
+    bp: dict,
+    int_min: int = -10,
+    int_max: int = 10,
+    max_history: int = 5
+) -> str:
+    """
+    Generate TLA+ specification from any L++ blueprint.
+
+    Automatically extracts:
+    - States from states dict
+    - Events from transitions
+    - Domains from context_schema (numbers, enums, strings)
+    - Gates and their expressions
+
+    Args:
+        bp: Blueprint dictionary
+        int_min: Minimum integer value for bounded model checking
+        int_max: Maximum integer value for bounded model checking
+        max_history: Maximum event history length
+
+    Returns:
+        TLA+ specification as string
+    """
+    lines = []
+
+    # Extract blueprint components
+    name = _to_tla_safe(bp.get("id", "Blueprint"))
+    states = list(bp.get("states", {}).keys())
+    entry = bp.get("entry_state", states[0] if states else "init")
+    terminal = bp.get("terminal_states", [])
+    transitions = bp.get("transitions", [])
+    gates = bp.get("gates", {})
+    context_schema = bp.get("context_schema", {})
+    properties = context_schema.get("properties", {})
+
+    # Extract domains from schema
+    domains = _extract_domains(bp)
+
+    # Module header
+    lines.append(
+        "---------------------------- "
+        f"MODULE {name} ----------------------------"
+    )
+    lines.append(f"\\* L++ Blueprint: {bp.get('name', 'Unnamed')}")
+    lines.append(f"\\* Version: {bp.get('version', '0.0.0')}")
+    lines.append("\\* Auto-generated TLA+ specification (universal adaptor)")
+    lines.append("")
+    lines.append("EXTENDS Integers, Sequences, TLC")
+    lines.append("")
+
+    # Bounds for state space
+    lines.append(
+        "\\* =========================================================")
+    lines.append("\\* BOUNDS - Constrain state space for model checking")
+    lines.append(
+        "\\* =========================================================")
+    lines.append(f"INT_MIN == {int_min}")
+    lines.append(f"INT_MAX == {int_max}")
+    lines.append(f"MAX_HISTORY == {max_history}")
+    lines.append("BoundedInt == INT_MIN..INT_MAX")
+    lines.append("")
+
+    # NULL constant
+    lines.append("\\* NULL constant for uninitialized values")
+    lines.append("CONSTANT NULL")
+    lines.append("")
+
+    # Generate domain sets for enums (dynamically from schema)
+    enum_domains = {
+        prop: info for prop, info in domains.items()
+        if info.get("type") == "enum"
+    }
+    if enum_domains:
+        lines.append(
+            "\\* =========================================================")
+        lines.append("\\* DOMAINS - Auto-extracted from context_schema")
+        lines.append(
+            "\\* =========================================================")
+        for prop, info in enum_domains.items():
+            enum_vals = info["enum_values"]
+            # Escape values for TLA+
+            escaped = [f'"{_escape_tla_string(v)}"' for v in enum_vals]
+            domain_name = info["domain_name"]
+            lines.append(f"{domain_name} == {{{', '.join(escaped)}}}")
+        lines.append("")
+
+    # States
+    lines.append("\\* States")
+    state_set = ", ".join(f'"{s}"' for s in states)
+    lines.append(f"States == {{{state_set}}}")
+    lines.append("")
+
+    # Events from transitions
+    events = set(t.get("on_event", "") for t in transitions)
+    events.discard("")  # Remove empty
+    event_set = ", ".join(f'"{e}"' for e in sorted(events))
+    lines.append(f"Events == {{{event_set}}}")
+    lines.append("")
+
+    # Terminal states
+    if terminal:
+        term_set = ", ".join(f'"{s}"' for s in terminal)
+        lines.append(f"TerminalStates == {{{term_set}}}")
+    else:
+        lines.append("TerminalStates == {}")
+    lines.append("")
+
+    # Variables
+    lines.append("VARIABLES")
+    lines.append("    state,           \\* Current state")
+    for prop in properties.keys():
+        safe_prop = _to_tla_safe(prop)
+        desc = properties[prop].get("description", "Context variable")
+        lines.append(f"    {safe_prop},           \\* {desc}")
+    lines.append("    event_history    \\* Trace of events")
+    lines.append("")
+
+    var_list = ["state"] + [_to_tla_safe(p) for p in properties.keys()] + \
+        ["event_history"]
+    lines.append(f"vars == <<{', '.join(var_list)}>>")
+    lines.append("")
+
+    # Type invariant (structural correctness)
+    lines.append("\\* Type invariant - structural correctness")
+    lines.append("TypeInvariant ==")
+    lines.append("    /\\ state \\in States")
+    for prop, info in domains.items():
+        safe_prop = _to_tla_safe(prop)
+        domain_name = info.get("domain_name")
+        if domain_name:
+            lines.append(
+                f"    /\\ ({safe_prop} \\in {domain_name}) \\/ "
+                f"({safe_prop} = NULL)"
+            )
+        else:
+            # String without enum - accept anything
+            lines.append(f"    /\\ TRUE  \\* {safe_prop}: any string or NULL")
+    lines.append("")
+
+    # State constraint (bounds exploration)
+    lines.append("\\* State constraint - limits TLC exploration depth")
+    lines.append("StateConstraint ==")
+    lines.append("    /\\ Len(event_history) <= MAX_HISTORY")
+    for prop, info in domains.items():
+        safe_prop = _to_tla_safe(prop)
+        if info.get("type") == "number":
+            lines.append(
+                f"    /\\ ({safe_prop} = NULL) \\/ "
+                f"({safe_prop} \\in BoundedInt)"
+            )
+    lines.append("")
+
+    # Initial state
+    lines.append("\\* Initial state")
+    lines.append("Init ==")
+    lines.append(f'    /\\ state = "{entry}"')
+    for prop in properties.keys():
+        safe_prop = _to_tla_safe(prop)
+        lines.append(f"    /\\ {safe_prop} = NULL")
+    lines.append("    /\\ event_history = <<>>")
+    lines.append("")
+
+    # Generate transition actions
+    lines.append("\\* Transitions")
+    for i, trans in enumerate(transitions):
+        tid = trans.get("id", f"trans_{i}")
+        from_state = trans.get("from", "*")
+        to_state = trans.get("to", "")
+        event = trans.get("on_event", "")
+        gate_ids = trans.get("gates", [])
+
+        lines.append(f"\\* {tid}: {from_state} --({event})--> {to_state}")
+        lines.append(f"{tid} ==")
+
+        # From state condition
+        if from_state == "*":
+            lines.append("    /\\ TRUE  \\* from any state")
+        else:
+            lines.append(f'    /\\ state = "{from_state}"')
+
+        # Gate conditions
+        for gid in gate_ids:
+            gate = gates.get(gid, {})
+            expr = gate.get("expression", "TRUE")
+            tla_expr = _python_to_tla(expr, properties, domains)
+            lines.append(f"    /\\ {tla_expr}  \\* gate: {gid}")
+
+        # State transition
+        lines.append(f'    /\\ state\' = "{to_state}"')
+
+        # Context unchanged (simplified - real impl would track mutations)
+        for prop in properties.keys():
+            safe_prop = _to_tla_safe(prop)
+            lines.append(f"    /\\ {safe_prop}' = {safe_prop}")
+
+        # Event history
+        lines.append(
+            f'    /\\ event_history\' = Append(event_history, "{event}")')
+        lines.append("")
+
+    # Next state relation
+    lines.append("\\* Next state relation")
+    lines.append("Next ==")
+    trans_ids = [t.get("id", f"trans_{i}") for i, t in enumerate(transitions)]
+    if trans_ids:
+        lines.append("    \\/ " + "\n    \\/ ".join(trans_ids))
+    else:
+        lines.append("    FALSE")
+    lines.append("")
+
+    # Spec
+    lines.append("\\* Specification")
+    lines.append("Spec == Init /\\ [][Next]_vars")
+    lines.append("")
+
+    # Safety properties
+    lines.append("\\* Safety: Always in valid state")
+    lines.append("AlwaysValidState == state \\in States")
+    lines.append("")
+
+    # Deadlock freedom (if no terminal states, should always have next)
+    if not terminal:
+        lines.append("\\* Liveness: No deadlock (always can make progress)")
+        lines.append("NoDeadlock == <>(ENABLED Next)")
+        lines.append("")
+
+    # Reachability
+    lines.append("\\* Reachability: Entry state is reachable")
+    lines.append(f'EntryReachable == state = "{entry}"')
+    lines.append("")
+
+    # Terminal reachability (if terminal states exist)
+    if terminal:
+        lines.append("\\* Terminal states are reachable")
+        term_cond = " \\/ ".join(f'state = "{t}"' for t in terminal)
+        lines.append(f"TerminalReachable == <>({term_cond})")
+        lines.append("")
+
+    lines.append(
+        "============================"
+        "=================================================")
+
+    return "\n".join(lines)
+
+
+def _python_to_tla(
+    expr: str,
+    properties: dict,
+    domains: Optional[Dict[str, dict]] = None
+) -> str:
+    """
+    Universal Python to TLA+ expression converter.
+
+    Handles:
+    - None/null checks -> NULL
+    - Boolean operators (and, or, not)
+    - Comparison operators (==, !=, <, >, <=, >=)
+    - 'in' membership tests -> \\in {set} or \\in DomainName
+    - String literals ('x' or "x") -> "x"
+    - Special characters (/ -> div in string literals)
+    - Domain-aware: uses domain names when available
+    """
+    tla = expr
+    domains = domains or {}
+
+    # First, convert Python string literals to TLA+ format
+    # Handle both single and double quoted strings
+    def convert_string_literal(m):
+        s = m.group(1) or m.group(2)  # Group 1 is single-quoted, 2 is double
+        # Escape special TLA+ characters
+        escaped = _escape_tla_string(s)
+        return f'"{escaped}"'
+
+    # Single-quoted strings: 'value'
+    tla = re.sub(r"'([^']*)'(?!')", convert_string_literal, tla)
+
+    # Handle 'in' operator for tuples/lists/sets
+    # If we have a domain for the variable, use the domain name
+    in_pattern = r"(\w+)\s+in\s+\(([^)]+)\)"
+
+    def replace_in(m):
+        var = m.group(1)
+        items = m.group(2)
+        # Check if this variable has a known domain
+        if var in domains and domains[var].get("domain_name"):
+            domain_name = domains[var]["domain_name"]
+            return f"{var} \\in {domain_name}"
+        # Otherwise, build inline set
+        return f"{var} \\in {{{items}}}"
+
+    tla = re.sub(in_pattern, replace_in, tla)
+
+    # Also handle list syntax: x in ['a', 'b']
+    list_pattern = r"(\w+)\s+in\s+\[([^\]]+)\]"
+    tla = re.sub(list_pattern, replace_in, tla)
+
+    # Python to TLA+ operator translations
+    translations = [
+        (" is not None", " /= NULL"),
+        (" is None", " = NULL"),
+        (" and ", " /\\ "),
+        (" or ", " \\/ "),
+        ("not ", "~"),
+        (" == ", " = "),
+        (" != ", " /= "),
+        (" >= ", " >= "),
+        (" <= ", " <= "),
+        (" > ", " > "),
+        (" < ", " < "),
+        ("True", "TRUE"),
+        ("False", "FALSE"),
+        ("_state", "state"),  # L++ uses _state for current state
+    ]
+
+    for py_op, tla_op in translations:
+        tla = tla.replace(py_op, tla_op)
+
+    # Handle len() -> Len() for TLA+ (case-sensitive)
+    tla = re.sub(r'\blen\(', 'Len(', tla)
+
+    return tla
+
+
+def generate_cfg(bp: dict, check_deadlock: bool = False) -> str:
+    """
+    Generate TLC configuration file.
+
+    Note: CHECK_DEADLOCK defaults to FALSE because L++ state machines
+    may intentionally allow states with no outgoing transitions.
+    """
+    lines = []
+    name = _to_tla_safe(bp.get("id", "Blueprint"))
+
+    lines.append(f"\\* TLC Configuration for {name}")
+    lines.append("\\* Bounded model checking configuration")
+    lines.append("")
+    lines.append("SPECIFICATION Spec")
+    lines.append("")
+    lines.append("\\* State constraint to bound exploration")
+    lines.append("CONSTRAINT StateConstraint")
+    lines.append("")
+    lines.append("INVARIANT TypeInvariant")
+    lines.append("INVARIANT AlwaysValidState")
+    lines.append("")
+
+    if check_deadlock:
+        lines.append("CHECK_DEADLOCK TRUE")
+    else:
+        lines.append("CHECK_DEADLOCK FALSE")
+
+    lines.append("")
+    lines.append("\\* Constants")
+    lines.append("CONSTANT")
+    lines.append("NULL = NULL")
+
+    return "\n".join(lines)
+
+
+def validate_with_tlc(
+    bp: dict,
+    tlc_path: str = "tlc",
+    timeout: int = 60
+) -> Tuple[bool, str]:
+    """
+    Validate blueprint using TLC model checker.
+
+    Args:
+        bp: Blueprint dictionary
+        tlc_path: Path to TLC executable (default assumes in PATH)
+        timeout: Timeout in seconds
+
+    Returns:
+        Tuple of (success, output_message)
+    """
+    # Generate TLA+ spec
+    tla_spec = generate_tla(bp)
+    cfg_spec = generate_cfg(bp)
+
+    name = _to_tla_safe(bp.get("id", "Blueprint"))
+
+    # Write to temp files
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tla_path = Path(tmpdir) / f"{name}.tla"
+        cfg_path = Path(tmpdir) / f"{name}.cfg"
+
+        tla_path.write_text(tla_spec)
+        cfg_path.write_text(cfg_spec)
+
+        # Check if TLC is available
         try:
-            with open(path, 'r') as f:
-                state_data = json.load(f)
+            result = subprocess.run(
+                [tlc_path, "-h"],
+                capture_output=True,
+                timeout=5
+            )
+        except FileNotFoundError:
+            return False, \
+                "TLC not found. Install TLA+ tools or specify tlc_path."
+        except subprocess.TimeoutExpired:
+            pass  # -h might hang, that's ok
 
-            # Validate blueprint ID matches
-            if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
-                return False
+        # Run TLC
+        try:
+            result = subprocess.run(
+                [tlc_path, "-config", str(cfg_path), str(tla_path)],
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                cwd=tmpdir
+            )
 
-            self.context = state_data.get('context', {})
+            output = result.stdout + result.stderr
 
-            # Restore traces
-            self.traces = []
-            for t in state_data.get('traces', []):
-                self.traces.append(TransitionTrace(
-                    timestamp=datetime.fromisoformat(
-                        t['timestamp']
-                    ).replace(tzinfo=timezone.utc),
-                    from_id=t['from_id'],
-                    to_id=t['to_id'],
-                ))
+            if result.returncode == 0 and "Error" not in output:
+                return True, "TLC validation passed.\n" + output
+            else:
+                return False, "TLC validation failed.\n" + output
 
-            return True
+        except subprocess.TimeoutExpired:
+            return False, f"TLC timed out after {timeout}s"
         except Exception as e:
-            print(f'[L++ ERROR] Failed to load state: {e}')
-            return False
+            return False, f"TLC error: {str(e)}"
 
 
-def create_operator(compute_registry: dict = None) -> Operator:
-    """Factory function to create a new Operator instance."""
-    return Operator(compute_registry)
+def save_tla(
+    bp: dict,
+    output_dir: str,
+    int_min: int = -10,
+    int_max: int = 10,
+    max_history: int = 5
+) -> Tuple[str, str]:
+    """
+    Save TLA+ spec and config to files.
+
+    Args:
+        bp: Blueprint dictionary
+        output_dir: Directory to save files
+        int_min: Minimum integer bound
+        int_max: Maximum integer bound
+        max_history: Maximum event history length
+
+    Returns:
+        Tuple of (tla_path, cfg_path)
+    """
+    name = _to_tla_safe(bp.get("id", "Blueprint"))
+
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    tla_path = output_path / f"{name}.tla"
+    cfg_path = output_path / f"{name}.cfg"
+
+    tla_path.write_text(generate_tla(bp, int_min, int_max, max_history))
+    cfg_path.write_text(generate_cfg(bp))
+
+    return str(tla_path), str(cfg_path)
 
 
-if __name__ == '__main__':
-    print('L++ Compiled Operator: L++ TLA+ Validator')
-    print('States:', list(STATES.keys()))
-    print('Entry:', ENTRY_STATE)
-    print('Transitions:', len(TRANSITIONS))
+# CLI
+if __name__ == "__main__":
+    import sys
+
+    usage = """
+Usage: python -m frame_py.tla_validator <blueprint.json> [options]
+
+Options:
+    --output, -o DIR    Save TLA+ files to directory
+    --validate, -v      Run TLC validation (requires TLC installed)
+    --tlc PATH          Path to TLC executable
+    --int-min N         Minimum integer value (default: -10)
+    --int-max N         Maximum integer value (default: 10)
+    --max-history N     Maximum event history length (default: 5)
+
+Bounds control state space explosion:
+    Small bounds (e.g., -3..3, history=3) = fast checking, limited coverage
+    Large bounds (e.g., -100..100, history=10) = thorough but slow
+
+Examples:
+    python -m frame_py.tla_validator blueprint.json
+    python -m frame_py.tla_validator blueprint.json -o ./tla_specs
+    python -m frame_py.tla_validator blueprint.json --validate
+"""
+
+    if len(sys.argv) < 2 or "-h" in sys.argv or "--help" in sys.argv:
+        print(usage)
+        sys.exit(0)
+
+    # Parse args
+    bp_path = None
+    output_dir = None
+    do_validate = False
+    tlc_path = "tlc"
+    int_min = -10
+    int_max = 10
+    max_history = 5
+
+    i = 1
+    while i < len(sys.argv):
+        arg = sys.argv[i]
+        if arg in ("--output", "-o") and i + 1 < len(sys.argv):
+            output_dir = sys.argv[i + 1]
+            i += 2
+        elif arg in ("--validate", "-v"):
+            do_validate = True
+            i += 1
+        elif arg == "--tlc" and i + 1 < len(sys.argv):
+            tlc_path = sys.argv[i + 1]
+            i += 2
+        elif arg == "--int-min" and i + 1 < len(sys.argv):
+            int_min = int(sys.argv[i + 1])
+            i += 2
+        elif arg == "--int-max" and i + 1 < len(sys.argv):
+            int_max = int(sys.argv[i + 1])
+            i += 2
+        elif arg == "--max-history" and i + 1 < len(sys.argv):
+            max_history = int(sys.argv[i + 1])
+            i += 2
+        elif not arg.startswith("-"):
+            bp_path = arg
+            i += 1
+        else:
+            i += 1
+
+    if not bp_path:
+        print("Error: No blueprint file specified")
+        sys.exit(1)
+
+    # Load blueprint
+    with open(bp_path) as f:
+        bp = json.load(f)
+
+    # Print bounds info
+    print(
+        f"Bounds: integers [{int_min}..{int_max}], history max {max_history}")
+
+    # Generate TLA+
+    tla_spec = generate_tla(bp, int_min, int_max, max_history)
+
+    if output_dir:
+        tla_path, cfg_path = save_tla(
+            bp, output_dir, int_min, int_max, max_history)
+        print(f"TLA+ spec saved to: {tla_path}")
+        print(f"TLC config saved to: {cfg_path}")
+    else:
+        print(tla_spec)
+
+    # Validate if requested
+    if do_validate:
+        print("\nRunning TLC validation...")
+        success, message = validate_with_tlc(bp, tlc_path)
+        print(message)
+        sys.exit(0 if success else 1)

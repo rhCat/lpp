@@ -1,415 +1,81 @@
 """
-L++ Compiled Operator: L++ Blueprint Validator
-Version: 1.0.0
-Description: Validates blueprint structure and semantic correctness
+L++ Blueprint Validator
 
-Auto-generated from JSON blueprint. Do not edit directly.
+Validates JSON blueprints against the L++ schema requirements.
+Ensures blueprints have all required fields for audit trails and determinism.
 """
 
-from frame_py.lpp_core import (
-    atom_EVALUATE,
-    atom_TRANSITION,
-    atom_MUTATE,
-    atom_DISPATCH,
-    TransitionTrace,
-)
+from typing import List
 
 
-# ======================================================================
-# BLUEPRINT CONSTANTS
-# ======================================================================
-
-BLUEPRINT_ID = 'lpp_validator'
-BLUEPRINT_NAME = 'L++ Blueprint Validator'
-BLUEPRINT_VERSION = '1.0.0'
-ENTRY_STATE = 'idle'
-TERMINAL_STATES = {'complete', 'error'}
-
-STATES = {
-    'idle': 'Idle',  # Ready to validate
-    'checking_structure': 'Checking Structure',  # Validating required fields
-    'checking_states': 'Checking States',  # Validating state definitions
-    'checking_transitions': 'Checking Transitions',  # Validating transition references
-    'checking_gates': 'Checking Gates',  # Validating gate expressions
-    'complete': 'Complete',  # Validation completed
-    'error': 'Error',  # Validation found errors
-}
-
-GATES = {
-    'g_has_id': "'id' in blueprint",
-    'g_has_states': "'states' in blueprint",
-    'g_has_entry': "'entry_state' in blueprint",
-    'g_no_errors': 'len(errors) == 0',
-}
-
-DISPLAY_RULES = [
-]
-
-ACTIONS = {
-    'a_check_required': {
-        'type': 'compute',
-        'compute_unit': 'impl:validate_required_fields',
-    },
-    'a_check_states': {
-        'type': 'compute',
-        'compute_unit': 'impl:validate_states',
-    },
-    'a_check_transitions': {
-        'type': 'compute',
-        'compute_unit': 'impl:validate_transitions',
-    },
-    'a_check_gates': {
-        'type': 'compute',
-        'compute_unit': 'impl:validate_gates',
-    },
-    'a_append_error': {
-        'type': 'compute',
-        'compute_unit': 'impl:errors.append',
-    },
-    'a_raise_error': {
-        'type': 'compute',
-        'compute_unit': 'impl:BlueprintValidationError',
-    },
-}
-
-TRANSITIONS = [
-    {
-        'id': 't_start',
-        'from': 'idle',
-        'to': 'checking_structure',
-        'on_event': 'VALIDATE',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_structure_ok',
-        'from': 'checking_structure',
-        'to': 'checking_states',
-        'on_event': 'STRUCTURE_OK',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_states_ok',
-        'from': 'checking_states',
-        'to': 'checking_transitions',
-        'on_event': 'STATES_OK',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_transitions_ok',
-        'from': 'checking_transitions',
-        'to': 'checking_gates',
-        'on_event': 'TRANSITIONS_OK',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_gates_ok',
-        'from': 'checking_gates',
-        'to': 'complete',
-        'on_event': 'GATES_OK',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_err_structure',
-        'from': 'checking_structure',
-        'to': 'error',
-        'on_event': 'STRUCTURE_ERROR',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_err_states',
-        'from': 'checking_states',
-        'to': 'error',
-        'on_event': 'STATES_ERROR',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_err_transitions',
-        'from': 'checking_transitions',
-        'to': 'error',
-        'on_event': 'TRANSITIONS_ERROR',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_err_gates',
-        'from': 'checking_gates',
-        'to': 'error',
-        'on_event': 'GATES_ERROR',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_reset',
-        'from': '*',
-        'to': 'idle',
-        'on_event': 'RESET',
-        'gates': [],
-        'actions': [],
-    },
-]
+class BlueprintValidationError(Exception):
+    """Raised when blueprint fails schema validation."""
+    pass
 
 
-# ======================================================================
-# HELPER FUNCTIONS
-# ======================================================================
-
-def _resolve_path(path: str, data: dict):
-    """Resolve a dotted path in a dictionary."""
-    parts = path.split('.')
-    obj = data
-    for part in parts:
-        if isinstance(obj, dict):
-            obj = obj.get(part)
-        else:
-            return None
-        if obj is None:
-            return None
-    return obj
-
-
-# ======================================================================
-# COMPILED OPERATOR
-# ======================================================================
-
-class Operator:
+def validate_blueprint(bp: dict) -> None:
     """
-    Compiled L++ Operator: L++ Blueprint Validator
+    Validate blueprint against schema requirements.
+    Raises BlueprintValidationError on failure.
+
+    Required fields:
+        - Root: $schema, id, name, version,
+            entry_state, states, transitions, actions, terminal_states
+        - transitions[]: id, on_event, from, to
+        - gates[]: type (expression | compute)
     """
+    errors: List[str] = []
 
-    def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'error': None, 'result': None, 'blueprint': None, 'errors': None}
-        self.traces: list[TransitionTrace] = []
-        self.compute_registry = compute_registry or {}
+    # Required root fields
+    for field in [
+        "$schema",
+        "id",
+        "name",
+        "version",
+        "entry_state",
+        "states",
+        "transitions",
+        "actions"
+    ]:
+        if field not in bp:
+            errors.append(f"Missing required root field: {field}")
 
-    @property
-    def state(self) -> str:
-        return self.context.get('_state', ENTRY_STATE)
+    # terminal_states must be present (can be empty array)
+    if "terminal_states" not in bp:
+        errors.append(
+            "Missing required root field: terminal_states (can be empty [])")
 
-    @property
-    def is_terminal(self) -> bool:
-        return self.state in TERMINAL_STATES
+    # Validate transitions - id is required
+    for i, trans in enumerate(bp.get("transitions", [])):
+        if not trans.get("id"):
+            errors.append(f"transitions[{i}]: Missing required field 'id'")
+        if not trans.get("on_event"):
+            errors.append(
+                f"transitions[{i}]: Missing required field 'on_event'")
+        if "from" not in trans:
+            errors.append(f"transitions[{i}]: Missing required field 'from'")
+        if "to" not in trans:
+            errors.append(f"transitions[{i}]: Missing required field 'to'")
 
-    def dispatch(self, event_name: str, payload: dict = None):
-        """
-        Dispatch an event to the operator.
+    # Validate gates - type is required
+    for gate_id, gate in bp.get("gates", {}).items():
+        if not gate.get("type"):
+            errors.append(
+                f"gates[{gate_id}]: Missing required "
+                "field 'type' (must be 'expression' or 'compute')")
+        elif gate["type"] not in ("expression", "compute"):
+            errors.append(
+                f"gates[{gate_id}]: Invalid type '{gate['type']}' "
+                "(must be 'expression' or 'compute')")
 
-        Args:
-            event_name: Name of the event
-            payload: Event payload data
+        if gate.get("type") == "expression" and not gate.get("expression"):
+            errors.append(
+                f"gates[{gate_id}]: "
+                "type='expression' requires 'expression' field")
+        if gate.get("type") == "compute" and not gate.get("compute_unit"):
+            errors.append(
+                f"gates[{gate_id}]: "
+                "type='compute' requires 'compute_unit' field")
 
-        Returns:
-            Tuple of (success, new_state, error)
-        """
-        payload = payload or {}
-        current = self.state
-
-        # Check terminal
-        if self.is_terminal:
-            return False, current, 'Already in terminal state'
-
-        # Build evaluation scope
-        scope = dict(self.context)
-        scope['event'] = {'name': event_name, 'payload': payload}
-
-        # Find matching transition (checks gates)
-        trans = None
-        for t in TRANSITIONS:
-            if t['on_event'] != event_name:
-                continue
-            if t['from'] != '*' and t['from'] != current:
-                continue
-            # Check gates
-            gates_pass = True
-            for gate_id in t.get('gates', []):
-                expr = GATES.get(gate_id, 'True')
-                if not atom_EVALUATE(expr, scope):
-                    gates_pass = False
-                    break
-            if gates_pass:
-                trans = t
-                break
-
-        if not trans:
-            return False, current, f'No transition for {event_name}'
-
-        # Execute actions
-        for action_id in trans['actions']:
-            action = ACTIONS.get(action_id)
-            if not action:
-                continue
-
-            if action['type'] == 'set':
-                # MUTATE
-                target = action.get('target')
-                if action.get('value') is not None:
-                    value = action['value']
-                elif action.get('value_from'):
-                    value = _resolve_path(action['value_from'], scope)
-                else:
-                    value = None
-                self.context = atom_MUTATE(self.context, target, value)
-                scope.update(self.context)  # Sync scope for chained actions
-
-            elif action['type'] == 'compute':
-                # DISPATCH
-                unit = action.get('compute_unit', '')
-                parts = unit.split(':')
-                if len(parts) == 2:
-                    sys_id, op_id = parts
-                    inp = {
-                        k: _resolve_path(v, scope)
-                        for k, v in action.get('input_map', {}).items()
-                    }
-                    result = atom_DISPATCH(
-                        sys_id, op_id, inp, self.compute_registry
-                    )
-                    for ctx_path, res_key in action.get('output_map', {}).items():
-                        if res_key in result:
-                            self.context = atom_MUTATE(
-                                self.context, ctx_path, result[res_key]
-                            )
-                    scope.update(self.context)  # Sync scope for chained actions
-
-        # TRANSITION
-        new_state, trace = atom_TRANSITION(current, trans['to'])
-        self.context = atom_MUTATE(self.context, '_state', new_state)
-        self.traces.append(trace)
-
-        return True, new_state, None
-
-    def get(self, path: str):
-        """Get a value from context by path."""
-        return _resolve_path(path, self.context)
-
-    def set(self, path: str, value):
-        """Set a value in context by path."""
-        self.context = atom_MUTATE(self.context, path, value)
-
-    def display(self) -> str:
-        """Evaluate display rules and return formatted string."""
-        for rule in DISPLAY_RULES:
-            gate = rule.get('gate')
-            if gate:
-                expr = GATES.get(gate, 'False')
-                if not atom_EVALUATE(expr, self.context):
-                    continue
-            # Gate passed or no gate, format template
-            template = rule.get('template', '')
-            try:
-                return template.format(**self.context)
-            except (KeyError, ValueError):
-                return template
-        return ''
-
-    def reset(self):
-        """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'error': None, 'result': None, 'blueprint': None, 'errors': None}
-        self.traces = []
-
-    def save_state(self, path: str = None):
-        """
-        Save current state to JSON file.
-
-        Args:
-            path: File path (default: ./states/{id}.json)
-
-        Returns:
-            Path where state was saved
-        """
-        import json
-        from pathlib import Path
-
-        if not path:
-            states_dir = Path('./states')
-            states_dir.mkdir(exist_ok=True)
-            path = states_dir / f'{BLUEPRINT_ID}.json'
-        else:
-            path = Path(path)
-            path.parent.mkdir(parents=True, exist_ok=True)
-
-        state_data = {
-            'blueprint_id': BLUEPRINT_ID,
-            'blueprint_version': BLUEPRINT_VERSION,
-            'context': self.context,
-            'traces': [
-                {
-                    'timestamp': t.timestamp.isoformat(),
-                    'from_id': t.from_id,
-                    'to_id': t.to_id,
-                }
-                for t in self.traces
-            ]
-        }
-
-        with open(path, 'w') as f:
-            json.dump(state_data, f, indent=2)
-
-        return str(path)
-
-    def load_state(self, path: str = None) -> bool:
-        """
-        Load state from JSON file.
-
-        Args:
-            path: File path (default: ./states/{id}.json)
-
-        Returns:
-            True if loaded successfully, False otherwise
-        """
-        import json
-        from pathlib import Path
-        from datetime import datetime, timezone
-
-        if not path:
-            path = Path('./states') / f'{BLUEPRINT_ID}.json'
-        else:
-            path = Path(path)
-
-        if not path.exists():
-            return False
-
-        try:
-            with open(path, 'r') as f:
-                state_data = json.load(f)
-
-            # Validate blueprint ID matches
-            if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
-                return False
-
-            self.context = state_data.get('context', {})
-
-            # Restore traces
-            self.traces = []
-            for t in state_data.get('traces', []):
-                self.traces.append(TransitionTrace(
-                    timestamp=datetime.fromisoformat(
-                        t['timestamp']
-                    ).replace(tzinfo=timezone.utc),
-                    from_id=t['from_id'],
-                    to_id=t['to_id'],
-                ))
-
-            return True
-        except Exception as e:
-            print(f'[L++ ERROR] Failed to load state: {e}')
-            return False
-
-
-def create_operator(compute_registry: dict = None) -> Operator:
-    """Factory function to create a new Operator instance."""
-    return Operator(compute_registry)
-
-
-if __name__ == '__main__':
-    print('L++ Compiled Operator: L++ Blueprint Validator')
-    print('States:', list(STATES.keys()))
-    print('Entry:', ENTRY_STATE)
-    print('Transitions:', len(TRANSITIONS))
+    if errors:
+        raise BlueprintValidationError("\n".join(errors))

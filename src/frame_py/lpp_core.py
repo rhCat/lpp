@@ -1,450 +1,328 @@
 """
-L++ Compiled Operator: L++ Core Atoms
-Version: 1.0.0
-Description: Core atomic operations: EVALUATE, TRANSITION, MUTATE, DISPATCH
+L++ Atomic Core - Pure Python Primitives
 
-Auto-generated from JSON blueprint. Do not edit directly.
+The "assembly language" of the L++ logic engine.
+Four atomic operations using only built-in Python primitives.
+No classes, no objects, no external libraries.
+
+    atom_EVALUATE   - The Judge
+    atom_TRANSITION - The Navigator
+    atom_MUTATE     - The Scribe
+    atom_DISPATCH   - The Messenger
+
+This is the absolute bedrock. The entire L++ universe, no matter how
+complex, will be built by an orchestrator loop just calling these
+four functions in different sequences.
+
+State Machine (from lpp_core_blueprint.json):
+    idle → evaluating|transitioning|mutating|dispatching → complete|error
+
+Error Handling:
+    Each atom returns (result, error) tuple where error is None on success.
+    This enables the orchestrator to trigger EVAL_ERROR, TRANS_ERROR, etc.
 """
 
-from frame_py.lpp_core import (
-    atom_EVALUATE,
-    atom_TRANSITION,
-    atom_MUTATE,
-    atom_DISPATCH,
-    TransitionTrace,
-)
+import datetime
+from typing import Any, Callable, Dict, NamedTuple, Optional, Tuple
 
 
-# ======================================================================
-# BLUEPRINT CONSTANTS
-# ======================================================================
-
-BLUEPRINT_ID = 'lpp_core'
-BLUEPRINT_NAME = 'L++ Core Atoms'
-BLUEPRINT_VERSION = '1.0.0'
-ENTRY_STATE = 'idle'
-TERMINAL_STATES = {'complete', 'error'}
-
-STATES = {
-    'idle': 'Idle',  # Ready for atomic operation
-    'evaluating': 'Evaluating',  # Executing atom_EVALUATE
-    'transitioning': 'Transitioning',  # Executing atom_TRANSITION
-    'mutating': 'Mutating',  # Executing atom_MUTATE
-    'dispatching': 'Dispatching',  # Executing atom_DISPATCH
-    'complete': 'Complete',  # Operation completed
-    'error': 'Error',  # Operation failed
-}
-
-GATES = {
-    'g_has_expression': 'expression is not None',
-    'g_has_scope': 'scope is not None',
-    'g_valid_path': 'path is not None and len(path) > 0',
-}
-
-DISPLAY_RULES = [
-]
-
-ACTIONS = {
-    'a_safe_eval': {
-        'type': 'compute',
-        'compute_unit': 'impl:safe_eval_bool',
-    },
-    'a_create_trace': {
-        'type': 'compute',
-        'compute_unit': 'impl:TransitionTrace',
-    },
-    'a_get_timestamp': {
-        'type': 'compute',
-        'compute_unit': 'impl:datetime.datetime.now',
-    },
-    'a_copy_context': {
-        'type': 'compute',
-        'compute_unit': 'impl:context_data.copy',
-    },
-    'a_split_path': {
-        'type': 'compute',
-        'compute_unit': 'impl:path.split',
-    },
-    'a_check_type': {
-        'type': 'compute',
-        'compute_unit': 'impl:isinstance',
-    },
-    'a_get_compute_func': {
-        'type': 'compute',
-        'compute_unit': 'impl:compute_registry.get',
-    },
-    'a_call_compute': {
-        'type': 'compute',
-        'compute_unit': 'impl:compute_func',
-    },
-    'a_log': {
-        'type': 'compute',
-        'compute_unit': 'impl:print',
-    },
-}
-
-TRANSITIONS = [
-    {
-        'id': 't_evaluate',
-        'from': 'idle',
-        'to': 'evaluating',
-        'on_event': 'EVALUATE',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_transition',
-        'from': 'idle',
-        'to': 'transitioning',
-        'on_event': 'TRANSITION',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_mutate',
-        'from': 'idle',
-        'to': 'mutating',
-        'on_event': 'MUTATE',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_dispatch',
-        'from': 'idle',
-        'to': 'dispatching',
-        'on_event': 'DISPATCH',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_eval_done',
-        'from': 'evaluating',
-        'to': 'complete',
-        'on_event': 'EVAL_DONE',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_trans_done',
-        'from': 'transitioning',
-        'to': 'complete',
-        'on_event': 'TRANS_DONE',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_mutate_done',
-        'from': 'mutating',
-        'to': 'complete',
-        'on_event': 'MUTATE_DONE',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_dispatch_done',
-        'from': 'dispatching',
-        'to': 'complete',
-        'on_event': 'DISPATCH_DONE',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_eval_error',
-        'from': 'evaluating',
-        'to': 'error',
-        'on_event': 'EVAL_ERROR',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_trans_error',
-        'from': 'transitioning',
-        'to': 'error',
-        'on_event': 'TRANS_ERROR',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_mutate_error',
-        'from': 'mutating',
-        'to': 'error',
-        'on_event': 'MUTATE_ERROR',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_dispatch_error',
-        'from': 'dispatching',
-        'to': 'error',
-        'on_event': 'DISPATCH_ERROR',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_reset',
-        'from': '*',
-        'to': 'idle',
-        'on_event': 'RESET',
-        'gates': [],
-        'actions': [],
-    },
-]
+# Type alias for hermetic compute unit function signature
+ComputeUnitFunc = Callable[[Dict[str, Any]], Dict[str, Any]]
 
 
-# ======================================================================
-# HELPER FUNCTIONS
-# ======================================================================
-
-def _resolve_path(path: str, data: dict):
-    """Resolve a dotted path in a dictionary."""
-    parts = path.split('.')
-    obj = data
-    for part in parts:
-        if isinstance(obj, dict):
-            obj = obj.get(part)
-        else:
-            return None
-        if obj is None:
-            return None
-    return obj
+class AtomError(Exception):
+    """Base exception for atomic operation failures."""
+    pass
 
 
-# ======================================================================
-# COMPILED OPERATOR
-# ======================================================================
+class EvaluateError(AtomError):
+    """Error during atom_EVALUATE execution."""
+    pass
 
-class Operator:
+
+class TransitionError(AtomError):
+    """Error during atom_TRANSITION execution."""
+    pass
+
+
+class MutateError(AtomError):
+    """Error during atom_MUTATE execution."""
+    pass
+
+
+class DispatchError(AtomError):
+    """Error during atom_DISPATCH execution."""
+    pass
+
+
+# A structured record of what happened, for the engine's internal history
+class TransitionTrace(NamedTuple):
+    """Kernel-level trace record for state transitions."""
+    timestamp: datetime.datetime
+    from_id: str
+    to_id: str
+    error: Optional[str] = None  # Error message if transition failed
+
+
+# =========================================================================
+# ATOM: EVALUATE (The Judge)
+# =========================================================================
+
+def atom_EVALUATE(
+    expression: str,
+    context_data: dict
+) -> Tuple[bool, Optional[str]]:
     """
-    Compiled L++ Operator: L++ Core Atoms
+    Atomic unit to evaluate a boolean expression against a data context.
+    Uses the safe expression evaluator for deterministic, secure execution.
+
+    Args:
+        expression: A Python boolean expression (e.g., "amount > 1000")
+        context_data: The data dictionary for variable resolution
+
+    Returns:
+        Tuple of (result, error):
+        - result: True/False if successful, False on error
+        - error: None on success, error message string on failure
+
+    Transitions (blueprint):
+        idle → evaluating (EVALUATE)
+        evaluating → complete (EVAL_DONE) | error (EVAL_ERROR)
+
+    Security:
+        Uses safe_eval which only allows:
+        - Boolean logic: and, or, not
+        - Comparisons: ==, !=, <, >, <=, >=
+        - Membership: in, not in
+        - Null checks: is None, is not None
+        - Context variable access
+        - Literals: numbers, strings, True, False, None
+
+        Blocked: imports, builtins, time, random, file access, etc.
     """
+    # Gate: g_has_expression
+    if expression is None:
+        return False, "EVAL_ERROR: expression is None"
 
-    def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'error': None, 'result': None, 'expression': None, 'scope': None, 'context_data': None}
-        self.traces: list[TransitionTrace] = []
-        self.compute_registry = compute_registry or {}
-
-    @property
-    def state(self) -> str:
-        return self.context.get('_state', ENTRY_STATE)
-
-    @property
-    def is_terminal(self) -> bool:
-        return self.state in TERMINAL_STATES
-
-    def dispatch(self, event_name: str, payload: dict = None):
-        """
-        Dispatch an event to the operator.
-
-        Args:
-            event_name: Name of the event
-            payload: Event payload data
-
-        Returns:
-            Tuple of (success, new_state, error)
-        """
-        payload = payload or {}
-        current = self.state
-
-        # Check terminal
-        if self.is_terminal:
-            return False, current, 'Already in terminal state'
-
-        # Build evaluation scope
-        scope = dict(self.context)
-        scope['event'] = {'name': event_name, 'payload': payload}
-
-        # Find matching transition (checks gates)
-        trans = None
-        for t in TRANSITIONS:
-            if t['on_event'] != event_name:
-                continue
-            if t['from'] != '*' and t['from'] != current:
-                continue
-            # Check gates
-            gates_pass = True
-            for gate_id in t.get('gates', []):
-                expr = GATES.get(gate_id, 'True')
-                if not atom_EVALUATE(expr, scope):
-                    gates_pass = False
-                    break
-            if gates_pass:
-                trans = t
-                break
-
-        if not trans:
-            return False, current, f'No transition for {event_name}'
-
-        # Execute actions
-        for action_id in trans['actions']:
-            action = ACTIONS.get(action_id)
-            if not action:
-                continue
-
-            if action['type'] == 'set':
-                # MUTATE
-                target = action.get('target')
-                if action.get('value') is not None:
-                    value = action['value']
-                elif action.get('value_from'):
-                    value = _resolve_path(action['value_from'], scope)
-                else:
-                    value = None
-                self.context = atom_MUTATE(self.context, target, value)
-                scope.update(self.context)  # Sync scope for chained actions
-
-            elif action['type'] == 'compute':
-                # DISPATCH
-                unit = action.get('compute_unit', '')
-                parts = unit.split(':')
-                if len(parts) == 2:
-                    sys_id, op_id = parts
-                    inp = {
-                        k: _resolve_path(v, scope)
-                        for k, v in action.get('input_map', {}).items()
-                    }
-                    result = atom_DISPATCH(
-                        sys_id, op_id, inp, self.compute_registry
-                    )
-                    for ctx_path, res_key in action.get('output_map', {}).items():
-                        if res_key in result:
-                            self.context = atom_MUTATE(
-                                self.context, ctx_path, result[res_key]
-                            )
-                    scope.update(self.context)  # Sync scope for chained actions
-
-        # TRANSITION
-        new_state, trace = atom_TRANSITION(current, trans['to'])
-        self.context = atom_MUTATE(self.context, '_state', new_state)
-        self.traces.append(trace)
-
-        return True, new_state, None
-
-    def get(self, path: str):
-        """Get a value from context by path."""
-        return _resolve_path(path, self.context)
-
-    def set(self, path: str, value):
-        """Set a value in context by path."""
-        self.context = atom_MUTATE(self.context, path, value)
-
-    def display(self) -> str:
-        """Evaluate display rules and return formatted string."""
-        for rule in DISPLAY_RULES:
-            gate = rule.get('gate')
-            if gate:
-                expr = GATES.get(gate, 'False')
-                if not atom_EVALUATE(expr, self.context):
-                    continue
-            # Gate passed or no gate, format template
-            template = rule.get('template', '')
-            try:
-                return template.format(**self.context)
-            except (KeyError, ValueError):
-                return template
-        return ''
-
-    def reset(self):
-        """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'error': None, 'result': None, 'expression': None, 'scope': None, 'context_data': None}
-        self.traces = []
-
-    def save_state(self, path: str = None):
-        """
-        Save current state to JSON file.
-
-        Args:
-            path: File path (default: ./states/{id}.json)
-
-        Returns:
-            Path where state was saved
-        """
-        import json
-        from pathlib import Path
-
-        if not path:
-            states_dir = Path('./states')
-            states_dir.mkdir(exist_ok=True)
-            path = states_dir / f'{BLUEPRINT_ID}.json'
-        else:
-            path = Path(path)
-            path.parent.mkdir(parents=True, exist_ok=True)
-
-        state_data = {
-            'blueprint_id': BLUEPRINT_ID,
-            'blueprint_version': BLUEPRINT_VERSION,
-            'context': self.context,
-            'traces': [
-                {
-                    'timestamp': t.timestamp.isoformat(),
-                    'from_id': t.from_id,
-                    'to_id': t.to_id,
-                }
-                for t in self.traces
-            ]
-        }
-
-        with open(path, 'w') as f:
-            json.dump(state_data, f, indent=2)
-
-        return str(path)
-
-    def load_state(self, path: str = None) -> bool:
-        """
-        Load state from JSON file.
-
-        Args:
-            path: File path (default: ./states/{id}.json)
-
-        Returns:
-            True if loaded successfully, False otherwise
-        """
-        import json
-        from pathlib import Path
-        from datetime import datetime, timezone
-
-        if not path:
-            path = Path('./states') / f'{BLUEPRINT_ID}.json'
-        else:
-            path = Path(path)
-
-        if not path.exists():
-            return False
-
-        try:
-            with open(path, 'r') as f:
-                state_data = json.load(f)
-
-            # Validate blueprint ID matches
-            if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
-                return False
-
-            self.context = state_data.get('context', {})
-
-            # Restore traces
-            self.traces = []
-            for t in state_data.get('traces', []):
-                self.traces.append(TransitionTrace(
-                    timestamp=datetime.fromisoformat(
-                        t['timestamp']
-                    ).replace(tzinfo=timezone.utc),
-                    from_id=t['from_id'],
-                    to_id=t['to_id'],
-                ))
-
-            return True
-        except Exception as e:
-            print(f'[L++ ERROR] Failed to load state: {e}')
-            return False
+    try:
+        from .safe_eval import safe_eval_bool
+        result, eval_error = safe_eval_bool(expression, context_data)
+        if eval_error:
+            return False, eval_error
+        return result, None  # EVAL_DONE
+    except Exception as e:
+        return False, f"EVAL_ERROR: {str(e)}"  # → error state
 
 
-def create_operator(compute_registry: dict = None) -> Operator:
-    """Factory function to create a new Operator instance."""
-    return Operator(compute_registry)
+# =========================================================================
+# ATOM: TRANSITION (The Navigator)
+# =========================================================================
+
+def atom_TRANSITION(
+    current_id: str,
+    target_id: str,
+    valid_states: Optional[set] = None
+) -> Tuple[Tuple[str, TransitionTrace], Optional[str]]:
+    """
+    Atomic unit to update the execution pointer.
+    Performs the move and generates a kernel-level trace record.
+
+    Args:
+        current_id: The current state identifier
+        target_id: The target state identifier
+        valid_states: Optional set of valid state IDs for validation
+
+    Returns:
+        Tuple of ((new_pointer, trace_record), error):
+        - new_pointer: The target_id (the new state)
+        - trace_record: TransitionTrace for the engine's verifiable history
+        - error: None on success, error message on failure
+
+    Transitions (blueprint):
+        idle → transitioning (TRANSITION)
+        transitioning → complete (TRANS_DONE) | error (TRANS_ERROR)
+
+    Note:
+        The trace is for the engine's own internal history stack, NOT an
+        external action log. The orchestrator decides what to do with it.
+    """
+    error_msg = None
+
+    # Validate states if valid_states provided
+    if valid_states is not None:
+        if current_id not in valid_states:
+            error_msg = f"TRANS_ERROR: invalid current_id '{current_id}'"
+        elif target_id not in valid_states:
+            error_msg = f"TRANS_ERROR: invalid target_id '{target_id}'"
+
+    # 1. Perform the core function: Define the new state pointer
+    new_pointer = target_id
+
+    # 2. Generate the internal trace record
+    trace = TransitionTrace(
+        timestamp=datetime.datetime.now(datetime.timezone.utc),
+        from_id=current_id,
+        to_id=target_id,
+        error=error_msg
+    )
+
+    # Return the new state AND the trace of the operation
+    return (new_pointer, trace), error_msg
 
 
-if __name__ == '__main__':
-    print('L++ Compiled Operator: L++ Core Atoms')
-    print('States:', list(STATES.keys()))
-    print('Entry:', ENTRY_STATE)
-    print('Transitions:', len(TRANSITIONS))
+# =========================================================================
+# ATOM: MUTATE (The Scribe)
+# =========================================================================
+
+def atom_MUTATE(
+    context_data: dict,
+    path: str,
+    value: Any
+) -> Tuple[dict, Optional[str]]:
+    """
+    Atomic unit to update the data context at a specific path.
+    Returns a SHALLOW COPY of the newly updated context.
+
+    Args:
+        context_data: The current context dictionary
+        path: Dot-notation path (e.g., "user.profile.email")
+        value: The value to set at the path
+
+    Returns:
+        Tuple of (new_context, error):
+        - new_context: New dictionary with the value updated at path
+        - error: None on success, error message on failure
+
+    Transitions (blueprint):
+        idle → mutating (MUTATE)
+        mutating → complete (MUTATE_DONE) | error (MUTATE_ERROR)
+
+    Note:
+        Uses shallow copy for efficiency. For absolute purity with nested
+        shared references, deep copy could be used at the cost of performance.
+    """
+    # Gate: g_valid_path
+    if path is None or len(path) == 0:
+        return context_data, "MUTATE_ERROR: path is None or empty"
+
+    try:
+        # Create a shallow copy to ensure the input dictionary is not modified
+        new_context = context_data.copy()
+
+        keys = path.split('.')
+        current_level = new_context
+
+        # Navigate down to the second-to-last key
+        for key in keys[:-1]:
+            if key not in current_level or not isinstance(
+                current_level[key], dict
+            ):
+                # If the path doesn't exist, create intermediate dictionaries
+                current_level[key] = {}
+            else:
+                # Copy the nested dict to avoid mutating the original
+                current_level[key] = current_level[key].copy()
+            current_level = current_level[key]
+
+        # Set the value at the final key
+        final_key = keys[-1]
+        current_level[final_key] = value
+
+        return new_context, None  # MUTATE_DONE
+
+    except Exception as e:
+        return context_data, f"MUTATE_ERROR: {str(e)}"  # → error state
+
+
+# =========================================================================
+# ATOM: DISPATCH (The Messenger)
+# =========================================================================
+
+def atom_DISPATCH(
+    system_id: str,
+    operation_id: str,
+    payload: dict,
+    compute_registry: Dict[tuple, ComputeUnitFunc]
+) -> Tuple[dict, Optional[str]]:
+    """
+    Atomic unit to pass a payload across the boundary to a compute unit.
+    Handles the lookup and standard I/O execution.
+
+    Args:
+        system_id: The system namespace (e.g., "pricing", "risk")
+        operation_id: The operation name (e.g., "calculate", "assess")
+        payload: The input payload dictionary
+        compute_registry: Dict mapping (system_id, operation_id) to callables
+
+    Returns:
+        Tuple of (result_payload, error):
+        - result_payload: The result from compute unit, or error dict
+        - error: None on success, error message on failure
+
+    Transitions (blueprint):
+        idle → dispatching (DISPATCH)
+        dispatching → complete (DISPATCH_DONE) | error (DISPATCH_ERROR)
+
+    Note:
+        The Frame must never crash. All compute unit failures are caught
+        and returned as standardized error payloads.
+    """
+    registry_key = (system_id, operation_id)
+    compute_func = compute_registry.get(registry_key)
+
+    if not compute_func:
+        # Deterministic error handling: return a standard error payload
+        error_msg = "DISPATCH_ERROR: No compute unit for " \
+            f"{system_id}:{operation_id}"
+        print(f"[L++ CORE ERROR] {error_msg}")
+        return {
+            "error": "COMPUTE_UNIT_NOT_FOUND", "status": "failed"
+        }, error_msg
+
+    try:
+        # Execute the hermetic unit with standard I/O
+        print(
+            f"[L++ CORE] Dispatching to {system_id}:{operation_id} "
+            f"with payload: {payload}"
+        )
+        result_payload = compute_func(payload)
+
+        # Enforce the output contract: must be a dictionary
+        if not isinstance(result_payload, dict):
+            error_msg = "DISPATCH_ERROR: Invalid compute output type"
+            return {
+                "error": "INVALID_COMPUTE_OUTPUT_TYPE", "status": "failed"
+            }, error_msg
+
+        # Check if compute returned an error
+        if result_payload.get("status") == "failed":
+            error_msg = "DISPATCH_ERROR: " + \
+                f"{result_payload.get('error', 'unknown')}"
+            return result_payload, error_msg
+
+        return result_payload, None  # DISPATCH_DONE
+
+    except Exception as e:
+        # Catch any crashes in the volatile compute layer
+        error_msg = f"DISPATCH_ERROR: {str(e)}"
+        print(f"[L++ CORE ERROR] Compute unit failed: {e}")
+        return {"error": str(e), "status": "failed"}, error_msg
+
+
+# =========================================================================
+# EXPORTS
+# =========================================================================
+
+__all__ = [
+    'atom_EVALUATE',
+    'atom_TRANSITION',
+    'atom_MUTATE',
+    'atom_DISPATCH',
+    'ComputeUnitFunc',
+    'TransitionTrace',
+    'AtomError',
+    'EvaluateError',
+    'TransitionError',
+    'MutateError',
+    'DispatchError',
+]

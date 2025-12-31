@@ -1,380 +1,238 @@
+#!/usr/bin/env python3
 """
-L++ Compiled Operator: L++ Blueprint Visualizer
-Version: 1.0.0
-Description: Generates visual representations of blueprints (Mermaid, ASCII)
+L++ Blueprint Visualizer (Logic CAD Edition)
 
-Auto-generated from JSON blueprint. Do not edit directly.
+Generates deterministic visualizations from L++ blueprints.
+Focuses on the 4 Atomic Units:
+EVALUATE (Gate),
+DISPATCH (Action),
+MUTATE,
+TRANSITION.
 """
 
-from frame_py.lpp_core import (
-    atom_EVALUATE,
-    atom_TRANSITION,
-    atom_MUTATE,
-    atom_DISPATCH,
-    TransitionTrace,
-)
+import json
+import argparse
+import sys
+from typing import Dict, List, Any, Set
 
 
-# ======================================================================
-# BLUEPRINT CONSTANTS
-# ======================================================================
+class LppVisualizer:
+    def __init__(self, bp: Dict[str, Any]):
+        self.bp = bp
+        self.name = bp.get("name", "Unnamed Logic")
+        self.version = bp.get("version", "0.0.0")
+        self.entry = bp.get("entry_state", "")
+        self.terminal = set(bp.get("terminal_states", []))
+        self.states = bp.get("states", {})
+        self.gates = bp.get("gates", {})
+        self.actions = bp.get("actions", {})
+        self.transitions = bp.get("transitions", [])
 
-BLUEPRINT_ID = 'lpp_visualizer'
-BLUEPRINT_NAME = 'L++ Blueprint Visualizer'
-BLUEPRINT_VERSION = '1.0.0'
-ENTRY_STATE = 'idle'
-TERMINAL_STATES = {'error', 'complete'}
+        # Pre-calculate sorted order for deterministic output
+        self.sorted_state_ids = self._compute_sort_states()
 
-STATES = {
-    'idle': 'Idle',  # Ready to visualize
-    'loading': 'Loading',  # Loading blueprint data
-    'rendering': 'Rendering',  # Rendering visualization
-    'complete': 'Complete',  # Visualization complete
-    'error': 'Error',  # Visualization failed
-}
+    def _compute_sort_states(self) -> List[str]:
+        """BFS-based reachability sorting."""
+        all_ids = list(self.states.keys())
+        if not self.entry:
+            return sorted(all_ids)
 
-GATES = {
-    'g_has_blueprint': 'blueprint is not None',
-    'g_mermaid_format': "format == 'mermaid'",
-    'g_ascii_format': "format == 'ascii'",
-}
+        visited = []
+        queue = [self.entry]
 
-DISPLAY_RULES = [
-]
+        # Build simple adjacency
+        adj = {s: set() for s in all_ids}
+        for t in self.transitions:
+            f, to = t.get("from"), t.get("to")
+            if f == "*":
+                for s in all_ids:
+                    adj[s].add(to)
+            elif f in adj:
+                adj[f].add(to)
 
-ACTIONS = {
-    'a_load_states': {
-        'type': 'compute',
-        'compute_unit': 'impl:self.states.get',
-    },
-    'a_render_mermaid': {
-        'type': 'compute',
-        'compute_unit': 'impl:as_mermaid_logic',
-    },
-    'a_render_ascii': {
-        'type': 'compute',
-        'compute_unit': 'impl:as_ascii',
-    },
-    'a_enumerate_transitions': {
-        'type': 'compute',
-        'compute_unit': 'impl:enumerate',
-    },
-    'a_append_line': {
-        'type': 'compute',
-        'compute_unit': 'impl:lines.append',
-    },
-    'a_join_output': {
-        'type': 'compute',
-        'compute_unit': 'impl:join',
-    },
-}
+        while queue:
+            curr = queue.pop(0)
+            if curr not in visited and curr in adj:
+                visited.append(curr)
+                queue.extend(sorted(list(adj[curr] - set(visited))))
 
-TRANSITIONS = [
-    {
-        'id': 't_visualize',
-        'from': 'idle',
-        'to': 'loading',
-        'on_event': 'VISUALIZE',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_loaded',
-        'from': 'loading',
-        'to': 'rendering',
-        'on_event': 'LOAD_DONE',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_rendered',
-        'from': 'rendering',
-        'to': 'complete',
-        'on_event': 'RENDER_DONE',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_load_err',
-        'from': 'loading',
-        'to': 'error',
-        'on_event': 'LOAD_ERROR',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_render_err',
-        'from': 'rendering',
-        'to': 'error',
-        'on_event': 'RENDER_ERROR',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_reset',
-        'from': '*',
-        'to': 'idle',
-        'on_event': 'RESET',
-        'gates': [],
-        'actions': [],
-    },
-]
+        # Append orphans
+        for s in sorted(all_ids):
+            if s not in visited:
+                visited.append(s)
+        return visited
 
+    def _get_transition_label(self, t: Dict) -> str:
+        event = t.get("on_event", "ANY")
+        gates = t.get("gates", [])
+        return f"{event} [{', '.join(gates)}]" if gates else event
 
-# ======================================================================
-# HELPER FUNCTIONS
-# ======================================================================
+    # =========================================================================
+    # MERMAID LOGIC (The "Logic CAD" View)
+    # =========================================================================
 
-def _resolve_path(path: str, data: dict):
-    """Resolve a dotted path in a dictionary."""
-    parts = path.split('.')
-    obj = data
-    for part in parts:
-        if isinstance(obj, dict):
-            obj = obj.get(part)
-        else:
-            return None
-        if obj is None:
-            return None
-    return obj
-
-
-# ======================================================================
-# COMPILED OPERATOR
-# ======================================================================
-
-class Operator:
-    """
-    Compiled L++ Operator: L++ Blueprint Visualizer
-    """
-
-    def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'error': None, 'result': None, 'blueprint': None, 'format': None, 'output': None}
-        self.traces: list[TransitionTrace] = []
-        self.compute_registry = compute_registry or {}
-
-    @property
-    def state(self) -> str:
-        return self.context.get('_state', ENTRY_STATE)
-
-    @property
-    def is_terminal(self) -> bool:
-        return self.state in TERMINAL_STATES
-
-    def dispatch(self, event_name: str, payload: dict = None):
+    def as_mermaid_logic(self) -> str:
         """
-        Dispatch an event to the operator.
-
-        Args:
-            event_name: Name of the event
-            payload: Event payload data
-
-        Returns:
-            Tuple of (success, new_state, error)
+        Generates a Logic-First flowchart with
+        Diamonds (Gates) and Rects (Actions).
         """
-        payload = payload or {}
-        current = self.state
+        lines = ["flowchart TD", "    %% L++ Logic CAD Export"]
 
-        # Check terminal
-        if self.is_terminal:
-            return False, current, 'Already in terminal state'
+        # Define States
+        for s_id in self.sorted_state_ids:
+            desc = self.states.get(s_id, {}).get("description", "")
+            label = f"<b>{s_id}</b><br/>{desc}" if desc else s_id
+            shape = f'state_{s_id}(["{label}"])'
+            if s_id == self.entry:
+                shape += ":::entry"
+            if s_id in self.terminal:
+                shape += ":::terminal"
+            lines.append(f"    {shape}")
 
-        # Build evaluation scope
-        scope = dict(self.context)
-        scope['event'] = {'name': event_name, 'payload': payload}
+        # Define Transitions
+        for i, t in enumerate(self.transitions):
+            f, to, event = t.get("from"), t.get("to"), t.get("on_event", "ANY")
+            gate_ids = t.get("gates", [])
+            action_ids = t.get("actions", [])
 
-        # Find matching transition (checks gates)
-        trans = None
-        for t in TRANSITIONS:
-            if t['on_event'] != event_name:
-                continue
-            if t['from'] != '*' and t['from'] != current:
-                continue
-            # Check gates
-            gates_pass = True
-            for gate_id in t.get('gates', []):
-                expr = GATES.get(gate_id, 'True')
-                if not atom_EVALUATE(expr, scope):
-                    gates_pass = False
-                    break
-            if gates_pass:
-                trans = t
-                break
+            sources = self.sorted_state_ids if f == "*" else [f]
 
-        if not trans:
-            return False, current, f'No transition for {event_name}'
+            for s_idx, src in enumerate(sources):
+                path_id = f"t_{i}_{s_idx}"
+                curr = f"state_{src}"
 
-        # Execute actions
-        for action_id in trans['actions']:
-            action = ACTIONS.get(action_id)
-            if not action:
-                continue
-
-            if action['type'] == 'set':
-                # MUTATE
-                target = action.get('target')
-                if action.get('value') is not None:
-                    value = action['value']
-                elif action.get('value_from'):
-                    value = _resolve_path(action['value_from'], scope)
+                # 1. Evaluate (Gate)
+                if gate_ids:
+                    g_node = f"gate_{path_id}"
+                    gate_label = ", ".join(gate_ids)
+                    lines.append(f'    {g_node}{{{{"{gate_label}?"}}}}')
+                    lines.append(f'    {curr} -- "{event}" --> {g_node}')
+                    curr = g_node
+                    link = " -- True --> "
                 else:
-                    value = None
-                self.context = atom_MUTATE(self.context, target, value)
-                scope.update(self.context)  # Sync scope for chained actions
+                    link = f' -- "{event}" --> '
 
-            elif action['type'] == 'compute':
-                # DISPATCH
-                unit = action.get('compute_unit', '')
-                parts = unit.split(':')
-                if len(parts) == 2:
-                    sys_id, op_id = parts
-                    inp = {
-                        k: _resolve_path(v, scope)
-                        for k, v in action.get('input_map', {}).items()
-                    }
-                    result = atom_DISPATCH(
-                        sys_id, op_id, inp, self.compute_registry
-                    )
-                    for ctx_path, res_key in action.get('output_map', {}).items():
-                        if res_key in result:
-                            self.context = atom_MUTATE(
-                                self.context, ctx_path, result[res_key]
-                            )
-                    scope.update(self.context)  # Sync scope for chained actions
+                # 2. Dispatch/Mutate (Actions)
+                if action_ids:
+                    a_node = f"act_{path_id}"
+                    action_label = ", ".join(action_ids)
+                    lines.append(f'    {a_node}[["{action_label}"]]')
+                    lines.append(f'    {curr}{link}{a_node}')
+                    curr = a_node
+                    link = " --> "
 
-        # TRANSITION
-        new_state, trace = atom_TRANSITION(current, trans['to'])
-        self.context = atom_MUTATE(self.context, '_state', new_state)
-        self.traces.append(trace)
+                # 3. Transition
+                lines.append(f"    {curr}{link}state_{to}")
 
-        return True, new_state, None
+        # Styling
+        lines.append(
+            "    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px")
+        lines.append(
+            "    classDef terminal fill:"
+            "#eceff1,stroke:#263238,stroke-width:4px")
+        return "\n".join(lines)
 
-    def get(self, path: str):
-        """Get a value from context by path."""
-        return _resolve_path(path, self.context)
+    # =========================================================================
+    # ASCII LOGIC TABLE (The "Audit" View)
+    # =========================================================================
 
-    def set(self, path: str, value):
-        """Set a value in context by path."""
-        self.context = atom_MUTATE(self.context, path, value)
+    def as_ascii(self) -> str:
+        """Generates a clean logic audit table."""
+        col_widths = [15, 12, 20, 25, 15]
+        headers = ["FROM", "EVENT", "GATE (IF)", "ACTIONS (DO)", "TO"]
 
-    def display(self) -> str:
-        """Evaluate display rules and return formatted string."""
-        for rule in DISPLAY_RULES:
-            gate = rule.get('gate')
-            if gate:
-                expr = GATES.get(gate, 'False')
-                if not atom_EVALUATE(expr, self.context):
-                    continue
-            # Gate passed or no gate, format template
-            template = rule.get('template', '')
-            try:
-                return template.format(**self.context)
-            except (KeyError, ValueError):
-                return template
-        return ''
+        def row(data):
+            return "│ " + " │ ".join(
+                str(d).ljust(w) for d, w in zip(data, col_widths)
+            ) + " │"
 
-    def reset(self):
-        """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'error': None, 'result': None, 'blueprint': None, 'format': None, 'output': None}
-        self.traces = []
+        sep = "├" + "─" * (sum(col_widths) + 14) + "┤"
 
-    def save_state(self, path: str = None):
-        """
-        Save current state to JSON file.
+        output = [
+            f"L++ Blueprint: {self.name} v{self.version}",
+            "═" * (sum(col_widths) + 16),
+            row(headers),
+            sep.replace("├", "╟").replace("─", "═").replace("┤", "╢")
+        ]
 
-        Args:
-            path: File path (default: ./states/{id}.json)
+        for t in self.transitions:
+            actions = ", ".join(t.get("actions", []))
+            gates = ", ".join(t.get("gates", []))
+            output.append(row([
+                t.get("from"),
+                t.get("on_event", "ANY"),
+                gates if gates else "-",
+                actions if actions else "-",
+                t.get("to")
+            ]))
 
-        Returns:
-            Path where state was saved
-        """
-        import json
-        from pathlib import Path
+        output.append(sep.replace("├", "└").replace(
+            "─", "─").replace("┤", "┘"))
+        return "\n".join(output)
 
-        if not path:
-            states_dir = Path('./states')
-            states_dir.mkdir(exist_ok=True)
-            path = states_dir / f'{BLUEPRINT_ID}.json'
+    # =========================================================================
+    # GRAPHVIZ DOT
+    # =========================================================================
+
+    def as_dot(self) -> str:
+        lines = [f'digraph "{self.name}" {{', "    rankdir=LR;",
+                 "    node [shape=box, style=rounded];"]
+
+        for s_id in self.sorted_state_ids:
+            attr = 'style="filled,rounded", ' \
+                'fillcolor="#e1f5fe"' if s_id == self.entry else ""
+            if s_id in self.terminal:
+                attr = 'shape=doubleoracle'
+            lines.append(f'    "{s_id}" [{attr}];')
+
+        for t in self.transitions:
+            f, to = t.get("from"), t.get("to")
+            label = self._get_transition_label(t)
+            sources = self.sorted_state_ids if f == "*" else [f]
+            for src in sources:
+                lines.append(f'    "{src}" -> "{to}" [label="{label}"];')
+
+        lines.append("}")
+        return "\n".join(lines)
+
+# =========================================================================
+# CLI ENTRY
+# =========================================================================
+
+
+def main():
+    parser = argparse.ArgumentParser(description="L++ Blueprint Visualizer")
+    parser.add_argument("file", help="Path to JSON blueprint")
+    parser.add_argument(
+        "-f", "--format", choices=["ascii", "mermaid", "dot"], default="ascii")
+    parser.add_argument("-o", "--output", help="Output file path")
+
+    args = parser.parse_args()
+
+    try:
+        with open(args.file, "r") as f:
+            bp = json.load(f)
+
+        viz = LppVisualizer(bp)
+
+        if args.format == "ascii":
+            result = viz.as_ascii()
+        elif args.format == "mermaid":
+            result = viz.as_mermaid_logic()
         else:
-            path = Path(path)
-            path.parent.mkdir(parents=True, exist_ok=True)
+            result = viz.as_dot()
 
-        state_data = {
-            'blueprint_id': BLUEPRINT_ID,
-            'blueprint_version': BLUEPRINT_VERSION,
-            'context': self.context,
-            'traces': [
-                {
-                    'timestamp': t.timestamp.isoformat(),
-                    'from_id': t.from_id,
-                    'to_id': t.to_id,
-                }
-                for t in self.traces
-            ]
-        }
-
-        with open(path, 'w') as f:
-            json.dump(state_data, f, indent=2)
-
-        return str(path)
-
-    def load_state(self, path: str = None) -> bool:
-        """
-        Load state from JSON file.
-
-        Args:
-            path: File path (default: ./states/{id}.json)
-
-        Returns:
-            True if loaded successfully, False otherwise
-        """
-        import json
-        from pathlib import Path
-        from datetime import datetime, timezone
-
-        if not path:
-            path = Path('./states') / f'{BLUEPRINT_ID}.json'
+        if args.output:
+            with open(args.output, "w") as f:
+                f.write(result)
+            print(f"Successfully wrote {args.format} to {args.output}")
         else:
-            path = Path(path)
+            print(result)
 
-        if not path.exists():
-            return False
-
-        try:
-            with open(path, 'r') as f:
-                state_data = json.load(f)
-
-            # Validate blueprint ID matches
-            if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
-                return False
-
-            self.context = state_data.get('context', {})
-
-            # Restore traces
-            self.traces = []
-            for t in state_data.get('traces', []):
-                self.traces.append(TransitionTrace(
-                    timestamp=datetime.fromisoformat(
-                        t['timestamp']
-                    ).replace(tzinfo=timezone.utc),
-                    from_id=t['from_id'],
-                    to_id=t['to_id'],
-                ))
-
-            return True
-        except Exception as e:
-            print(f'[L++ ERROR] Failed to load state: {e}')
-            return False
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
 
 
-def create_operator(compute_registry: dict = None) -> Operator:
-    """Factory function to create a new Operator instance."""
-    return Operator(compute_registry)
-
-
-if __name__ == '__main__':
-    print('L++ Compiled Operator: L++ Blueprint Visualizer')
-    print('States:', list(STATES.keys()))
-    print('Entry:', ENTRY_STATE)
-    print('Transitions:', len(TRANSITIONS))
+if __name__ == "__main__":
+    main()

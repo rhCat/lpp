@@ -1,158 +1,224 @@
 """
-L++ Compiled Operator: L++ Orchestrator
-Version: 1.0.0
-Description: Orchestrates blueprint execution using the four atomic operations
+L++ Orchestrator - The Thin Conductor
 
-Auto-generated from JSON blueprint. Do not edit directly.
+Minimal orchestrator that runs the execution loop by calling the
+four atomic operations in sequence. No business logic here -
+just conducts the symphony.
+
+State Machine (from orchestrator_blueprint.json):
+    idle → finding_transition → evaluating_gates →
+            ↓                    ↓
+          error               error              
+    executing_actions → transitioning → complete
+        ↓
+    error
+Transitions:
+    DISPATCH_EVENT: idle → finding_transition
+    TRANSITION_FOUND: finding_transition → evaluating_gates
+    NO_TRANSITION: finding_transition → error
+    GATES_PASSED: evaluating_gates → executing_actions
+    GATES_FAILED: evaluating_gates → error
+    ACTIONS_DONE: executing_actions → transitioning
+    ACTION_ERROR: executing_actions → error
+    TRANSITION_DONE: transitioning → complete
+    RESET: * → idle
 """
 
-from frame_py.lpp_core import (
+from typing import Any, Optional
+from enum import Enum
+
+from .lpp_core import (
     atom_EVALUATE,
     atom_TRANSITION,
     atom_MUTATE,
     atom_DISPATCH,
+    ComputeUnitFunc,
     TransitionTrace,
 )
+from .schema import Blueprint
 
 
-# ======================================================================
-# BLUEPRINT CONSTANTS
-# ======================================================================
-
-BLUEPRINT_ID = 'lpp_orchestrator'
-BLUEPRINT_NAME = 'L++ Orchestrator'
-BLUEPRINT_VERSION = '1.0.0'
-ENTRY_STATE = 'idle'
-TERMINAL_STATES = {'complete', 'error'}
-
-STATES = {
-    'idle': 'Idle',  # Waiting for event dispatch
-    'finding_transition': 'Finding Transition',  # Searching for matching transition
-    'evaluating_gates': 'Evaluating Gates',  # Checking gate conditions
-    'executing_actions': 'Executing Actions',  # Running transition actions
-    'transitioning': 'Transitioning',  # Performing state transition
-    'complete': 'Complete',  # Event processed successfully
-    'error': 'Error',  # Processing failed with error
-}
-
-GATES = {
-    'g_has_transition': 'transition is not None',
-    'g_not_terminal': 'current_state not in terminal_states',
-}
-
-DISPLAY_RULES = [
-]
-
-ACTIONS = {
-    'a_find_transition': {
-        'type': 'compute',
-        'compute_unit': 'impl:_find_transition',
-    },
-    'a_evaluate_gate': {
-        'type': 'compute',
-        'compute_unit': 'impl:atom_EVALUATE',
-    },
-    'a_mutate_context': {
-        'type': 'compute',
-        'compute_unit': 'impl:atom_MUTATE',
-    },
-    'a_dispatch_compute': {
-        'type': 'compute',
-        'compute_unit': 'impl:atom_DISPATCH',
-    },
-    'a_transition': {
-        'type': 'compute',
-        'compute_unit': 'impl:atom_TRANSITION',
-    },
-    'a_append_trace': {
-        'type': 'compute',
-        'compute_unit': 'impl:traces.append',
-    },
-}
-
-TRANSITIONS = [
-    {
-        'id': 't_dispatch',
-        'from': 'idle',
-        'to': 'finding_transition',
-        'on_event': 'DISPATCH_EVENT',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_found',
-        'from': 'finding_transition',
-        'to': 'evaluating_gates',
-        'on_event': 'TRANSITION_FOUND',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_gates_pass',
-        'from': 'evaluating_gates',
-        'to': 'executing_actions',
-        'on_event': 'GATES_PASSED',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_actions_done',
-        'from': 'executing_actions',
-        'to': 'transitioning',
-        'on_event': 'ACTIONS_DONE',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_transition_done',
-        'from': 'transitioning',
-        'to': 'complete',
-        'on_event': 'TRANSITION_DONE',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_no_transition',
-        'from': 'finding_transition',
-        'to': 'error',
-        'on_event': 'NO_TRANSITION',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_gates_fail',
-        'from': 'evaluating_gates',
-        'to': 'error',
-        'on_event': 'GATES_FAILED',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_action_error',
-        'from': 'executing_actions',
-        'to': 'error',
-        'on_event': 'ACTION_ERROR',
-        'gates': [],
-        'actions': [],
-    },
-    {
-        'id': 't_reset',
-        'from': '*',
-        'to': 'idle',
-        'on_event': 'RESET',
-        'gates': [],
-        'actions': [],
-    },
-]
+class OrchestratorState(Enum):
+    """Orchestrator state machine states."""
+    IDLE = "idle"
+    FINDING_TRANSITION = "finding_transition"
+    EVALUATING_GATES = "evaluating_gates"
+    EXECUTING_ACTIONS = "executing_actions"
+    TRANSITIONING = "transitioning"
+    COMPLETE = "complete"
+    ERROR = "error"
 
 
-# ======================================================================
-# HELPER FUNCTIONS
-# ======================================================================
+def run_frame(
+    blueprint: Blueprint,
+    context: dict,
+    event_name: str,
+    event_payload: dict,
+    compute_registry: dict[tuple, ComputeUnitFunc]
+) -> tuple[str, dict, list[TransitionTrace], Optional[str]]:
+    """
+    Execute one event dispatch cycle through the frame.
 
-def _resolve_path(path: str, data: dict):
+    Args:
+        blueprint: The workflow blueprint
+        context: Current context data
+        event_name: Name of the incoming event
+        event_payload: Event payload data
+        compute_registry: Dict mapping (system_id, op_id) to callables
+
+    Returns:
+        Tuple of (new_state, new_context, traces, error)
+        - new_state: The resulting state pointer
+        - new_context: The updated context dict
+        - traces: List of TransitionTrace records
+        - error: Error message if failed, None if success
+
+    State machine:
+        idle → finding_transition → evaluating_gates →
+        executing_actions → transitioning → complete | error
+    """
+    orch_state = OrchestratorState.IDLE
+    current_state = context.get("_state", blueprint.entry_state)
+    traces: list[TransitionTrace] = []
+    error_msg: Optional[str] = None
+
+    # Gate: g_not_terminal - Check if already terminal
+    if current_state in blueprint.terminal_states:
+        return current_state, context, traces, "Already in terminal state"
+
+    # =========================================================================
+    # DISPATCH_EVENT: idle → finding_transition
+    # =========================================================================
+    orch_state = OrchestratorState.FINDING_TRANSITION
+
+    transition = _find_transition(blueprint, current_state, event_name)
+
+    if not transition:
+        # NO_TRANSITION: finding_transition → error
+        orch_state = OrchestratorState.ERROR
+        return current_state, context, traces, f"NO_TRANSITION: '{event_name}'"
+
+    # =========================================================================
+    # TRANSITION_FOUND: finding_transition → evaluating_gates
+    # =========================================================================
+    orch_state = OrchestratorState.EVALUATING_GATES
+
+    # Build evaluation scope (context + event)
+    eval_scope = dict(context)
+    eval_scope["event"] = {"name": event_name, "payload": event_payload}
+
+    # EVALUATE: Check gates
+    for gate_id in transition.gates:
+        gate = blueprint.get_gate(gate_id)
+        if gate and gate.expression:
+            result, eval_error = atom_EVALUATE(gate.expression, eval_scope)
+            if eval_error:
+                # GATES_FAILED: evaluating_gates → error
+                orch_state = OrchestratorState.ERROR
+                return current_state,context, traces, f"GATES_FAILED: {eval_error}"
+            if not result:
+                # GATES_FAILED: evaluating_gates → error
+                orch_state = OrchestratorState.ERROR
+                return current_state, context, traces, f"GATES_FAILED: '{gate_id}' blocked"
+
+    # =========================================================================
+    # GATES_PASSED: evaluating_gates → executing_actions
+    # =========================================================================
+    orch_state = OrchestratorState.EXECUTING_ACTIONS
+
+    # Execute actions
+    new_context = dict(context)
+    for action_id in transition.actions:
+        action = blueprint.get_action(action_id)
+        if not action:
+            continue
+
+        try:
+            # SET action
+            if action.type.value == "set" and action.target:
+                value = action.value
+                if action.value_from:
+                    value = _resolve_path(action.value_from, eval_scope)
+                new_context, mutate_error = atom_MUTATE(new_context, action.target, value)
+                if mutate_error:
+                    # ACTION_ERROR: executing_actions → error
+                    orch_state = OrchestratorState.ERROR
+                    return current_state, context, traces, f"ACTION_ERROR: {mutate_error}"
+
+            # COMPUTE action
+            elif action.type.value == "compute" and action.compute_unit:
+                # Parse system_id:operation from compute_unit string
+                parts = action.compute_unit.split(":")
+                if len(parts) == 2:
+                    sys_id, op_id = parts
+                    payload = {
+                        k: _resolve_path(v, eval_scope)
+                        for k, v in action.input_map.items()
+                    }
+                    result, dispatch_error = atom_DISPATCH(
+                        sys_id, op_id, payload, compute_registry
+                    )
+                    if dispatch_error:
+                        # ACTION_ERROR: executing_actions → error
+                        orch_state = OrchestratorState.ERROR
+                        return current_state, context, traces, f"ACTION_ERROR: {dispatch_error}"
+
+                    # Apply output mapping
+                    for ctx_path, result_key in action.output_map.items():
+                        if result_key in result:
+                            new_context, mutate_error = atom_MUTATE(
+                                new_context, ctx_path, result[result_key]
+                            )
+                            if mutate_error:
+                                orch_state = OrchestratorState.ERROR
+                                return current_state, context, traces, f"ACTION_ERROR: {mutate_error}"
+
+        except Exception as e:
+            # ACTION_ERROR: executing_actions → error
+            orch_state = OrchestratorState.ERROR
+            return current_state, context, traces, f"ACTION_ERROR: {str(e)}"
+
+    # =========================================================================
+    # ACTIONS_DONE: executing_actions → transitioning
+    # =========================================================================
+    orch_state = OrchestratorState.TRANSITIONING
+
+    # TRANSITION: Move to next state
+    (new_state, trace), trans_error = atom_TRANSITION(current_state, transition.to_state)
+    traces.append(trace)
+
+    if trans_error:
+        # Note: We still completed the transition but log the error
+        pass
+
+    # Store state in context
+    new_context, _ = atom_MUTATE(new_context, "_state", new_state)
+
+    # =========================================================================
+    # TRANSITION_DONE: transitioning → complete
+    # =========================================================================
+    orch_state = OrchestratorState.COMPLETE
+
+    return new_state, new_context, traces, None
+
+
+def _find_transition(
+    blueprint: Blueprint,
+    current_state: str,
+    event_name: str
+):
+    """Find a matching transition for the event."""
+    for trans in blueprint.transitions.values():
+        if trans.on_event != event_name:
+            continue
+        if trans.from_state == "*" or trans.from_state == current_state:
+            return trans
+    return None
+
+
+def _resolve_path(path: str, data: dict) -> Any:
     """Resolve a dotted path in a dictionary."""
-    parts = path.split('.')
+    parts = path.split(".")
     obj = data
     for part in parts:
         if isinstance(obj, dict):
@@ -164,242 +230,7 @@ def _resolve_path(path: str, data: dict):
     return obj
 
 
-# ======================================================================
-# COMPILED OPERATOR
-# ======================================================================
-
-class Operator:
-    """
-    Compiled L++ Operator: L++ Orchestrator
-    """
-
-    def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'error': None, 'result': None, 'current_state': None, 'event': None, 'traces': None}
-        self.traces: list[TransitionTrace] = []
-        self.compute_registry = compute_registry or {}
-
-    @property
-    def state(self) -> str:
-        return self.context.get('_state', ENTRY_STATE)
-
-    @property
-    def is_terminal(self) -> bool:
-        return self.state in TERMINAL_STATES
-
-    def dispatch(self, event_name: str, payload: dict = None):
-        """
-        Dispatch an event to the operator.
-
-        Args:
-            event_name: Name of the event
-            payload: Event payload data
-
-        Returns:
-            Tuple of (success, new_state, error)
-        """
-        payload = payload or {}
-        current = self.state
-
-        # Check terminal
-        if self.is_terminal:
-            return False, current, 'Already in terminal state'
-
-        # Build evaluation scope
-        scope = dict(self.context)
-        scope['event'] = {'name': event_name, 'payload': payload}
-
-        # Find matching transition (checks gates)
-        trans = None
-        for t in TRANSITIONS:
-            if t['on_event'] != event_name:
-                continue
-            if t['from'] != '*' and t['from'] != current:
-                continue
-            # Check gates
-            gates_pass = True
-            for gate_id in t.get('gates', []):
-                expr = GATES.get(gate_id, 'True')
-                if not atom_EVALUATE(expr, scope):
-                    gates_pass = False
-                    break
-            if gates_pass:
-                trans = t
-                break
-
-        if not trans:
-            return False, current, f'No transition for {event_name}'
-
-        # Execute actions
-        for action_id in trans['actions']:
-            action = ACTIONS.get(action_id)
-            if not action:
-                continue
-
-            if action['type'] == 'set':
-                # MUTATE
-                target = action.get('target')
-                if action.get('value') is not None:
-                    value = action['value']
-                elif action.get('value_from'):
-                    value = _resolve_path(action['value_from'], scope)
-                else:
-                    value = None
-                self.context = atom_MUTATE(self.context, target, value)
-                scope.update(self.context)  # Sync scope for chained actions
-
-            elif action['type'] == 'compute':
-                # DISPATCH
-                unit = action.get('compute_unit', '')
-                parts = unit.split(':')
-                if len(parts) == 2:
-                    sys_id, op_id = parts
-                    inp = {
-                        k: _resolve_path(v, scope)
-                        for k, v in action.get('input_map', {}).items()
-                    }
-                    result = atom_DISPATCH(
-                        sys_id, op_id, inp, self.compute_registry
-                    )
-                    for ctx_path, res_key in action.get('output_map', {}).items():
-                        if res_key in result:
-                            self.context = atom_MUTATE(
-                                self.context, ctx_path, result[res_key]
-                            )
-                    scope.update(self.context)  # Sync scope for chained actions
-
-        # TRANSITION
-        new_state, trace = atom_TRANSITION(current, trans['to'])
-        self.context = atom_MUTATE(self.context, '_state', new_state)
-        self.traces.append(trace)
-
-        return True, new_state, None
-
-    def get(self, path: str):
-        """Get a value from context by path."""
-        return _resolve_path(path, self.context)
-
-    def set(self, path: str, value):
-        """Set a value in context by path."""
-        self.context = atom_MUTATE(self.context, path, value)
-
-    def display(self) -> str:
-        """Evaluate display rules and return formatted string."""
-        for rule in DISPLAY_RULES:
-            gate = rule.get('gate')
-            if gate:
-                expr = GATES.get(gate, 'False')
-                if not atom_EVALUATE(expr, self.context):
-                    continue
-            # Gate passed or no gate, format template
-            template = rule.get('template', '')
-            try:
-                return template.format(**self.context)
-            except (KeyError, ValueError):
-                return template
-        return ''
-
-    def reset(self):
-        """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'error': None, 'result': None, 'current_state': None, 'event': None, 'traces': None}
-        self.traces = []
-
-    def save_state(self, path: str = None):
-        """
-        Save current state to JSON file.
-
-        Args:
-            path: File path (default: ./states/{id}.json)
-
-        Returns:
-            Path where state was saved
-        """
-        import json
-        from pathlib import Path
-
-        if not path:
-            states_dir = Path('./states')
-            states_dir.mkdir(exist_ok=True)
-            path = states_dir / f'{BLUEPRINT_ID}.json'
-        else:
-            path = Path(path)
-            path.parent.mkdir(parents=True, exist_ok=True)
-
-        state_data = {
-            'blueprint_id': BLUEPRINT_ID,
-            'blueprint_version': BLUEPRINT_VERSION,
-            'context': self.context,
-            'traces': [
-                {
-                    'timestamp': t.timestamp.isoformat(),
-                    'from_id': t.from_id,
-                    'to_id': t.to_id,
-                }
-                for t in self.traces
-            ]
-        }
-
-        with open(path, 'w') as f:
-            json.dump(state_data, f, indent=2)
-
-        return str(path)
-
-    def load_state(self, path: str = None) -> bool:
-        """
-        Load state from JSON file.
-
-        Args:
-            path: File path (default: ./states/{id}.json)
-
-        Returns:
-            True if loaded successfully, False otherwise
-        """
-        import json
-        from pathlib import Path
-        from datetime import datetime, timezone
-
-        if not path:
-            path = Path('./states') / f'{BLUEPRINT_ID}.json'
-        else:
-            path = Path(path)
-
-        if not path.exists():
-            return False
-
-        try:
-            with open(path, 'r') as f:
-                state_data = json.load(f)
-
-            # Validate blueprint ID matches
-            if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
-                return False
-
-            self.context = state_data.get('context', {})
-
-            # Restore traces
-            self.traces = []
-            for t in state_data.get('traces', []):
-                self.traces.append(TransitionTrace(
-                    timestamp=datetime.fromisoformat(
-                        t['timestamp']
-                    ).replace(tzinfo=timezone.utc),
-                    from_id=t['from_id'],
-                    to_id=t['to_id'],
-                ))
-
-            return True
-        except Exception as e:
-            print(f'[L++ ERROR] Failed to load state: {e}')
-            return False
-
-
-def create_operator(compute_registry: dict = None) -> Operator:
-    """Factory function to create a new Operator instance."""
-    return Operator(compute_registry)
-
-
-if __name__ == '__main__':
-    print('L++ Compiled Operator: L++ Orchestrator')
-    print('States:', list(STATES.keys()))
-    print('Entry:', ENTRY_STATE)
-    print('Transitions:', len(TRANSITIONS))
+__all__ = [
+    'run_frame',
+    'OrchestratorState',
+]
