@@ -31,14 +31,16 @@ stateDiagram-v2
     error: error
 
     idle --> quizzing: SELECT_CATEGORY
-    quizzing --> fetching: ANSWER
+    quizzing --> quizzing: ANSWER [incomplete]
+    quizzing --> fetching: ANSWER [complete]
     quizzing --> fetching: SKIP_QUIZ
+    fetching --> fetching: FETCH_MORE
     fetching --> analyzing: DONE
-    fetching --> error: DONE
+    fetching --> error: DONE [error]
     analyzing --> ranking: DONE
-    analyzing --> error: DONE
+    analyzing --> error: DONE [error]
     ranking --> browsing: DONE
-    ranking --> error: DONE
+    ranking --> error: DONE [error]
     browsing --> detail: VIEW
     browsing --> comparing: COMPARE
     detail --> browsing: BACK
@@ -51,10 +53,20 @@ stateDiagram-v2
     browsing --> idle: NEW_SEARCH
     browsing --> quizzing: REFINE
     error --> idle: RETRY
-    quizzing --> idle: RESET
+    [*] --> idle: RESET (from any)
 ```
 
 ## Usage
+
+### Web App (Recommended)
+
+```bash
+cd examples/python/discovery_shopping
+python app.py
+# Open http://localhost:10001
+```
+
+### CLI Mode
 
 ```bash
 cd examples/python/discovery_shopping
@@ -127,6 +139,7 @@ Commands: <event> [args] | state | ctx | quit
 | `SELECT_CATEGORY` | idle | Start discovery for a category |
 | `ANSWER` | quizzing | Submit quiz answer |
 | `SKIP_QUIZ` | quizzing | Skip remaining questions |
+| `FETCH_MORE` | fetching | Load more products |
 | `DONE` | fetching, analyzing, ranking | Progress to next phase |
 | `VIEW` | browsing | View product detail |
 | `COMPARE` | browsing, detail | Compare multiple products |
@@ -163,8 +176,8 @@ Commands: <event> [args] | state | ctx | quit
 ## TLA+ Verification
 
 ```
-States: 95
-Distinct: 51
+States: 127
+Distinct: 63
 Depth: 6
 Result: PASS
 ```
@@ -174,10 +187,12 @@ Result: PASS
 ```
 discovery_shopping/
 ├── discovery_shopping.json    # Blueprint (bone)
+├── app.py                     # Web app - minimal HTTP wrapper
 ├── interactive.py             # CLI wrapper (extrusion)
 ├── src/
 │   ├── __init__.py
-│   └── shopping_compute.py    # Compute units (flesh)
+│   ├── shopping_compute.py    # Compute units (flesh)
+│   └── shopping_view.py       # View rendering (hermetic)
 ├── results/
 │   └── discovery_shopping_compiled.py
 └── tla/
