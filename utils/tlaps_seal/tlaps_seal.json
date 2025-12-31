@@ -1,0 +1,379 @@
+{
+  "$schema": "lpp/v0.1.2",
+  "id": "tlaps_seal",
+  "name": "TLAPS Seal Certifier",
+  "version": "1.0.0",
+  "description": "Certify L++ blueprints with formal verification - transition from empirical to axiomatic certainty",
+
+  "context_schema": {
+    "properties": {
+      "blueprintPath": {
+        "type": "string",
+        "description": "Path to L++ blueprint JSON file"
+      },
+      "blueprint": {
+        "type": "object",
+        "description": "Loaded blueprint content"
+      },
+      "tlaPath": {
+        "type": "string",
+        "description": "Path to generated TLA+ specification"
+      },
+      "tlaSpec": {
+        "type": "string",
+        "description": "Generated TLA+ specification content"
+      },
+      "tlcResult": {
+        "type": "object",
+        "description": "TLC model checker verification result"
+      },
+      "tlapsResult": {
+        "type": "object",
+        "description": "TLAPS theorem prover result"
+      },
+      "trinityAudit": {
+        "type": "object",
+        "description": "Audit of Trinity (Transitions, Gates, Actions)"
+      },
+      "flangeAudit": {
+        "type": "object",
+        "description": "Context schema (Flange) validation result"
+      },
+      "invariants": {
+        "type": "array",
+        "description": "List of verified invariants"
+      },
+      "sealStatus": {
+        "type": "string",
+        "enum": ["pending", "tlc_verified", "tlaps_certified", "rejected"],
+        "description": "Current certification status"
+      },
+      "sealCertificate": {
+        "type": "object",
+        "description": "Final seal certificate with metadata"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message if any"
+      }
+    }
+  },
+
+  "states": {
+    "idle": {
+      "description": "Ready to receive blueprint for certification"
+    },
+    "loading": {
+      "description": "Loading and parsing blueprint"
+    },
+    "auditing": {
+      "description": "Auditing Trinity and Flange structure"
+    },
+    "generating_tla": {
+      "description": "Generating TLA+ specification"
+    },
+    "tlc_verifying": {
+      "description": "Running TLC model checker (empirical)"
+    },
+    "tlc_verified": {
+      "description": "TLC verification passed"
+    },
+    "tlaps_proving": {
+      "description": "Running TLAPS theorem prover (axiomatic)"
+    },
+    "certified": {
+      "description": "TLAPS certification complete - Seal granted"
+    },
+    "rejected": {
+      "description": "Blueprint failed verification"
+    },
+    "error": {
+      "description": "Error during certification process"
+    }
+  },
+
+  "entry_state": "idle",
+  "terminal_states": ["certified", "rejected"],
+
+  "gates": {
+    "hasBlueprint": {
+      "type": "expression",
+      "expression": "blueprint is not None"
+    },
+    "hasTlaSpec": {
+      "type": "expression",
+      "expression": "tlaSpec is not None"
+    },
+    "trinityValid": {
+      "type": "expression",
+      "expression": "trinityAudit is not None and trinityAudit['valid']"
+    },
+    "flangeValid": {
+      "type": "expression",
+      "expression": "flangeAudit is not None and flangeAudit['valid']"
+    },
+    "tlcPassed": {
+      "type": "expression",
+      "expression": "tlcResult is not None and tlcResult['passed']"
+    },
+    "tlapsPassed": {
+      "type": "expression",
+      "expression": "tlapsResult is not None and tlapsResult['passed']"
+    },
+    "hasError": {
+      "type": "expression",
+      "expression": "error is not None"
+    },
+    "noError": {
+      "type": "expression",
+      "expression": "error is None"
+    }
+  },
+
+  "actions": {
+    "setPath": {
+      "type": "set",
+      "target": "blueprintPath",
+      "value_from": "event.payload.path"
+    },
+    "loadBlueprint": {
+      "type": "compute",
+      "compute_unit": "seal:loadBlueprint",
+      "input_map": {
+        "blueprintPath": "blueprintPath"
+      },
+      "output_map": {
+        "blueprint": "blueprint",
+        "error": "error"
+      }
+    },
+    "auditTrinity": {
+      "type": "compute",
+      "compute_unit": "seal:auditTrinity",
+      "input_map": {
+        "blueprint": "blueprint"
+      },
+      "output_map": {
+        "trinityAudit": "trinityAudit",
+        "error": "error"
+      }
+    },
+    "auditFlange": {
+      "type": "compute",
+      "compute_unit": "seal:auditFlange",
+      "input_map": {
+        "blueprint": "blueprint"
+      },
+      "output_map": {
+        "flangeAudit": "flangeAudit",
+        "error": "error"
+      }
+    },
+    "generateTla": {
+      "type": "compute",
+      "compute_unit": "seal:generateTla",
+      "input_map": {
+        "blueprint": "blueprint",
+        "blueprintPath": "blueprintPath"
+      },
+      "output_map": {
+        "tlaSpec": "tlaSpec",
+        "tlaPath": "tlaPath",
+        "error": "error"
+      }
+    },
+    "runTlc": {
+      "type": "compute",
+      "compute_unit": "seal:runTlc",
+      "input_map": {
+        "tlaPath": "tlaPath"
+      },
+      "output_map": {
+        "tlcResult": "tlcResult",
+        "sealStatus": "sealStatus",
+        "error": "error"
+      }
+    },
+    "runTlaps": {
+      "type": "compute",
+      "compute_unit": "seal:runTlaps",
+      "input_map": {
+        "tlaPath": "tlaPath",
+        "invariants": "invariants"
+      },
+      "output_map": {
+        "tlapsResult": "tlapsResult",
+        "sealStatus": "sealStatus",
+        "error": "error"
+      }
+    },
+    "generateCertificate": {
+      "type": "compute",
+      "compute_unit": "seal:generateCertificate",
+      "input_map": {
+        "blueprint": "blueprint",
+        "trinityAudit": "trinityAudit",
+        "flangeAudit": "flangeAudit",
+        "tlcResult": "tlcResult",
+        "tlapsResult": "tlapsResult"
+      },
+      "output_map": {
+        "sealCertificate": "sealCertificate",
+        "sealStatus": "sealStatus"
+      }
+    },
+    "setRejected": {
+      "type": "set",
+      "target": "sealStatus",
+      "value": "rejected"
+    },
+    "clearError": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    },
+    "resetContext": {
+      "type": "compute",
+      "compute_unit": "seal:resetContext",
+      "input_map": {},
+      "output_map": {
+        "blueprint": "blueprint",
+        "tlaSpec": "tlaSpec",
+        "tlcResult": "tlcResult",
+        "tlapsResult": "tlapsResult",
+        "trinityAudit": "trinityAudit",
+        "flangeAudit": "flangeAudit",
+        "sealCertificate": "sealCertificate",
+        "sealStatus": "sealStatus",
+        "error": "error"
+      }
+    }
+  },
+
+  "transitions": [
+    {
+      "id": "t1_certify",
+      "from": "idle",
+      "to": "loading",
+      "on_event": "CERTIFY",
+      "actions": ["setPath"]
+    },
+    {
+      "id": "t2_load",
+      "from": "loading",
+      "to": "auditing",
+      "on_event": "AUTO",
+      "actions": ["loadBlueprint"],
+      "gates": ["noError"]
+    },
+    {
+      "id": "t3_audit",
+      "from": "auditing",
+      "to": "generating_tla",
+      "on_event": "AUTO",
+      "actions": ["auditTrinity", "auditFlange"],
+      "gates": ["hasBlueprint", "noError"]
+    },
+    {
+      "id": "t4_generate",
+      "from": "generating_tla",
+      "to": "tlc_verifying",
+      "on_event": "AUTO",
+      "actions": ["generateTla"],
+      "gates": ["trinityValid", "flangeValid", "noError"]
+    },
+    {
+      "id": "t5_tlc",
+      "from": "tlc_verifying",
+      "to": "tlc_verified",
+      "on_event": "AUTO",
+      "actions": ["runTlc"],
+      "gates": ["hasTlaSpec", "noError"]
+    },
+    {
+      "id": "t6_tlaps_start",
+      "from": "tlc_verified",
+      "to": "tlaps_proving",
+      "on_event": "PROVE",
+      "gates": ["tlcPassed"]
+    },
+    {
+      "id": "t7_tlaps_complete",
+      "from": "tlaps_proving",
+      "to": "certified",
+      "on_event": "AUTO",
+      "actions": ["runTlaps", "generateCertificate"],
+      "gates": ["noError"]
+    },
+    {
+      "id": "t8_quick_seal",
+      "from": "tlc_verified",
+      "to": "certified",
+      "on_event": "SEAL_TLC",
+      "actions": ["generateCertificate"],
+      "gates": ["tlcPassed"]
+    },
+    {
+      "id": "t9_audit_fail",
+      "from": "auditing",
+      "to": "rejected",
+      "on_event": "AUTO",
+      "actions": ["setRejected"],
+      "gates": ["hasError"]
+    },
+    {
+      "id": "t10_tlc_fail",
+      "from": "tlc_verifying",
+      "to": "rejected",
+      "on_event": "AUTO",
+      "actions": ["setRejected"],
+      "gates": ["hasError"]
+    },
+    {
+      "id": "t11_tlaps_fail",
+      "from": "tlaps_proving",
+      "to": "rejected",
+      "on_event": "AUTO",
+      "actions": ["setRejected"],
+      "gates": ["hasError"]
+    },
+    {
+      "id": "t12_error_any",
+      "from": "*",
+      "to": "error",
+      "on_event": "ERROR",
+      "gates": ["hasError"]
+    },
+    {
+      "id": "t13_reset",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET",
+      "actions": ["resetContext"]
+    },
+    {
+      "id": "t14_view_cert",
+      "from": "certified",
+      "to": "certified",
+      "on_event": "VIEW",
+      "gates": ["tlapsPassed"]
+    }
+  ],
+
+  "display": {
+    "rules": [
+      {
+        "state": "idle",
+        "message": "Ready - provide blueprint path to certify"
+      },
+      {
+        "state": "certified",
+        "message": "TLAPS Seal Granted - Logic Certified"
+      },
+      {
+        "state": "rejected",
+        "message": "Certification Failed - See audit report"
+      }
+    ]
+  }
+}
