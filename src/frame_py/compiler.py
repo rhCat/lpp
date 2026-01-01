@@ -470,7 +470,8 @@ def _generate_code(bp: dict) -> str:
     lines.append("            gate = rule.get('gate')")
     lines.append("            if gate:")
     lines.append("                expr = GATES.get(gate, 'False')")
-    lines.append("                gate_result, _ = atom_EVALUATE(expr, self.context)")
+    lines.append(
+        "                gate_result, _ = atom_EVALUATE(expr, self.context)")
     lines.append("                if not gate_result:")
     lines.append("                    continue")
     lines.append("            # Gate passed or no gate, format template")

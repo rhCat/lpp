@@ -115,7 +115,7 @@ def run_frame(
             if eval_error:
                 # GATES_FAILED: evaluating_gates → error
                 orch_state = OrchestratorState.ERROR
-                return current_state,context, traces, f"GATES_FAILED: {eval_error}"
+                return current_state, context, traces, f"GATES_FAILED: {eval_error}"
             if not result:
                 # GATES_FAILED: evaluating_gates → error
                 orch_state = OrchestratorState.ERROR
@@ -139,7 +139,8 @@ def run_frame(
                 value = action.value
                 if action.value_from:
                     value = _resolve_path(action.value_from, eval_scope)
-                new_context, mutate_error = atom_MUTATE(new_context, action.target, value)
+                new_context, mutate_error = atom_MUTATE(
+                    new_context, action.target, value)
                 if mutate_error:
                     # ACTION_ERROR: executing_actions → error
                     orch_state = OrchestratorState.ERROR
@@ -184,7 +185,8 @@ def run_frame(
     orch_state = OrchestratorState.TRANSITIONING
 
     # TRANSITION: Move to next state
-    (new_state, trace), trans_error = atom_TRANSITION(current_state, transition.to_state)
+    (new_state, trace), trans_error = atom_TRANSITION(
+        current_state, transition.to_state)
     traces.append(trace)
 
     if trans_error:

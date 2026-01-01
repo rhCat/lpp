@@ -49,6 +49,7 @@ class SafeEvalState(Enum):
 
 class SafeEvalError(Exception):
     """Raised when safe evaluation fails."""
+
     def __init__(self, message: str, state: SafeEvalState = None):
         self.state = state or SafeEvalState.ERROR
         super().__init__(message)
