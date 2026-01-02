@@ -150,6 +150,18 @@ else:
     print(output[:500])
     exit(1)
 "
+
+    # Run operational validation on Python files
+    echo ""
+    echo "      Running operational validation..."
+    PYTHONPATH="$SRC_DIR:$PYTHONPATH" python3 -c "
+from frame_py.operational_validator import validate_skill
+
+# Validate Python files in skill directory
+passed = validate_skill('$SKILL_PATH', verbose=True)
+if not passed:
+    exit(1)
+"
 fi
 
 # Step 3: DOCUMENT - Generate Mermaid

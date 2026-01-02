@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Test scholar_chat to learn about TLA+"""
+from scholar_compute import synthesize, initConfig
 import sys
 sys.path.insert(0, '../../src')
 sys.path.insert(0, 'src')
 
-from scholar_compute import synthesize, initConfig
 
 config = initConfig({})
 

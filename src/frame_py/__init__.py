@@ -58,6 +58,18 @@ from .compiler import compile_blueprint, compile_blueprint_dict
 
 from .orchestrator import run_frame
 
+# ==========================================================================
+# OPERATIONAL VALIDATOR
+# ==========================================================================
+
+from .operational_validator import (
+    validate_python_file,
+    validate_skill_directory,
+    validate_skill,
+    sanitize_python_code,
+    OperationalValidationError,
+)
+
 
 __version__ = "0.1.0"
 
@@ -92,4 +104,11 @@ __all__ = [
 
     # Orchestrator
     'run_frame',
+
+    # Operational Validator
+    'validate_python_file',
+    'validate_skill_directory',
+    'validate_skill',
+    'sanitize_python_code',
+    'OperationalValidationError',
 ]

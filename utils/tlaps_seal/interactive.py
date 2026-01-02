@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """TLAPS Seal Certifier - Interactive CLI (< 50 lines per build_rules.md)"""
+from frame_py.compiler import compile_blueprint
 from src.seal_compute import COMPUTE_REGISTRY
 from pathlib import Path
 import importlib.util
 import json
 import sys
 sys.path.insert(0, "../../src")
-from frame_py.compiler import compile_blueprint
 
 HERE = Path(__file__).parent
 

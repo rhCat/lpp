@@ -318,9 +318,11 @@ def generateTla(params: dict) -> dict:
     lines.append("")
 
     # TLAPS Theorems
-    lines.append("\\* =========================================================")
+    lines.append(
+        "\\* =========================================================")
     lines.append("\\* TLAPS THEOREMS - Axiomatic Certification")
-    lines.append("\\* =========================================================")
+    lines.append(
+        "\\* =========================================================")
     lines.append("")
     lines.append("\\* Theorem 1: Type Safety")
     lines.append("THEOREM TypeSafety == Spec => []TypeInvariant")

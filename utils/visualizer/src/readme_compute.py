@@ -406,7 +406,8 @@ def leaf_queue_table(params: Dict[str, Any]) -> Dict[str, Any]:
         marker = "▶" if i == exec_count else ""
         status = leaf.get("status", "pending")
         name = leaf.get("name", leaf.get("id", "?"))[:40]
-        lines.append(f"| {i+1}{marker} | `{leaf.get('id', '-')}` | {name} | {status} |")
+        lines.append(
+            f"| {i+1}{marker} | `{leaf.get('id', '-')}` | {name} | {status} |")
 
     lines.append("")
     lines.append(f"**Progress:** {exec_count}/{len(queue)}")
