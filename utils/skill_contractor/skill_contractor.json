@@ -1,0 +1,1111 @@
+{
+  "$schema": "lpp/v0.1.2",
+  "id": "skill_contractor",
+  "name": "Skill Contractor",
+  "version": "1.7.0",
+  "description": "Autonomous L++ skill generator. Continuously iterates on logic to achieve coding targets with self-evaluation. Two-phase workflow: (1) Blueprint phase generates and validates JSON until TLC passes, (2) Implementation phase generates compute+interactive with auto-sanitization (fixes literal newlines in strings) and enhanced validation (content checks, AST parsing, import validation, structure checks). Features auto-correction of schema issues with logging. Enforces L++ schema v0.1.2 and build_rules.md for skill creation.",
+
+  "context_schema": {
+    "properties": {
+      "api_key": { "type": "string", "description": "LLM API key" },
+      "api_base": { "type": "string", "description": "LLM API base URL" },
+      "model": { "type": "string", "description": "LLM model identifier" },
+      "target": { "type": "string", "description": "Coding target to achieve" },
+      "workspace_path": { "type": "string", "description": "Working directory" },
+      "run_id": { "type": "string", "description": "Unique identifier for this run (timestamp)" },
+      "run_dir": { "type": "string", "description": "Path to run-specific folder for state and logs" },
+      "phase": { "type": "string", "description": "Current workflow phase: blueprint or implementation" },
+      "blueprint_validated": { "type": "boolean", "description": "True if blueprint phase passed validation" },
+      "plan": { "type": "object", "description": "Decomposed execution plan" },
+      "current_step": { "type": "object", "description": "Active step being executed" },
+      "step_index": { "type": "number", "description": "Current step index" },
+      "step_count": { "type": "number", "description": "Total steps in plan" },
+      "execution_log": { "type": "array", "description": "History of executed steps" },
+      "artifacts": { "type": "array", "description": "Generated files and outputs" },
+      "evaluation": { "type": "object", "description": "Self-evaluation result" },
+      "score": { "type": "number", "description": "Evaluation score 0-100" },
+      "threshold": { "type": "number", "description": "Score threshold for completion" },
+      "feedback": { "type": "string", "description": "Evaluation feedback" },
+      "iteration": { "type": "number", "description": "Current iteration count" },
+      "max_iterations": { "type": "number", "description": "Max iterations allowed" },
+      "is_satisfied": { "type": "boolean", "description": "Target achieved flag" },
+      "error": { "type": "string", "description": "Error message if any" },
+      "error_count": { "type": "number", "description": "Consecutive error count" },
+      "max_errors": { "type": "number", "description": "Max errors per step before skip" },
+      "last_error": { "type": "string", "description": "Most recent error for feedback" },
+      "step_error_count": { "type": "number", "description": "Errors on current step" },
+      "failed_steps": { "type": "array", "description": "Steps skipped due to errors" },
+      "review_decision": { "type": "string", "description": "Review outcome: skip or replan" },
+      "is_lpp_target": { "type": "boolean", "description": "True if target involves L++ skill creation" },
+      "lpp_validated": { "type": "boolean", "description": "True if L++ artifacts passed validation" },
+      "lpp_root": { "type": "string", "description": "Root path of L++ framework installation" },
+      "raw_output": { "type": "string", "description": "Raw LLM output before parsing" },
+      "parsed_output": { "type": "object", "description": "Parsed and sanitized output" },
+      "parse_error": { "type": "string", "description": "Parse/validation error if any" },
+      "corrections": { "type": "array", "description": "Auto-corrections applied during sanitization (for review)" },
+      "corrections_approved": { "type": "boolean", "description": "True if corrections were reviewed and approved" },
+      "repair_attempts": { "type": "number", "description": "Number of output repair attempts" },
+      "max_repairs": { "type": "number", "description": "Max repair attempts before re-prompting" },
+      "interactive_valid": { "type": "boolean", "description": "True if interactive.py passed syntax/import validation" },
+      "interactive_feedback": { "type": "string", "description": "Feedback from interactive evaluation" }
+    }
+  },
+
+  "states": {
+    "idle": { "description": "Awaiting target assignment" },
+    "planning": { "description": "Decomposing target into steps (L++ workflow if is_lpp_target)" },
+    "executing": { "description": "LLM generating step output" },
+    "parsing": { "description": "Parsing LLM output and applying auto-corrections for schema compliance" },
+    "correcting": { "description": "Auto-corrections applied - logging for review (auto-approved unless critical)" },
+    "stepping": { "description": "Advancing to next step" },
+    "validating": { "description": "Validating L++ artifacts with build_skill.sh" },
+    "eval_interactive": { "description": "Evaluating generated interactive.py with syntax and import checks" },
+    "evaluating": { "description": "Self-evaluating progress (includes L++ compliance check)" },
+    "refining": { "description": "Refining plan based on feedback" },
+    "reviewing": { "description": "Reviewing failed step - skip or replan" },
+    "complete": { "description": "Target achieved" },
+    "error": { "description": "Error occurred" }
+  },
+
+  "entry_state": "idle",
+  "terminal_states": ["complete"],
+
+  "gates": {
+    "has_target": {
+      "type": "expression",
+      "expression": "target is not None and len(target) > 0"
+    },
+    "has_plan": {
+      "type": "expression",
+      "expression": "plan is not None"
+    },
+    "has_more_steps": {
+      "type": "expression",
+      "expression": "step_index + 1 < step_count"
+    },
+    "all_steps_done": {
+      "type": "expression",
+      "expression": "step_index + 1 >= step_count"
+    },
+    "is_satisfied": {
+      "type": "expression",
+      "expression": "is_satisfied == True"
+    },
+    "not_satisfied": {
+      "type": "expression",
+      "expression": "is_satisfied == False or is_satisfied is None"
+    },
+    "within_iterations": {
+      "type": "expression",
+      "expression": "iteration < max_iterations"
+    },
+    "max_iterations_reached": {
+      "type": "expression",
+      "expression": "iteration >= max_iterations"
+    },
+    "above_threshold": {
+      "type": "expression",
+      "expression": "score >= threshold"
+    },
+    "below_threshold": {
+      "type": "expression",
+      "expression": "score < threshold"
+    },
+    "has_error": {
+      "type": "expression",
+      "expression": "error is not None"
+    },
+    "no_error": {
+      "type": "expression",
+      "expression": "error is None"
+    },
+    "can_retry_error": {
+      "type": "expression",
+      "expression": "error_count < max_errors"
+    },
+    "max_errors_reached": {
+      "type": "expression",
+      "expression": "error_count >= max_errors"
+    },
+    "has_target_for_recovery": {
+      "type": "expression",
+      "expression": "target is not None and error_count < max_errors"
+    },
+    "step_can_retry": {
+      "type": "expression",
+      "expression": "(step_error_count is None or step_error_count < max_errors)"
+    },
+    "step_max_errors": {
+      "type": "expression",
+      "expression": "(step_error_count is not None and step_error_count >= max_errors)"
+    },
+    "review_skip": {
+      "type": "expression",
+      "expression": "review_decision == \"skip\""
+    },
+    "review_replan": {
+      "type": "expression",
+      "expression": "review_decision == \"replan\""
+    },
+    "review_invalid": {
+      "type": "expression",
+      "expression": "review_decision is None or (review_decision != \"skip\" and review_decision != \"replan\")"
+    },
+    "no_plan": {
+      "type": "expression",
+      "expression": "plan is None or step_count is None or step_count == 0"
+    },
+    "too_many_failed_steps": {
+      "type": "expression",
+      "expression": "failed_steps is not None and len(failed_steps) >= 3"
+    },
+    "is_lpp_target": {
+      "type": "expression",
+      "expression": "is_lpp_target == True"
+    },
+    "not_lpp_target": {
+      "type": "expression",
+      "expression": "is_lpp_target != True"
+    },
+    "lpp_valid": {
+      "type": "expression",
+      "expression": "lpp_validated == True"
+    },
+    "lpp_invalid": {
+      "type": "expression",
+      "expression": "is_lpp_target == True and lpp_validated != True"
+    },
+    "lpp_ok": {
+      "type": "expression",
+      "expression": "is_lpp_target != True or lpp_validated == True"
+    },
+    "output_valid": {
+      "type": "expression",
+      "expression": "parsed_output is not None and parse_error is None"
+    },
+    "output_invalid": {
+      "type": "expression",
+      "expression": "parse_error is not None"
+    },
+    "can_repair": {
+      "type": "expression",
+      "expression": "(repair_attempts is None or repair_attempts < max_repairs)"
+    },
+    "max_repairs_reached": {
+      "type": "expression",
+      "expression": "(repair_attempts is not None and repair_attempts >= max_repairs)"
+    },
+    "has_raw_output": {
+      "type": "expression",
+      "expression": "raw_output is not None and len(raw_output) > 0"
+    },
+    "in_blueprint_phase": {
+      "type": "expression",
+      "expression": "phase == \"blueprint\""
+    },
+    "in_implementation_phase": {
+      "type": "expression",
+      "expression": "phase == \"implementation\""
+    },
+    "blueprint_validated": {
+      "type": "expression",
+      "expression": "blueprint_validated == True"
+    },
+    "blueprint_not_validated": {
+      "type": "expression",
+      "expression": "blueprint_validated != True"
+    },
+    "has_corrections": {
+      "type": "expression",
+      "expression": "corrections is not None and len(corrections) > 0"
+    },
+    "no_corrections": {
+      "type": "expression",
+      "expression": "corrections is None or len(corrections) == 0"
+    },
+    "corrections_approved": {
+      "type": "expression",
+      "expression": "corrections_approved == True"
+    },
+    "interactive_valid": {
+      "type": "expression",
+      "expression": "interactive_valid == True"
+    },
+    "interactive_invalid": {
+      "type": "expression",
+      "expression": "interactive_valid != True"
+    }
+  },
+
+  "actions": {
+    "init": {
+      "type": "compute",
+      "compute_unit": "agent:init",
+      "input_map": {},
+      "output_map": {
+        "api_key": "api_key",
+        "api_base": "api_base",
+        "model": "model",
+        "workspace_path": "workspace_path",
+        "run_id": "run_id",
+        "run_dir": "run_dir",
+        "phase": "phase",
+        "blueprint_validated": "blueprint_validated",
+        "threshold": "threshold",
+        "max_iterations": "max_iterations",
+        "iteration": "iteration",
+        "execution_log": "execution_log",
+        "artifacts": "artifacts",
+        "error_count": "error_count",
+        "max_errors": "max_errors",
+        "step_error_count": "step_error_count",
+        "failed_steps": "failed_steps",
+        "is_lpp_target": "is_lpp_target",
+        "lpp_validated": "lpp_validated",
+        "lpp_root": "lpp_root",
+        "repair_attempts": "repair_attempts",
+        "max_repairs": "max_repairs"
+      }
+    },
+    "set_target": {
+      "type": "set",
+      "target": "target",
+      "value_from": "event.payload.target"
+    },
+    "detect_lpp_target": {
+      "type": "compute",
+      "compute_unit": "agent:detect_lpp_target",
+      "input_map": { "target": "target" },
+      "output_map": { "is_lpp_target": "is_lpp_target" }
+    },
+    "decompose": {
+      "type": "compute",
+      "compute_unit": "agent:decompose",
+      "input_map": {
+        "api_key": "api_key",
+        "api_base": "api_base",
+        "model": "model",
+        "target": "target",
+        "workspace_path": "workspace_path",
+        "run_dir": "run_dir",
+        "feedback": "feedback",
+        "is_lpp_target": "is_lpp_target",
+        "lpp_root": "lpp_root",
+        "iteration": "iteration",
+        "phase": "phase"
+      },
+      "output_map": {
+        "plan": "plan",
+        "step_count": "step_count",
+        "step_index": "step_index",
+        "current_step": "current_step",
+        "error": "error"
+      }
+    },
+    "generate_step_output": {
+      "type": "compute",
+      "compute_unit": "agent:generate_step_output",
+      "input_map": {
+        "api_key": "api_key",
+        "api_base": "api_base",
+        "model": "model",
+        "target": "target",
+        "plan": "plan",
+        "current_step": "current_step",
+        "step_index": "step_index",
+        "workspace_path": "workspace_path",
+        "run_dir": "run_dir",
+        "execution_log": "execution_log",
+        "is_lpp_target": "is_lpp_target",
+        "lpp_root": "lpp_root",
+        "feedback": "feedback",
+        "iteration": "iteration",
+        "parse_error": "parse_error",
+        "raw_output": "raw_output",
+        "repair_attempts": "repair_attempts",
+        "phase": "phase"
+      },
+      "output_map": {
+        "raw_output": "raw_output",
+        "error": "error"
+      }
+    },
+    "parse_and_sanitize": {
+      "type": "compute",
+      "compute_unit": "agent:parse_and_sanitize",
+      "input_map": {
+        "raw_output": "raw_output",
+        "current_step": "current_step",
+        "step_index": "step_index",
+        "run_dir": "run_dir",
+        "is_lpp_target": "is_lpp_target",
+        "phase": "phase"
+      },
+      "output_map": {
+        "parsed_output": "parsed_output",
+        "parse_error": "parse_error",
+        "corrections": "corrections"
+      }
+    },
+    "approve_corrections": {
+      "type": "set",
+      "target": "corrections_approved",
+      "value": true
+    },
+    "log_corrections": {
+      "type": "compute",
+      "compute_unit": "agent:log_corrections",
+      "input_map": {
+        "corrections": "corrections",
+        "run_dir": "run_dir",
+        "step_index": "step_index"
+      },
+      "output_map": {
+        "corrections_approved": "corrections_approved"
+      }
+    },
+    "write_output": {
+      "type": "compute",
+      "compute_unit": "agent:write_output",
+      "input_map": {
+        "parsed_output": "parsed_output",
+        "current_step": "current_step",
+        "step_index": "step_index",
+        "workspace_path": "workspace_path",
+        "run_dir": "run_dir",
+        "raw_output": "raw_output",
+        "execution_log": "execution_log",
+        "artifacts": "artifacts"
+      },
+      "output_map": {
+        "execution_log": "execution_log",
+        "artifacts": "artifacts",
+        "current_step": "current_step",
+        "error": "error"
+      }
+    },
+    "incr_repair": {
+      "type": "compute",
+      "compute_unit": "agent:incr_repair",
+      "input_map": { "repair_attempts": "repair_attempts" },
+      "output_map": { "repair_attempts": "repair_attempts" }
+    },
+    "reset_repair": {
+      "type": "set",
+      "target": "repair_attempts",
+      "value": 0
+    },
+    "clear_parse_error": {
+      "type": "set",
+      "target": "parse_error",
+      "value": null
+    },
+    "advance_step": {
+      "type": "compute",
+      "compute_unit": "agent:advance_step",
+      "input_map": {
+        "plan": "plan",
+        "step_index": "step_index",
+        "step_count": "step_count",
+        "run_dir": "run_dir"
+      },
+      "output_map": {
+        "step_index": "step_index",
+        "current_step": "current_step"
+      }
+    },
+    "validate_lpp": {
+      "type": "compute",
+      "compute_unit": "agent:validate_lpp",
+      "input_map": {
+        "workspace_path": "workspace_path",
+        "run_dir": "run_dir",
+        "artifacts": "artifacts",
+        "lpp_root": "lpp_root",
+        "phase": "phase"
+      },
+      "output_map": {
+        "lpp_validated": "lpp_validated",
+        "blueprint_validated": "blueprint_validated",
+        "feedback": "feedback",
+        "error": "error"
+      }
+    },
+    "advance_phase": {
+      "type": "compute",
+      "compute_unit": "agent:advance_phase",
+      "input_map": {
+        "phase": "phase",
+        "run_dir": "run_dir"
+      },
+      "output_map": {
+        "phase": "phase"
+      }
+    },
+    "evaluate": {
+      "type": "compute",
+      "compute_unit": "agent:evaluate",
+      "input_map": {
+        "api_key": "api_key",
+        "api_base": "api_base",
+        "model": "model",
+        "target": "target",
+        "run_dir": "run_dir",
+        "plan": "plan",
+        "execution_log": "execution_log",
+        "artifacts": "artifacts",
+        "iteration": "iteration",
+        "threshold": "threshold",
+        "is_lpp_target": "is_lpp_target",
+        "lpp_validated": "lpp_validated"
+      },
+      "output_map": {
+        "evaluation": "evaluation",
+        "score": "score",
+        "is_satisfied": "is_satisfied",
+        "feedback": "feedback",
+        "error": "error"
+      }
+    },
+    "evaluate_interactive": {
+      "type": "compute",
+      "compute_unit": "agent:evaluate_interactive",
+      "input_map": {
+        "run_dir": "run_dir",
+        "artifacts": "artifacts"
+      },
+      "output_map": {
+        "interactive_valid": "interactive_valid",
+        "interactive_feedback": "interactive_feedback",
+        "error": "error"
+      }
+    },
+    "incr_iteration": {
+      "type": "compute",
+      "compute_unit": "agent:incr_iteration",
+      "input_map": { "iteration": "iteration" },
+      "output_map": { "iteration": "iteration" }
+    },
+    "reset_for_refine": {
+      "type": "compute",
+      "compute_unit": "agent:reset_for_refine",
+      "input_map": {},
+      "output_map": {
+        "step_index": "step_index",
+        "current_step": "current_step"
+      }
+    },
+    "clear_error": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    },
+    "capture_error_feedback": {
+      "type": "compute",
+      "compute_unit": "agent:capture_error",
+      "input_map": {
+        "error": "error",
+        "error_count": "error_count",
+        "current_step": "current_step",
+        "step_index": "step_index",
+        "run_dir": "run_dir"
+      },
+      "output_map": {
+        "last_error": "last_error",
+        "feedback": "feedback",
+        "error_count": "error_count"
+      }
+    },
+    "reset_error_count": {
+      "type": "set",
+      "target": "error_count",
+      "value": 0
+    },
+    "prepare_recovery": {
+      "type": "compute",
+      "compute_unit": "agent:prepare_recovery",
+      "input_map": {
+        "last_error": "last_error",
+        "feedback": "feedback",
+        "plan": "plan",
+        "step_index": "step_index"
+      },
+      "output_map": {
+        "feedback": "feedback",
+        "error": "error"
+      }
+    },
+    "capture_step_error": {
+      "type": "compute",
+      "compute_unit": "agent:capture_step_error",
+      "input_map": {
+        "error": "error",
+        "step_error_count": "step_error_count",
+        "current_step": "current_step",
+        "step_index": "step_index",
+        "run_dir": "run_dir"
+      },
+      "output_map": {
+        "last_error": "last_error",
+        "feedback": "feedback",
+        "step_error_count": "step_error_count"
+      }
+    },
+    "reset_step_error_count": {
+      "type": "set",
+      "target": "step_error_count",
+      "value": 0
+    },
+    "review_failed_step": {
+      "type": "compute",
+      "compute_unit": "agent:review_failed_step",
+      "input_map": {
+        "api_key": "api_key",
+        "api_base": "api_base",
+        "model": "model",
+        "target": "target",
+        "run_dir": "run_dir",
+        "plan": "plan",
+        "current_step": "current_step",
+        "step_index": "step_index",
+        "step_count": "step_count",
+        "last_error": "last_error",
+        "failed_steps": "failed_steps",
+        "execution_log": "execution_log"
+      },
+      "output_map": {
+        "review_decision": "review_decision",
+        "feedback": "feedback",
+        "failed_steps": "failed_steps"
+      }
+    },
+    "skip_to_next_step": {
+      "type": "compute",
+      "compute_unit": "agent:skip_step",
+      "input_map": {
+        "plan": "plan",
+        "step_index": "step_index",
+        "step_count": "step_count",
+        "run_dir": "run_dir",
+        "failed_steps": "failed_steps",
+        "current_step": "current_step"
+      },
+      "output_map": {
+        "step_index": "step_index",
+        "current_step": "current_step",
+        "failed_steps": "failed_steps",
+        "step_error_count": "step_error_count"
+      }
+    },
+    "capture_parse_error": {
+      "type": "compute",
+      "compute_unit": "agent:capture_parse_error",
+      "input_map": {
+        "parse_error": "parse_error",
+        "raw_output": "raw_output",
+        "repair_attempts": "repair_attempts",
+        "step_index": "step_index",
+        "run_dir": "run_dir"
+      },
+      "output_map": {
+        "feedback": "feedback",
+        "step_error_count": "step_error_count"
+      }
+    },
+    "copy_interactive_feedback": {
+      "type": "set",
+      "target": "feedback",
+      "value_from": "interactive_feedback"
+    },
+    "set_lpp_hard_fail": {
+      "type": "set",
+      "target": "error",
+      "value": "L++ HARD FAIL: Max iterations reached without passing ./utils/build_skill.sh --validate. Blueprint must be TLC-valid."
+    }
+  },
+
+  "transitions": [
+    {
+      "id": "t_start",
+      "from": "idle",
+      "to": "idle",
+      "on_event": "START",
+      "actions": ["init"]
+    },
+    {
+      "id": "t_submit_target",
+      "from": "idle",
+      "to": "planning",
+      "on_event": "SUBMIT",
+      "gates": [],
+      "actions": ["set_target", "detect_lpp_target", "decompose"]
+    },
+    {
+      "id": "t_plan_ready",
+      "from": "planning",
+      "to": "executing",
+      "on_event": "DONE",
+      "gates": ["has_plan", "no_error"],
+      "actions": ["generate_step_output"]
+    },
+    {
+      "id": "t_plan_error",
+      "from": "planning",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": ["has_error"],
+      "actions": ["capture_error_feedback"]
+    },
+    {
+      "id": "t_exec_to_parse",
+      "from": "executing",
+      "to": "parsing",
+      "on_event": "DONE",
+      "gates": ["has_raw_output", "no_error"],
+      "actions": ["parse_and_sanitize"]
+    },
+    {
+      "id": "t_exec_error",
+      "from": "executing",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": ["has_error"],
+      "actions": ["capture_step_error"]
+    },
+    {
+      "id": "t_parse_ok_correct_step",
+      "from": "parsing",
+      "to": "correcting",
+      "on_event": "DONE",
+      "gates": ["output_valid", "has_corrections", "has_more_steps"],
+      "actions": ["log_corrections"]
+    },
+    {
+      "id": "t_parse_ok_step",
+      "from": "parsing",
+      "to": "stepping",
+      "on_event": "DONE",
+      "gates": ["output_valid", "no_corrections", "has_more_steps"],
+      "actions": ["write_output", "reset_repair"]
+    },
+    {
+      "id": "t_parse_ok_correct_blueprint_validate",
+      "from": "parsing",
+      "to": "correcting",
+      "on_event": "DONE",
+      "gates": ["output_valid", "has_corrections", "all_steps_done", "is_lpp_target", "in_blueprint_phase"],
+      "actions": ["log_corrections"]
+    },
+    {
+      "id": "t_parse_ok_blueprint_validate",
+      "from": "parsing",
+      "to": "validating",
+      "on_event": "DONE",
+      "gates": ["output_valid", "no_corrections", "all_steps_done", "is_lpp_target", "in_blueprint_phase"],
+      "actions": ["write_output", "reset_repair", "validate_lpp"]
+    },
+    {
+      "id": "t_parse_ok_correct_impl_validate",
+      "from": "parsing",
+      "to": "correcting",
+      "on_event": "DONE",
+      "gates": ["output_valid", "has_corrections", "all_steps_done", "is_lpp_target", "in_implementation_phase"],
+      "actions": ["log_corrections"]
+    },
+    {
+      "id": "t_parse_ok_impl_validate",
+      "from": "parsing",
+      "to": "validating",
+      "on_event": "DONE",
+      "gates": ["output_valid", "no_corrections", "all_steps_done", "is_lpp_target", "in_implementation_phase"],
+      "actions": ["write_output", "reset_repair", "validate_lpp"]
+    },
+    {
+      "id": "t_parse_ok_correct_eval",
+      "from": "parsing",
+      "to": "correcting",
+      "on_event": "DONE",
+      "gates": ["output_valid", "has_corrections", "all_steps_done", "not_lpp_target"],
+      "actions": ["log_corrections"]
+    },
+    {
+      "id": "t_parse_ok_eval",
+      "from": "parsing",
+      "to": "evaluating",
+      "on_event": "DONE",
+      "gates": ["output_valid", "no_corrections", "all_steps_done", "not_lpp_target"],
+      "actions": ["write_output", "reset_repair", "evaluate"]
+    },
+    {
+      "id": "t_correct_to_step",
+      "from": "correcting",
+      "to": "stepping",
+      "on_event": "DONE",
+      "gates": ["corrections_approved", "has_more_steps"],
+      "actions": ["write_output", "reset_repair"]
+    },
+    {
+      "id": "t_correct_to_validate_blueprint",
+      "from": "correcting",
+      "to": "validating",
+      "on_event": "DONE",
+      "gates": ["corrections_approved", "all_steps_done", "is_lpp_target", "in_blueprint_phase"],
+      "actions": ["write_output", "reset_repair", "validate_lpp"]
+    },
+    {
+      "id": "t_correct_to_validate_impl",
+      "from": "correcting",
+      "to": "validating",
+      "on_event": "DONE",
+      "gates": ["corrections_approved", "all_steps_done", "is_lpp_target", "in_implementation_phase"],
+      "actions": ["write_output", "reset_repair", "validate_lpp"]
+    },
+    {
+      "id": "t_correct_to_eval",
+      "from": "correcting",
+      "to": "evaluating",
+      "on_event": "DONE",
+      "gates": ["corrections_approved", "all_steps_done", "not_lpp_target"],
+      "actions": ["write_output", "reset_repair", "evaluate"]
+    },
+    {
+      "id": "t_parse_fail_retry",
+      "from": "parsing",
+      "to": "executing",
+      "on_event": "DONE",
+      "gates": ["output_invalid", "can_repair"],
+      "actions": ["capture_parse_error", "incr_repair", "generate_step_output"]
+    },
+    {
+      "id": "t_parse_fail_max",
+      "from": "parsing",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": ["output_invalid", "max_repairs_reached"],
+      "actions": ["capture_step_error"]
+    },
+    {
+      "id": "t_step_exec",
+      "from": "stepping",
+      "to": "executing",
+      "on_event": "DONE",
+      "gates": ["has_more_steps", "no_error"],
+      "actions": ["advance_step", "reset_step_error_count", "reset_repair", "clear_parse_error", "generate_step_output"]
+    },
+    {
+      "id": "t_step_validate_blueprint",
+      "from": "stepping",
+      "to": "validating",
+      "on_event": "DONE",
+      "gates": ["all_steps_done", "no_error", "is_lpp_target", "in_blueprint_phase"],
+      "actions": ["validate_lpp"]
+    },
+    {
+      "id": "t_step_validate_impl",
+      "from": "stepping",
+      "to": "validating",
+      "on_event": "DONE",
+      "gates": ["all_steps_done", "no_error", "is_lpp_target", "in_implementation_phase"],
+      "actions": ["validate_lpp"]
+    },
+    {
+      "id": "t_step_eval",
+      "from": "stepping",
+      "to": "evaluating",
+      "on_event": "DONE",
+      "gates": ["all_steps_done", "no_error", "not_lpp_target"],
+      "actions": ["evaluate"]
+    },
+    {
+      "id": "t_step_error",
+      "from": "stepping",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": ["has_error"],
+      "actions": ["capture_error_feedback"]
+    },
+    {
+      "id": "t_validate_blueprint_pass",
+      "from": "validating",
+      "to": "planning",
+      "on_event": "DONE",
+      "gates": ["blueprint_validated", "no_error", "in_blueprint_phase"],
+      "actions": ["advance_phase", "decompose"]
+    },
+    {
+      "id": "t_validate_impl_pass",
+      "from": "validating",
+      "to": "eval_interactive",
+      "on_event": "DONE",
+      "gates": ["lpp_valid", "no_error", "in_implementation_phase"],
+      "actions": ["evaluate_interactive"]
+    },
+    {
+      "id": "t_eval_interactive_pass",
+      "from": "eval_interactive",
+      "to": "evaluating",
+      "on_event": "DONE",
+      "gates": ["interactive_valid", "no_error"],
+      "actions": ["evaluate"]
+    },
+    {
+      "id": "t_eval_interactive_fail",
+      "from": "eval_interactive",
+      "to": "refining",
+      "on_event": "DONE",
+      "gates": ["interactive_invalid", "within_iterations"],
+      "actions": ["copy_interactive_feedback", "incr_iteration", "reset_for_refine"]
+    },
+    {
+      "id": "t_eval_interactive_maxiter",
+      "from": "eval_interactive",
+      "to": "evaluating",
+      "on_event": "DONE",
+      "gates": ["interactive_invalid", "max_iterations_reached"],
+      "actions": ["evaluate"]
+    },
+    {
+      "id": "t_eval_interactive_error",
+      "from": "eval_interactive",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": ["has_error"],
+      "actions": ["capture_error_feedback"]
+    },
+    {
+      "id": "t_validate_blueprint_fail",
+      "from": "validating",
+      "to": "refining",
+      "on_event": "DONE",
+      "gates": ["blueprint_not_validated", "within_iterations", "in_blueprint_phase"],
+      "actions": ["incr_iteration", "reset_for_refine"]
+    },
+    {
+      "id": "t_validate_impl_fail",
+      "from": "validating",
+      "to": "refining",
+      "on_event": "DONE",
+      "gates": ["lpp_invalid", "within_iterations", "in_implementation_phase"],
+      "actions": ["incr_iteration", "reset_for_refine"]
+    },
+    {
+      "id": "t_validate_fail_maxiter",
+      "from": "validating",
+      "to": "evaluating",
+      "on_event": "DONE",
+      "gates": ["lpp_invalid", "max_iterations_reached"],
+      "actions": ["evaluate"]
+    },
+    {
+      "id": "t_validate_error",
+      "from": "validating",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": ["has_error"],
+      "actions": ["capture_error_feedback"]
+    },
+    {
+      "id": "t_eval_satisfied",
+      "from": "evaluating",
+      "to": "complete",
+      "on_event": "DONE",
+      "gates": ["is_satisfied", "lpp_ok", "no_error"]
+    },
+    {
+      "id": "t_eval_lpp_fail",
+      "from": "evaluating",
+      "to": "refining",
+      "on_event": "DONE",
+      "gates": ["is_satisfied", "lpp_invalid", "within_iterations", "no_error"],
+      "actions": ["incr_iteration", "reset_for_refine"]
+    },
+    {
+      "id": "t_eval_refine",
+      "from": "evaluating",
+      "to": "refining",
+      "on_event": "DONE",
+      "gates": ["not_satisfied", "within_iterations", "no_error"],
+      "actions": ["incr_iteration", "reset_for_refine"]
+    },
+    {
+      "id": "t_eval_maxiter",
+      "from": "evaluating",
+      "to": "complete",
+      "on_event": "DONE",
+      "gates": ["max_iterations_reached", "lpp_ok"]
+    },
+    {
+      "id": "t_eval_lpp_hard_fail",
+      "from": "evaluating",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": ["max_iterations_reached", "lpp_invalid"],
+      "actions": ["set_lpp_hard_fail", "capture_error_feedback"]
+    },
+    {
+      "id": "t_eval_error",
+      "from": "evaluating",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": ["has_error"],
+      "actions": ["capture_error_feedback"]
+    },
+    {
+      "id": "t_refine_plan",
+      "from": "refining",
+      "to": "planning",
+      "on_event": "DONE",
+      "gates": ["no_error"],
+      "actions": ["decompose"]
+    },
+    {
+      "id": "t_refine_error",
+      "from": "refining",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": ["has_error"],
+      "actions": ["capture_error_feedback"]
+    },
+    {
+      "id": "t_error_step_retry",
+      "from": "error",
+      "to": "executing",
+      "on_event": "DONE",
+      "gates": ["step_can_retry", "has_plan"],
+      "actions": ["clear_error", "reset_repair", "generate_step_output"]
+    },
+    {
+      "id": "t_error_no_plan",
+      "from": "error",
+      "to": "refining",
+      "on_event": "DONE",
+      "gates": ["no_plan", "within_iterations"],
+      "actions": ["clear_error", "incr_iteration", "reset_for_refine"]
+    },
+    {
+      "id": "t_error_no_plan_maxiter",
+      "from": "error",
+      "to": "complete",
+      "on_event": "DONE",
+      "gates": ["no_plan", "max_iterations_reached"],
+      "actions": []
+    },
+    {
+      "id": "t_error_to_review",
+      "from": "error",
+      "to": "reviewing",
+      "on_event": "DONE",
+      "gates": ["step_max_errors"],
+      "actions": ["clear_error", "review_failed_step"]
+    },
+    {
+      "id": "t_error_maxiter_complete",
+      "from": "error",
+      "to": "complete",
+      "on_event": "DONE",
+      "gates": ["max_iterations_reached", "has_plan"],
+      "actions": []
+    },
+    {
+      "id": "t_review_too_many_fails",
+      "from": "reviewing",
+      "to": "evaluating",
+      "on_event": "DONE",
+      "gates": ["too_many_failed_steps"],
+      "actions": ["evaluate"]
+    },
+    {
+      "id": "t_review_skip",
+      "from": "reviewing",
+      "to": "stepping",
+      "on_event": "DONE",
+      "gates": ["review_skip", "has_more_steps"],
+      "actions": ["reset_repair", "skip_to_next_step"]
+    },
+    {
+      "id": "t_review_skip_eval",
+      "from": "reviewing",
+      "to": "evaluating",
+      "on_event": "DONE",
+      "gates": ["review_skip", "all_steps_done"],
+      "actions": ["evaluate"]
+    },
+    {
+      "id": "t_review_replan",
+      "from": "reviewing",
+      "to": "refining",
+      "on_event": "DONE",
+      "gates": ["review_replan", "within_iterations"],
+      "actions": ["incr_iteration", "reset_for_refine"]
+    },
+    {
+      "id": "t_review_replan_maxiter",
+      "from": "reviewing",
+      "to": "evaluating",
+      "on_event": "DONE",
+      "gates": ["review_replan", "max_iterations_reached"],
+      "actions": ["evaluate"]
+    },
+    {
+      "id": "t_review_invalid_skip",
+      "from": "reviewing",
+      "to": "stepping",
+      "on_event": "DONE",
+      "gates": ["review_invalid", "has_more_steps"],
+      "actions": ["reset_repair", "skip_to_next_step"]
+    },
+    {
+      "id": "t_review_invalid_eval",
+      "from": "reviewing",
+      "to": "evaluating",
+      "on_event": "DONE",
+      "gates": ["review_invalid", "all_steps_done"],
+      "actions": ["evaluate"]
+    },
+    {
+      "id": "t_review_no_plan",
+      "from": "reviewing",
+      "to": "refining",
+      "on_event": "DONE",
+      "gates": ["no_plan", "within_iterations"],
+      "actions": ["incr_iteration", "reset_for_refine"]
+    },
+    {
+      "id": "t_review_no_plan_maxiter",
+      "from": "reviewing",
+      "to": "complete",
+      "on_event": "DONE",
+      "gates": ["no_plan", "max_iterations_reached"],
+      "actions": []
+    },
+    {
+      "id": "t_recover",
+      "from": "error",
+      "to": "idle",
+      "on_event": "RETRY",
+      "actions": ["clear_error", "reset_error_count", "reset_step_error_count", "reset_repair"]
+    },
+    {
+      "id": "t_reset",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+
+  "display": {
+    "rules": [
+      { "gate": "has_corrections", "template": "📝 AUTO-CORRECTED: {corrections} schema issues fixed - approved for validation" },
+      { "gate": "output_invalid", "template": "⚠️ PARSE ERROR (repair {repair_attempts}/{max_repairs}): {parse_error}" },
+      { "gate": "lpp_invalid", "template": "L++ VALIDATION FAILED - refining to fix schema/build issues" },
+      { "gate": "lpp_valid", "template": "L++ VALIDATED: Schema v0.1.2 compliant, TLC passed" },
+      { "gate": "too_many_failed_steps", "template": "WARNING: {failed_steps} steps failed - evaluating partial" },
+      { "gate": "step_max_errors", "template": "REVIEWING: Step {step_index} failed {step_error_count}x - {review_decision}" },
+      { "gate": "has_error", "template": "ERROR ({step_error_count}/{max_errors}): {error} - retrying step..." },
+      { "gate": "is_satisfied", "template": "COMPLETE: Score {score}/100" },
+      { "gate": "is_lpp_target", "template": "L++ Mode | Step {step_index}/{step_count} | Iter {iteration}" },
+      { "gate": "has_plan", "template": "Step {step_index}/{step_count} | Iter {iteration} | Failed {failed_steps}" },
+      { "template": "Ready - submit a coding target" }
+    ]
+  }
+}
