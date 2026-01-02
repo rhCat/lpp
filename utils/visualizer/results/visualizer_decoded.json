@@ -1,0 +1,199 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_viz_compute",
+  "name": "Decoded: viz_compute",
+  "version": "1.0.0",
+  "description": "Auto-decoded from utils/visualizer/src/viz_compute.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "loading": {
+      "name": "Loading",
+      "description": "From function: load_blueprint"
+    },
+    "zoom": {
+      "name": "Zoom",
+      "description": "From function: zoom"
+    },
+    "toggle": {
+      "name": "Toggle",
+      "description": "From function: toggle"
+    },
+    "initializing": {
+      "name": "Initializing",
+      "description": "From function: init_defaults"
+    },
+    "explaining": {
+      "name": "Explaining",
+      "description": "From function: render_graph"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "loading",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "loading",
+      "to": "zoom",
+      "on_event": "LOADING_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "zoom",
+      "to": "toggle",
+      "on_event": "ZOOM_DONE"
+    },
+    {
+      "id": "t3",
+      "from": "toggle",
+      "to": "initializing",
+      "on_event": "TOGGLE_DONE"
+    },
+    {
+      "id": "t4",
+      "from": "initializing",
+      "to": "explaining",
+      "on_event": "INITIALIZING_DONE"
+    },
+    {
+      "id": "t5",
+      "from": "explaining",
+      "to": "complete",
+      "on_event": "EXPLAINING_DONE"
+    },
+    {
+      "id": "t6",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:params.get",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:Path",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:path.exists",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:open",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:json.load",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a5": {
+      "type": "compute",
+      "compute_unit": "impl:BlueprintLoader",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a6": {
+      "type": "compute",
+      "compute_unit": "impl:loader.load",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a7": {
+      "type": "compute",
+      "compute_unit": "impl:blueprint.states.items",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a8": {
+      "type": "compute",
+      "compute_unit": "impl:list",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:blueprint.gates.items",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a11": {
+      "type": "compute",
+      "compute_unit": "impl:blueprint.actions.items",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a13": {
+      "type": "compute",
+      "compute_unit": "impl:str",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a16": {
+      "type": "compute",
+      "compute_unit": "impl:max",
+      "description": "Inferred from function:zoom"
+    },
+    "a17": {
+      "type": "compute",
+      "compute_unit": "impl:min",
+      "description": "Inferred from function:zoom"
+    },
+    "a18": {
+      "type": "compute",
+      "compute_unit": "impl:round",
+      "description": "Inferred from function:zoom"
+    },
+    "a24": {
+      "type": "compute",
+      "compute_unit": "impl:lines.append",
+      "description": "Inferred from function:render_graph"
+    },
+    "a28": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'bp', 'ctx': {'_type': 'Load'}, 'lineno': 121}, 'slice': {'_type': 'Constant', 'value': 'states', 'kind': None, 'lineno': 121}, 'ctx': {'_type': 'Load'}, 'lineno': 121}.items",
+      "description": "Inferred from function:render_graph"
+    },
+    "a29": {
+      "type": "compute",
+      "compute_unit": "impl:state.get",
+      "description": "Inferred from function:render_graph"
+    },
+    "a34": {
+      "type": "compute",
+      "compute_unit": "impl:t.get",
+      "description": "Inferred from function:render_graph"
+    },
+    "a35": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'bp', 'ctx': {'_type': 'Load'}, 'lineno': 140}, 'slice': {'_type': 'Constant', 'value': 'gates', 'kind': None, 'lineno': 140}, 'ctx': {'_type': 'Load'}, 'lineno': 140}.get.get",
+      "description": "Inferred from function:render_graph"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ]
+}

@@ -499,7 +499,14 @@ def inferStates(params: dict) -> dict:
         name = fn.get("name", "")
         if name.startswith("_"):
             continue  # Skip private
-        # Common patterns
+        
+        # Convert function name to readable state name
+        def to_state_name(fn_name):
+            """Convert snake_case to Title Case"""
+            words = fn_name.replace("_", " ").split()
+            return " ".join(w.capitalize() for w in words)
+        
+        # Common patterns -> grouped states
         if any(kw in name.lower() for kw in ["init", "setup", "start"]):
             states.append({
                 "id": f"initializing",
@@ -507,7 +514,7 @@ def inferStates(params: dict) -> dict:
                 "description": f"From function: {name}",
                 "inferred_from": f"function:{name}"
             })
-        elif any(kw in name.lower() for kw in ["process", "handle", "run"]):
+        elif any(kw in name.lower() for kw in ["process", "handle", "run", "execute"]):
             states.append({
                 "id": f"processing",
                 "name": "Processing",
@@ -539,6 +546,100 @@ def inferStates(params: dict) -> dict:
             states.append({
                 "id": f"error",
                 "name": "Error",
+                "description": f"From function: {name}",
+                "inferred_from": f"function:{name}"
+            })
+        elif any(kw in name.lower() for kw in ["query", "search", "find", "lookup"]):
+            states.append({
+                "id": f"querying",
+                "name": "Querying",
+                "description": f"From function: {name}",
+                "inferred_from": f"function:{name}"
+            })
+        elif any(kw in name.lower() for kw in ["generate", "create", "build", "make"]):
+            states.append({
+                "id": f"generating",
+                "name": "Generating",
+                "description": f"From function: {name}",
+                "inferred_from": f"function:{name}"
+            })
+        elif any(kw in name.lower() for kw in ["analyze", "parse", "decode", "extract"]):
+            states.append({
+                "id": f"analyzing",
+                "name": "Analyzing",
+                "description": f"From function: {name}",
+                "inferred_from": f"function:{name}"
+            })
+        elif any(kw in name.lower() for kw in ["explain", "describe", "format", "render"]):
+            states.append({
+                "id": f"explaining",
+                "name": "Explaining",
+                "description": f"From function: {name}",
+                "inferred_from": f"function:{name}"
+            })
+        elif any(kw in name.lower() for kw in ["suggest", "recommend", "improve"]):
+            states.append({
+                "id": f"suggesting",
+                "name": "Suggesting",
+                "description": f"From function: {name}",
+                "inferred_from": f"function:{name}"
+            })
+        elif any(kw in name.lower() for kw in ["register", "add", "update", "set"]):
+            states.append({
+                "id": f"registering",
+                "name": "Registering",
+                "description": f"From function: {name}",
+                "inferred_from": f"function:{name}"
+            })
+        elif any(kw in name.lower() for kw in ["list", "show", "display", "print"]):
+            states.append({
+                "id": f"listing",
+                "name": "Listing",
+                "description": f"From function: {name}",
+                "inferred_from": f"function:{name}"
+            })
+        elif any(kw in name.lower() for kw in ["compile", "transform", "convert"]):
+            states.append({
+                "id": f"compiling",
+                "name": "Compiling",
+                "description": f"From function: {name}",
+                "inferred_from": f"function:{name}"
+            })
+        elif any(kw in name.lower() for kw in ["visualize", "graph", "draw", "plot"]):
+            states.append({
+                "id": f"visualizing",
+                "name": "Visualizing",
+                "description": f"From function: {name}",
+                "inferred_from": f"function:{name}"
+            })
+        elif any(kw in name.lower() for kw in ["orchestrate", "dispatch", "schedule", "route"]):
+            states.append({
+                "id": f"orchestrating",
+                "name": "Orchestrating",
+                "description": f"From function: {name}",
+                "inferred_from": f"function:{name}"
+            })
+        elif any(kw in name.lower() for kw in ["scrape", "crawl", "download"]):
+            states.append({
+                "id": f"scraping",
+                "name": "Scraping",
+                "description": f"From function: {name}",
+                "inferred_from": f"function:{name}"
+            })
+        elif any(kw in name.lower() for kw in ["seal", "sign", "verify", "proof"]):
+            states.append({
+                "id": f"sealing",
+                "name": "Sealing",
+                "description": f"From function: {name}",
+                "inferred_from": f"function:{name}"
+            })
+        else:
+            # Fallback: create a unique state for each unmatched public function
+            state_id = name.lower().replace("_", "-")
+            state_name = to_state_name(name)
+            states.append({
+                "id": state_id,
+                "name": state_name,
                 "description": f"From function: {name}",
                 "inferred_from": f"function:{name}"
             })
@@ -671,7 +772,7 @@ def inferActions(params: dict) -> dict:
     aId = 0
 
     importSemantics = {i.get("module", "").split(".")[0]: i.get("semantic", {})
-                       for i in imports}
+                       for i in imports if i.get("module")}
 
     for fn in functions:
         name = fn.get("name", "")

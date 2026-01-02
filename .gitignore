@@ -6,8 +6,6 @@ __pycache__/
 # test result files
 **/examples/**/results
 **/examples/**/result
-**/utils/**/results
-**/utils/**/result
 **/utils/**/samples
 .DS_Store
 always_on/

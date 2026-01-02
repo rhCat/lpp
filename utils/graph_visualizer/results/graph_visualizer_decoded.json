@@ -1,0 +1,159 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_graph_visualizer_compute",
+  "name": "Decoded: graph_visualizer_compute",
+  "version": "1.0.0",
+  "description": "Auto-decoded from utils/graph_visualizer/src/graph_visualizer_compute.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "processing": {
+      "name": "Processing",
+      "description": "From function: process"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "processing",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "processing",
+      "to": "complete",
+      "on_event": "PROCESSING_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:params.get",
+      "description": "Inferred from function:process"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:json.loads",
+      "description": "Inferred from function:process"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:blueprint.get",
+      "description": "Inferred from function:process"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:set",
+      "description": "Inferred from function:process"
+    },
+    "a11": {
+      "type": "compute",
+      "compute_unit": "impl:states_dict.keys",
+      "description": "Inferred from function:process"
+    },
+    "a12": {
+      "type": "compute",
+      "compute_unit": "impl:defaultdict",
+      "description": "Inferred from function:process"
+    },
+    "a14": {
+      "type": "compute",
+      "compute_unit": "impl:isinstance",
+      "description": "Inferred from function:process"
+    },
+    "a15": {
+      "type": "compute",
+      "compute_unit": "impl:t.get",
+      "description": "Inferred from function:process"
+    },
+    "a19": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': ', ', 'kind': None, 'lineno': 50}.join",
+      "description": "Inferred from function:process"
+    },
+    "a20": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'adjacency', 'ctx': {'_type': 'Load'}, 'lineno': 58}, 'slice': {'_type': 'Name', 'id': 'from_state', 'ctx': {'_type': 'Load'}, 'lineno': 58}, 'ctx': {'_type': 'Load'}, 'lineno': 58}.add",
+      "description": "Inferred from function:process"
+    },
+    "a21": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'back_adjacency', 'ctx': {'_type': 'Load'}, 'lineno': 59}, 'slice': {'_type': 'Name', 'id': 'to_state', 'ctx': {'_type': 'Load'}, 'lineno': 59}, 'ctx': {'_type': 'Load'}, 'lineno': 59}.add",
+      "description": "Inferred from function:process"
+    },
+    "a22": {
+      "type": "compute",
+      "compute_unit": "impl:links.append",
+      "description": "Inferred from function:process"
+    },
+    "a23": {
+      "type": "compute",
+      "compute_unit": "impl:_calculate_layers",
+      "description": "Inferred from function:process"
+    },
+    "a24": {
+      "type": "compute",
+      "compute_unit": "impl:states_dict.items",
+      "description": "Inferred from function:process"
+    },
+    "a26": {
+      "type": "compute",
+      "compute_unit": "impl:state_info.get",
+      "description": "Inferred from function:process"
+    },
+    "a27": {
+      "type": "compute",
+      "compute_unit": "impl:str",
+      "description": "Inferred from function:process"
+    },
+    "a28": {
+      "type": "compute",
+      "compute_unit": "impl:layers.get",
+      "description": "Inferred from function:process"
+    },
+    "a29": {
+      "type": "compute",
+      "compute_unit": "impl:nodes.append",
+      "description": "Inferred from function:process"
+    },
+    "a30": {
+      "type": "compute",
+      "compute_unit": "impl:_build_html",
+      "description": "Inferred from function:process"
+    },
+    "a31": {
+      "type": "compute",
+      "compute_unit": "impl:open",
+      "description": "Inferred from function:process"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ]
+}

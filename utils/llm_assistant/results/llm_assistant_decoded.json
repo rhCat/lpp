@@ -1,0 +1,267 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_llm_compute",
+  "name": "Decoded: llm_compute",
+  "version": "1.0.0",
+  "description": "Auto-decoded from utils/llm_assistant/src/llm_compute.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "initializing": {
+      "name": "Initializing",
+      "description": "From function: init_config"
+    },
+    "loading": {
+      "name": "Loading",
+      "description": "From function: load_schema"
+    },
+    "querying": {
+      "name": "Querying",
+      "description": "From function: query"
+    },
+    "explaining": {
+      "name": "Explaining",
+      "description": "From function: explain_blueprint"
+    },
+    "validating": {
+      "name": "Validating",
+      "description": "From function: validate_blueprint"
+    },
+    "suggesting": {
+      "name": "Suggesting",
+      "description": "From function: suggest_improvements"
+    },
+    "generating": {
+      "name": "Generating",
+      "description": "From function: generate_blueprint"
+    },
+    "error": {
+      "name": "Error",
+      "description": "From try/except blocks"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "initializing",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "initializing",
+      "to": "loading",
+      "on_event": "INITIALIZING_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "loading",
+      "to": "querying",
+      "on_event": "LOADING_DONE"
+    },
+    {
+      "id": "t3",
+      "from": "querying",
+      "to": "explaining",
+      "on_event": "QUERYING_DONE"
+    },
+    {
+      "id": "t4",
+      "from": "explaining",
+      "to": "validating",
+      "on_event": "EXPLAINING_DONE"
+    },
+    {
+      "id": "t5",
+      "from": "validating",
+      "to": "suggesting",
+      "on_event": "VALIDATING_DONE"
+    },
+    {
+      "id": "t6",
+      "from": "suggesting",
+      "to": "generating",
+      "on_event": "SUGGESTING_DONE"
+    },
+    {
+      "id": "t7",
+      "from": "generating",
+      "to": "error",
+      "on_event": "GENERATING_DONE"
+    },
+    {
+      "id": "t8",
+      "from": "error",
+      "to": "complete",
+      "on_event": "ERROR_DONE"
+    },
+    {
+      "id": "t9",
+      "from": "idle",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t10",
+      "from": "initializing",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t11",
+      "from": "loading",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t12",
+      "from": "querying",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t13",
+      "from": "explaining",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t14",
+      "from": "validating",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t15",
+      "from": "suggesting",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t16",
+      "from": "generating",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t17",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:os.environ.get",
+      "description": "Inferred from function:init_config"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:SCHEMA_PATH.exists",
+      "description": "Inferred from function:load_schema"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:SCHEMA_PATH.read_text",
+      "description": "Inferred from function:load_schema"
+    },
+    "a5": {
+      "type": "compute",
+      "compute_unit": "impl:str",
+      "description": "Inferred from function:load_schema"
+    },
+    "a6": {
+      "type": "compute",
+      "compute_unit": "impl:params.get",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a7": {
+      "type": "compute",
+      "compute_unit": "impl:Path",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a8": {
+      "type": "compute",
+      "compute_unit": "impl:p.exists",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a9": {
+      "type": "compute",
+      "compute_unit": "impl:json.loads",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:p.read_text",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a12": {
+      "type": "compute",
+      "compute_unit": "impl:p.resolve",
+      "description": "Inferred from function:load_blueprint"
+    },
+    "a18": {
+      "type": "compute",
+      "compute_unit": "impl:SYSTEM_PROMPT_WITH_SCHEMA.format",
+      "description": "Inferred from function:query"
+    },
+    "a19": {
+      "type": "compute",
+      "compute_unit": "impl:json.dumps",
+      "description": "Inferred from function:query"
+    },
+    "a20": {
+      "type": "compute",
+      "compute_unit": "impl:messages.extend",
+      "description": "Inferred from function:query"
+    },
+    "a21": {
+      "type": "compute",
+      "compute_unit": "impl:messages.append",
+      "description": "Inferred from function:query"
+    },
+    "a22": {
+      "type": "compute",
+      "compute_unit": "impl:_call_llm",
+      "description": "Inferred from function:query"
+    },
+    "a28": {
+      "type": "compute",
+      "compute_unit": "impl:list",
+      "description": "Inferred from function:query"
+    },
+    "a29": {
+      "type": "compute",
+      "compute_unit": "impl:new_conv.append",
+      "description": "Inferred from function:query"
+    },
+    "a32": {
+      "type": "compute",
+      "compute_unit": "impl:query",
+      "description": "Inferred from function:explain_blueprint"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ]
+}

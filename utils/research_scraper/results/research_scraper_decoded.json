@@ -1,0 +1,248 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_scraper_compute",
+  "name": "Decoded: scraper_compute",
+  "version": "1.0.0",
+  "description": "Auto-decoded from utils/research_scraper/src/scraper_compute.py",
+  "context_schema": {
+    "properties": {
+      "response": {
+        "type": "object"
+      },
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "arxiv": {
+      "name": "Arxiv",
+      "description": "From function: arxiv"
+    },
+    "semanticscholar": {
+      "name": "Semanticscholar",
+      "description": "From function: semanticScholar"
+    },
+    "web": {
+      "name": "Web",
+      "description": "From function: web"
+    },
+    "loading": {
+      "name": "Loading",
+      "description": "From function: fetchDetail"
+    },
+    "error": {
+      "name": "Error",
+      "description": "From try/except blocks"
+    },
+    "fetching": {
+      "name": "Fetching",
+      "description": "HTTP operations via urllib.parse"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "arxiv",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "arxiv",
+      "to": "semanticscholar",
+      "on_event": "ARXIV_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "semanticscholar",
+      "to": "web",
+      "on_event": "SEMANTICSCHOLAR_DONE"
+    },
+    {
+      "id": "t3",
+      "from": "web",
+      "to": "loading",
+      "on_event": "WEB_DONE"
+    },
+    {
+      "id": "t4",
+      "from": "loading",
+      "to": "error",
+      "on_event": "LOADING_DONE"
+    },
+    {
+      "id": "t5",
+      "from": "error",
+      "to": "fetching",
+      "on_event": "ERROR_DONE"
+    },
+    {
+      "id": "t6",
+      "from": "fetching",
+      "to": "complete",
+      "on_event": "FETCHING_DONE"
+    },
+    {
+      "id": "t7",
+      "from": "idle",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t8",
+      "from": "arxiv",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t9",
+      "from": "semanticscholar",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t10",
+      "from": "web",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t11",
+      "from": "loading",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t12",
+      "from": "fetching",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t13",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:params.get",
+      "description": "Inferred from function:arxiv"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:urllib.parse.quote",
+      "description": "Inferred from function:arxiv"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:_httpGet",
+      "description": "Inferred from function:arxiv"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:ET.fromstring",
+      "description": "Inferred from function:arxiv"
+    },
+    "a5": {
+      "type": "compute",
+      "compute_unit": "impl:root.findall",
+      "description": "Inferred from function:arxiv"
+    },
+    "a6": {
+      "type": "compute",
+      "compute_unit": "impl:entry.find",
+      "description": "Inferred from function:arxiv"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:entry.findall",
+      "description": "Inferred from function:arxiv"
+    },
+    "a11": {
+      "type": "compute",
+      "compute_unit": "impl:author.find",
+      "description": "Inferred from function:arxiv"
+    },
+    "a12": {
+      "type": "compute",
+      "compute_unit": "impl:authors.append",
+      "description": "Inferred from function:arxiv"
+    },
+    "a13": {
+      "type": "compute",
+      "compute_unit": "impl:re.search",
+      "description": "Inferred from function:arxiv"
+    },
+    "a14": {
+      "type": "compute",
+      "compute_unit": "impl:match.group",
+      "description": "Inferred from function:arxiv"
+    },
+    "a15": {
+      "type": "compute",
+      "compute_unit": "impl:results.append",
+      "description": "Inferred from function:arxiv"
+    },
+    "a16": {
+      "type": "compute",
+      "compute_unit": "impl:title.text.strip",
+      "description": "Inferred from function:arxiv"
+    },
+    "a17": {
+      "type": "compute",
+      "compute_unit": "impl:summary.text.strip",
+      "description": "Inferred from function:arxiv"
+    },
+    "a22": {
+      "type": "compute",
+      "compute_unit": "impl:json.loads",
+      "description": "Inferred from function:semanticScholar"
+    },
+    "a23": {
+      "type": "compute",
+      "compute_unit": "impl:data.get",
+      "description": "Inferred from function:semanticScholar"
+    },
+    "a24": {
+      "type": "compute",
+      "compute_unit": "impl:a.get",
+      "description": "Inferred from function:semanticScholar"
+    },
+    "a25": {
+      "type": "compute",
+      "compute_unit": "impl:p.get",
+      "description": "Inferred from function:semanticScholar"
+    },
+    "a31": {
+      "type": "compute",
+      "compute_unit": "impl:str",
+      "description": "Inferred from function:semanticScholar"
+    },
+    "a37": {
+      "type": "compute",
+      "compute_unit": "impl:BeautifulSoup",
+      "description": "Inferred from function:web"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ]
+}

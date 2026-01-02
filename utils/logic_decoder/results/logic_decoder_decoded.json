@@ -1,0 +1,269 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_decoder_compute",
+  "name": "Decoded: decoder_compute",
+  "version": "1.0.0",
+  "description": "Auto-decoded from utils/logic_decoder/src/decoder_compute.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "hasvalue": {
+      "name": "Hasvalue",
+      "description": "From function: hasValue"
+    },
+    "loading": {
+      "name": "Loading",
+      "description": "From function: loadFile"
+    },
+    "analyzing": {
+      "name": "Analyzing",
+      "description": "From function: parseAst"
+    },
+    "walk": {
+      "name": "Walk",
+      "description": "From function: walk"
+    },
+    "registering": {
+      "name": "Registering",
+      "description": "From function: addNode"
+    },
+    "walkbody": {
+      "name": "Walkbody",
+      "description": "From function: walkBody"
+    },
+    "inferstates": {
+      "name": "Inferstates",
+      "description": "From function: inferStates"
+    },
+    "to-state-name": {
+      "name": "To State Name",
+      "description": "From function: to_state_name"
+    },
+    "infertransitions": {
+      "name": "Infertransitions",
+      "description": "From function: inferTransitions"
+    },
+    "inferactions": {
+      "name": "Inferactions",
+      "description": "From function: inferActions"
+    },
+    "generating": {
+      "name": "Generating",
+      "description": "From function: generateBlueprint"
+    },
+    "clearstate": {
+      "name": "Clearstate",
+      "description": "From function: clearState"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "hasvalue",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "hasvalue",
+      "to": "loading",
+      "on_event": "HASVALUE_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "loading",
+      "to": "analyzing",
+      "on_event": "LOADING_DONE"
+    },
+    {
+      "id": "t3",
+      "from": "analyzing",
+      "to": "walk",
+      "on_event": "ANALYZING_DONE"
+    },
+    {
+      "id": "t4",
+      "from": "walk",
+      "to": "registering",
+      "on_event": "WALK_DONE"
+    },
+    {
+      "id": "t5",
+      "from": "registering",
+      "to": "walkbody",
+      "on_event": "REGISTERING_DONE"
+    },
+    {
+      "id": "t6",
+      "from": "walkbody",
+      "to": "inferstates",
+      "on_event": "WALKBODY_DONE"
+    },
+    {
+      "id": "t7",
+      "from": "inferstates",
+      "to": "to-state-name",
+      "on_event": "INFERSTATES_DONE"
+    },
+    {
+      "id": "t8",
+      "from": "to-state-name",
+      "to": "infertransitions",
+      "on_event": "TO-STATE-NAME_DONE"
+    },
+    {
+      "id": "t9",
+      "from": "infertransitions",
+      "to": "inferactions",
+      "on_event": "INFERTRANSITIONS_DONE"
+    },
+    {
+      "id": "t10",
+      "from": "inferactions",
+      "to": "generating",
+      "on_event": "INFERACTIONS_DONE"
+    },
+    {
+      "id": "t11",
+      "from": "generating",
+      "to": "clearstate",
+      "on_event": "GENERATING_DONE"
+    },
+    {
+      "id": "t12",
+      "from": "clearstate",
+      "to": "complete",
+      "on_event": "CLEARSTATE_DONE"
+    },
+    {
+      "id": "t13",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:params.get.strip",
+      "description": "Inferred from function:hasValue"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:params.get",
+      "description": "Inferred from function:hasValue"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:open",
+      "description": "Inferred from function:loadFile"
+    },
+    "a5": {
+      "type": "compute",
+      "compute_unit": "impl:f.read",
+      "description": "Inferred from function:loadFile"
+    },
+    "a6": {
+      "type": "compute",
+      "compute_unit": "impl:str",
+      "description": "Inferred from function:loadFile"
+    },
+    "a8": {
+      "type": "compute",
+      "compute_unit": "impl:ast.parse",
+      "description": "Inferred from function:parseAst"
+    },
+    "a9": {
+      "type": "compute",
+      "compute_unit": "impl:_astToDict",
+      "description": "Inferred from function:parseAst"
+    },
+    "a11": {
+      "type": "compute",
+      "compute_unit": "impl:isinstance",
+      "description": "Inferred from function:analyzeImports"
+    },
+    "a12": {
+      "type": "compute",
+      "compute_unit": "impl:node.get",
+      "description": "Inferred from function:analyzeImports"
+    },
+    "a14": {
+      "type": "compute",
+      "compute_unit": "impl:alias.get",
+      "description": "Inferred from function:analyzeImports"
+    },
+    "a15": {
+      "type": "compute",
+      "compute_unit": "impl:name.split",
+      "description": "Inferred from function:analyzeImports"
+    },
+    "a16": {
+      "type": "compute",
+      "compute_unit": "impl:imports.append",
+      "description": "Inferred from function:analyzeImports"
+    },
+    "a18": {
+      "type": "compute",
+      "compute_unit": "impl:IMPORT_SEMANTICS.get",
+      "description": "Inferred from function:analyzeImports"
+    },
+    "a21": {
+      "type": "compute",
+      "compute_unit": "impl:mod.split",
+      "description": "Inferred from function:analyzeImports"
+    },
+    "a28": {
+      "type": "compute",
+      "compute_unit": "impl:node.values",
+      "description": "Inferred from function:analyzeImports"
+    },
+    "a29": {
+      "type": "compute",
+      "compute_unit": "impl:walk",
+      "description": "Inferred from function:analyzeImports"
+    },
+    "a56": {
+      "type": "compute",
+      "compute_unit": "impl:i.get",
+      "description": "Inferred from function:analyzeFunctions"
+    },
+    "a58": {
+      "type": "compute",
+      "compute_unit": "impl:i.get.split",
+      "description": "Inferred from function:analyzeFunctions"
+    },
+    "a61": {
+      "type": "compute",
+      "compute_unit": "impl:node.get.get",
+      "description": "Inferred from function:analyzeFunctions"
+    },
+    "a63": {
+      "type": "compute",
+      "compute_unit": "impl:args.append",
+      "description": "Inferred from function:analyzeFunctions"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ]
+}

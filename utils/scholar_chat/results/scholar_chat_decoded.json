@@ -1,0 +1,264 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_scholar_compute",
+  "name": "Decoded: scholar_compute",
+  "version": "1.0.0",
+  "description": "Auto-decoded from utils/scholar_chat/src/scholar_compute.py",
+  "context_schema": {
+    "properties": {
+      "response": {
+        "type": "object"
+      },
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "initializing": {
+      "name": "Initializing",
+      "description": "From function: initConfig"
+    },
+    "querying": {
+      "name": "Querying",
+      "description": "From function: searchAll"
+    },
+    "loading": {
+      "name": "Loading",
+      "description": "From function: fetchDetails"
+    },
+    "synthesize": {
+      "name": "Synthesize",
+      "description": "From function: synthesize"
+    },
+    "chat": {
+      "name": "Chat",
+      "description": "From function: chat"
+    },
+    "error": {
+      "name": "Error",
+      "description": "From try/except blocks"
+    },
+    "fetching": {
+      "name": "Fetching",
+      "description": "HTTP operations via urllib.request"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "initializing",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "initializing",
+      "to": "querying",
+      "on_event": "INITIALIZING_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "querying",
+      "to": "loading",
+      "on_event": "QUERYING_DONE"
+    },
+    {
+      "id": "t3",
+      "from": "loading",
+      "to": "synthesize",
+      "on_event": "LOADING_DONE"
+    },
+    {
+      "id": "t4",
+      "from": "synthesize",
+      "to": "chat",
+      "on_event": "SYNTHESIZE_DONE"
+    },
+    {
+      "id": "t5",
+      "from": "chat",
+      "to": "error",
+      "on_event": "CHAT_DONE"
+    },
+    {
+      "id": "t6",
+      "from": "error",
+      "to": "fetching",
+      "on_event": "ERROR_DONE"
+    },
+    {
+      "id": "t7",
+      "from": "fetching",
+      "to": "complete",
+      "on_event": "FETCHING_DONE"
+    },
+    {
+      "id": "t8",
+      "from": "idle",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t9",
+      "from": "initializing",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t10",
+      "from": "querying",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t11",
+      "from": "loading",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t12",
+      "from": "synthesize",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t13",
+      "from": "chat",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t14",
+      "from": "fetching",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t15",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:os.environ.get",
+      "description": "Inferred from function:initConfig"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:params.get",
+      "description": "Inferred from function:searchAll"
+    },
+    "a5": {
+      "type": "compute",
+      "compute_unit": "impl:arxiv",
+      "description": "Inferred from function:searchAll"
+    },
+    "a6": {
+      "type": "compute",
+      "compute_unit": "impl:semanticScholar",
+      "description": "Inferred from function:searchAll"
+    },
+    "a7": {
+      "type": "compute",
+      "compute_unit": "impl:r.get",
+      "description": "Inferred from function:searchAll"
+    },
+    "a8": {
+      "type": "compute",
+      "compute_unit": "impl:results.extend",
+      "description": "Inferred from function:searchAll"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:errors.append",
+      "description": "Inferred from function:searchAll"
+    },
+    "a12": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': '; ', 'kind': None, 'lineno': 72}.join",
+      "description": "Inferred from function:searchAll"
+    },
+    "a15": {
+      "type": "compute",
+      "compute_unit": "impl:list",
+      "description": "Inferred from function:fetchDetails"
+    },
+    "a16": {
+      "type": "compute",
+      "compute_unit": "impl:range",
+      "description": "Inferred from function:fetchDetails"
+    },
+    "a17": {
+      "type": "compute",
+      "compute_unit": "impl:min",
+      "description": "Inferred from function:fetchDetails"
+    },
+    "a18": {
+      "type": "compute",
+      "compute_unit": "impl:len",
+      "description": "Inferred from function:fetchDetails"
+    },
+    "a20": {
+      "type": "compute",
+      "compute_unit": "impl:fetchDetail",
+      "description": "Inferred from function:fetchDetails"
+    },
+    "a21": {
+      "type": "compute",
+      "compute_unit": "impl:paper.get",
+      "description": "Inferred from function:fetchDetails"
+    },
+    "a24": {
+      "type": "compute",
+      "compute_unit": "impl:details.append",
+      "description": "Inferred from function:fetchDetails"
+    },
+    "a25": {
+      "type": "compute",
+      "compute_unit": "impl:links.append",
+      "description": "Inferred from function:fetchDetails"
+    },
+    "a26": {
+      "type": "compute",
+      "compute_unit": "impl:d.get",
+      "description": "Inferred from function:fetchDetails"
+    },
+    "a43": {
+      "type": "compute",
+      "compute_unit": "impl:enumerate",
+      "description": "Inferred from function:synthesize"
+    },
+    "a45": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'links', 'ctx': {'_type': 'Load'}, 'lineno': 147}, 'slice': {'_type': 'Name', 'id': 'i', 'ctx': {'_type': 'Load'}, 'lineno': 147}, 'ctx': {'_type': 'Load'}, 'lineno': 147}.get",
+      "description": "Inferred from function:synthesize"
+    },
+    "a46": {
+      "type": "compute",
+      "compute_unit": "impl:p.get",
+      "description": "Inferred from function:synthesize"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ]
+}

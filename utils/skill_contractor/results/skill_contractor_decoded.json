@@ -1,0 +1,469 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_skill_contractor_compute",
+  "name": "Decoded: skill_contractor_compute",
+  "version": "1.0.0",
+  "description": "Auto-decoded from utils/skill_contractor/src/skill_contractor_compute.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "sanitize-python-code": {
+      "name": "Sanitize Python Code",
+      "description": "From function: sanitize_python_code"
+    },
+    "initializing": {
+      "name": "Initializing",
+      "description": "From function: init"
+    },
+    "loading": {
+      "name": "Loading",
+      "description": "From function: detect_lpp_target"
+    },
+    "decompose": {
+      "name": "Decompose",
+      "description": "From function: decompose"
+    },
+    "generating": {
+      "name": "Generating",
+      "description": "From function: generate_step_output"
+    },
+    "analyzing": {
+      "name": "Analyzing",
+      "description": "From function: parse_and_sanitize"
+    },
+    "saving": {
+      "name": "Saving",
+      "description": "From function: write_output"
+    },
+    "advance-step": {
+      "name": "Advance Step",
+      "description": "From function: advance_step"
+    },
+    "validating": {
+      "name": "Validating",
+      "description": "From function: validate_lpp"
+    },
+    "advance-phase": {
+      "name": "Advance Phase",
+      "description": "From function: advance_phase"
+    },
+    "evaluate": {
+      "name": "Evaluate",
+      "description": "From function: evaluate"
+    },
+    "incr-iteration": {
+      "name": "Incr Iteration",
+      "description": "From function: incr_iteration"
+    },
+    "incr-repair": {
+      "name": "Incr Repair",
+      "description": "From function: incr_repair"
+    },
+    "registering": {
+      "name": "Registering",
+      "description": "From function: reset_for_refine"
+    },
+    "error": {
+      "name": "Error",
+      "description": "From function: capture_error"
+    },
+    "prepare-recovery": {
+      "name": "Prepare Recovery",
+      "description": "From function: prepare_recovery"
+    },
+    "skip-step": {
+      "name": "Skip Step",
+      "description": "From function: skip_step"
+    },
+    "clear-state": {
+      "name": "Clear State",
+      "description": "From function: clear_state"
+    },
+    "log-corrections": {
+      "name": "Log Corrections",
+      "description": "From function: log_corrections"
+    },
+    "evaluate-interactive": {
+      "name": "Evaluate Interactive",
+      "description": "From function: evaluate_interactive"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "sanitize-python-code",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "sanitize-python-code",
+      "to": "initializing",
+      "on_event": "SANITIZE-PYTHON-CODE_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "initializing",
+      "to": "loading",
+      "on_event": "INITIALIZING_DONE"
+    },
+    {
+      "id": "t3",
+      "from": "loading",
+      "to": "decompose",
+      "on_event": "LOADING_DONE"
+    },
+    {
+      "id": "t4",
+      "from": "decompose",
+      "to": "generating",
+      "on_event": "DECOMPOSE_DONE"
+    },
+    {
+      "id": "t5",
+      "from": "generating",
+      "to": "analyzing",
+      "on_event": "GENERATING_DONE"
+    },
+    {
+      "id": "t6",
+      "from": "analyzing",
+      "to": "saving",
+      "on_event": "ANALYZING_DONE"
+    },
+    {
+      "id": "t7",
+      "from": "saving",
+      "to": "advance-step",
+      "on_event": "SAVING_DONE"
+    },
+    {
+      "id": "t8",
+      "from": "advance-step",
+      "to": "validating",
+      "on_event": "ADVANCE-STEP_DONE"
+    },
+    {
+      "id": "t9",
+      "from": "validating",
+      "to": "advance-phase",
+      "on_event": "VALIDATING_DONE"
+    },
+    {
+      "id": "t10",
+      "from": "advance-phase",
+      "to": "evaluate",
+      "on_event": "ADVANCE-PHASE_DONE"
+    },
+    {
+      "id": "t11",
+      "from": "evaluate",
+      "to": "incr-iteration",
+      "on_event": "EVALUATE_DONE"
+    },
+    {
+      "id": "t12",
+      "from": "incr-iteration",
+      "to": "incr-repair",
+      "on_event": "INCR-ITERATION_DONE"
+    },
+    {
+      "id": "t13",
+      "from": "incr-repair",
+      "to": "registering",
+      "on_event": "INCR-REPAIR_DONE"
+    },
+    {
+      "id": "t14",
+      "from": "registering",
+      "to": "error",
+      "on_event": "REGISTERING_DONE"
+    },
+    {
+      "id": "t15",
+      "from": "error",
+      "to": "prepare-recovery",
+      "on_event": "ERROR_DONE"
+    },
+    {
+      "id": "t16",
+      "from": "prepare-recovery",
+      "to": "skip-step",
+      "on_event": "PREPARE-RECOVERY_DONE"
+    },
+    {
+      "id": "t17",
+      "from": "skip-step",
+      "to": "clear-state",
+      "on_event": "SKIP-STEP_DONE"
+    },
+    {
+      "id": "t18",
+      "from": "clear-state",
+      "to": "log-corrections",
+      "on_event": "CLEAR-STATE_DONE"
+    },
+    {
+      "id": "t19",
+      "from": "log-corrections",
+      "to": "evaluate-interactive",
+      "on_event": "LOG-CORRECTIONS_DONE"
+    },
+    {
+      "id": "t20",
+      "from": "evaluate-interactive",
+      "to": "complete",
+      "on_event": "EVALUATE-INTERACTIVE_DONE"
+    },
+    {
+      "id": "t21",
+      "from": "idle",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t22",
+      "from": "sanitize-python-code",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t23",
+      "from": "initializing",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t24",
+      "from": "loading",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t25",
+      "from": "decompose",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t26",
+      "from": "generating",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t27",
+      "from": "analyzing",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t28",
+      "from": "saving",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t29",
+      "from": "advance-step",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t30",
+      "from": "validating",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t31",
+      "from": "advance-phase",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t32",
+      "from": "evaluate",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t33",
+      "from": "incr-iteration",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t34",
+      "from": "incr-repair",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t35",
+      "from": "registering",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t36",
+      "from": "prepare-recovery",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t37",
+      "from": "skip-step",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t38",
+      "from": "clear-state",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t39",
+      "from": "log-corrections",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t40",
+      "from": "evaluate-interactive",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t41",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:os.environ.get",
+      "description": "Inferred from function:init"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:os.getcwd",
+      "description": "Inferred from function:init"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:_getRunDir",
+      "description": "Inferred from function:init"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:_logRun",
+      "description": "Inferred from function:init"
+    },
+    "a5": {
+      "type": "compute",
+      "compute_unit": "impl:print",
+      "description": "Inferred from function:init"
+    },
+    "a9": {
+      "type": "compute",
+      "compute_unit": "impl:str",
+      "description": "Inferred from function:init"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:_findLppRoot",
+      "description": "Inferred from function:init"
+    },
+    "a11": {
+      "type": "compute",
+      "compute_unit": "impl:int",
+      "description": "Inferred from function:init"
+    },
+    "a19": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'BoolOp', 'op': {'_type': 'Or'}, 'values': [{'_type': 'Call', 'func': {'_type': 'Attribute', 'value': {'_type': 'Name', 'id': 'params', 'ctx': {'_type': 'Load'}, 'lineno': 588}, 'attr': 'get', 'ctx': {'_type': 'Load'}, 'lineno': 588}, 'args': [{'_type': 'Constant', 'value': 'target', 'kind': None, 'lineno': 588}], 'keywords': [], 'lineno': 588}, {'_type': 'Constant', 'value': '', 'kind': None, 'lineno': 588}], 'lineno': 588}.lower",
+      "description": "Inferred from function:detect_lpp_target"
+    },
+    "a20": {
+      "type": "compute",
+      "compute_unit": "impl:params.get",
+      "description": "Inferred from function:detect_lpp_target"
+    },
+    "a21": {
+      "type": "compute",
+      "compute_unit": "impl:any",
+      "description": "Inferred from function:detect_lpp_target"
+    },
+    "a23": {
+      "type": "compute",
+      "compute_unit": "impl:Path",
+      "description": "Inferred from function:detect_lpp_target"
+    },
+    "a40": {
+      "type": "compute",
+      "compute_unit": "impl:fixHints.append",
+      "description": "Inferred from function:decompose"
+    },
+    "a43": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Constant', 'value': '\\n', 'kind': None, 'lineno': 632}.join",
+      "description": "Inferred from function:decompose"
+    },
+    "a44": {
+      "type": "compute",
+      "compute_unit": "impl:_truncate",
+      "description": "Inferred from function:decompose"
+    },
+    "a46": {
+      "type": "compute",
+      "compute_unit": "impl:prompts.DECOMPOSE.format",
+      "description": "Inferred from function:decompose"
+    },
+    "a47": {
+      "type": "compute",
+      "compute_unit": "impl:_callLlm",
+      "description": "Inferred from function:decompose"
+    },
+    "a48": {
+      "type": "compute",
+      "compute_unit": "impl:result.get",
+      "description": "Inferred from function:decompose"
+    },
+    "a50": {
+      "type": "compute",
+      "compute_unit": "impl:_extractJson",
+      "description": "Inferred from function:decompose"
+    },
+    "a51": {
+      "type": "compute",
+      "compute_unit": "impl:plan.get",
+      "description": "Inferred from function:decompose"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ]
+}

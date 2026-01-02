@@ -1,0 +1,229 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_seal_compute",
+  "name": "Decoded: seal_compute",
+  "version": "1.0.0",
+  "description": "Auto-decoded from utils/tlaps_seal/src/seal_compute.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "loading": {
+      "name": "Loading",
+      "description": "From function: loadBlueprint"
+    },
+    "initializing": {
+      "name": "Initializing",
+      "description": "From function: auditTrinity"
+    },
+    "auditflange": {
+      "name": "Auditflange",
+      "description": "From function: auditFlange"
+    },
+    "generating": {
+      "name": "Generating",
+      "description": "From function: generateTla"
+    },
+    "tlastr": {
+      "name": "Tlastr",
+      "description": "From function: tlaStr"
+    },
+    "processing": {
+      "name": "Processing",
+      "description": "From function: runTlc"
+    },
+    "registering": {
+      "name": "Registering",
+      "description": "From function: resetContext"
+    },
+    "validating": {
+      "name": "Validating",
+      "description": "From function: checkFlangeValid"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "loading",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "loading",
+      "to": "initializing",
+      "on_event": "LOADING_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "initializing",
+      "to": "auditflange",
+      "on_event": "INITIALIZING_DONE"
+    },
+    {
+      "id": "t3",
+      "from": "auditflange",
+      "to": "generating",
+      "on_event": "AUDITFLANGE_DONE"
+    },
+    {
+      "id": "t4",
+      "from": "generating",
+      "to": "tlastr",
+      "on_event": "GENERATING_DONE"
+    },
+    {
+      "id": "t5",
+      "from": "tlastr",
+      "to": "processing",
+      "on_event": "TLASTR_DONE"
+    },
+    {
+      "id": "t6",
+      "from": "processing",
+      "to": "registering",
+      "on_event": "PROCESSING_DONE"
+    },
+    {
+      "id": "t7",
+      "from": "registering",
+      "to": "validating",
+      "on_event": "REGISTERING_DONE"
+    },
+    {
+      "id": "t8",
+      "from": "validating",
+      "to": "complete",
+      "on_event": "VALIDATING_DONE"
+    },
+    {
+      "id": "t9",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:params.get",
+      "description": "Inferred from function:loadBlueprint"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:open",
+      "description": "Inferred from function:loadBlueprint"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:json.load",
+      "description": "Inferred from function:loadBlueprint"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:str",
+      "description": "Inferred from function:loadBlueprint"
+    },
+    "a5": {
+      "type": "compute",
+      "compute_unit": "impl:bp.get",
+      "description": "Inferred from function:auditTrinity"
+    },
+    "a6": {
+      "type": "compute",
+      "compute_unit": "impl:len",
+      "description": "Inferred from function:auditTrinity"
+    },
+    "a7": {
+      "type": "compute",
+      "compute_unit": "impl:set",
+      "description": "Inferred from function:auditTrinity"
+    },
+    "a8": {
+      "type": "compute",
+      "compute_unit": "impl:bp.get.keys",
+      "description": "Inferred from function:auditTrinity"
+    },
+    "a14": {
+      "type": "compute",
+      "compute_unit": "impl:t.get",
+      "description": "Inferred from function:auditTrinity"
+    },
+    "a15": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Subscript', 'value': {'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'audit', 'ctx': {'_type': 'Load'}, 'lineno': 56}, 'slice': {'_type': 'Constant', 'value': 'transitions', 'kind': None, 'lineno': 56}, 'ctx': {'_type': 'Load'}, 'lineno': 56}, 'slice': {'_type': 'Constant', 'value': 'issues', 'kind': None, 'lineno': 56}, 'ctx': {'_type': 'Load'}, 'lineno': 56}.append",
+      "description": "Inferred from function:auditTrinity"
+    },
+    "a16": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Subscript', 'value': {'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'audit', 'ctx': {'_type': 'Load'}, 'lineno': 59}, 'slice': {'_type': 'Constant', 'value': 'transitions', 'kind': None, 'lineno': 59}, 'ctx': {'_type': 'Load'}, 'lineno': 59}, 'slice': {'_type': 'Constant', 'value': 'issues', 'kind': None, 'lineno': 59}, 'ctx': {'_type': 'Load'}, 'lineno': 59}.append",
+      "description": "Inferred from function:auditTrinity"
+    },
+    "a17": {
+      "type": "compute",
+      "compute_unit": "impl:usedTids.add",
+      "description": "Inferred from function:auditTrinity"
+    },
+    "a20": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Subscript', 'value': {'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'audit', 'ctx': {'_type': 'Load'}, 'lineno': 66}, 'slice': {'_type': 'Constant', 'value': 'transitions', 'kind': None, 'lineno': 66}, 'ctx': {'_type': 'Load'}, 'lineno': 66}, 'slice': {'_type': 'Constant', 'value': 'issues', 'kind': None, 'lineno': 66}, 'ctx': {'_type': 'Load'}, 'lineno': 66}.append",
+      "description": "Inferred from function:auditTrinity"
+    },
+    "a21": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Subscript', 'value': {'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'audit', 'ctx': {'_type': 'Load'}, 'lineno': 70}, 'slice': {'_type': 'Constant', 'value': 'transitions', 'kind': None, 'lineno': 70}, 'ctx': {'_type': 'Load'}, 'lineno': 70}, 'slice': {'_type': 'Constant', 'value': 'issues', 'kind': None, 'lineno': 70}, 'ctx': {'_type': 'Load'}, 'lineno': 70}.append",
+      "description": "Inferred from function:auditTrinity"
+    },
+    "a25": {
+      "type": "compute",
+      "compute_unit": "impl:reachable.add",
+      "description": "Inferred from function:auditTrinity"
+    },
+    "a27": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Subscript', 'value': {'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'audit', 'ctx': {'_type': 'Load'}, 'lineno': 87}, 'slice': {'_type': 'Constant', 'value': 'transitions', 'kind': None, 'lineno': 87}, 'ctx': {'_type': 'Load'}, 'lineno': 87}, 'slice': {'_type': 'Constant', 'value': 'issues', 'kind': None, 'lineno': 87}, 'ctx': {'_type': 'Load'}, 'lineno': 87}.append",
+      "description": "Inferred from function:auditTrinity"
+    },
+    "a32": {
+      "type": "compute",
+      "compute_unit": "impl:usedGates.add",
+      "description": "Inferred from function:auditTrinity"
+    },
+    "a33": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Subscript', 'value': {'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'audit', 'ctx': {'_type': 'Load'}, 'lineno': 100}, 'slice': {'_type': 'Constant', 'value': 'gates', 'kind': None, 'lineno': 100}, 'ctx': {'_type': 'Load'}, 'lineno': 100}, 'slice': {'_type': 'Constant', 'value': 'issues', 'kind': None, 'lineno': 100}, 'ctx': {'_type': 'Load'}, 'lineno': 100}.append",
+      "description": "Inferred from function:auditTrinity"
+    },
+    "a35": {
+      "type": "compute",
+      "compute_unit": "impl:gates.keys",
+      "description": "Inferred from function:auditTrinity"
+    },
+    "a36": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Subscript', 'value': {'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'audit', 'ctx': {'_type': 'Load'}, 'lineno': 105}, 'slice': {'_type': 'Constant', 'value': 'gates', 'kind': None, 'lineno': 105}, 'ctx': {'_type': 'Load'}, 'lineno': 105}, 'slice': {'_type': 'Constant', 'value': 'issues', 'kind': None, 'lineno': 105}, 'ctx': {'_type': 'Load'}, 'lineno': 105}.append",
+      "description": "Inferred from function:auditTrinity"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ]
+}

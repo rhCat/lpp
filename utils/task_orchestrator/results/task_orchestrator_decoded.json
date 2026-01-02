@@ -1,0 +1,357 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_orchestrator_compute",
+  "name": "Decoded: orchestrator_compute",
+  "version": "1.0.0",
+  "description": "Auto-decoded from utils/task_orchestrator/src/orchestrator_compute.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "initializing": {
+      "name": "Initializing",
+      "description": "From function: init"
+    },
+    "analyzing": {
+      "name": "Analyzing",
+      "description": "From function: analyze_root"
+    },
+    "expand": {
+      "name": "Expand",
+      "description": "From function: expand"
+    },
+    "collect": {
+      "name": "Collect",
+      "description": "From function: collect"
+    },
+    "plan-leaf": {
+      "name": "Plan Leaf",
+      "description": "From function: plan_leaf"
+    },
+    "generating": {
+      "name": "Generating",
+      "description": "From function: build"
+    },
+    "exec-leaf": {
+      "name": "Exec Leaf",
+      "description": "From function: exec_leaf"
+    },
+    "next-leaf": {
+      "name": "Next Leaf",
+      "description": "From function: next_leaf"
+    },
+    "reflect": {
+      "name": "Reflect",
+      "description": "From function: reflect"
+    },
+    "evaluate": {
+      "name": "Evaluate",
+      "description": "From function: evaluate"
+    },
+    "incr": {
+      "name": "Incr",
+      "description": "From function: incr"
+    },
+    "registering": {
+      "name": "Registering",
+      "description": "From function: reset_exec"
+    },
+    "error": {
+      "name": "Error",
+      "description": "From try/except blocks"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "initializing",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "initializing",
+      "to": "analyzing",
+      "on_event": "INITIALIZING_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "analyzing",
+      "to": "expand",
+      "on_event": "ANALYZING_DONE"
+    },
+    {
+      "id": "t3",
+      "from": "expand",
+      "to": "collect",
+      "on_event": "EXPAND_DONE"
+    },
+    {
+      "id": "t4",
+      "from": "collect",
+      "to": "plan-leaf",
+      "on_event": "COLLECT_DONE"
+    },
+    {
+      "id": "t5",
+      "from": "plan-leaf",
+      "to": "generating",
+      "on_event": "PLAN-LEAF_DONE"
+    },
+    {
+      "id": "t6",
+      "from": "generating",
+      "to": "exec-leaf",
+      "on_event": "GENERATING_DONE"
+    },
+    {
+      "id": "t7",
+      "from": "exec-leaf",
+      "to": "next-leaf",
+      "on_event": "EXEC-LEAF_DONE"
+    },
+    {
+      "id": "t8",
+      "from": "next-leaf",
+      "to": "reflect",
+      "on_event": "NEXT-LEAF_DONE"
+    },
+    {
+      "id": "t9",
+      "from": "reflect",
+      "to": "evaluate",
+      "on_event": "REFLECT_DONE"
+    },
+    {
+      "id": "t10",
+      "from": "evaluate",
+      "to": "incr",
+      "on_event": "EVALUATE_DONE"
+    },
+    {
+      "id": "t11",
+      "from": "incr",
+      "to": "registering",
+      "on_event": "INCR_DONE"
+    },
+    {
+      "id": "t12",
+      "from": "registering",
+      "to": "error",
+      "on_event": "REGISTERING_DONE"
+    },
+    {
+      "id": "t13",
+      "from": "error",
+      "to": "complete",
+      "on_event": "ERROR_DONE"
+    },
+    {
+      "id": "t14",
+      "from": "idle",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t15",
+      "from": "initializing",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t16",
+      "from": "analyzing",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t17",
+      "from": "expand",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t18",
+      "from": "collect",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t19",
+      "from": "plan-leaf",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t20",
+      "from": "generating",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t21",
+      "from": "exec-leaf",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t22",
+      "from": "next-leaf",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t23",
+      "from": "reflect",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t24",
+      "from": "evaluate",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t25",
+      "from": "incr",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t26",
+      "from": "registering",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t27",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:os.environ.get",
+      "description": "Inferred from function:init"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:int",
+      "description": "Inferred from function:init"
+    },
+    "a8": {
+      "type": "compute",
+      "compute_unit": "impl:os.getcwd",
+      "description": "Inferred from function:init"
+    },
+    "a9": {
+      "type": "compute",
+      "compute_unit": "impl:params.get",
+      "description": "Inferred from function:analyze_root"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:_llm",
+      "description": "Inferred from function:analyze_root"
+    },
+    "a11": {
+      "type": "compute",
+      "compute_unit": "impl:_json",
+      "description": "Inferred from function:analyze_root"
+    },
+    "a12": {
+      "type": "compute",
+      "compute_unit": "impl:len",
+      "description": "Inferred from function:analyze_root"
+    },
+    "a13": {
+      "type": "compute",
+      "compute_unit": "impl:tree.get",
+      "description": "Inferred from function:analyze_root"
+    },
+    "a14": {
+      "type": "compute",
+      "compute_unit": "impl:str",
+      "description": "Inferred from function:analyze_root"
+    },
+    "a20": {
+      "type": "compute",
+      "compute_unit": "impl:_find_unexpanded",
+      "description": "Inferred from function:expand"
+    },
+    "a21": {
+      "type": "compute",
+      "compute_unit": "impl:node.get",
+      "description": "Inferred from function:expand"
+    },
+    "a26": {
+      "type": "compute",
+      "compute_unit": "impl:_set_at_path",
+      "description": "Inferred from function:expand"
+    },
+    "a31": {
+      "type": "compute",
+      "compute_unit": "impl:_collect_leaves",
+      "description": "Inferred from function:collect"
+    },
+    "a37": {
+      "type": "compute",
+      "compute_unit": "impl:leaf.get",
+      "description": "Inferred from function:plan_leaf"
+    },
+    "a41": {
+      "type": "compute",
+      "compute_unit": "impl:plan.get",
+      "description": "Inferred from function:plan_leaf"
+    },
+    "a48": {
+      "type": "compute",
+      "compute_unit": "impl:tool.get",
+      "description": "Inferred from function:build"
+    },
+    "a52": {
+      "type": "compute",
+      "compute_unit": "impl:Path",
+      "description": "Inferred from function:build"
+    },
+    "a53": {
+      "type": "compute",
+      "compute_unit": "impl:d.mkdir",
+      "description": "Inferred from function:build"
+    },
+    "a54": {
+      "type": "compute",
+      "compute_unit": "impl:p.write_text",
+      "description": "Inferred from function:build"
+    },
+    "a55": {
+      "type": "compute",
+      "compute_unit": "impl:json.dumps",
+      "description": "Inferred from function:build"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ]
+}

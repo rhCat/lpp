@@ -1,0 +1,189 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_registry_compute",
+  "name": "Decoded: registry_compute",
+  "version": "1.0.0",
+  "description": "Auto-decoded from utils/skill_registry/src/registry_compute.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "scan": {
+      "name": "Scan",
+      "description": "From function: scan"
+    },
+    "loading": {
+      "name": "Loading",
+      "description": "From function: loadDetail"
+    },
+    "export": {
+      "name": "Export",
+      "description": "From function: export"
+    },
+    "explaining": {
+      "name": "Explaining",
+      "description": "From function: formatContext"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "scan",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "scan",
+      "to": "loading",
+      "on_event": "SCAN_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "loading",
+      "to": "export",
+      "on_event": "LOADING_DONE"
+    },
+    {
+      "id": "t3",
+      "from": "export",
+      "to": "explaining",
+      "on_event": "EXPORT_DONE"
+    },
+    {
+      "id": "t4",
+      "from": "explaining",
+      "to": "complete",
+      "on_event": "EXPLAINING_DONE"
+    },
+    {
+      "id": "t5",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:params.get",
+      "description": "Inferred from function:scan"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:Path",
+      "description": "Inferred from function:scan"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:base.exists",
+      "description": "Inferred from function:scan"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:base.iterdir",
+      "description": "Inferred from function:scan"
+    },
+    "a4": {
+      "type": "compute",
+      "compute_unit": "impl:item.is_dir",
+      "description": "Inferred from function:scan"
+    },
+    "a5": {
+      "type": "compute",
+      "compute_unit": "impl:item.glob",
+      "description": "Inferred from function:scan"
+    },
+    "a6": {
+      "type": "compute",
+      "compute_unit": "impl:f.name.startswith",
+      "description": "Inferred from function:scan"
+    },
+    "a7": {
+      "type": "compute",
+      "compute_unit": "impl:json.loads",
+      "description": "Inferred from function:scan"
+    },
+    "a8": {
+      "type": "compute",
+      "compute_unit": "impl:f.read_text",
+      "description": "Inferred from function:scan"
+    },
+    "a9": {
+      "type": "compute",
+      "compute_unit": "impl:bp.get.startswith",
+      "description": "Inferred from function:scan"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:bp.get",
+      "description": "Inferred from function:scan"
+    },
+    "a11": {
+      "type": "compute",
+      "compute_unit": "impl:skills.append",
+      "description": "Inferred from function:scan"
+    },
+    "a16": {
+      "type": "compute",
+      "compute_unit": "impl:str",
+      "description": "Inferred from function:scan"
+    },
+    "a18": {
+      "type": "compute",
+      "compute_unit": "impl:len",
+      "description": "Inferred from function:scan"
+    },
+    "a29": {
+      "type": "compute",
+      "compute_unit": "impl:skillDir.exists",
+      "description": "Inferred from function:loadDetail"
+    },
+    "a31": {
+      "type": "compute",
+      "compute_unit": "impl:d.glob",
+      "description": "Inferred from function:loadDetail"
+    },
+    "a35": {
+      "type": "compute",
+      "compute_unit": "impl:skillDir.glob",
+      "description": "Inferred from function:loadDetail"
+    },
+    "a42": {
+      "type": "compute",
+      "compute_unit": "impl:bpFile.read_text",
+      "description": "Inferred from function:loadDetail"
+    },
+    "a43": {
+      "type": "compute",
+      "compute_unit": "impl:bp.get.get",
+      "description": "Inferred from function:loadDetail"
+    },
+    "a45": {
+      "type": "compute",
+      "compute_unit": "impl:v.get",
+      "description": "Inferred from function:loadDetail"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ]
+}
