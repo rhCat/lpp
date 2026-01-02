@@ -12,6 +12,8 @@ __pycache__/
 .DS_Store
 always_on/
 **/.smb*
+uv.lock
+
 
 # Mac stuff
 **/.__**
