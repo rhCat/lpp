@@ -6,6 +6,9 @@ Minimal HTTP wrapper for L++ operator.
 Usage: python app.py
 """
 
+from src.shopping_view import renderPage
+from src import COMPUTE_REGISTRY
+from frame_py.compiler import compile_blueprint
 import sys
 import uuid
 import importlib.util
@@ -16,9 +19,6 @@ from http.cookies import SimpleCookie
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "src"))
 
-from frame_py.compiler import compile_blueprint
-from src import COMPUTE_REGISTRY
-from src.shopping_view import renderPage
 
 HERE = Path(__file__).parent
 PORT = 10001

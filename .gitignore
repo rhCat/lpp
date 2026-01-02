@@ -11,7 +11,7 @@ __pycache__/
 **/utils/**/samples
 .DS_Store
 always_on/
-
+**/.smb*
 
 # Mac stuff
 **/.__**

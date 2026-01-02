@@ -77,6 +77,40 @@ graph TD
 *   **Frame Prototype (Python):** `src/frame_py/`
 *   **Examples:** `examples/`
 
+## ◼️ Utilities
+
+The `utils/` directory contains L++ skills for building, validating, and visualizing other L++ skills:
+
+| Utility | Description |
+|---------|-------------|
+| **skill_contractor** | Autonomous L++ skill generator - builds complete skills from natural language descriptions |
+| **graph_visualizer** | Interactive HTML/SVG state machine diagrams with multiple layouts (hierarchical, horizontal, circular, grid) |
+| **task_orchestrator** | Multi-skill task coordination and workflow management |
+| **tlaps_seal** | TLAPS formal proof verification for L++ blueprints |
+| **logic_decoder** | Parses and validates L++ blueprint logic |
+| **visualizer** | Mermaid diagram generator for state machines |
+| **llm_assistant** | LLM-powered assistant for L++ development |
+| **research_scraper** | Web research and document scraping |
+| **scholar_chat** | Academic paper analysis and discussion |
+| **skill_registry** | Central registry for discovering and managing skills |
+
+### Quick Start with Utilities
+
+```bash
+# Build and validate a skill
+./utils/build_skill.sh <skill_path> --validate
+
+# Generate interactive visualization
+cd utils/graph_visualizer
+python interactive.py ../skill_contractor/skill_contractor.json
+open output.html
+
+# Use skill_contractor to generate a new skill
+cd utils/skill_contractor
+export OPENAI_API_BASE="..." OPENAI_API_KEY="..." OPENAI_MODEL="..."
+python interactive.py
+```
+
 ## ◼️ License
 
 MIT

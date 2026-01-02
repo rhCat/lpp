@@ -505,7 +505,8 @@ def rankProducts(params: Dict[str, Any]) -> Dict[str, Any]:
         pid = p["id"]
         rv = reviews.get(pid, {})
 
-        priceScore = max(0, 1 - (p["price"] / maxPrice)) if maxPrice > 0 else 0.5
+        priceScore = max(0, 1 - (p["price"] / maxPrice)
+                         ) if maxPrice > 0 else 0.5
         qualScore = p.get("rating", 0) / 5.0
         featScore = min(1.0, len(p.get("features", [])) / 5.0)
         revScore = min(1.0, rv.get("volume", 0) / 5000)
