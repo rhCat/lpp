@@ -85,9 +85,10 @@ The `utils/` directory contains L++ skills for building, validating, and visuali
 |---------|-------------|
 | **skill_contractor** | Autonomous L++ skill generator - builds complete skills from natural language descriptions |
 | **graph_visualizer** | Interactive HTML/SVG state machine diagrams with multiple layouts (hierarchical, horizontal, circular, grid) |
+| **function_decoder** | Analyzes Python scripts to extract inbound/outbound interfaces and build modular dependency graphs |
 | **task_orchestrator** | Multi-skill task coordination and workflow management |
 | **tlaps_seal** | TLAPS formal proof verification for L++ blueprints |
-| **logic_decoder** | Parses and validates L++ blueprint logic |
+| **logic_decoder** | Reverse-engineers Python into L++ blueprints via AST analysis |
 | **visualizer** | Mermaid diagram generator for state machines |
 | **llm_assistant** | LLM-powered assistant for L++ development |
 | **research_scraper** | Web research and document scraping |

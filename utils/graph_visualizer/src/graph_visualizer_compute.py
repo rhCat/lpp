@@ -49,20 +49,27 @@ def process(params: dict) -> dict:
             gate_list = t.get("gates", [])
             gate_str = ", ".join(gate_list) if gate_list else ""
             
-            # Skip wildcards and invalid refs
-            if from_state == "*" or to_state == "*":
-                continue
-            if from_state not in valid_node_ids or to_state not in valid_node_ids:
+            # Skip invalid to_state
+            if to_state == "*" or to_state not in valid_node_ids:
                 continue
             
-            adjacency[from_state].add(to_state)
-            back_adjacency[to_state].add(from_state)
-            links.append({
-                "source": from_state, 
-                "target": to_state, 
-                "label": event,
-                "gates": gate_str
-            })
+            # Expand wildcard from_state to all valid states
+            if from_state == "*":
+                source_states = [s for s in valid_node_ids if s != to_state]
+            elif from_state not in valid_node_ids:
+                continue
+            else:
+                source_states = [from_state]
+            
+            for src in source_states:
+                adjacency[src].add(to_state)
+                back_adjacency[to_state].add(src)
+                links.append({
+                    "source": src, 
+                    "target": to_state, 
+                    "label": event,
+                    "gates": gate_str
+                })
     
     # Calculate layers using BFS from entry state
     layers = _calculate_layers(entry_state, adjacency, valid_node_ids, terminal_states)
