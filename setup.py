@@ -24,26 +24,26 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/lpp-project/lpp",
     license="MIT",
-    
+
     # Package configuration
     package_dir={"": "src"},
     packages=find_packages(where="src"),
-    
+
     # Include non-Python files
     include_package_data=True,
     package_data={
         "blueprints": ["*.json", "**/*.json"],
         "frame_py": ["tlaps_seals/*.json"],
     },
-    
+
     # Python version requirement
     python_requires=">=3.9",
-    
+
     # Dependencies (L++ core uses only stdlib)
     install_requires=[
         # Core has no external dependencies - stdlib only
     ],
-    
+
     # Optional dependencies for extended features
     extras_require={
         "dev": [
@@ -61,7 +61,7 @@ setup(
             "pytest>=7.0",
         ],
     },
-    
+
     # Entry points for CLI tools
     entry_points={
         "console_scripts": [
@@ -69,7 +69,7 @@ setup(
             "lpp-visualize=frame_py.visualizer:main",
         ],
     },
-    
+
     # Classifiers
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -85,7 +85,7 @@ setup(
         "Topic :: Software Development :: Code Generators",
         "Topic :: Software Development :: Compilers",
     ],
-    
+
     # Keywords for PyPI
     keywords=[
         "state-machine",
