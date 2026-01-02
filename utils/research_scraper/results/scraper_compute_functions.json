@@ -1,0 +1,302 @@
+{
+  "module": "scraper_compute",
+  "filePath": "/Users/ruihe/mnt/lpp/lpp/utils/research_scraper/src/scraper_compute.py",
+  "inbound": [
+    {
+      "type": "function",
+      "name": "arxiv",
+      "module": "scraper_compute",
+      "line": 40,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Search arXiv using their API.\nInput: query, maxResults\nOutput: results (list of papers), error",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "semanticScholar",
+      "module": "scraper_compute",
+      "line": 105,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Search Semantic Scholar using their API.\nInput: query, maxResults\nOutput: results, error",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "web",
+      "module": "scraper_compute",
+      "line": 151,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "General web search via DuckDuckGo HTML (no API key needed).\nInput: query, maxResults\nOutput: results, error",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "fetchDetail",
+      "module": "scraper_compute",
+      "line": 210,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Fetch detailed info for a paper.\nInput: id, source\nOutput: detail, error",
+      "decorators": []
+    }
+  ],
+  "outbound": [
+    {
+      "module": "re",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "urllib.parse",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "urllib.request",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "xml.etree.ElementTree",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "typing",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Any",
+          "alias": "Any"
+        },
+        {
+          "name": "Dict",
+          "alias": "Dict"
+        },
+        {
+          "name": "List",
+          "alias": "List"
+        }
+      ]
+    },
+    {
+      "module": "requests",
+      "category": "pip",
+      "names": []
+    },
+    {
+      "module": "bs4",
+      "category": "pip",
+      "names": [
+        {
+          "name": "BeautifulSoup",
+          "alias": "BeautifulSoup"
+        }
+      ]
+    },
+    {
+      "module": "json",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "json",
+      "category": "stdlib",
+      "names": []
+    }
+  ],
+  "nodes": [
+    {
+      "id": "scraper_compute",
+      "type": "module",
+      "label": "scraper_compute",
+      "metrics": {
+        "fanIn": 4,
+        "fanOut": 8,
+        "instability": 0.667,
+        "internalEdges": 0,
+        "externalCallCount": 8,
+        "localCallCount": 0,
+        "callsByCategory": {
+          "pip": 2,
+          "stdlib": 6
+        },
+        "localDependencies": []
+      }
+    },
+    {
+      "id": "scraper_compute.arxiv",
+      "type": "function",
+      "label": "arxiv",
+      "direction": "inbound",
+      "parent": "scraper_compute",
+      "line": 40,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "scraper_compute.semanticScholar",
+      "type": "function",
+      "label": "semanticScholar",
+      "direction": "inbound",
+      "parent": "scraper_compute",
+      "line": 105,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "scraper_compute.web",
+      "type": "function",
+      "label": "web",
+      "direction": "inbound",
+      "parent": "scraper_compute",
+      "line": 151,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "scraper_compute.fetchDetail",
+      "type": "function",
+      "label": "fetchDetail",
+      "direction": "inbound",
+      "parent": "scraper_compute",
+      "line": 210,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "re",
+      "type": "dependency",
+      "label": "re",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "urllib.parse",
+      "type": "dependency",
+      "label": "parse",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "urllib.request",
+      "type": "dependency",
+      "label": "request",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "xml.etree.ElementTree",
+      "type": "dependency",
+      "label": "ElementTree",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "typing",
+      "type": "dependency",
+      "label": "typing",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "requests",
+      "type": "dependency",
+      "label": "requests",
+      "direction": "outbound",
+      "category": "pip"
+    },
+    {
+      "id": "bs4",
+      "type": "dependency",
+      "label": "bs4",
+      "direction": "outbound",
+      "category": "pip"
+    },
+    {
+      "id": "json",
+      "type": "dependency",
+      "label": "json",
+      "direction": "outbound",
+      "category": "stdlib"
+    }
+  ],
+  "edges": [
+    {
+      "from": "scraper_compute._httpGet",
+      "to": "requests",
+      "type": "external",
+      "category": "pip",
+      "line": 31
+    },
+    {
+      "from": "scraper_compute.arxiv",
+      "to": "xml",
+      "type": "external",
+      "category": "stdlib",
+      "line": 61
+    },
+    {
+      "from": "scraper_compute.arxiv",
+      "to": "re",
+      "type": "external",
+      "category": "stdlib",
+      "line": 81
+    },
+    {
+      "from": "scraper_compute.semanticScholar",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 129
+    },
+    {
+      "from": "scraper_compute.web",
+      "to": "bs4",
+      "type": "external",
+      "category": "pip",
+      "line": 178
+    },
+    {
+      "from": "scraper_compute.web",
+      "to": "re",
+      "type": "external",
+      "category": "stdlib",
+      "line": 190
+    },
+    {
+      "from": "scraper_compute.fetchDetail",
+      "to": "xml",
+      "type": "external",
+      "category": "stdlib",
+      "line": 229
+    },
+    {
+      "from": "scraper_compute.fetchDetail",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 284
+    }
+  ],
+  "coupling": {
+    "fanIn": 4,
+    "fanOut": 8,
+    "instability": 0.667,
+    "internalEdges": 0,
+    "externalCallCount": 8,
+    "localCallCount": 0,
+    "callsByCategory": {
+      "pip": 2,
+      "stdlib": 6
+    },
+    "localDependencies": []
+  }
+}

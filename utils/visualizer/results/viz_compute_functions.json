@@ -1,0 +1,460 @@
+{
+  "module": "viz_compute",
+  "filePath": "/Users/ruihe/mnt/lpp/lpp/utils/visualizer/src/viz_compute.py",
+  "inbound": [
+    {
+      "type": "function",
+      "name": "load_blueprint",
+      "module": "viz_compute",
+      "line": 16,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Load an L++ blueprint from a JSON file.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "zoom",
+      "module": "viz_compute",
+      "line": 78,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Adjust zoom level.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "toggle",
+      "module": "viz_compute",
+      "line": 87,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Toggle a boolean value.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "init_defaults",
+      "module": "viz_compute",
+      "line": 93,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Initialize default visualization settings.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "render_graph",
+      "module": "viz_compute",
+      "line": 103,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Render blueprint as ASCII graph.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "render_table",
+      "module": "viz_compute",
+      "line": 154,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Render blueprint as markdown tables - delegates to readme_compute.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "render_mermaid",
+      "module": "viz_compute",
+      "line": 174,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Render blueprint as Mermaid diagram - delegates to readme_compute.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "render_tree",
+      "module": "viz_compute",
+      "line": 184,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Render hierarchical tree as ASCII - delegates to readme_compute.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "render_tree_mermaid",
+      "module": "viz_compute",
+      "line": 198,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Render hierarchical tree as Mermaid flowchart.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "load_tree",
+      "module": "viz_compute",
+      "line": 212,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Load a hierarchical tree from JSON file or context.",
+      "decorators": []
+    }
+  ],
+  "outbound": [
+    {
+      "module": "json",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "pathlib",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Path",
+          "alias": "Path"
+        }
+      ]
+    },
+    {
+      "module": "typing",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Any",
+          "alias": "Any"
+        },
+        {
+          "name": "Dict",
+          "alias": "Dict"
+        }
+      ]
+    },
+    {
+      "module": "frame_py.loader",
+      "category": "pip",
+      "names": [
+        {
+          "name": "BlueprintLoader",
+          "alias": "BlueprintLoader"
+        }
+      ]
+    },
+    {
+      "module": "readme_compute",
+      "category": "local",
+      "names": [
+        {
+          "name": "states_table",
+          "alias": "states_table"
+        },
+        {
+          "name": "gates_table",
+          "alias": "gates_table"
+        },
+        {
+          "name": "actions_table",
+          "alias": "actions_table"
+        },
+        {
+          "name": "transitions_table",
+          "alias": "transitions_table"
+        }
+      ]
+    },
+    {
+      "module": "readme_compute",
+      "category": "local",
+      "names": [
+        {
+          "name": "mermaid",
+          "alias": "mermaid"
+        }
+      ]
+    },
+    {
+      "module": "readme_compute",
+      "category": "local",
+      "names": [
+        {
+          "name": "tree_ascii",
+          "alias": "tree_ascii"
+        }
+      ]
+    },
+    {
+      "module": "readme_compute",
+      "category": "local",
+      "names": [
+        {
+          "name": "tree_mermaid",
+          "alias": "tree_mermaid"
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "viz_compute",
+      "type": "module",
+      "label": "viz_compute",
+      "metrics": {
+        "fanIn": 10,
+        "fanOut": 4,
+        "instability": 0.286,
+        "internalEdges": 0,
+        "externalCallCount": 5,
+        "localCallCount": 7,
+        "callsByCategory": {
+          "stdlib": 4,
+          "pip": 1
+        },
+        "localDependencies": [
+          "readme_compute"
+        ]
+      }
+    },
+    {
+      "id": "viz_compute.load_blueprint",
+      "type": "function",
+      "label": "load_blueprint",
+      "direction": "inbound",
+      "parent": "viz_compute",
+      "line": 16,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "viz_compute.zoom",
+      "type": "function",
+      "label": "zoom",
+      "direction": "inbound",
+      "parent": "viz_compute",
+      "line": 78,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "viz_compute.toggle",
+      "type": "function",
+      "label": "toggle",
+      "direction": "inbound",
+      "parent": "viz_compute",
+      "line": 87,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "viz_compute.init_defaults",
+      "type": "function",
+      "label": "init_defaults",
+      "direction": "inbound",
+      "parent": "viz_compute",
+      "line": 93,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "viz_compute.render_graph",
+      "type": "function",
+      "label": "render_graph",
+      "direction": "inbound",
+      "parent": "viz_compute",
+      "line": 103,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "viz_compute.render_table",
+      "type": "function",
+      "label": "render_table",
+      "direction": "inbound",
+      "parent": "viz_compute",
+      "line": 154,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "viz_compute.render_mermaid",
+      "type": "function",
+      "label": "render_mermaid",
+      "direction": "inbound",
+      "parent": "viz_compute",
+      "line": 174,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "viz_compute.render_tree",
+      "type": "function",
+      "label": "render_tree",
+      "direction": "inbound",
+      "parent": "viz_compute",
+      "line": 184,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "viz_compute.render_tree_mermaid",
+      "type": "function",
+      "label": "render_tree_mermaid",
+      "direction": "inbound",
+      "parent": "viz_compute",
+      "line": 198,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "viz_compute.load_tree",
+      "type": "function",
+      "label": "load_tree",
+      "direction": "inbound",
+      "parent": "viz_compute",
+      "line": 212,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "json",
+      "type": "dependency",
+      "label": "json",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "pathlib",
+      "type": "dependency",
+      "label": "pathlib",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "typing",
+      "type": "dependency",
+      "label": "typing",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "frame_py.loader",
+      "type": "dependency",
+      "label": "loader",
+      "direction": "outbound",
+      "category": "pip"
+    },
+    {
+      "id": "readme_compute",
+      "type": "dependency",
+      "label": "readme_compute",
+      "direction": "outbound",
+      "category": "local"
+    }
+  ],
+  "edges": [
+    {
+      "from": "viz_compute.load_blueprint",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 23
+    },
+    {
+      "from": "viz_compute.load_blueprint",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 28
+    },
+    {
+      "from": "viz_compute.load_blueprint",
+      "to": "frame_py",
+      "type": "external",
+      "category": "pip",
+      "line": 30
+    },
+    {
+      "from": "viz_compute.load_tree",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 221
+    },
+    {
+      "from": "viz_compute.load_tree",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 226
+    },
+    {
+      "from": "viz_compute.render_table",
+      "to": "readme_compute",
+      "type": "local",
+      "line": 165
+    },
+    {
+      "from": "viz_compute.render_table",
+      "to": "readme_compute",
+      "type": "local",
+      "line": 166
+    },
+    {
+      "from": "viz_compute.render_table",
+      "to": "readme_compute",
+      "type": "local",
+      "line": 167
+    },
+    {
+      "from": "viz_compute.render_table",
+      "to": "readme_compute",
+      "type": "local",
+      "line": 168
+    },
+    {
+      "from": "viz_compute.render_mermaid",
+      "to": "readme_compute",
+      "type": "local",
+      "line": 181
+    },
+    {
+      "from": "viz_compute.render_tree",
+      "to": "readme_compute",
+      "type": "local",
+      "line": 191
+    },
+    {
+      "from": "viz_compute.render_tree_mermaid",
+      "to": "readme_compute",
+      "type": "local",
+      "line": 205
+    }
+  ],
+  "coupling": {
+    "fanIn": 10,
+    "fanOut": 4,
+    "instability": 0.286,
+    "internalEdges": 0,
+    "externalCallCount": 5,
+    "localCallCount": 7,
+    "callsByCategory": {
+      "stdlib": 4,
+      "pip": 1
+    },
+    "localDependencies": [
+      "readme_compute"
+    ]
+  }
+}

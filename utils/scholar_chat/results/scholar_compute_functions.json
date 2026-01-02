@@ -1,0 +1,364 @@
+{
+  "module": "scholar_compute",
+  "filePath": "/Users/ruihe/mnt/lpp/lpp/utils/scholar_chat/src/scholar_compute.py",
+  "inbound": [
+    {
+      "type": "function",
+      "name": "initConfig",
+      "module": "scholar_compute",
+      "line": 27,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Initialize config from environment.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "searchAll",
+      "module": "scholar_compute",
+      "line": 37,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Search multiple academic sources in parallel.\nInput: query, sources\nOutput: searchResults, error",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "fetchDetails",
+      "module": "scholar_compute",
+      "line": 77,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Fetch full details for selected papers.\nInput: searchResults, selectedPapers (indices)\nOutput: paperDetails, paperLinks, error",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "synthesize",
+      "module": "scholar_compute",
+      "line": 128,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Generate research synthesis using LLM.\nInput: query, paperDetails, paperLinks, apiKey, apiBase, model\nOutput: synthesis, followUpQuestions, conversation, error",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "chat",
+      "module": "scholar_compute",
+      "line": 214,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Continue conversation about research.\nInput: question, conversation, paperDetails, apiKey, apiBase, model\nOutput: synthesis (response), conversation, error",
+      "decorators": []
+    }
+  ],
+  "outbound": [
+    {
+      "module": "os",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "json",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "typing",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Any",
+          "alias": "Any"
+        },
+        {
+          "name": "Dict",
+          "alias": "Dict"
+        },
+        {
+          "name": "List",
+          "alias": "List"
+        }
+      ]
+    },
+    {
+      "module": "sys",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "scraper_compute",
+      "category": "pip",
+      "names": [
+        {
+          "name": "arxiv",
+          "alias": "arxiv"
+        },
+        {
+          "name": "semanticScholar",
+          "alias": "semanticScholar"
+        },
+        {
+          "name": "fetchDetail",
+          "alias": "fetchDetail"
+        }
+      ]
+    },
+    {
+      "module": "llm_compute",
+      "category": "pip",
+      "names": [
+        {
+          "name": "query",
+          "alias": "llmQuery"
+        }
+      ]
+    },
+    {
+      "module": "urllib.request",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "urllib.error",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "urllib.request",
+      "category": "stdlib",
+      "names": []
+    }
+  ],
+  "nodes": [
+    {
+      "id": "scholar_compute",
+      "type": "module",
+      "label": "scholar_compute",
+      "metrics": {
+        "fanIn": 5,
+        "fanOut": 8,
+        "instability": 0.615,
+        "internalEdges": 0,
+        "externalCallCount": 12,
+        "localCallCount": 0,
+        "callsByCategory": {
+          "stdlib": 9,
+          "pip": 3
+        },
+        "localDependencies": []
+      }
+    },
+    {
+      "id": "scholar_compute.initConfig",
+      "type": "function",
+      "label": "initConfig",
+      "direction": "inbound",
+      "parent": "scholar_compute",
+      "line": 27,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "scholar_compute.searchAll",
+      "type": "function",
+      "label": "searchAll",
+      "direction": "inbound",
+      "parent": "scholar_compute",
+      "line": 37,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "scholar_compute.fetchDetails",
+      "type": "function",
+      "label": "fetchDetails",
+      "direction": "inbound",
+      "parent": "scholar_compute",
+      "line": 77,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "scholar_compute.synthesize",
+      "type": "function",
+      "label": "synthesize",
+      "direction": "inbound",
+      "parent": "scholar_compute",
+      "line": 128,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "scholar_compute.chat",
+      "type": "function",
+      "label": "chat",
+      "direction": "inbound",
+      "parent": "scholar_compute",
+      "line": 214,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "os",
+      "type": "dependency",
+      "label": "os",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "json",
+      "type": "dependency",
+      "label": "json",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "typing",
+      "type": "dependency",
+      "label": "typing",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "sys",
+      "type": "dependency",
+      "label": "sys",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "scraper_compute",
+      "type": "dependency",
+      "label": "scraper_compute",
+      "direction": "outbound",
+      "category": "pip"
+    },
+    {
+      "id": "llm_compute",
+      "type": "dependency",
+      "label": "llm_compute",
+      "direction": "outbound",
+      "category": "pip"
+    },
+    {
+      "id": "urllib.request",
+      "type": "dependency",
+      "label": "request",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "urllib.error",
+      "type": "dependency",
+      "label": "error",
+      "direction": "outbound",
+      "category": "stdlib"
+    }
+  ],
+  "edges": [
+    {
+      "from": "scholar_compute",
+      "to": "sys",
+      "type": "external",
+      "category": "stdlib",
+      "line": 13
+    },
+    {
+      "from": "scholar_compute",
+      "to": "sys",
+      "type": "external",
+      "category": "stdlib",
+      "line": 14
+    },
+    {
+      "from": "scholar_compute.initConfig",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 30
+    },
+    {
+      "from": "scholar_compute.initConfig",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 31
+    },
+    {
+      "from": "scholar_compute.initConfig",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 32
+    },
+    {
+      "from": "scholar_compute.searchAll",
+      "to": "scraper_compute",
+      "type": "external",
+      "category": "pip",
+      "line": 58
+    },
+    {
+      "from": "scholar_compute.searchAll",
+      "to": "scraper_compute",
+      "type": "external",
+      "category": "pip",
+      "line": 60
+    },
+    {
+      "from": "scholar_compute.fetchDetails",
+      "to": "scraper_compute",
+      "type": "external",
+      "category": "pip",
+      "line": 101
+    },
+    {
+      "from": "scholar_compute._callLlm",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 291
+    },
+    {
+      "from": "scholar_compute._callLlm",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 297
+    },
+    {
+      "from": "scholar_compute._callLlmMessages",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 321
+    },
+    {
+      "from": "scholar_compute._callLlmMessages",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 327
+    }
+  ],
+  "coupling": {
+    "fanIn": 5,
+    "fanOut": 8,
+    "instability": 0.615,
+    "internalEdges": 0,
+    "externalCallCount": 12,
+    "localCallCount": 0,
+    "callsByCategory": {
+      "stdlib": 9,
+      "pip": 3
+    },
+    "localDependencies": []
+  }
+}

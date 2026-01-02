@@ -1,0 +1,792 @@
+{
+  "module": "decoder_compute",
+  "filePath": "/Users/ruihe/mnt/lpp/lpp/utils/logic_decoder/src/decoder_compute.py",
+  "inbound": [
+    {
+      "type": "function",
+      "name": "hasValue",
+      "module": "decoder_compute",
+      "line": 70,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Gate: check if context field has non-null value.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "loadFile",
+      "module": "decoder_compute",
+      "line": 77,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Load Python source file from disk.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "parseAst",
+      "module": "decoder_compute",
+      "line": 91,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Parse Python source into AST.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "analyzeImports",
+      "module": "decoder_compute",
+      "line": 119,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Extract and resolve import semantics.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "analyzeFunctions",
+      "module": "decoder_compute",
+      "line": 164,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Extract function and class definitions.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "analyzeControlFlow",
+      "module": "decoder_compute",
+      "line": 306,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Build control flow graph from AST.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "inferStates",
+      "module": "decoder_compute",
+      "line": 479,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Infer state machine states from code structure.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "inferTransitions",
+      "module": "decoder_compute",
+      "line": 697,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Infer transitions and guards from control flow.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "inferActions",
+      "module": "decoder_compute",
+      "line": 765,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Infer actions from function calls and side effects.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "generateBlueprint",
+      "module": "decoder_compute",
+      "line": 817,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Assemble final L++ blueprint.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "clearState",
+      "module": "decoder_compute",
+      "line": 909,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Reset all analysis state.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "walk",
+      "module": "decoder_compute",
+      "line": 124,
+      "args": [
+        "node"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "extractFn",
+      "module": "decoder_compute",
+      "line": 174,
+      "args": [
+        "node",
+        "className"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "walk",
+      "module": "decoder_compute",
+      "line": 197,
+      "args": [
+        "node",
+        "className"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "walk",
+      "module": "decoder_compute",
+      "line": 275,
+      "args": [
+        "node"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "addNode",
+      "module": "decoder_compute",
+      "line": 314,
+      "args": [
+        "label",
+        "ntype",
+        "line"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "addEdge",
+      "module": "decoder_compute",
+      "line": 325,
+      "args": [
+        "src",
+        "dst",
+        "label"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "walkBody",
+      "module": "decoder_compute",
+      "line": 328,
+      "args": [
+        "body",
+        "prevId"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "to_state_name",
+      "module": "decoder_compute",
+      "line": 504,
+      "args": [
+        "fn_name"
+      ],
+      "returns": null,
+      "docstring": "Convert snake_case to Title Case",
+      "decorators": []
+    }
+  ],
+  "outbound": [
+    {
+      "module": "ast",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "json",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "os",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "typing",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Any",
+          "alias": "Any"
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "decoder_compute",
+      "type": "module",
+      "label": "decoder_compute",
+      "metrics": {
+        "fanIn": 19,
+        "fanOut": 4,
+        "instability": 0.174,
+        "internalEdges": 44,
+        "externalCallCount": 4,
+        "localCallCount": 0,
+        "callsByCategory": {
+          "stdlib": 4
+        },
+        "localDependencies": []
+      }
+    },
+    {
+      "id": "decoder_compute.hasValue",
+      "type": "function",
+      "label": "hasValue",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 70,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "decoder_compute.loadFile",
+      "type": "function",
+      "label": "loadFile",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 77,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "decoder_compute.parseAst",
+      "type": "function",
+      "label": "parseAst",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 91,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "decoder_compute.analyzeImports",
+      "type": "function",
+      "label": "analyzeImports",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 119,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "decoder_compute.analyzeFunctions",
+      "type": "function",
+      "label": "analyzeFunctions",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 164,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "decoder_compute.analyzeControlFlow",
+      "type": "function",
+      "label": "analyzeControlFlow",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 306,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "decoder_compute.inferStates",
+      "type": "function",
+      "label": "inferStates",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 479,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "decoder_compute.inferTransitions",
+      "type": "function",
+      "label": "inferTransitions",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 697,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "decoder_compute.inferActions",
+      "type": "function",
+      "label": "inferActions",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 765,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "decoder_compute.generateBlueprint",
+      "type": "function",
+      "label": "generateBlueprint",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 817,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "decoder_compute.clearState",
+      "type": "function",
+      "label": "clearState",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 909,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "decoder_compute.walk",
+      "type": "function",
+      "label": "walk",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 124,
+      "signature": "(node)"
+    },
+    {
+      "id": "decoder_compute.extractFn",
+      "type": "function",
+      "label": "extractFn",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 174,
+      "signature": "(node, className)"
+    },
+    {
+      "id": "decoder_compute.walk",
+      "type": "function",
+      "label": "walk",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 197,
+      "signature": "(node, className)"
+    },
+    {
+      "id": "decoder_compute.walk",
+      "type": "function",
+      "label": "walk",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 275,
+      "signature": "(node)"
+    },
+    {
+      "id": "decoder_compute.addNode",
+      "type": "function",
+      "label": "addNode",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 314,
+      "signature": "(label, ntype, line)"
+    },
+    {
+      "id": "decoder_compute.addEdge",
+      "type": "function",
+      "label": "addEdge",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 325,
+      "signature": "(src, dst, label)"
+    },
+    {
+      "id": "decoder_compute.walkBody",
+      "type": "function",
+      "label": "walkBody",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 328,
+      "signature": "(body, prevId)"
+    },
+    {
+      "id": "decoder_compute.to_state_name",
+      "type": "function",
+      "label": "to_state_name",
+      "direction": "inbound",
+      "parent": "decoder_compute",
+      "line": 504,
+      "signature": "(fn_name)"
+    },
+    {
+      "id": "ast",
+      "type": "dependency",
+      "label": "ast",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "json",
+      "type": "dependency",
+      "label": "json",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "os",
+      "type": "dependency",
+      "label": "os",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "typing",
+      "type": "dependency",
+      "label": "typing",
+      "direction": "outbound",
+      "category": "stdlib"
+    }
+  ],
+  "edges": [
+    {
+      "from": "decoder_compute.walk",
+      "to": "decoder_compute.walk",
+      "type": "internal",
+      "line": 155
+    },
+    {
+      "from": "decoder_compute.walk",
+      "to": "decoder_compute.walk",
+      "type": "internal",
+      "line": 158
+    },
+    {
+      "from": "decoder_compute.analyzeImports",
+      "to": "decoder_compute.walk",
+      "type": "internal",
+      "line": 160
+    },
+    {
+      "from": "decoder_compute.walk",
+      "to": "decoder_compute.walk",
+      "type": "internal",
+      "line": 209
+    },
+    {
+      "from": "decoder_compute.walk",
+      "to": "decoder_compute.extractFn",
+      "type": "internal",
+      "line": 211
+    },
+    {
+      "from": "decoder_compute.walk",
+      "to": "decoder_compute.walk",
+      "type": "internal",
+      "line": 213
+    },
+    {
+      "from": "decoder_compute.walk",
+      "to": "decoder_compute.walk",
+      "type": "internal",
+      "line": 216
+    },
+    {
+      "from": "decoder_compute.walk",
+      "to": "decoder_compute.walk",
+      "type": "internal",
+      "line": 219
+    },
+    {
+      "from": "decoder_compute.analyzeFunctions",
+      "to": "decoder_compute.walk",
+      "type": "internal",
+      "line": 221
+    },
+    {
+      "from": "decoder_compute.walk",
+      "to": "decoder_compute.walk",
+      "type": "internal",
+      "line": 296
+    },
+    {
+      "from": "decoder_compute.walk",
+      "to": "decoder_compute.walk",
+      "type": "internal",
+      "line": 299
+    },
+    {
+      "from": "decoder_compute._findSideEffects",
+      "to": "decoder_compute.walk",
+      "type": "internal",
+      "line": 302
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addNode",
+      "type": "internal",
+      "line": 337
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addEdge",
+      "type": "internal",
+      "line": 339
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.walkBody",
+      "type": "internal",
+      "line": 343
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.walkBody",
+      "type": "internal",
+      "line": 347
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addNode",
+      "type": "internal",
+      "line": 348
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addEdge",
+      "type": "internal",
+      "line": 350
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addEdge",
+      "type": "internal",
+      "line": 352
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addNode",
+      "type": "internal",
+      "line": 359
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addEdge",
+      "type": "internal",
+      "line": 361
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.walkBody",
+      "type": "internal",
+      "line": 363
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addEdge",
+      "type": "internal",
+      "line": 365
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addNode",
+      "type": "internal",
+      "line": 370
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addEdge",
+      "type": "internal",
+      "line": 372
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.walkBody",
+      "type": "internal",
+      "line": 374
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addEdge",
+      "type": "internal",
+      "line": 376
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addNode",
+      "type": "internal",
+      "line": 380
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addEdge",
+      "type": "internal",
+      "line": 382
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.walkBody",
+      "type": "internal",
+      "line": 385
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addNode",
+      "type": "internal",
+      "line": 390
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addEdge",
+      "type": "internal",
+      "line": 391
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.walkBody",
+      "type": "internal",
+      "line": 392
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addNode",
+      "type": "internal",
+      "line": 397
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addEdge",
+      "type": "internal",
+      "line": 399
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addEdge",
+      "type": "internal",
+      "line": 401
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.walkBody",
+      "type": "internal",
+      "line": 402
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addNode",
+      "type": "internal",
+      "line": 407
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addEdge",
+      "type": "internal",
+      "line": 409
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addNode",
+      "type": "internal",
+      "line": 414
+    },
+    {
+      "from": "decoder_compute.walkBody",
+      "to": "decoder_compute.addEdge",
+      "type": "internal",
+      "line": 416
+    },
+    {
+      "from": "decoder_compute.analyzeControlFlow",
+      "to": "decoder_compute.addNode",
+      "type": "internal",
+      "line": 424
+    },
+    {
+      "from": "decoder_compute.analyzeControlFlow",
+      "to": "decoder_compute.walkBody",
+      "type": "internal",
+      "line": 429
+    },
+    {
+      "from": "decoder_compute.inferStates",
+      "to": "decoder_compute.to_state_name",
+      "type": "internal",
+      "line": 639
+    },
+    {
+      "from": "decoder_compute.parseAst",
+      "to": "ast",
+      "type": "external",
+      "category": "stdlib",
+      "line": 97
+    },
+    {
+      "from": "decoder_compute._astToDict",
+      "to": "ast",
+      "type": "external",
+      "category": "stdlib",
+      "line": 108
+    },
+    {
+      "from": "decoder_compute.generateBlueprint",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 826
+    },
+    {
+      "from": "decoder_compute.generateBlueprint",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 904
+    }
+  ],
+  "coupling": {
+    "fanIn": 19,
+    "fanOut": 4,
+    "instability": 0.174,
+    "internalEdges": 44,
+    "externalCallCount": 4,
+    "localCallCount": 0,
+    "callsByCategory": {
+      "stdlib": 4
+    },
+    "localDependencies": []
+  }
+}

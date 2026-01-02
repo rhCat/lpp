@@ -1,0 +1,258 @@
+{
+  "module": "registry_compute",
+  "filePath": "/Users/ruihe/mnt/lpp/lpp/utils/skill_registry/src/registry_compute.py",
+  "inbound": [
+    {
+      "type": "function",
+      "name": "scan",
+      "module": "registry_compute",
+      "line": 13,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Scan directory for L++ skill blueprints.\nInput: basePath\nOutput: skills (list of skill summaries), error",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "loadDetail",
+      "module": "registry_compute",
+      "line": 60,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Load full detail for a skill.\nInput: skillId, basePath\nOutput: selectedSkill (full metadata), error",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "export",
+      "module": "registry_compute",
+      "line": 166,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Export full registry as agent context.\nInput: skills, basePath\nOutput: registry (structured context for agent), error",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "formatContext",
+      "module": "registry_compute",
+      "line": 248,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Format registry as markdown for agent context.\nInput: registry\nOutput: markdown, error",
+      "decorators": []
+    }
+  ],
+  "outbound": [
+    {
+      "module": "json",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "os",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "pathlib",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Path",
+          "alias": "Path"
+        }
+      ]
+    },
+    {
+      "module": "typing",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Any",
+          "alias": "Any"
+        },
+        {
+          "name": "Dict",
+          "alias": "Dict"
+        },
+        {
+          "name": "List",
+          "alias": "List"
+        }
+      ]
+    },
+    {
+      "module": "re",
+      "category": "stdlib",
+      "names": []
+    }
+  ],
+  "nodes": [
+    {
+      "id": "registry_compute",
+      "type": "module",
+      "label": "registry_compute",
+      "metrics": {
+        "fanIn": 4,
+        "fanOut": 5,
+        "instability": 0.556,
+        "internalEdges": 1,
+        "externalCallCount": 7,
+        "localCallCount": 0,
+        "callsByCategory": {
+          "stdlib": 7
+        },
+        "localDependencies": []
+      }
+    },
+    {
+      "id": "registry_compute.scan",
+      "type": "function",
+      "label": "scan",
+      "direction": "inbound",
+      "parent": "registry_compute",
+      "line": 13,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "registry_compute.loadDetail",
+      "type": "function",
+      "label": "loadDetail",
+      "direction": "inbound",
+      "parent": "registry_compute",
+      "line": 60,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "registry_compute.export",
+      "type": "function",
+      "label": "export",
+      "direction": "inbound",
+      "parent": "registry_compute",
+      "line": 166,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "registry_compute.formatContext",
+      "type": "function",
+      "label": "formatContext",
+      "direction": "inbound",
+      "parent": "registry_compute",
+      "line": 248,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "json",
+      "type": "dependency",
+      "label": "json",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "os",
+      "type": "dependency",
+      "label": "os",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "pathlib",
+      "type": "dependency",
+      "label": "pathlib",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "typing",
+      "type": "dependency",
+      "label": "typing",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "re",
+      "type": "dependency",
+      "label": "re",
+      "direction": "outbound",
+      "category": "stdlib"
+    }
+  ],
+  "edges": [
+    {
+      "from": "registry_compute.export",
+      "to": "registry_compute.loadDetail",
+      "type": "internal",
+      "line": 199
+    },
+    {
+      "from": "registry_compute.scan",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 24
+    },
+    {
+      "from": "registry_compute.scan",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 37
+    },
+    {
+      "from": "registry_compute.loadDetail",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 73
+    },
+    {
+      "from": "registry_compute.loadDetail",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 80
+    },
+    {
+      "from": "registry_compute.loadDetail",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 91
+    },
+    {
+      "from": "registry_compute.loadDetail",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 101
+    },
+    {
+      "from": "registry_compute.loadDetail",
+      "to": "re",
+      "type": "external",
+      "category": "stdlib",
+      "line": 127
+    }
+  ],
+  "coupling": {
+    "fanIn": 4,
+    "fanOut": 5,
+    "instability": 0.556,
+    "internalEdges": 1,
+    "externalCallCount": 7,
+    "localCallCount": 0,
+    "callsByCategory": {
+      "stdlib": 7
+    },
+    "localDependencies": []
+  }
+}

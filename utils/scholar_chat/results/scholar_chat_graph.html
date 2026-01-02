@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8"/>
-<title>Python Function Decoder - State Machine</title>
+<title>Scholar Chatbot - State Machine</title>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <style>
 body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #1a1a2e; color: #eee; }
@@ -32,7 +32,7 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 </style>
 </head>
 <body>
-<h1>Python Function Decoder</h1>
+<h1>Scholar Chatbot</h1>
 <div class="controls">
   <button onclick="resetZoom()">Reset View</button>
   <button onclick="centerGraph()">Center</button>
@@ -62,8 +62,8 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 </div>
 <div id="tooltip"></div>
 <script>
-const nodes = [{"id": "idle", "label": "idle", "description": "Awaiting file path", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0}, {"id": "parsing", "label": "parsing", "description": "Parsing Python source into AST", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1}, {"id": "extracting", "label": "extracting", "description": "Extracting exports and imports", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}, {"id": "tracing", "label": "tracing", "description": "Tracing function call graph", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3}, {"id": "computing", "label": "computing", "description": "Computing coupling metrics", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4}, {"id": "complete", "label": "complete", "description": "Module graph generated", "type": "state", "isEntry": false, "isTerminal": false, "layer": 5}, {"id": "error", "label": "error", "description": "Analysis failed", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}];
-const links = [{"source": "idle", "target": "parsing", "label": "DECODE", "gates": "hasFilePath"}, {"source": "parsing", "target": "error", "label": "AUTO", "gates": "hasError"}, {"source": "parsing", "target": "extracting", "label": "AUTO", "gates": "hasAst"}, {"source": "extracting", "target": "error", "label": "AUTO", "gates": "hasError"}, {"source": "extracting", "target": "tracing", "label": "AUTO", "gates": "hasExtracts"}, {"source": "tracing", "target": "error", "label": "AUTO", "gates": "hasError"}, {"source": "tracing", "target": "computing", "label": "AUTO", "gates": "hasCalls"}, {"source": "computing", "target": "error", "label": "AUTO", "gates": "hasError"}, {"source": "computing", "target": "complete", "label": "AUTO", "gates": ""}, {"source": "complete", "target": "idle", "label": "RESET", "gates": ""}, {"source": "parsing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "tracing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "extracting", "target": "idle", "label": "RESET", "gates": ""}, {"source": "computing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "error", "target": "idle", "label": "RESET", "gates": ""}];
+const nodes = [{"id": "idle", "label": "idle", "description": "Ready for research query", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0}, {"id": "searching", "label": "searching", "description": "Searching academic sources", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1}, {"id": "reviewing", "label": "reviewing", "description": "Reviewing search results", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}, {"id": "analyzing", "label": "analyzing", "description": "LLM analyzing selected papers", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3}, {"id": "chatting", "label": "chatting", "description": "Interactive Q&A about research", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4}, {"id": "error", "label": "error", "description": "Error occurred", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}];
+const links = [{"source": "idle", "target": "idle", "label": "INIT", "gates": ""}, {"source": "idle", "target": "searching", "label": "SEARCH", "gates": ""}, {"source": "searching", "target": "reviewing", "label": "DONE", "gates": "noError"}, {"source": "searching", "target": "error", "label": "DONE", "gates": "hasError"}, {"source": "reviewing", "target": "searching", "label": "SEARCH", "gates": ""}, {"source": "reviewing", "target": "analyzing", "label": "SELECT", "gates": ""}, {"source": "analyzing", "target": "chatting", "label": "DONE", "gates": "noError"}, {"source": "analyzing", "target": "error", "label": "DONE", "gates": "hasError"}, {"source": "chatting", "target": "chatting", "label": "ASK", "gates": ""}, {"source": "chatting", "target": "searching", "label": "SEARCH", "gates": ""}, {"source": "chatting", "target": "reviewing", "label": "BACK", "gates": ""}, {"source": "reviewing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "error", "target": "idle", "label": "RETRY", "gates": ""}];
 
 // Calculate layout dimensions based on layers
 const layerMap = {};

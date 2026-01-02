@@ -1,0 +1,374 @@
+{
+  "module": "llm_compute",
+  "filePath": "/Users/ruihe/mnt/lpp/lpp/utils/llm_assistant/src/llm_compute.py",
+  "inbound": [
+    {
+      "type": "function",
+      "name": "init_config",
+      "module": "llm_compute",
+      "line": 47,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Initialize configuration from environment. Pure function.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "load_schema",
+      "module": "llm_compute",
+      "line": 61,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Load L++ schema specification. Pure function.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "load_blueprint",
+      "module": "llm_compute",
+      "line": 74,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Load blueprint from file. Pure function.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "query",
+      "module": "llm_compute",
+      "line": 136,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Send query to LLM with context. Pure function.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "explain_blueprint",
+      "module": "llm_compute",
+      "line": 180,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Get detailed explanation of blueprint. Pure function.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "validate_blueprint",
+      "module": "llm_compute",
+      "line": 200,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Validate blueprint against schema. Pure function.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "suggest_improvements",
+      "module": "llm_compute",
+      "line": 217,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Suggest blueprint improvements. Pure function.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "generate_blueprint",
+      "module": "llm_compute",
+      "line": 233,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Generate blueprint from description. Pure function.",
+      "decorators": []
+    }
+  ],
+  "outbound": [
+    {
+      "module": "json",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "os",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "pathlib",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Path",
+          "alias": "Path"
+        }
+      ]
+    },
+    {
+      "module": "typing",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Any",
+          "alias": "Any"
+        },
+        {
+          "name": "Dict",
+          "alias": "Dict"
+        },
+        {
+          "name": "List",
+          "alias": "List"
+        }
+      ]
+    },
+    {
+      "module": "openai",
+      "category": "pip",
+      "names": [
+        {
+          "name": "OpenAI",
+          "alias": "OpenAI"
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "llm_compute",
+      "type": "module",
+      "label": "llm_compute",
+      "metrics": {
+        "fanIn": 8,
+        "fanOut": 5,
+        "instability": 0.385,
+        "internalEdges": 4,
+        "externalCallCount": 8,
+        "localCallCount": 0,
+        "callsByCategory": {
+          "stdlib": 7,
+          "pip": 1
+        },
+        "localDependencies": []
+      }
+    },
+    {
+      "id": "llm_compute.init_config",
+      "type": "function",
+      "label": "init_config",
+      "direction": "inbound",
+      "parent": "llm_compute",
+      "line": 47,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "llm_compute.load_schema",
+      "type": "function",
+      "label": "load_schema",
+      "direction": "inbound",
+      "parent": "llm_compute",
+      "line": 61,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "llm_compute.load_blueprint",
+      "type": "function",
+      "label": "load_blueprint",
+      "direction": "inbound",
+      "parent": "llm_compute",
+      "line": 74,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "llm_compute.query",
+      "type": "function",
+      "label": "query",
+      "direction": "inbound",
+      "parent": "llm_compute",
+      "line": 136,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "llm_compute.explain_blueprint",
+      "type": "function",
+      "label": "explain_blueprint",
+      "direction": "inbound",
+      "parent": "llm_compute",
+      "line": 180,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "llm_compute.validate_blueprint",
+      "type": "function",
+      "label": "validate_blueprint",
+      "direction": "inbound",
+      "parent": "llm_compute",
+      "line": 200,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "llm_compute.suggest_improvements",
+      "type": "function",
+      "label": "suggest_improvements",
+      "direction": "inbound",
+      "parent": "llm_compute",
+      "line": 217,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "llm_compute.generate_blueprint",
+      "type": "function",
+      "label": "generate_blueprint",
+      "direction": "inbound",
+      "parent": "llm_compute",
+      "line": 233,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "json",
+      "type": "dependency",
+      "label": "json",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "os",
+      "type": "dependency",
+      "label": "os",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "pathlib",
+      "type": "dependency",
+      "label": "pathlib",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "typing",
+      "type": "dependency",
+      "label": "typing",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "openai",
+      "type": "dependency",
+      "label": "openai",
+      "direction": "outbound",
+      "category": "pip"
+    }
+  ],
+  "edges": [
+    {
+      "from": "llm_compute.explain_blueprint",
+      "to": "llm_compute.query",
+      "type": "internal",
+      "line": 197
+    },
+    {
+      "from": "llm_compute.validate_blueprint",
+      "to": "llm_compute.query",
+      "type": "internal",
+      "line": 214
+    },
+    {
+      "from": "llm_compute.suggest_improvements",
+      "to": "llm_compute.query",
+      "type": "internal",
+      "line": 230
+    },
+    {
+      "from": "llm_compute.generate_blueprint",
+      "to": "llm_compute.query",
+      "type": "internal",
+      "line": 253
+    },
+    {
+      "from": "llm_compute",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 21
+    },
+    {
+      "from": "llm_compute.init_config",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 50
+    },
+    {
+      "from": "llm_compute.init_config",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 51
+    },
+    {
+      "from": "llm_compute.init_config",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 55
+    },
+    {
+      "from": "llm_compute.load_blueprint",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 80
+    },
+    {
+      "from": "llm_compute.load_blueprint",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 87
+    },
+    {
+      "from": "llm_compute._call_llm",
+      "to": "openai",
+      "type": "external",
+      "category": "pip",
+      "line": 120
+    },
+    {
+      "from": "llm_compute.query",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 151
+    }
+  ],
+  "coupling": {
+    "fanIn": 8,
+    "fanOut": 5,
+    "instability": 0.385,
+    "internalEdges": 4,
+    "externalCallCount": 8,
+    "localCallCount": 0,
+    "callsByCategory": {
+      "stdlib": 7,
+      "pip": 1
+    },
+    "localDependencies": []
+  }
+}

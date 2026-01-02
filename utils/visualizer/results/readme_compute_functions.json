@@ -1,0 +1,338 @@
+{
+  "module": "readme_compute",
+  "filePath": "/Users/ruihe/mnt/lpp/lpp/utils/visualizer/src/readme_compute.py",
+  "inbound": [
+    {
+      "type": "function",
+      "name": "header",
+      "module": "readme_compute",
+      "line": 11,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Generate README header section.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "mermaid",
+      "module": "readme_compute",
+      "line": 31,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Generate mermaid state diagram.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "states_table",
+      "module": "readme_compute",
+      "line": 71,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Generate states documentation table.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "gates_table",
+      "module": "readme_compute",
+      "line": 97,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Generate gates documentation table.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "actions_table",
+      "module": "readme_compute",
+      "line": 120,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Generate actions documentation table.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "transitions_table",
+      "module": "readme_compute",
+      "line": 143,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Generate transitions documentation table.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "assemble",
+      "module": "readme_compute",
+      "line": 172,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Assemble all sections into final README.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "write",
+      "module": "readme_compute",
+      "line": 196,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Write README to file.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "tree_ascii",
+      "module": "readme_compute",
+      "line": 217,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Render hierarchical feature tree as ASCII art.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "tree_mermaid",
+      "module": "readme_compute",
+      "line": 264,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Render hierarchical tree as Mermaid flowchart.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "tree_summary",
+      "module": "readme_compute",
+      "line": 345,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Generate summary statistics for a hierarchical tree.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "leaf_queue_table",
+      "module": "readme_compute",
+      "line": 390,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Generate table of leaf nodes from queue.",
+      "decorators": []
+    }
+  ],
+  "outbound": [
+    {
+      "module": "typing",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Any",
+          "alias": "Any"
+        },
+        {
+          "name": "Dict",
+          "alias": "Dict"
+        }
+      ]
+    },
+    {
+      "module": "pathlib",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Path",
+          "alias": "Path"
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "readme_compute",
+      "type": "module",
+      "label": "readme_compute",
+      "metrics": {
+        "fanIn": 12,
+        "fanOut": 2,
+        "instability": 0.143,
+        "internalEdges": 0,
+        "externalCallCount": 1,
+        "localCallCount": 0,
+        "callsByCategory": {
+          "stdlib": 1
+        },
+        "localDependencies": []
+      }
+    },
+    {
+      "id": "readme_compute.header",
+      "type": "function",
+      "label": "header",
+      "direction": "inbound",
+      "parent": "readme_compute",
+      "line": 11,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "readme_compute.mermaid",
+      "type": "function",
+      "label": "mermaid",
+      "direction": "inbound",
+      "parent": "readme_compute",
+      "line": 31,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "readme_compute.states_table",
+      "type": "function",
+      "label": "states_table",
+      "direction": "inbound",
+      "parent": "readme_compute",
+      "line": 71,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "readme_compute.gates_table",
+      "type": "function",
+      "label": "gates_table",
+      "direction": "inbound",
+      "parent": "readme_compute",
+      "line": 97,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "readme_compute.actions_table",
+      "type": "function",
+      "label": "actions_table",
+      "direction": "inbound",
+      "parent": "readme_compute",
+      "line": 120,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "readme_compute.transitions_table",
+      "type": "function",
+      "label": "transitions_table",
+      "direction": "inbound",
+      "parent": "readme_compute",
+      "line": 143,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "readme_compute.assemble",
+      "type": "function",
+      "label": "assemble",
+      "direction": "inbound",
+      "parent": "readme_compute",
+      "line": 172,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "readme_compute.write",
+      "type": "function",
+      "label": "write",
+      "direction": "inbound",
+      "parent": "readme_compute",
+      "line": 196,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "readme_compute.tree_ascii",
+      "type": "function",
+      "label": "tree_ascii",
+      "direction": "inbound",
+      "parent": "readme_compute",
+      "line": 217,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "readme_compute.tree_mermaid",
+      "type": "function",
+      "label": "tree_mermaid",
+      "direction": "inbound",
+      "parent": "readme_compute",
+      "line": 264,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "readme_compute.tree_summary",
+      "type": "function",
+      "label": "tree_summary",
+      "direction": "inbound",
+      "parent": "readme_compute",
+      "line": 345,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "readme_compute.leaf_queue_table",
+      "type": "function",
+      "label": "leaf_queue_table",
+      "direction": "inbound",
+      "parent": "readme_compute",
+      "line": 390,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "typing",
+      "type": "dependency",
+      "label": "typing",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "pathlib",
+      "type": "dependency",
+      "label": "pathlib",
+      "direction": "outbound",
+      "category": "stdlib"
+    }
+  ],
+  "edges": [
+    {
+      "from": "readme_compute.write",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 205
+    }
+  ],
+  "coupling": {
+    "fanIn": 12,
+    "fanOut": 2,
+    "instability": 0.143,
+    "internalEdges": 0,
+    "externalCallCount": 1,
+    "localCallCount": 0,
+    "callsByCategory": {
+      "stdlib": 1
+    },
+    "localDependencies": []
+  }
+}

@@ -1,0 +1,1220 @@
+{
+  "module": "skill_contractor_compute",
+  "filePath": "/Users/ruihe/mnt/lpp/lpp/utils/skill_contractor/src/skill_contractor_compute.py",
+  "inbound": [
+    {
+      "type": "function",
+      "name": "init",
+      "module": "skill_contractor_compute",
+      "line": 544,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Initialize agent context with new runtime folder.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "detect_lpp_target",
+      "module": "skill_contractor_compute",
+      "line": 586,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Detect if target requires L++ output.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "decompose",
+      "module": "skill_contractor_compute",
+      "line": 604,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Decompose target into steps via LLM.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "generate_step_output",
+      "module": "skill_contractor_compute",
+      "line": 692,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Generate step output via LLM with step-level logging.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "parse_and_sanitize",
+      "module": "skill_contractor_compute",
+      "line": 842,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Parse and sanitize LLM output with logging.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "write_output",
+      "module": "skill_contractor_compute",
+      "line": 936,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Write validated output to disk.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "advance_step",
+      "module": "skill_contractor_compute",
+      "line": 1040,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Advance to next step.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "validate_lpp",
+      "module": "skill_contractor_compute",
+      "line": 1054,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Validate L++ artifacts.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "advance_phase",
+      "module": "skill_contractor_compute",
+      "line": 1137,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Advance from blueprint phase to implementation phase.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "evaluate",
+      "module": "skill_contractor_compute",
+      "line": 1153,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Self-evaluate progress.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "incr_iteration",
+      "module": "skill_contractor_compute",
+      "line": 1220,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "incr_repair",
+      "module": "skill_contractor_compute",
+      "line": 1224,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "reset_for_refine",
+      "module": "skill_contractor_compute",
+      "line": 1228,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "capture_error",
+      "module": "skill_contractor_compute",
+      "line": 1232,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "capture_step_error",
+      "module": "skill_contractor_compute",
+      "line": 1249,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "capture_parse_error",
+      "module": "skill_contractor_compute",
+      "line": 1264,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "prepare_recovery",
+      "module": "skill_contractor_compute",
+      "line": 1280,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "review_failed_step",
+      "module": "skill_contractor_compute",
+      "line": 1291,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "LLM reviews failed step: skip or replan.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "skip_step",
+      "module": "skill_contractor_compute",
+      "line": 1351,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Skip current step and advance.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "save_state",
+      "module": "skill_contractor_compute",
+      "line": 1371,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Save state to run folder.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "load_state",
+      "module": "skill_contractor_compute",
+      "line": 1400,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Load state from run folder.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "clear_state",
+      "module": "skill_contractor_compute",
+      "line": 1414,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Clear saved state.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "log_corrections",
+      "module": "skill_contractor_compute",
+      "line": 1423,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Log auto-corrections for review and auto-approve.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "evaluate_interactive",
+      "module": "skill_contractor_compute",
+      "line": 1444,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Evaluate generated interactive.py and related Python files.\nUses frame_py.operational_validator for validation.\n\nValidation stages:\n1. Content - LLM-specific errors (literal newlines, placeholders)\n2. Syntax - AST parsing with line numbers\n3. Import - Module reference validation\n4. Structure - Required elements (COMPUTE_UNITS, etc.)\n\nReturns evaluation results with pass/fail status and feedback.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "sanitize_python_code",
+      "module": "skill_contractor_compute",
+      "line": 35,
+      "args": [
+        "code",
+        "filename",
+        "verbose"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    }
+  ],
+  "outbound": [
+    {
+      "module": "json",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "os",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "re",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "subprocess",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "datetime",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "datetime",
+          "alias": "datetime"
+        }
+      ]
+    },
+    {
+      "module": "pathlib",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Path",
+          "alias": "Path"
+        }
+      ]
+    },
+    {
+      "module": "typing",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Any",
+          "alias": "Any"
+        },
+        {
+          "name": "Dict",
+          "alias": "Dict"
+        },
+        {
+          "name": "List",
+          "alias": "List"
+        },
+        {
+          "name": "Optional",
+          "alias": "Optional"
+        }
+      ]
+    },
+    {
+      "module": "",
+      "category": "local",
+      "names": [
+        {
+          "name": "prompts",
+          "alias": "prompts"
+        }
+      ]
+    },
+    {
+      "module": "openai",
+      "category": "pip",
+      "names": [
+        {
+          "name": "OpenAI",
+          "alias": "OpenAI"
+        }
+      ]
+    },
+    {
+      "module": "frame_py.operational_validator",
+      "category": "pip",
+      "names": [
+        {
+          "name": "sanitize_python_code",
+          "alias": "sanitize_python_code"
+        }
+      ]
+    },
+    {
+      "module": "frame_py.operational_validator",
+      "category": "pip",
+      "names": [
+        {
+          "name": "validate_skill_directory",
+          "alias": "validate_skill_directory"
+        }
+      ]
+    },
+    {
+      "module": "sys",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "frame_py.operational_validator",
+      "category": "pip",
+      "names": [
+        {
+          "name": "validate_skill_directory",
+          "alias": "validate_skill_directory"
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "skill_contractor_compute",
+      "type": "module",
+      "label": "skill_contractor_compute",
+      "metrics": {
+        "fanIn": 25,
+        "fanOut": 10,
+        "instability": 0.286,
+        "internalEdges": 1,
+        "externalCallCount": 60,
+        "localCallCount": 4,
+        "callsByCategory": {
+          "stdlib": 57,
+          "pip": 3
+        },
+        "localDependencies": [
+          "prompts",
+          ""
+        ]
+      }
+    },
+    {
+      "id": "skill_contractor_compute.init",
+      "type": "function",
+      "label": "init",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 544,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.detect_lpp_target",
+      "type": "function",
+      "label": "detect_lpp_target",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 586,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.decompose",
+      "type": "function",
+      "label": "decompose",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 604,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.generate_step_output",
+      "type": "function",
+      "label": "generate_step_output",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 692,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.parse_and_sanitize",
+      "type": "function",
+      "label": "parse_and_sanitize",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 842,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.write_output",
+      "type": "function",
+      "label": "write_output",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 936,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.advance_step",
+      "type": "function",
+      "label": "advance_step",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1040,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.validate_lpp",
+      "type": "function",
+      "label": "validate_lpp",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1054,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.advance_phase",
+      "type": "function",
+      "label": "advance_phase",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1137,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.evaluate",
+      "type": "function",
+      "label": "evaluate",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1153,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.incr_iteration",
+      "type": "function",
+      "label": "incr_iteration",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1220,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.incr_repair",
+      "type": "function",
+      "label": "incr_repair",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1224,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.reset_for_refine",
+      "type": "function",
+      "label": "reset_for_refine",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1228,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.capture_error",
+      "type": "function",
+      "label": "capture_error",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1232,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.capture_step_error",
+      "type": "function",
+      "label": "capture_step_error",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1249,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.capture_parse_error",
+      "type": "function",
+      "label": "capture_parse_error",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1264,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.prepare_recovery",
+      "type": "function",
+      "label": "prepare_recovery",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1280,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.review_failed_step",
+      "type": "function",
+      "label": "review_failed_step",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1291,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.skip_step",
+      "type": "function",
+      "label": "skip_step",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1351,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.save_state",
+      "type": "function",
+      "label": "save_state",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1371,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.load_state",
+      "type": "function",
+      "label": "load_state",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1400,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.clear_state",
+      "type": "function",
+      "label": "clear_state",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1414,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.log_corrections",
+      "type": "function",
+      "label": "log_corrections",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1423,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.evaluate_interactive",
+      "type": "function",
+      "label": "evaluate_interactive",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 1444,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "skill_contractor_compute.sanitize_python_code",
+      "type": "function",
+      "label": "sanitize_python_code",
+      "direction": "inbound",
+      "parent": "skill_contractor_compute",
+      "line": 35,
+      "signature": "(code, filename, verbose)"
+    },
+    {
+      "id": "json",
+      "type": "dependency",
+      "label": "json",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "os",
+      "type": "dependency",
+      "label": "os",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "re",
+      "type": "dependency",
+      "label": "re",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "subprocess",
+      "type": "dependency",
+      "label": "subprocess",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "datetime",
+      "type": "dependency",
+      "label": "datetime",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "pathlib",
+      "type": "dependency",
+      "label": "pathlib",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "typing",
+      "type": "dependency",
+      "label": "typing",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "relative.level1",
+      "type": "dependency",
+      "label": "level1",
+      "direction": "outbound",
+      "category": "local"
+    },
+    {
+      "id": "openai",
+      "type": "dependency",
+      "label": "openai",
+      "direction": "outbound",
+      "category": "pip"
+    },
+    {
+      "id": "frame_py.operational_validator",
+      "type": "dependency",
+      "label": "operational_validator",
+      "direction": "outbound",
+      "category": "pip"
+    },
+    {
+      "id": "sys",
+      "type": "dependency",
+      "label": "sys",
+      "direction": "outbound",
+      "category": "stdlib"
+    }
+  ],
+  "edges": [
+    {
+      "from": "skill_contractor_compute.write_output",
+      "to": "skill_contractor_compute.sanitize_python_code",
+      "type": "internal",
+      "line": 994
+    },
+    {
+      "from": "skill_contractor_compute._getRunDir",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 45
+    },
+    {
+      "from": "skill_contractor_compute._getRunDir",
+      "to": "datetime",
+      "type": "external",
+      "category": "stdlib",
+      "line": 52
+    },
+    {
+      "from": "skill_contractor_compute._logStep",
+      "to": "datetime",
+      "type": "external",
+      "category": "stdlib",
+      "line": 62
+    },
+    {
+      "from": "skill_contractor_compute._logRun",
+      "to": "datetime",
+      "type": "external",
+      "category": "stdlib",
+      "line": 90
+    },
+    {
+      "from": "skill_contractor_compute._condenseForEval",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 148
+    },
+    {
+      "from": "skill_contractor_compute._extractJson",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 198
+    },
+    {
+      "from": "skill_contractor_compute._extractJson",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 205
+    },
+    {
+      "from": "skill_contractor_compute._extractJson",
+      "to": "re",
+      "type": "external",
+      "category": "stdlib",
+      "line": 213
+    },
+    {
+      "from": "skill_contractor_compute._extractJson",
+      "to": "re",
+      "type": "external",
+      "category": "stdlib",
+      "line": 214
+    },
+    {
+      "from": "skill_contractor_compute._extractJson",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 216
+    },
+    {
+      "from": "skill_contractor_compute._extractJson",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 221
+    },
+    {
+      "from": "skill_contractor_compute._callLlm",
+      "to": "openai",
+      "type": "external",
+      "category": "pip",
+      "line": 236
+    },
+    {
+      "from": "skill_contractor_compute._findLppRoot",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 248
+    },
+    {
+      "from": "skill_contractor_compute._findLppRoot",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 251
+    },
+    {
+      "from": "skill_contractor_compute._findLppRoot",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 251
+    },
+    {
+      "from": "skill_contractor_compute.init",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 546
+    },
+    {
+      "from": "skill_contractor_compute.init",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 546
+    },
+    {
+      "from": "skill_contractor_compute.init",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 558
+    },
+    {
+      "from": "skill_contractor_compute.init",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 559
+    },
+    {
+      "from": "skill_contractor_compute.init",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 560
+    },
+    {
+      "from": "skill_contractor_compute.init",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 567
+    },
+    {
+      "from": "skill_contractor_compute.init",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 568
+    },
+    {
+      "from": "skill_contractor_compute.init",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 569
+    },
+    {
+      "from": "skill_contractor_compute.init",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 570
+    },
+    {
+      "from": "skill_contractor_compute.detect_lpp_target",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 596
+    },
+    {
+      "from": "skill_contractor_compute.decompose",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 615
+    },
+    {
+      "from": "skill_contractor_compute.generate_step_output",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 707
+    },
+    {
+      "from": "skill_contractor_compute.parse_and_sanitize",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 851
+    },
+    {
+      "from": "skill_contractor_compute.parse_and_sanitize",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 884
+    },
+    {
+      "from": "skill_contractor_compute.write_output",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 944
+    },
+    {
+      "from": "skill_contractor_compute.write_output",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 971
+    },
+    {
+      "from": "skill_contractor_compute.write_output",
+      "to": "frame_py",
+      "type": "external",
+      "category": "pip",
+      "line": 994
+    },
+    {
+      "from": "skill_contractor_compute.write_output",
+      "to": "subprocess",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1010
+    },
+    {
+      "from": "skill_contractor_compute.write_output",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1032
+    },
+    {
+      "from": "skill_contractor_compute.advance_step",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1048
+    },
+    {
+      "from": "skill_contractor_compute.validate_lpp",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1060
+    },
+    {
+      "from": "skill_contractor_compute.validate_lpp",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1072
+    },
+    {
+      "from": "skill_contractor_compute.validate_lpp",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1080
+    },
+    {
+      "from": "skill_contractor_compute.validate_lpp",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1081
+    },
+    {
+      "from": "skill_contractor_compute.validate_lpp",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1091
+    },
+    {
+      "from": "skill_contractor_compute.validate_lpp",
+      "to": "subprocess",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1095
+    },
+    {
+      "from": "skill_contractor_compute.advance_phase",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1140
+    },
+    {
+      "from": "skill_contractor_compute.evaluate",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1166
+    },
+    {
+      "from": "skill_contractor_compute.evaluate",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1183
+    },
+    {
+      "from": "skill_contractor_compute.capture_error",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1237
+    },
+    {
+      "from": "skill_contractor_compute.capture_step_error",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1253
+    },
+    {
+      "from": "skill_contractor_compute.capture_parse_error",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1269
+    },
+    {
+      "from": "skill_contractor_compute.review_failed_step",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1303
+    },
+    {
+      "from": "skill_contractor_compute.review_failed_step",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1318
+    },
+    {
+      "from": "skill_contractor_compute.skip_step",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1359
+    },
+    {
+      "from": "skill_contractor_compute.save_state",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1373
+    },
+    {
+      "from": "skill_contractor_compute.save_state",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1394
+    },
+    {
+      "from": "skill_contractor_compute.load_state",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1402
+    },
+    {
+      "from": "skill_contractor_compute.load_state",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1407
+    },
+    {
+      "from": "skill_contractor_compute.clear_state",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1416
+    },
+    {
+      "from": "skill_contractor_compute.log_corrections",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1426
+    },
+    {
+      "from": "skill_contractor_compute.evaluate_interactive",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1457
+    },
+    {
+      "from": "skill_contractor_compute.evaluate_interactive",
+      "to": "sys",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1479
+    },
+    {
+      "from": "skill_contractor_compute.evaluate_interactive",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1479
+    },
+    {
+      "from": "skill_contractor_compute.evaluate_interactive",
+      "to": "frame_py",
+      "type": "external",
+      "category": "pip",
+      "line": 1491
+    },
+    {
+      "from": "skill_contractor_compute.decompose",
+      "to": "prompts",
+      "type": "local",
+      "line": 653
+    },
+    {
+      "from": "skill_contractor_compute.generate_step_output",
+      "to": "prompts",
+      "type": "local",
+      "line": 804
+    },
+    {
+      "from": "skill_contractor_compute.evaluate",
+      "to": "prompts",
+      "type": "local",
+      "line": 1175
+    },
+    {
+      "from": "skill_contractor_compute.review_failed_step",
+      "to": "prompts",
+      "type": "local",
+      "line": 1312
+    }
+  ],
+  "coupling": {
+    "fanIn": 25,
+    "fanOut": 10,
+    "instability": 0.286,
+    "internalEdges": 1,
+    "externalCallCount": 60,
+    "localCallCount": 4,
+    "callsByCategory": {
+      "stdlib": 57,
+      "pip": 3
+    },
+    "localDependencies": [
+      "prompts",
+      ""
+    ]
+  }
+}

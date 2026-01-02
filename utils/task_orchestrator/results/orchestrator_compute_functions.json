@@ -1,0 +1,510 @@
+{
+  "module": "orchestrator_compute",
+  "filePath": "/Users/ruihe/mnt/lpp/lpp/utils/task_orchestrator/src/orchestrator_compute.py",
+  "inbound": [
+    {
+      "type": "function",
+      "name": "init",
+      "module": "orchestrator_compute",
+      "line": 63,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Initialize orchestrator config from environment.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "analyze_root",
+      "module": "orchestrator_compute",
+      "line": 83,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Analyze task and create root feature tree.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "expand",
+      "module": "orchestrator_compute",
+      "line": 140,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Expand a feature into sub-features (one level deeper).",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "collect",
+      "module": "orchestrator_compute",
+      "line": 242,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Collect all leaf nodes from feature tree.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "plan_leaf",
+      "module": "orchestrator_compute",
+      "line": 276,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Plan execution for current leaf node.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "build",
+      "module": "orchestrator_compute",
+      "line": 342,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Build one tool from the needed list.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "exec_leaf",
+      "module": "orchestrator_compute",
+      "line": 414,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Execute current leaf feature.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "next_leaf",
+      "module": "orchestrator_compute",
+      "line": 476,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Prepare next leaf for execution.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "reflect",
+      "module": "orchestrator_compute",
+      "line": 505,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Reflect on execution progress.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "evaluate",
+      "module": "orchestrator_compute",
+      "line": 552,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Evaluate task completion.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "incr",
+      "module": "orchestrator_compute",
+      "line": 603,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Increment iteration counter.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "reset_exec",
+      "module": "orchestrator_compute",
+      "line": 608,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Reset execution state for next iteration.",
+      "decorators": []
+    }
+  ],
+  "outbound": [
+    {
+      "module": "email.mime",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "base",
+          "alias": "base"
+        }
+      ]
+    },
+    {
+      "module": "json",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "logging",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "log",
+          "alias": "log"
+        }
+      ]
+    },
+    {
+      "module": "os",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "pathlib",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Path",
+          "alias": "Path"
+        }
+      ]
+    },
+    {
+      "module": "typing",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Any",
+          "alias": "Any"
+        },
+        {
+          "name": "Dict",
+          "alias": "Dict"
+        },
+        {
+          "name": "List",
+          "alias": "List"
+        }
+      ]
+    },
+    {
+      "module": "openai",
+      "category": "pip",
+      "names": [
+        {
+          "name": "OpenAI",
+          "alias": "OpenAI"
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "orchestrator_compute",
+      "type": "module",
+      "label": "orchestrator_compute",
+      "metrics": {
+        "fanIn": 12,
+        "fanOut": 7,
+        "instability": 0.368,
+        "internalEdges": 0,
+        "externalCallCount": 14,
+        "localCallCount": 0,
+        "callsByCategory": {
+          "pip": 1,
+          "stdlib": 13
+        },
+        "localDependencies": []
+      }
+    },
+    {
+      "id": "orchestrator_compute.init",
+      "type": "function",
+      "label": "init",
+      "direction": "inbound",
+      "parent": "orchestrator_compute",
+      "line": 63,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "orchestrator_compute.analyze_root",
+      "type": "function",
+      "label": "analyze_root",
+      "direction": "inbound",
+      "parent": "orchestrator_compute",
+      "line": 83,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "orchestrator_compute.expand",
+      "type": "function",
+      "label": "expand",
+      "direction": "inbound",
+      "parent": "orchestrator_compute",
+      "line": 140,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "orchestrator_compute.collect",
+      "type": "function",
+      "label": "collect",
+      "direction": "inbound",
+      "parent": "orchestrator_compute",
+      "line": 242,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "orchestrator_compute.plan_leaf",
+      "type": "function",
+      "label": "plan_leaf",
+      "direction": "inbound",
+      "parent": "orchestrator_compute",
+      "line": 276,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "orchestrator_compute.build",
+      "type": "function",
+      "label": "build",
+      "direction": "inbound",
+      "parent": "orchestrator_compute",
+      "line": 342,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "orchestrator_compute.exec_leaf",
+      "type": "function",
+      "label": "exec_leaf",
+      "direction": "inbound",
+      "parent": "orchestrator_compute",
+      "line": 414,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "orchestrator_compute.next_leaf",
+      "type": "function",
+      "label": "next_leaf",
+      "direction": "inbound",
+      "parent": "orchestrator_compute",
+      "line": 476,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "orchestrator_compute.reflect",
+      "type": "function",
+      "label": "reflect",
+      "direction": "inbound",
+      "parent": "orchestrator_compute",
+      "line": 505,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "orchestrator_compute.evaluate",
+      "type": "function",
+      "label": "evaluate",
+      "direction": "inbound",
+      "parent": "orchestrator_compute",
+      "line": 552,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "orchestrator_compute.incr",
+      "type": "function",
+      "label": "incr",
+      "direction": "inbound",
+      "parent": "orchestrator_compute",
+      "line": 603,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "orchestrator_compute.reset_exec",
+      "type": "function",
+      "label": "reset_exec",
+      "direction": "inbound",
+      "parent": "orchestrator_compute",
+      "line": 608,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "email.mime",
+      "type": "dependency",
+      "label": "mime",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "json",
+      "type": "dependency",
+      "label": "json",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "logging",
+      "type": "dependency",
+      "label": "logging",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "os",
+      "type": "dependency",
+      "label": "os",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "pathlib",
+      "type": "dependency",
+      "label": "pathlib",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "typing",
+      "type": "dependency",
+      "label": "typing",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "openai",
+      "type": "dependency",
+      "label": "openai",
+      "direction": "outbound",
+      "category": "pip"
+    }
+  ],
+  "edges": [
+    {
+      "from": "orchestrator_compute._llm",
+      "to": "openai",
+      "type": "external",
+      "category": "pip",
+      "line": 36
+    },
+    {
+      "from": "orchestrator_compute._json",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 56
+    },
+    {
+      "from": "orchestrator_compute.init",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 66
+    },
+    {
+      "from": "orchestrator_compute.init",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 67
+    },
+    {
+      "from": "orchestrator_compute.init",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 71
+    },
+    {
+      "from": "orchestrator_compute.init",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 72
+    },
+    {
+      "from": "orchestrator_compute.init",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 73
+    },
+    {
+      "from": "orchestrator_compute.init",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 75
+    },
+    {
+      "from": "orchestrator_compute.init",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 75
+    },
+    {
+      "from": "orchestrator_compute.build",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 387
+    },
+    {
+      "from": "orchestrator_compute.build",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 390
+    },
+    {
+      "from": "orchestrator_compute.exec_leaf",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 434
+    },
+    {
+      "from": "orchestrator_compute.exec_leaf",
+      "to": "logging",
+      "type": "external",
+      "category": "stdlib",
+      "line": 449
+    },
+    {
+      "from": "orchestrator_compute.reflect",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 523
+    }
+  ],
+  "coupling": {
+    "fanIn": 12,
+    "fanOut": 7,
+    "instability": 0.368,
+    "internalEdges": 0,
+    "externalCallCount": 14,
+    "localCallCount": 0,
+    "callsByCategory": {
+      "pip": 1,
+      "stdlib": 13
+    },
+    "localDependencies": []
+  }
+}

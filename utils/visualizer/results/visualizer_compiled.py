@@ -57,11 +57,9 @@ GATES = {
 DISPLAY_RULES = [
     {'gate': 'is_error', 'template': '❌ ERROR: {error}'},
     {'gate': 'is_idle', 'template': '📂 No blueprint loaded. Use LOAD command.'},
-    {'gate': 'is_viewing',
-        'template': '[{view_mode}] Viewing: {blueprint_name} | Zoom: {zoom_level}x'},
+    {'gate': 'is_viewing', 'template': '[{view_mode}] Viewing: {blueprint_name} | Zoom: {zoom_level}x'},
     {'gate': 'has_tree', 'template': '[tree] {tree_name}'},
-    {'gate': 'is_loaded',
-        'template': '✅ Loaded: {blueprint_name} ({blueprint_id})'},
+    {'gate': 'is_loaded', 'template': '✅ Loaded: {blueprint_name} ({blueprint_id})'},
     {'gate': 'is_exporting', 'template': '📤 Exporting...'},
     {'template': 'L++ Visualizer'},
 ]
@@ -448,8 +446,7 @@ class Operator:
     """
 
     def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_name': None, 'blueprint_id': None, 'view_mode': None, 'selected_node': None, 'zoom_level': None,
-                        'show_gates': None, 'show_actions': None, 'output': None, 'readme_content': None, 'export_path': None, 'tree': None, 'tree_name': None, 'tree_output': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_name': None, 'blueprint_id': None, 'view_mode': None, 'selected_node': None, 'zoom_level': None, 'show_gates': None, 'show_actions': None, 'output': None, 'readme_content': None, 'export_path': None, 'tree': None, 'tree_name': None, 'tree_output': None, 'error': None}
         self.traces: list[TransitionTrace] = []
         self.compute_registry = compute_registry or {}
 
@@ -494,7 +491,8 @@ class Operator:
             gates_pass = True
             for gate_id in t.get('gates', []):
                 expr = GATES.get(gate_id, 'True')
-                if not atom_EVALUATE(expr, scope):
+                gate_result, _ = atom_EVALUATE(expr, scope)
+                if not gate_result:
                     gates_pass = False
                     break
             if gates_pass:
@@ -519,7 +517,7 @@ class Operator:
                     value = _resolve_path(action['value_from'], scope)
                 else:
                     value = None
-                self.context = atom_MUTATE(self.context, target, value)
+                self.context, _ = atom_MUTATE(self.context, target, value)
                 scope.update(self.context)  # Sync scope for chained actions
 
             elif action['type'] == 'compute':
@@ -532,20 +530,19 @@ class Operator:
                         k: _resolve_path(v, scope)
                         for k, v in action.get('input_map', {}).items()
                     }
-                    result = atom_DISPATCH(
+                    result, _ = atom_DISPATCH(
                         sys_id, op_id, inp, self.compute_registry
                     )
                     for ctx_path, res_key in action.get('output_map', {}).items():
                         if res_key in result:
-                            self.context = atom_MUTATE(
+                            self.context, _ = atom_MUTATE(
                                 self.context, ctx_path, result[res_key]
                             )
-                    # Sync scope for chained actions
-                    scope.update(self.context)
+                    scope.update(self.context)  # Sync scope for chained actions
 
         # TRANSITION
-        new_state, trace = atom_TRANSITION(current, trans['to'])
-        self.context = atom_MUTATE(self.context, '_state', new_state)
+        (new_state, trace), _ = atom_TRANSITION(current, trans['to'])
+        self.context, _ = atom_MUTATE(self.context, '_state', new_state)
         self.traces.append(trace)
 
         return True, new_state, None
@@ -556,7 +553,7 @@ class Operator:
 
     def set(self, path: str, value):
         """Set a value in context by path."""
-        self.context = atom_MUTATE(self.context, path, value)
+        self.context, _ = atom_MUTATE(self.context, path, value)
 
     def display(self) -> str:
         """Evaluate display rules and return formatted string."""
@@ -564,7 +561,8 @@ class Operator:
             gate = rule.get('gate')
             if gate:
                 expr = GATES.get(gate, 'False')
-                if not atom_EVALUATE(expr, self.context):
+                gate_result, _ = atom_EVALUATE(expr, self.context)
+                if not gate_result:
                     continue
             # Gate passed or no gate, format template
             template = rule.get('template', '')
@@ -576,8 +574,7 @@ class Operator:
 
     def reset(self):
         """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_name': None, 'blueprint_id': None, 'view_mode': None, 'selected_node': None, 'zoom_level': None,
-                        'show_gates': None, 'show_actions': None, 'output': None, 'readme_content': None, 'export_path': None, 'tree': None, 'tree_name': None, 'tree_output': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_name': None, 'blueprint_id': None, 'view_mode': None, 'selected_node': None, 'zoom_level': None, 'show_gates': None, 'show_actions': None, 'output': None, 'readme_content': None, 'export_path': None, 'tree': None, 'tree_name': None, 'tree_output': None, 'error': None}
         self.traces = []
 
     def save_state(self, path: str = None):
@@ -648,8 +645,7 @@ class Operator:
 
             # Validate blueprint ID matches
             if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(
-                    f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
+                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
                 return False
 
             self.context = state_data.get('context', {})

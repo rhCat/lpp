@@ -194,7 +194,10 @@ function traceUpstream(nodeId, visited = new Set()) {
 const svg = d3.select("svg").attr("width", width).attr("height", height);
 const g = svg.append("g");
 
-const zoom = d3.zoom().scaleExtent([0.2, 3]).on("zoom", (e) => g.attr("transform", e.transform));
+const zoom = d3.zoom()
+    .scaleExtent([0.2, 3])
+    .filter(e => !e.target.closest('.node'))  // Prevent zoom/pan when clicking on nodes
+    .on("zoom", (e) => g.attr("transform", e.transform));
 svg.call(zoom);
 
 // Arrow markers
@@ -235,6 +238,7 @@ updateLinks();
 // Drag behavior for nodes
 const drag = d3.drag()
     .on("start", function(e, d) {
+        e.sourceEvent.stopPropagation();  // Prevent zoom interference
         d3.select(this).raise().select("rect").attr("stroke", "#ff0").attr("stroke-width", 4);
     })
     .on("drag", function(e, d) {
@@ -458,6 +462,19 @@ function toggleUpstream() {
 
 // Auto-fit on load
 fitToView();
+
+// Click on background to deselect
+svg.on("click", (e) => {
+    if (e.target.tagName === 'svg' || e.target.tagName === 'g') {
+        selectedNode = null;
+        node.select("rect").attr("stroke", "#fff").attr("stroke-width", 2);
+        link.attr("stroke", l => l.gates && l.gates.includes("error") ? "#ff6b6b" : "#556")
+            .attr("stroke-width", 2)
+            .attr("marker-end", "url(#arrow)");
+        document.getElementById("details").innerHTML = "Click a node to see details";
+        document.getElementById("flow-list").innerHTML = "";
+    }
+});
 </script>
 </body>
 </html>

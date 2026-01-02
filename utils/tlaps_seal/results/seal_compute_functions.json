@@ -1,0 +1,494 @@
+{
+  "module": "seal_compute",
+  "filePath": "/Users/ruihe/mnt/lpp/lpp/utils/tlaps_seal/src/seal_compute.py",
+  "inbound": [
+    {
+      "type": "function",
+      "name": "loadBlueprint",
+      "module": "seal_compute",
+      "line": 14,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Load and parse L++ blueprint JSON file.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "auditTrinity",
+      "module": "seal_compute",
+      "line": 31,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Audit the Trinity: Transitions, Gates, Actions.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "auditFlange",
+      "module": "seal_compute",
+      "line": 137,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Audit the Flange (context_schema) for hermeticity.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "generateTla",
+      "module": "seal_compute",
+      "line": 191,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Generate TLA+ specification from blueprint.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "runTlc",
+      "module": "seal_compute",
+      "line": 376,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Run TLC model checker on TLA+ specification.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "runTlaps",
+      "module": "seal_compute",
+      "line": 448,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Run TLAPS theorem prover (or simulate if not installed).",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "generateCertificate",
+      "module": "seal_compute",
+      "line": 509,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Generate the TLAPS Seal certificate.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "resetContext",
+      "module": "seal_compute",
+      "line": 576,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Reset all context to initial state.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "checkTrinityValid",
+      "module": "seal_compute",
+      "line": 591,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Gate: check if trinity audit passed.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "checkFlangeValid",
+      "module": "seal_compute",
+      "line": 597,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Gate: check if flange audit passed.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "checkTlcPassed",
+      "module": "seal_compute",
+      "line": 603,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Gate: check if TLC verification passed.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "checkTlapsPassed",
+      "module": "seal_compute",
+      "line": 609,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Gate: check if TLAPS proof passed.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "tlaStr",
+      "module": "seal_compute",
+      "line": 212,
+      "args": [
+        "s"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    }
+  ],
+  "outbound": [
+    {
+      "module": "json",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "os",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "subprocess",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "hashlib",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "datetime",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "datetime",
+          "alias": "datetime"
+        }
+      ]
+    },
+    {
+      "module": "pathlib",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Path",
+          "alias": "Path"
+        }
+      ]
+    },
+    {
+      "module": "typing",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Any",
+          "alias": "Any"
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "seal_compute",
+      "type": "module",
+      "label": "seal_compute",
+      "metrics": {
+        "fanIn": 13,
+        "fanOut": 7,
+        "instability": 0.35,
+        "internalEdges": 3,
+        "externalCallCount": 9,
+        "localCallCount": 0,
+        "callsByCategory": {
+          "stdlib": 9
+        },
+        "localDependencies": []
+      }
+    },
+    {
+      "id": "seal_compute.loadBlueprint",
+      "type": "function",
+      "label": "loadBlueprint",
+      "direction": "inbound",
+      "parent": "seal_compute",
+      "line": 14,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "seal_compute.auditTrinity",
+      "type": "function",
+      "label": "auditTrinity",
+      "direction": "inbound",
+      "parent": "seal_compute",
+      "line": 31,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "seal_compute.auditFlange",
+      "type": "function",
+      "label": "auditFlange",
+      "direction": "inbound",
+      "parent": "seal_compute",
+      "line": 137,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "seal_compute.generateTla",
+      "type": "function",
+      "label": "generateTla",
+      "direction": "inbound",
+      "parent": "seal_compute",
+      "line": 191,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "seal_compute.runTlc",
+      "type": "function",
+      "label": "runTlc",
+      "direction": "inbound",
+      "parent": "seal_compute",
+      "line": 376,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "seal_compute.runTlaps",
+      "type": "function",
+      "label": "runTlaps",
+      "direction": "inbound",
+      "parent": "seal_compute",
+      "line": 448,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "seal_compute.generateCertificate",
+      "type": "function",
+      "label": "generateCertificate",
+      "direction": "inbound",
+      "parent": "seal_compute",
+      "line": 509,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "seal_compute.resetContext",
+      "type": "function",
+      "label": "resetContext",
+      "direction": "inbound",
+      "parent": "seal_compute",
+      "line": 576,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "seal_compute.checkTrinityValid",
+      "type": "function",
+      "label": "checkTrinityValid",
+      "direction": "inbound",
+      "parent": "seal_compute",
+      "line": 591,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "seal_compute.checkFlangeValid",
+      "type": "function",
+      "label": "checkFlangeValid",
+      "direction": "inbound",
+      "parent": "seal_compute",
+      "line": 597,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "seal_compute.checkTlcPassed",
+      "type": "function",
+      "label": "checkTlcPassed",
+      "direction": "inbound",
+      "parent": "seal_compute",
+      "line": 603,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "seal_compute.checkTlapsPassed",
+      "type": "function",
+      "label": "checkTlapsPassed",
+      "direction": "inbound",
+      "parent": "seal_compute",
+      "line": 609,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "seal_compute.tlaStr",
+      "type": "function",
+      "label": "tlaStr",
+      "direction": "inbound",
+      "parent": "seal_compute",
+      "line": 212,
+      "signature": "(s)"
+    },
+    {
+      "id": "json",
+      "type": "dependency",
+      "label": "json",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "os",
+      "type": "dependency",
+      "label": "os",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "subprocess",
+      "type": "dependency",
+      "label": "subprocess",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "hashlib",
+      "type": "dependency",
+      "label": "hashlib",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "datetime",
+      "type": "dependency",
+      "label": "datetime",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "pathlib",
+      "type": "dependency",
+      "label": "pathlib",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "typing",
+      "type": "dependency",
+      "label": "typing",
+      "direction": "outbound",
+      "category": "stdlib"
+    }
+  ],
+  "edges": [
+    {
+      "from": "seal_compute.generateTla",
+      "to": "seal_compute.tlaStr",
+      "type": "internal",
+      "line": 227
+    },
+    {
+      "from": "seal_compute.generateTla",
+      "to": "seal_compute.tlaStr",
+      "type": "internal",
+      "line": 228
+    },
+    {
+      "from": "seal_compute.generateTla",
+      "to": "seal_compute.tlaStr",
+      "type": "internal",
+      "line": 229
+    },
+    {
+      "from": "seal_compute.loadBlueprint",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 21
+    },
+    {
+      "from": "seal_compute.generateTla",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 347
+    },
+    {
+      "from": "seal_compute.runTlc",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 393
+    },
+    {
+      "from": "seal_compute.runTlc",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 394
+    },
+    {
+      "from": "seal_compute.runTlc",
+      "to": "subprocess",
+      "type": "external",
+      "category": "stdlib",
+      "line": 396
+    },
+    {
+      "from": "seal_compute.runTlaps",
+      "to": "subprocess",
+      "type": "external",
+      "category": "stdlib",
+      "line": 467
+    },
+    {
+      "from": "seal_compute.generateCertificate",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 518
+    },
+    {
+      "from": "seal_compute.generateCertificate",
+      "to": "hashlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 519
+    },
+    {
+      "from": "seal_compute.generateCertificate",
+      "to": "datetime",
+      "type": "external",
+      "category": "stdlib",
+      "line": 535
+    }
+  ],
+  "coupling": {
+    "fanIn": 13,
+    "fanOut": 7,
+    "instability": 0.35,
+    "internalEdges": 3,
+    "externalCallCount": 9,
+    "localCallCount": 0,
+    "callsByCategory": {
+      "stdlib": 9
+    },
+    "localDependencies": []
+  }
+}
