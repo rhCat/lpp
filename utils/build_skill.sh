@@ -17,6 +17,7 @@ INT_MAX=5
 MAX_HISTORY=3
 DO_VALIDATE=false
 DO_MERMAID=false
+DO_GRAPH=false
 
 usage() {
     cat << EOF
@@ -30,6 +31,7 @@ Arguments:
 Options:
     --validate, -v  Run TLA+ validation
     --mermaid, -m   Generate Mermaid diagram
+    --graph, -g     Generate interactive HTML graph visualization
     --int-min N     TLA+ int minimum (default: $INT_MIN)
     --int-max N     TLA+ int maximum (default: $INT_MAX)
     --history N     TLA+ history depth (default: $MAX_HISTORY)
@@ -38,12 +40,13 @@ Options:
 Examples:
     $0 llm_assistant
     $0 llm_assistant --validate --mermaid
-    $0 llm_assistant -v --int-min -1 --int-max 1
+    $0 llm_assistant -v -g --int-min -1 --int-max 1
 
 Pipeline Steps:
     1. COMPILE   - Compile {skill}.json to results/{skill}_compiled.py
     2. VERIFY    - Generate TLA+ spec and optionally validate with TLC
     3. DOCUMENT  - Generate Mermaid diagram (with -m flag)
+    4. VISUALIZE - Generate interactive HTML graph (with -g flag)
 EOF
     exit 0
 }
@@ -60,6 +63,7 @@ while [ $# -gt 0 ]; do
     case "$1" in
         --validate|-v) DO_VALIDATE=true ;;
         --mermaid|-m) DO_MERMAID=true ;;
+        --graph|-g) DO_GRAPH=true ;;
         --int-min) INT_MIN="$2"; shift ;;
         --int-max) INT_MAX="$2"; shift ;;
         --history) MAX_HISTORY="$2"; shift ;;
@@ -194,7 +198,54 @@ print(result['mermaid'])
 "
 else
     echo ""
-    echo "[3/3] DOCUMENT - Skipped (use -m to generate Mermaid)"
+    echo "[3/4] DOCUMENT - Skipped (use -m to generate Mermaid)"
+fi
+
+# Step 4: VISUALIZE - Generate interactive HTML graph
+if [ "$DO_GRAPH" = true ]; then
+    echo ""
+    echo "[4/4] VISUALIZE - Generating interactive HTML graph..."
+    PYTHONPATH="$SRC_DIR:$PYTHONPATH" python3 -c "
+import json
+import sys
+sys.path.insert(0, '$SCRIPT_DIR/graph_visualizer/src')
+from graph_visualizer_compute import process
+
+with open('$BLUEPRINT') as f:
+    bp_str = f.read()
+
+result = process({
+    'blueprint': bp_str,
+    'html_path': '$SKILL_PATH/results/${SKILL_NAME}_graph.html'
+})
+
+if result.get('has_html'):
+    print('      Output: results/${SKILL_NAME}_graph.html')
+else:
+    print('      Error:', result.get('error', 'Unknown error'))
+    exit(1)
+"
+
+    # Update README with graph link if README exists
+    if [ -f "$SKILL_PATH/README.md" ]; then
+        # Check if graph section already exists
+        if ! grep -q "## State Machine Visualization" "$SKILL_PATH/README.md"; then
+            echo "" >> "$SKILL_PATH/README.md"
+            echo "## State Machine Visualization" >> "$SKILL_PATH/README.md"
+            echo "" >> "$SKILL_PATH/README.md"
+            echo "Interactive state machine diagram: [${SKILL_NAME}_graph.html](results/${SKILL_NAME}_graph.html)" >> "$SKILL_PATH/README.md"
+            echo "" >> "$SKILL_PATH/README.md"
+            echo "Open the HTML file in a browser for:" >> "$SKILL_PATH/README.md"
+            echo "- Zoom/pan navigation" >> "$SKILL_PATH/README.md"
+            echo "- Click nodes to highlight connections" >> "$SKILL_PATH/README.md"
+            echo "- Hover for gate conditions" >> "$SKILL_PATH/README.md"
+            echo "- Multiple layout options (hierarchical, horizontal, circular, grid)" >> "$SKILL_PATH/README.md"
+            echo "      Updated: README.md with visualization link"
+        fi
+    fi
+else
+    echo ""
+    echo "[4/4] VISUALIZE - Skipped (use -g to generate HTML graph)"
 fi
 
 echo ""
