@@ -1,0 +1,306 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>Awaiting target assignment"]):::entry
+    state_planning(["<b>planning</b><br/>Decomposing target into steps (L++ workflow if is_lpp_target)"])
+    state_error(["<b>error</b><br/>Error occurred"])
+    state_executing(["<b>executing</b><br/>LLM generating step output"])
+    state_complete(["<b>complete</b><br/>Target achieved"]):::terminal
+    state_refining(["<b>refining</b><br/>Refining plan based on feedback"])
+    state_reviewing(["<b>reviewing</b><br/>Reviewing failed step - skip or replan"])
+    state_parsing(["<b>parsing</b><br/>Parsing LLM output and applying auto-corrections for schema compliance"])
+    state_evaluating(["<b>evaluating</b><br/>Self-evaluating progress (includes L++ compliance check)"])
+    state_stepping(["<b>stepping</b><br/>Advancing to next step"])
+    state_correcting(["<b>correcting</b><br/>Auto-corrections applied - logging for review (auto-approved unless critical)"])
+    state_validating(["<b>validating</b><br/>Validating L++ artifacts with build_skill.sh"])
+    state_eval_interactive(["<b>eval_interactive</b><br/>Evaluating generated interactive.py with syntax and import checks"])
+    act_t_0_0[["init"]]
+    state_idle -- "START" --> act_t_0_0
+    act_t_0_0 --> state_idle
+    gate_t_1_0{{"can_submit?"}}
+    state_idle -- "SUBMIT" --> gate_t_1_0
+    act_t_1_0[["set_target, detect_lpp_target, decompose"]]
+    gate_t_1_0 -- True --> act_t_1_0
+    act_t_1_0 --> state_planning
+    gate_t_2_0{{"has_plan, no_error?"}}
+    state_planning -- "DONE" --> gate_t_2_0
+    act_t_2_0[["generate_step_output"]]
+    gate_t_2_0 -- True --> act_t_2_0
+    act_t_2_0 --> state_executing
+    gate_t_3_0{{"has_error?"}}
+    state_planning -- "DONE" --> gate_t_3_0
+    act_t_3_0[["capture_error_feedback"]]
+    gate_t_3_0 -- True --> act_t_3_0
+    act_t_3_0 --> state_error
+    gate_t_4_0{{"has_raw_output, no_error?"}}
+    state_executing -- "DONE" --> gate_t_4_0
+    act_t_4_0[["parse_and_sanitize"]]
+    gate_t_4_0 -- True --> act_t_4_0
+    act_t_4_0 --> state_parsing
+    gate_t_5_0{{"has_error?"}}
+    state_executing -- "DONE" --> gate_t_5_0
+    act_t_5_0[["capture_step_error"]]
+    gate_t_5_0 -- True --> act_t_5_0
+    act_t_5_0 --> state_error
+    gate_t_6_0{{"output_valid, has_corrections, has_more_steps?"}}
+    state_parsing -- "DONE" --> gate_t_6_0
+    act_t_6_0[["log_corrections"]]
+    gate_t_6_0 -- True --> act_t_6_0
+    act_t_6_0 --> state_correcting
+    gate_t_7_0{{"output_valid, no_corrections, has_more_steps?"}}
+    state_parsing -- "DONE" --> gate_t_7_0
+    act_t_7_0[["write_output, reset_repair"]]
+    gate_t_7_0 -- True --> act_t_7_0
+    act_t_7_0 --> state_stepping
+    gate_t_8_0{{"output_valid, has_corrections, all_steps_done, is_lpp_target, in_blueprint_phase?"}}
+    state_parsing -- "DONE" --> gate_t_8_0
+    act_t_8_0[["log_corrections"]]
+    gate_t_8_0 -- True --> act_t_8_0
+    act_t_8_0 --> state_correcting
+    gate_t_9_0{{"output_valid, no_corrections, all_steps_done, is_lpp_target, in_blueprint_phase?"}}
+    state_parsing -- "DONE" --> gate_t_9_0
+    act_t_9_0[["write_output, reset_repair, validate_lpp"]]
+    gate_t_9_0 -- True --> act_t_9_0
+    act_t_9_0 --> state_validating
+    gate_t_10_0{{"output_valid, has_corrections, all_steps_done, is_lpp_target, in_implementation_phase?"}}
+    state_parsing -- "DONE" --> gate_t_10_0
+    act_t_10_0[["log_corrections"]]
+    gate_t_10_0 -- True --> act_t_10_0
+    act_t_10_0 --> state_correcting
+    gate_t_11_0{{"output_valid, no_corrections, all_steps_done, is_lpp_target, in_implementation_phase?"}}
+    state_parsing -- "DONE" --> gate_t_11_0
+    act_t_11_0[["write_output, reset_repair, validate_lpp"]]
+    gate_t_11_0 -- True --> act_t_11_0
+    act_t_11_0 --> state_validating
+    gate_t_12_0{{"output_valid, has_corrections, all_steps_done, not_lpp_target?"}}
+    state_parsing -- "DONE" --> gate_t_12_0
+    act_t_12_0[["log_corrections"]]
+    gate_t_12_0 -- True --> act_t_12_0
+    act_t_12_0 --> state_correcting
+    gate_t_13_0{{"output_valid, no_corrections, all_steps_done, not_lpp_target?"}}
+    state_parsing -- "DONE" --> gate_t_13_0
+    act_t_13_0[["write_output, reset_repair, evaluate"]]
+    gate_t_13_0 -- True --> act_t_13_0
+    act_t_13_0 --> state_evaluating
+    gate_t_14_0{{"corrections_approved, has_more_steps?"}}
+    state_correcting -- "DONE" --> gate_t_14_0
+    act_t_14_0[["write_output, reset_repair"]]
+    gate_t_14_0 -- True --> act_t_14_0
+    act_t_14_0 --> state_stepping
+    gate_t_15_0{{"corrections_approved, all_steps_done, is_lpp_target, in_blueprint_phase?"}}
+    state_correcting -- "DONE" --> gate_t_15_0
+    act_t_15_0[["write_output, reset_repair, validate_lpp"]]
+    gate_t_15_0 -- True --> act_t_15_0
+    act_t_15_0 --> state_validating
+    gate_t_16_0{{"corrections_approved, all_steps_done, is_lpp_target, in_implementation_phase?"}}
+    state_correcting -- "DONE" --> gate_t_16_0
+    act_t_16_0[["write_output, reset_repair, validate_lpp"]]
+    gate_t_16_0 -- True --> act_t_16_0
+    act_t_16_0 --> state_validating
+    gate_t_17_0{{"corrections_approved, all_steps_done, not_lpp_target?"}}
+    state_correcting -- "DONE" --> gate_t_17_0
+    act_t_17_0[["write_output, reset_repair, evaluate"]]
+    gate_t_17_0 -- True --> act_t_17_0
+    act_t_17_0 --> state_evaluating
+    gate_t_18_0{{"output_invalid, can_repair?"}}
+    state_parsing -- "DONE" --> gate_t_18_0
+    act_t_18_0[["capture_parse_error, incr_repair, generate_step_output"]]
+    gate_t_18_0 -- True --> act_t_18_0
+    act_t_18_0 --> state_executing
+    gate_t_19_0{{"output_invalid, max_repairs_reached?"}}
+    state_parsing -- "DONE" --> gate_t_19_0
+    act_t_19_0[["capture_step_error"]]
+    gate_t_19_0 -- True --> act_t_19_0
+    act_t_19_0 --> state_error
+    gate_t_20_0{{"has_more_steps, no_error?"}}
+    state_stepping -- "DONE" --> gate_t_20_0
+    act_t_20_0[["advance_step, reset_step_error_count, reset_repair, clear_parse_error, generate_step_output"]]
+    gate_t_20_0 -- True --> act_t_20_0
+    act_t_20_0 --> state_executing
+    gate_t_21_0{{"all_steps_done, no_error, is_lpp_target, in_blueprint_phase?"}}
+    state_stepping -- "DONE" --> gate_t_21_0
+    act_t_21_0[["validate_lpp"]]
+    gate_t_21_0 -- True --> act_t_21_0
+    act_t_21_0 --> state_validating
+    gate_t_22_0{{"all_steps_done, no_error, is_lpp_target, in_implementation_phase?"}}
+    state_stepping -- "DONE" --> gate_t_22_0
+    act_t_22_0[["validate_lpp"]]
+    gate_t_22_0 -- True --> act_t_22_0
+    act_t_22_0 --> state_validating
+    gate_t_23_0{{"all_steps_done, no_error, not_lpp_target?"}}
+    state_stepping -- "DONE" --> gate_t_23_0
+    act_t_23_0[["evaluate"]]
+    gate_t_23_0 -- True --> act_t_23_0
+    act_t_23_0 --> state_evaluating
+    gate_t_24_0{{"has_error?"}}
+    state_stepping -- "DONE" --> gate_t_24_0
+    act_t_24_0[["capture_error_feedback"]]
+    gate_t_24_0 -- True --> act_t_24_0
+    act_t_24_0 --> state_error
+    gate_t_25_0{{"blueprint_validated, no_error, in_blueprint_phase?"}}
+    state_validating -- "DONE" --> gate_t_25_0
+    act_t_25_0[["advance_phase, decompose"]]
+    gate_t_25_0 -- True --> act_t_25_0
+    act_t_25_0 --> state_planning
+    gate_t_26_0{{"lpp_valid, no_error, in_implementation_phase?"}}
+    state_validating -- "DONE" --> gate_t_26_0
+    act_t_26_0[["evaluate_interactive"]]
+    gate_t_26_0 -- True --> act_t_26_0
+    act_t_26_0 --> state_eval_interactive
+    gate_t_27_0{{"interactive_valid, no_error?"}}
+    state_eval_interactive -- "DONE" --> gate_t_27_0
+    act_t_27_0[["evaluate"]]
+    gate_t_27_0 -- True --> act_t_27_0
+    act_t_27_0 --> state_evaluating
+    gate_t_28_0{{"interactive_invalid, within_iterations?"}}
+    state_eval_interactive -- "DONE" --> gate_t_28_0
+    act_t_28_0[["copy_interactive_feedback, incr_iteration, reset_for_refine"]]
+    gate_t_28_0 -- True --> act_t_28_0
+    act_t_28_0 --> state_refining
+    gate_t_29_0{{"interactive_invalid, max_iterations_reached?"}}
+    state_eval_interactive -- "DONE" --> gate_t_29_0
+    act_t_29_0[["evaluate"]]
+    gate_t_29_0 -- True --> act_t_29_0
+    act_t_29_0 --> state_evaluating
+    gate_t_30_0{{"has_error?"}}
+    state_eval_interactive -- "DONE" --> gate_t_30_0
+    act_t_30_0[["capture_error_feedback"]]
+    gate_t_30_0 -- True --> act_t_30_0
+    act_t_30_0 --> state_error
+    gate_t_31_0{{"blueprint_not_validated, within_iterations, in_blueprint_phase?"}}
+    state_validating -- "DONE" --> gate_t_31_0
+    act_t_31_0[["incr_iteration, reset_for_refine"]]
+    gate_t_31_0 -- True --> act_t_31_0
+    act_t_31_0 --> state_refining
+    gate_t_32_0{{"lpp_invalid, within_iterations, in_implementation_phase?"}}
+    state_validating -- "DONE" --> gate_t_32_0
+    act_t_32_0[["incr_iteration, reset_for_refine"]]
+    gate_t_32_0 -- True --> act_t_32_0
+    act_t_32_0 --> state_refining
+    gate_t_33_0{{"lpp_invalid, max_iterations_reached?"}}
+    state_validating -- "DONE" --> gate_t_33_0
+    act_t_33_0[["evaluate"]]
+    gate_t_33_0 -- True --> act_t_33_0
+    act_t_33_0 --> state_evaluating
+    gate_t_34_0{{"has_error?"}}
+    state_validating -- "DONE" --> gate_t_34_0
+    act_t_34_0[["capture_error_feedback"]]
+    gate_t_34_0 -- True --> act_t_34_0
+    act_t_34_0 --> state_error
+    gate_t_35_0{{"is_satisfied, lpp_ok, no_error?"}}
+    state_evaluating -- "DONE" --> gate_t_35_0
+    gate_t_35_0 -- True --> state_complete
+    gate_t_36_0{{"is_satisfied, lpp_invalid, within_iterations, no_error?"}}
+    state_evaluating -- "DONE" --> gate_t_36_0
+    act_t_36_0[["incr_iteration, reset_for_refine"]]
+    gate_t_36_0 -- True --> act_t_36_0
+    act_t_36_0 --> state_refining
+    gate_t_37_0{{"not_satisfied, within_iterations, no_error?"}}
+    state_evaluating -- "DONE" --> gate_t_37_0
+    act_t_37_0[["incr_iteration, reset_for_refine"]]
+    gate_t_37_0 -- True --> act_t_37_0
+    act_t_37_0 --> state_refining
+    gate_t_38_0{{"max_iterations_reached, lpp_ok?"}}
+    state_evaluating -- "DONE" --> gate_t_38_0
+    gate_t_38_0 -- True --> state_complete
+    gate_t_39_0{{"max_iterations_reached, lpp_invalid?"}}
+    state_evaluating -- "DONE" --> gate_t_39_0
+    act_t_39_0[["set_lpp_hard_fail, capture_error_feedback"]]
+    gate_t_39_0 -- True --> act_t_39_0
+    act_t_39_0 --> state_error
+    gate_t_40_0{{"has_error?"}}
+    state_evaluating -- "DONE" --> gate_t_40_0
+    act_t_40_0[["capture_error_feedback"]]
+    gate_t_40_0 -- True --> act_t_40_0
+    act_t_40_0 --> state_error
+    gate_t_41_0{{"no_error?"}}
+    state_refining -- "DONE" --> gate_t_41_0
+    act_t_41_0[["decompose"]]
+    gate_t_41_0 -- True --> act_t_41_0
+    act_t_41_0 --> state_planning
+    gate_t_42_0{{"has_error?"}}
+    state_refining -- "DONE" --> gate_t_42_0
+    act_t_42_0[["capture_error_feedback"]]
+    gate_t_42_0 -- True --> act_t_42_0
+    act_t_42_0 --> state_error
+    gate_t_43_0{{"step_can_retry, has_plan?"}}
+    state_error -- "DONE" --> gate_t_43_0
+    act_t_43_0[["clear_error, reset_repair, generate_step_output"]]
+    gate_t_43_0 -- True --> act_t_43_0
+    act_t_43_0 --> state_executing
+    gate_t_44_0{{"no_plan, within_iterations?"}}
+    state_error -- "DONE" --> gate_t_44_0
+    act_t_44_0[["clear_error, incr_iteration, reset_for_refine"]]
+    gate_t_44_0 -- True --> act_t_44_0
+    act_t_44_0 --> state_refining
+    gate_t_45_0{{"no_plan, max_iterations_reached?"}}
+    state_error -- "DONE" --> gate_t_45_0
+    gate_t_45_0 -- True --> state_complete
+    gate_t_46_0{{"step_max_errors?"}}
+    state_error -- "DONE" --> gate_t_46_0
+    act_t_46_0[["clear_error, review_failed_step"]]
+    gate_t_46_0 -- True --> act_t_46_0
+    act_t_46_0 --> state_reviewing
+    gate_t_47_0{{"max_iterations_reached, has_plan?"}}
+    state_error -- "DONE" --> gate_t_47_0
+    gate_t_47_0 -- True --> state_complete
+    gate_t_48_0{{"too_many_failed_steps?"}}
+    state_reviewing -- "DONE" --> gate_t_48_0
+    act_t_48_0[["evaluate"]]
+    gate_t_48_0 -- True --> act_t_48_0
+    act_t_48_0 --> state_evaluating
+    gate_t_49_0{{"review_skip, has_more_steps?"}}
+    state_reviewing -- "DONE" --> gate_t_49_0
+    act_t_49_0[["reset_repair, skip_to_next_step"]]
+    gate_t_49_0 -- True --> act_t_49_0
+    act_t_49_0 --> state_stepping
+    gate_t_50_0{{"review_skip, all_steps_done?"}}
+    state_reviewing -- "DONE" --> gate_t_50_0
+    act_t_50_0[["evaluate"]]
+    gate_t_50_0 -- True --> act_t_50_0
+    act_t_50_0 --> state_evaluating
+    gate_t_51_0{{"review_replan, within_iterations?"}}
+    state_reviewing -- "DONE" --> gate_t_51_0
+    act_t_51_0[["incr_iteration, reset_for_refine"]]
+    gate_t_51_0 -- True --> act_t_51_0
+    act_t_51_0 --> state_refining
+    gate_t_52_0{{"review_replan, max_iterations_reached?"}}
+    state_reviewing -- "DONE" --> gate_t_52_0
+    act_t_52_0[["evaluate"]]
+    gate_t_52_0 -- True --> act_t_52_0
+    act_t_52_0 --> state_evaluating
+    gate_t_53_0{{"review_invalid, has_more_steps?"}}
+    state_reviewing -- "DONE" --> gate_t_53_0
+    act_t_53_0[["reset_repair, skip_to_next_step"]]
+    gate_t_53_0 -- True --> act_t_53_0
+    act_t_53_0 --> state_stepping
+    gate_t_54_0{{"review_invalid, all_steps_done?"}}
+    state_reviewing -- "DONE" --> gate_t_54_0
+    act_t_54_0[["evaluate"]]
+    gate_t_54_0 -- True --> act_t_54_0
+    act_t_54_0 --> state_evaluating
+    gate_t_55_0{{"no_plan, within_iterations?"}}
+    state_reviewing -- "DONE" --> gate_t_55_0
+    act_t_55_0[["incr_iteration, reset_for_refine"]]
+    gate_t_55_0 -- True --> act_t_55_0
+    act_t_55_0 --> state_refining
+    gate_t_56_0{{"no_plan, max_iterations_reached?"}}
+    state_reviewing -- "DONE" --> gate_t_56_0
+    gate_t_56_0 -- True --> state_complete
+    act_t_57_0[["clear_error, reset_error_count, reset_step_error_count, reset_repair"]]
+    state_error -- "RETRY" --> act_t_57_0
+    act_t_57_0 --> state_idle
+    state_idle -- "RESET" --> state_idle
+    state_planning -- "RESET" --> state_idle
+    state_error -- "RESET" --> state_idle
+    state_executing -- "RESET" --> state_idle
+    state_complete -- "RESET" --> state_idle
+    state_refining -- "RESET" --> state_idle
+    state_reviewing -- "RESET" --> state_idle
+    state_parsing -- "RESET" --> state_idle
+    state_evaluating -- "RESET" --> state_idle
+    state_stepping -- "RESET" --> state_idle
+    state_correcting -- "RESET" --> state_idle
+    state_validating -- "RESET" --> state_idle
+    state_eval_interactive -- "RESET" --> state_idle
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

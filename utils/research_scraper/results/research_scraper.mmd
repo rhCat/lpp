@@ -1,0 +1,44 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>Ready for search query"]):::entry
+    state_error(["<b>error</b><br/>Error occurred"])
+    state_hasResults(["<b>hasResults</b><br/>Results available"])
+    act_t_0_0[["setQuery, setMaxResults, setSourceArxiv, searchArxiv"]]
+    state_idle -- "SEARCH_ARXIV" --> act_t_0_0
+    act_t_0_0 --> state_hasResults
+    act_t_1_0[["setQuery, setMaxResults, setSourceScholar, searchSemanticScholar"]]
+    state_idle -- "SEARCH_SCHOLAR" --> act_t_1_0
+    act_t_1_0 --> state_hasResults
+    act_t_2_0[["setQuery, setMaxResults, setSourceWeb, searchWeb"]]
+    state_idle -- "SEARCH_WEB" --> act_t_2_0
+    act_t_2_0 --> state_hasResults
+    act_t_3_0[["setSelectedId, setSourceFromPayload, fetchDetail"]]
+    state_hasResults -- "SELECT" --> act_t_3_0
+    act_t_3_0 --> state_hasResults
+    act_t_4_0[["clearDetail, setQuery, setMaxResults, setSourceArxiv, searchArxiv"]]
+    state_hasResults -- "SEARCH_ARXIV" --> act_t_4_0
+    act_t_4_0 --> state_hasResults
+    act_t_5_0[["clearDetail, setQuery, setMaxResults, setSourceScholar, searchSemanticScholar"]]
+    state_hasResults -- "SEARCH_SCHOLAR" --> act_t_5_0
+    act_t_5_0 --> state_hasResults
+    act_t_6_0[["clearDetail, setQuery, setMaxResults, setSourceWeb, searchWeb"]]
+    state_hasResults -- "SEARCH_WEB" --> act_t_6_0
+    act_t_6_0 --> state_hasResults
+    act_t_7_0[["clearResults, clearDetail"]]
+    state_hasResults -- "CLEAR" --> act_t_7_0
+    act_t_7_0 --> state_idle
+    act_t_8_0[["clearError"]]
+    state_error -- "RETRY" --> act_t_8_0
+    act_t_8_0 --> state_idle
+    gate_t_9_0{{"hasError?"}}
+    state_idle -- "ERROR" --> gate_t_9_0
+    act_t_9_0[["log_error"]]
+    gate_t_9_0 -- True --> act_t_9_0
+    act_t_9_0 --> state_error
+    gate_t_10_0{{"hasError?"}}
+    state_hasResults -- "ERROR" --> gate_t_10_0
+    act_t_10_0[["log_error"]]
+    gate_t_10_0 -- True --> act_t_10_0
+    act_t_10_0 --> state_error
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

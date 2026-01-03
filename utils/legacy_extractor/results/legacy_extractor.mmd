@@ -1,0 +1,99 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>Awaiting source file or code input"]):::entry
+    state_loading(["<b>loading</b><br/>Loading source file from disk"])
+    state_error(["<b>error</b><br/>Extraction failed"])
+    state_parsing(["<b>parsing</b><br/>Parsing Python source into AST"])
+    state_detecting(["<b>detecting</b><br/>Detecting state machine patterns in code"])
+    state_extracting_states(["<b>extracting_states</b><br/>Extracting state definitions from code"])
+    state_extracting_transitions(["<b>extracting_transitions</b><br/>Extracting state transitions from methods"])
+    state_extracting_gates(["<b>extracting_gates</b><br/>Extracting gate conditions from if statements"])
+    state_extracting_actions(["<b>extracting_actions</b><br/>Extracting actions from side effects"])
+    state_analyzing_events(["<b>analyzing_events</b><br/>Analyzing event handler patterns"])
+    state_inferring_entry(["<b>inferring_entry</b><br/>Inferring entry and terminal states"])
+    state_generating(["<b>generating</b><br/>Generating L++ blueprint"])
+    state_mapping(["<b>mapping</b><br/>Generating source-to-blueprint mapping"])
+    state_complete(["<b>complete</b><br/>Extraction complete, blueprint ready"])
+    act_t_0_0[["setMode"]]
+    state_idle -- "SET_MODE" --> act_t_0_0
+    act_t_0_0 --> state_idle
+    gate_t_1_0{{"hasFilePath?"}}
+    state_idle -- "EXTRACT" --> gate_t_1_0
+    act_t_1_0[["loadSource"]]
+    gate_t_1_0 -- True --> act_t_1_0
+    act_t_1_0 --> state_loading
+    gate_t_2_0{{"hasError?"}}
+    state_loading -- "AUTO" --> gate_t_2_0
+    gate_t_2_0 -- True --> state_error
+    gate_t_3_0{{"hasSourceCode, noError?"}}
+    state_loading -- "AUTO" --> gate_t_3_0
+    act_t_3_0[["parseAst"]]
+    gate_t_3_0 -- True --> act_t_3_0
+    act_t_3_0 --> state_parsing
+    gate_t_4_0{{"hasError?"}}
+    state_parsing -- "AUTO" --> gate_t_4_0
+    gate_t_4_0 -- True --> state_error
+    gate_t_5_0{{"hasAst, noError?"}}
+    state_parsing -- "AUTO" --> gate_t_5_0
+    act_t_5_0[["findStatePatterns"]]
+    gate_t_5_0 -- True --> act_t_5_0
+    act_t_5_0 --> state_detecting
+    gate_t_6_0{{"hasPatterns?"}}
+    state_detecting -- "AUTO" --> gate_t_6_0
+    act_t_6_0[["extractStates"]]
+    gate_t_6_0 -- True --> act_t_6_0
+    act_t_6_0 --> state_extracting_states
+    gate_t_7_0{{"hasStates?"}}
+    state_extracting_states -- "AUTO" --> gate_t_7_0
+    act_t_7_0[["extractTransitions"]]
+    gate_t_7_0 -- True --> act_t_7_0
+    act_t_7_0 --> state_extracting_transitions
+    gate_t_8_0{{"hasTransitions?"}}
+    state_extracting_transitions -- "AUTO" --> gate_t_8_0
+    act_t_8_0[["extractGates"]]
+    gate_t_8_0 -- True --> act_t_8_0
+    act_t_8_0 --> state_extracting_gates
+    gate_t_9_0{{"hasGates?"}}
+    state_extracting_gates -- "AUTO" --> gate_t_9_0
+    act_t_9_0[["extractActions"]]
+    gate_t_9_0 -- True --> act_t_9_0
+    act_t_9_0 --> state_extracting_actions
+    gate_t_10_0{{"hasActions?"}}
+    state_extracting_actions -- "AUTO" --> gate_t_10_0
+    act_t_10_0[["analyzeEventHandlers"]]
+    gate_t_10_0 -- True --> act_t_10_0
+    act_t_10_0 --> state_analyzing_events
+    gate_t_11_0{{"hasEvents?"}}
+    state_analyzing_events -- "AUTO" --> gate_t_11_0
+    act_t_11_0[["inferEntryState"]]
+    gate_t_11_0 -- True --> act_t_11_0
+    act_t_11_0 --> state_inferring_entry
+    gate_t_12_0{{"hasEntryState?"}}
+    state_inferring_entry -- "AUTO" --> gate_t_12_0
+    act_t_12_0[["generateBlueprint"]]
+    gate_t_12_0 -- True --> act_t_12_0
+    act_t_12_0 --> state_generating
+    gate_t_13_0{{"hasBlueprint?"}}
+    state_generating -- "AUTO" --> gate_t_13_0
+    act_t_13_0[["generateMapping"]]
+    gate_t_13_0 -- True --> act_t_13_0
+    act_t_13_0 --> state_mapping
+    gate_t_14_0{{"hasMapping?"}}
+    state_mapping -- "AUTO" --> gate_t_14_0
+    gate_t_14_0 -- True --> state_complete
+    gate_t_15_0{{"hasBlueprint?"}}
+    state_complete -- "EXPORT_BLUEPRINT" --> gate_t_15_0
+    act_t_15_0[["exportBlueprint"]]
+    gate_t_15_0 -- True --> act_t_15_0
+    act_t_15_0 --> state_complete
+    act_t_16_0[["exportReport"]]
+    state_complete -- "EXPORT_REPORT" --> act_t_16_0
+    act_t_16_0 --> state_complete
+    act_t_17_0[["clearState"]]
+    state_complete -- "RESET" --> act_t_17_0
+    act_t_17_0 --> state_idle
+    act_t_18_0[["clearError, clearState"]]
+    state_error -- "RESET" --> act_t_18_0
+    act_t_18_0 --> state_idle
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

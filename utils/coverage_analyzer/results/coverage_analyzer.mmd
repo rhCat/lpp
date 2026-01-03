@@ -1,0 +1,164 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>No blueprint loaded, waiting for input"]):::entry
+    state_error(["<b>error</b><br/>Error state"])
+    state_loaded(["<b>loaded</b><br/>Blueprint loaded, coverage tracking initialized"])
+    state_analyzing(["<b>analyzing</b><br/>Computing coverage metrics"])
+    state_tracking(["<b>tracking</b><br/>Actively tracking coverage data"])
+    state_reporting(["<b>reporting</b><br/>Generating reports"])
+    gate_t_0_0{{"no_blueprint?"}}
+    state_idle -- "LOAD" --> gate_t_0_0
+    act_t_0_0[["load_blueprint, init_coverage"]]
+    gate_t_0_0 -- True --> act_t_0_0
+    act_t_0_0 --> state_loaded
+    act_t_1_0[["clear_all, load_blueprint, init_coverage"]]
+    state_loaded -- "LOAD" --> act_t_1_0
+    act_t_1_0 --> state_loaded
+    act_t_2_0[["clear_all, load_blueprint, init_coverage"]]
+    state_tracking -- "LOAD" --> act_t_2_0
+    act_t_2_0 --> state_loaded
+    act_t_3_0[["clear_all, load_blueprint, init_coverage"]]
+    state_analyzing -- "LOAD" --> act_t_3_0
+    act_t_3_0 --> state_loaded
+    act_t_4_0[["clear_all, load_blueprint, init_coverage"]]
+    state_reporting -- "LOAD" --> act_t_4_0
+    act_t_4_0 --> state_loaded
+    gate_t_5_0{{"has_blueprint?"}}
+    state_loaded -- "START" --> gate_t_5_0
+    gate_t_5_0 -- True --> state_tracking
+    act_t_6_0[["record_state"]]
+    state_tracking -- "STATE" --> act_t_6_0
+    act_t_6_0 --> state_tracking
+    act_t_7_0[["record_transition"]]
+    state_tracking -- "TRANSITION" --> act_t_7_0
+    act_t_7_0 --> state_tracking
+    act_t_8_0[["record_gate"]]
+    state_tracking -- "GATE" --> act_t_8_0
+    act_t_8_0 --> state_tracking
+    act_t_9_0[["record_action"]]
+    state_tracking -- "ACTION" --> act_t_9_0
+    act_t_9_0 --> state_tracking
+    act_t_10_0[["record_event"]]
+    state_tracking -- "EVENT" --> act_t_10_0
+    act_t_10_0 --> state_tracking
+    gate_t_11_0{{"has_blueprint, can_import?"}}
+    state_loaded -- "IMPORT" --> gate_t_11_0
+    act_t_11_0[["import_trace"]]
+    gate_t_11_0 -- True --> act_t_11_0
+    act_t_11_0 --> state_tracking
+    gate_t_12_0{{"can_import?"}}
+    state_tracking -- "IMPORT" --> gate_t_12_0
+    act_t_12_0[["import_trace"]]
+    gate_t_12_0 -- True --> act_t_12_0
+    act_t_12_0 --> state_tracking
+    gate_t_13_0{{"has_coverage?"}}
+    state_tracking -- "ANALYZE" --> gate_t_13_0
+    act_t_13_0[["compute_metrics"]]
+    gate_t_13_0 -- True --> act_t_13_0
+    act_t_13_0 --> state_analyzing
+    gate_t_14_0{{"has_blueprint?"}}
+    state_loaded -- "ANALYZE" --> gate_t_14_0
+    act_t_14_0[["compute_metrics"]]
+    gate_t_14_0 -- True --> act_t_14_0
+    act_t_14_0 --> state_analyzing
+    gate_t_15_0{{"has_metrics?"}}
+    state_analyzing -- "SUMMARY" --> gate_t_15_0
+    act_t_15_0[["generate_summary"]]
+    gate_t_15_0 -- True --> act_t_15_0
+    act_t_15_0 --> state_reporting
+    gate_t_16_0{{"has_metrics?"}}
+    state_analyzing -- "DETAILED" --> gate_t_16_0
+    act_t_16_0[["generate_detailed"]]
+    gate_t_16_0 -- True --> act_t_16_0
+    act_t_16_0 --> state_reporting
+    gate_t_17_0{{"has_metrics?"}}
+    state_analyzing -- "GAP" --> gate_t_17_0
+    act_t_17_0[["generate_gap_report"]]
+    gate_t_17_0 -- True --> act_t_17_0
+    act_t_17_0 --> state_reporting
+    gate_t_18_0{{"has_metrics?"}}
+    state_analyzing -- "ALL_REPORTS" --> gate_t_18_0
+    act_t_18_0[["generate_summary, generate_detailed, generate_gap_report"]]
+    gate_t_18_0 -- True --> act_t_18_0
+    act_t_18_0 --> state_reporting
+    gate_t_19_0{{"has_metrics?"}}
+    state_reporting -- "EXPORT_HTML" --> gate_t_19_0
+    act_t_19_0[["export_html"]]
+    gate_t_19_0 -- True --> act_t_19_0
+    act_t_19_0 --> state_reporting
+    gate_t_20_0{{"has_metrics?"}}
+    state_analyzing -- "EXPORT_HTML" --> gate_t_20_0
+    act_t_20_0[["export_html"]]
+    gate_t_20_0 -- True --> act_t_20_0
+    act_t_20_0 --> state_reporting
+    gate_t_21_0{{"has_metrics?"}}
+    state_reporting -- "EXPORT_JSON" --> gate_t_21_0
+    act_t_21_0[["export_json"]]
+    gate_t_21_0 -- True --> act_t_21_0
+    act_t_21_0 --> state_reporting
+    gate_t_22_0{{"has_metrics?"}}
+    state_analyzing -- "EXPORT_JSON" --> gate_t_22_0
+    act_t_22_0[["export_json"]]
+    gate_t_22_0 -- True --> act_t_22_0
+    act_t_22_0 --> state_reporting
+    gate_t_23_0{{"has_metrics?"}}
+    state_reporting -- "SUMMARY" --> gate_t_23_0
+    act_t_23_0[["generate_summary"]]
+    gate_t_23_0 -- True --> act_t_23_0
+    act_t_23_0 --> state_reporting
+    gate_t_24_0{{"has_metrics?"}}
+    state_reporting -- "DETAILED" --> gate_t_24_0
+    act_t_24_0[["generate_detailed"]]
+    gate_t_24_0 -- True --> act_t_24_0
+    act_t_24_0 --> state_reporting
+    gate_t_25_0{{"has_metrics?"}}
+    state_reporting -- "GAP" --> gate_t_25_0
+    act_t_25_0[["generate_gap_report"]]
+    gate_t_25_0 -- True --> act_t_25_0
+    act_t_25_0 --> state_reporting
+    act_t_26_0[["reset_coverage"]]
+    state_tracking -- "RESET" --> act_t_26_0
+    act_t_26_0 --> state_loaded
+    act_t_27_0[["reset_coverage"]]
+    state_analyzing -- "RESET" --> act_t_27_0
+    act_t_27_0 --> state_loaded
+    act_t_28_0[["reset_coverage"]]
+    state_reporting -- "RESET" --> act_t_28_0
+    act_t_28_0 --> state_loaded
+    state_analyzing -- "BACK" --> state_tracking
+    state_reporting -- "BACK" --> state_analyzing
+    act_t_31_0[["clear_all"]]
+    state_loaded -- "UNLOAD" --> act_t_31_0
+    act_t_31_0 --> state_idle
+    act_t_32_0[["clear_all"]]
+    state_tracking -- "UNLOAD" --> act_t_32_0
+    act_t_32_0 --> state_idle
+    act_t_33_0[["clear_all"]]
+    state_analyzing -- "UNLOAD" --> act_t_33_0
+    act_t_33_0 --> state_idle
+    act_t_34_0[["clear_all"]]
+    state_reporting -- "UNLOAD" --> act_t_34_0
+    act_t_34_0 --> state_idle
+    act_t_35_0[["set_error"]]
+    state_idle -- "ERROR" --> act_t_35_0
+    act_t_35_0 --> state_error
+    act_t_35_1[["set_error"]]
+    state_error -- "ERROR" --> act_t_35_1
+    act_t_35_1 --> state_error
+    act_t_35_2[["set_error"]]
+    state_loaded -- "ERROR" --> act_t_35_2
+    act_t_35_2 --> state_error
+    act_t_35_3[["set_error"]]
+    state_analyzing -- "ERROR" --> act_t_35_3
+    act_t_35_3 --> state_error
+    act_t_35_4[["set_error"]]
+    state_tracking -- "ERROR" --> act_t_35_4
+    act_t_35_4 --> state_error
+    act_t_35_5[["set_error"]]
+    state_reporting -- "ERROR" --> act_t_35_5
+    act_t_35_5 --> state_error
+    act_t_36_0[["clear_error, clear_all"]]
+    state_error -- "CLEAR" --> act_t_36_0
+    act_t_36_0 --> state_idle
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

@@ -1,0 +1,15 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>Waiting for blueprint input"]):::entry
+    state_generating(["<b>generating</b><br/>Generating interactive diagram"])
+    state_done(["<b>done</b><br/>Diagram generation complete"]):::terminal
+    gate_t_0_0{{"has_blueprint?"}}
+    state_idle -- "start" --> gate_t_0_0
+    act_t_0_0[["set_html_path"]]
+    gate_t_0_0 -- True --> act_t_0_0
+    act_t_0_0 --> state_generating
+    act_t_1_0[["generate_diagram"]]
+    state_generating -- "generate" --> act_t_1_0
+    act_t_1_0 --> state_done
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

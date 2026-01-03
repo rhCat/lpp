@@ -1,0 +1,66 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_init(["<b>init</b><br/>Initial state, checking API configuration"]):::entry
+    state_error(["<b>error</b><br/>Error state - recoverable"])
+    state_ready(["<b>ready</b><br/>Configured and ready for queries"])
+    state_querying(["<b>querying</b><br/>Sending query to LLM API"])
+    gate_t_0_0{{"has_api_key?"}}
+    state_init -- "START" --> gate_t_0_0
+    act_t_0_0[["load_schema"]]
+    gate_t_0_0 -- True --> act_t_0_0
+    act_t_0_0 --> state_ready
+    gate_t_1_0{{"no_api_key?"}}
+    state_init -- "START" --> gate_t_1_0
+    gate_t_1_0 -- True --> state_error
+    act_t_2_0[["init_config"]]
+    state_init -- "CONFIGURE" --> act_t_2_0
+    act_t_2_0 --> state_init
+    act_t_2_1[["init_config"]]
+    state_error -- "CONFIGURE" --> act_t_2_1
+    act_t_2_1 --> state_init
+    act_t_2_2[["init_config"]]
+    state_ready -- "CONFIGURE" --> act_t_2_2
+    act_t_2_2 --> state_init
+    act_t_2_3[["init_config"]]
+    state_querying -- "CONFIGURE" --> act_t_2_3
+    act_t_2_3 --> state_init
+    act_t_3_0[["clear_error"]]
+    state_error -- "SET_KEY" --> act_t_3_0
+    act_t_3_0 --> state_init
+    act_t_4_0[["load_blueprint, clear_conversation"]]
+    state_ready -- "LOAD" --> act_t_4_0
+    act_t_4_0 --> state_ready
+    act_t_5_0[["set_query, query_llm"]]
+    state_ready -- "QUERY" --> act_t_5_0
+    act_t_5_0 --> state_querying
+    gate_t_6_0{{"has_blueprint?"}}
+    state_ready -- "EXPLAIN" --> gate_t_6_0
+    act_t_6_0[["explain_blueprint"]]
+    gate_t_6_0 -- True --> act_t_6_0
+    act_t_6_0 --> state_querying
+    gate_t_7_0{{"has_blueprint?"}}
+    state_ready -- "VALIDATE" --> gate_t_7_0
+    act_t_7_0[["validate_blueprint"]]
+    gate_t_7_0 -- True --> act_t_7_0
+    act_t_7_0 --> state_querying
+    gate_t_8_0{{"has_blueprint?"}}
+    state_ready -- "SUGGEST" --> gate_t_8_0
+    act_t_8_0[["suggest_improvements"]]
+    gate_t_8_0 -- True --> act_t_8_0
+    act_t_8_0 --> state_querying
+    gate_t_9_0{{"no_error?"}}
+    state_querying -- "DONE" --> gate_t_9_0
+    gate_t_9_0 -- True --> state_ready
+    gate_t_10_0{{"has_error?"}}
+    state_querying -- "DONE" --> gate_t_10_0
+    gate_t_10_0 -- True --> state_error
+    act_t_11_0[["clear_conversation, clear_blueprint"]]
+    state_ready -- "CLEAR" --> act_t_11_0
+    act_t_11_0 --> state_ready
+    gate_t_12_0{{"has_api_key?"}}
+    state_error -- "RETRY" --> gate_t_12_0
+    act_t_12_0[["clear_error"]]
+    gate_t_12_0 -- True --> act_t_12_0
+    act_t_12_0 --> state_ready
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

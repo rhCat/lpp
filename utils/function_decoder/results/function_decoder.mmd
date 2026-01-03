@@ -1,0 +1,53 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>Awaiting file path"]):::entry
+    state_parsing(["<b>parsing</b><br/>Parsing Python source into AST"])
+    state_error(["<b>error</b><br/>Analysis failed"])
+    state_extracting(["<b>extracting</b><br/>Extracting exports and imports"])
+    state_tracing(["<b>tracing</b><br/>Tracing function call graph"])
+    state_computing(["<b>computing</b><br/>Computing coupling metrics"])
+    state_complete(["<b>complete</b><br/>Module graph generated"])
+    gate_t_0_0{{"hasFilePath?"}}
+    state_idle -- "DECODE" --> gate_t_0_0
+    act_t_0_0[["loadFile, parseAst"]]
+    gate_t_0_0 -- True --> act_t_0_0
+    act_t_0_0 --> state_parsing
+    gate_t_1_0{{"hasError?"}}
+    state_parsing -- "AUTO" --> gate_t_1_0
+    gate_t_1_0 -- True --> state_error
+    gate_t_2_0{{"hasAst?"}}
+    state_parsing -- "AUTO" --> gate_t_2_0
+    act_t_2_0[["extractExports, extractImports"]]
+    gate_t_2_0 -- True --> act_t_2_0
+    act_t_2_0 --> state_extracting
+    gate_t_3_0{{"hasError?"}}
+    state_extracting -- "AUTO" --> gate_t_3_0
+    gate_t_3_0 -- True --> state_error
+    gate_t_4_0{{"hasExtracts?"}}
+    state_extracting -- "AUTO" --> gate_t_4_0
+    act_t_4_0[["traceInternalCalls, traceExternalCalls"]]
+    gate_t_4_0 -- True --> act_t_4_0
+    act_t_4_0 --> state_tracing
+    gate_t_5_0{{"hasError?"}}
+    state_tracing -- "AUTO" --> gate_t_5_0
+    gate_t_5_0 -- True --> state_error
+    gate_t_6_0{{"hasCalls?"}}
+    state_tracing -- "AUTO" --> gate_t_6_0
+    act_t_6_0[["computeCoupling"]]
+    gate_t_6_0 -- True --> act_t_6_0
+    act_t_6_0 --> state_computing
+    gate_t_7_0{{"hasError?"}}
+    state_computing -- "AUTO" --> gate_t_7_0
+    gate_t_7_0 -- True --> state_error
+    act_t_8_0[["generateModuleGraph"]]
+    state_computing -- "AUTO" --> act_t_8_0
+    act_t_8_0 --> state_complete
+    state_idle -- "RESET" --> state_idle
+    state_parsing -- "RESET" --> state_idle
+    state_error -- "RESET" --> state_idle
+    state_extracting -- "RESET" --> state_idle
+    state_tracing -- "RESET" --> state_idle
+    state_computing -- "RESET" --> state_idle
+    state_complete -- "RESET" --> state_idle
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

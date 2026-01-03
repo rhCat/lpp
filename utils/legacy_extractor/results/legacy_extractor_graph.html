@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Legacy Code State Machine Extractor - State Machine</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #1a1a2e; color: #eee; }
+h1 { color: #00d4ff; margin-bottom: 10px; }
+#container { display: flex; gap: 20px; }
+#graph { flex: 1; overflow: auto; }
+#info { width: 320px; background: #16213e; padding: 15px; border-radius: 8px; max-height: 90vh; overflow-y: auto; }
+svg { background: #0f0f23; border-radius: 8px; }
+.node { cursor: pointer; }
+.node-rect { rx: 8; ry: 8; transition: stroke 0.2s, stroke-width 0.2s; }
+.node-label { font-size: 12px; fill: #fff; text-anchor: middle; pointer-events: none; font-weight: bold; }
+.node-desc { font-size: 9px; fill: #aaa; text-anchor: middle; pointer-events: none; }
+.link { stroke-opacity: 0.7; fill: none; transition: stroke 0.2s, stroke-width 0.2s; }
+.link-label { font-size: 9px; fill: #aaa; pointer-events: none; text-anchor: middle; dominant-baseline: middle; }
+.link-label-bg { fill: #0f0f23; opacity: 0.85; }
+.gate-label { font-size: 8px; fill: #88aaff; pointer-events: none; font-style: italic; text-anchor: middle; }
+#tooltip { position: absolute; background: #16213e; border: 1px solid #00d4ff; padding: 10px; border-radius: 4px; pointer-events: none; display: none; max-width: 350px; z-index: 100; font-size: 12px; }
+.controls { margin-bottom: 10px; }
+.controls button { background: #4a4a8a; color: #fff; border: none; padding: 8px 16px; margin-right: 5px; margin-bottom: 5px; cursor: pointer; border-radius: 4px; font-size: 12px; }
+.controls button:hover { background: #5a5a9a; }
+.controls button.active { background: #00d4ff; color: #000; }
+.controls .btn-error { background: #8a4a4a; }
+.controls .btn-error:hover { background: #9a5a5a; }
+.controls .btn-error.active { background: #ff6b6b; color: #000; }
+.controls .btn-happy { background: #4a8a4a; }
+.controls .btn-happy:hover { background: #5a9a5a; }
+.controls .btn-happy.active { background: #6bff6b; color: #000; }
+.control-group { display: inline-block; margin-right: 15px; }
+.control-label { color: #888; font-size: 11px; margin-right: 5px; }
+.legend { margin-top: 20px; }
+.legend-item { display: flex; align-items: center; margin: 5px 0; font-size: 12px; }
+.legend-color { width: 20px; height: 20px; border-radius: 4px; margin-right: 10px; }
+h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
+#details { font-size: 12px; line-height: 1.5; }
+#flow-list { font-size: 11px; max-height: 300px; overflow-y: auto; }
+#flow-list div { padding: 3px 0; border-bottom: 1px solid #333; }
+</style>
+</head>
+<body>
+<h1>Legacy Code State Machine Extractor</h1>
+<div class="controls">
+  <span class="control-group">
+    <span class="control-label">View:</span>
+    <button onclick="resetZoom()" class="active">Reset</button>
+    <button onclick="centerGraph()">Center</button>
+    <button onclick="fitToView()">Fit</button>
+  </span>
+  <span class="control-group">
+    <span class="control-label">Highlight:</span>
+    <button id="btn-upstream" onclick="toggleUpstream()">Upstream</button>
+    <button id="btn-failure" onclick="toggleFailurePaths()" class="btn-error">Failure Paths</button>
+    <button id="btn-happy" onclick="toggleHappyPaths()" class="btn-happy">Happy Paths</button>
+  </span>
+  <span class="control-group">
+    <span class="control-label">Layout:</span>
+    <button onclick="setLayout('hierarchical')" id="btn-hierarchical" class="active">Hierarchical</button>
+    <button onclick="setLayout('horizontal')" id="btn-horizontal">Horizontal</button>
+    <button onclick="setLayout('circular')" id="btn-circular">Circular</button>
+    <button onclick="setLayout('grid')" id="btn-grid">Grid</button>
+  </span>
+</div>
+<div id="container">
+  <div id="graph"><svg></svg></div>
+  <div id="info">
+    <h3>Selected Node</h3>
+    <div id="details">Click a node to see details</div>
+    <h4>Transitions</h4>
+    <div id="flow-list"></div>
+    <div class="legend">
+      <h4>States</h4>
+      <div class="legend-item"><div class="legend-color" style="background:#00d4ff"></div> Entry State</div>
+      <div class="legend-item"><div class="legend-color" style="background:#ff6b6b"></div> Terminal State</div>
+      <div class="legend-item"><div class="legend-color" style="background:#4a4a8a"></div> Normal State</div>
+      <div class="legend-item"><div class="legend-color" style="background:#ffa500"></div> Error State</div>
+      <h4>Transitions</h4>
+      <div class="legend-item"><div class="legend-color" style="background:#00ff00"></div> Forward (normal)</div>
+      <div class="legend-item"><div class="legend-color" style="background:#ff6b6b"></div> To Error</div>
+      <div class="legend-item"><div class="legend-color" style="background:#ffaa00;border:1px dashed #000"></div> Reset (back to idle)</div>
+      <div class="legend-item"><div class="legend-color" style="background:#00d4ff"></div> Incoming</div>
+      <h4>Path Highlights</h4>
+      <div class="legend-item"><div class="legend-color" style="background:#ff4444"></div> Failure Path</div>
+      <div class="legend-item"><div class="legend-color" style="background:#44ff44"></div> Happy Path</div>
+      <div class="legend-item"><div class="legend-color" style="background:#ff00ff"></div> Upstream Trace</div>
+    </div>
+  </div>
+</div>
+<div id="tooltip"></div>
+<script>
+const nodes = [{"id": "idle", "label": "idle", "description": "Awaiting source file or code input", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0}, {"id": "loading", "label": "loading", "description": "Loading source file from disk", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1}, {"id": "parsing", "label": "parsing", "description": "Parsing Python source into AST", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}, {"id": "detecting", "label": "detecting", "description": "Detecting state machine patterns in code", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3}, {"id": "extracting_states", "label": "extracting_states", "description": "Extracting state definitions from code", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4}, {"id": "extracting_transitions", "label": "extracting_transitions", "description": "Extracting state transitions from methods", "type": "state", "isEntry": false, "isTerminal": false, "layer": 5}, {"id": "extracting_gates", "label": "extracting_gates", "description": "Extracting gate conditions from if statements", "type": "state", "isEntry": false, "isTerminal": false, "layer": 6}, {"id": "extracting_actions", "label": "extracting_actions", "description": "Extracting actions from side effects", "type": "state", "isEntry": false, "isTerminal": false, "layer": 7}, {"id": "analyzing_events", "label": "analyzing_events", "description": "Analyzing event handler patterns", "type": "state", "isEntry": false, "isTerminal": false, "layer": 8}, {"id": "inferring_entry", "label": "inferring_entry", "description": "Inferring entry and terminal states", "type": "state", "isEntry": false, "isTerminal": false, "layer": 9}, {"id": "generating", "label": "generating", "description": "Generating L++ blueprint", "type": "state", "isEntry": false, "isTerminal": false, "layer": 10}, {"id": "mapping", "label": "mapping", "description": "Generating source-to-blueprint mapping", "type": "state", "isEntry": false, "isTerminal": false, "layer": 11}, {"id": "complete", "label": "complete", "description": "Extraction complete, blueprint ready", "type": "state", "isEntry": false, "isTerminal": false, "layer": 12}, {"id": "error", "label": "error", "description": "Extraction failed", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}];
+const links = [{"source": "idle", "target": "idle", "label": "SET_MODE", "gates": ""}, {"source": "idle", "target": "loading", "label": "EXTRACT", "gates": "hasFilePath"}, {"source": "loading", "target": "error", "label": "AUTO", "gates": "hasError"}, {"source": "loading", "target": "parsing", "label": "AUTO", "gates": "hasSourceCode, noError"}, {"source": "parsing", "target": "error", "label": "AUTO", "gates": "hasError"}, {"source": "parsing", "target": "detecting", "label": "AUTO", "gates": "hasAst, noError"}, {"source": "detecting", "target": "extracting_states", "label": "AUTO", "gates": "hasPatterns"}, {"source": "extracting_states", "target": "extracting_transitions", "label": "AUTO", "gates": "hasStates"}, {"source": "extracting_transitions", "target": "extracting_gates", "label": "AUTO", "gates": "hasTransitions"}, {"source": "extracting_gates", "target": "extracting_actions", "label": "AUTO", "gates": "hasGates"}, {"source": "extracting_actions", "target": "analyzing_events", "label": "AUTO", "gates": "hasActions"}, {"source": "analyzing_events", "target": "inferring_entry", "label": "AUTO", "gates": "hasEvents"}, {"source": "inferring_entry", "target": "generating", "label": "AUTO", "gates": "hasEntryState"}, {"source": "generating", "target": "mapping", "label": "AUTO", "gates": "hasBlueprint"}, {"source": "mapping", "target": "complete", "label": "AUTO", "gates": "hasMapping"}, {"source": "complete", "target": "complete", "label": "EXPORT_BLUEPRINT", "gates": "hasBlueprint"}, {"source": "complete", "target": "complete", "label": "EXPORT_REPORT", "gates": ""}, {"source": "complete", "target": "idle", "label": "RESET", "gates": ""}, {"source": "error", "target": "idle", "label": "RESET", "gates": ""}];
+
+// Calculate layout dimensions based on layers
+const layerMap = {};
+nodes.forEach(n => {
+    if (!layerMap[n.layer]) layerMap[n.layer] = [];
+    layerMap[n.layer].push(n);
+});
+const numLayers = Object.keys(layerMap).length;
+const maxNodesInLayer = Math.max(...Object.values(layerMap).map(l => l.length));
+
+const nodeWidth = 140;
+const nodeHeight = 50;
+const layerGap = 120;
+const nodeGap = 30;
+
+const width = Math.max(1200, maxNodesInLayer * (nodeWidth + nodeGap) + 100);
+const height = Math.max(700, numLayers * layerGap + 150);
+
+// Layout functions
+let currentLayout = 'hierarchical';
+
+function layoutHierarchical() {
+    Object.keys(layerMap).sort((a,b) => a-b).forEach((layer, layerIdx) => {
+        const nodesInLayer = layerMap[layer];
+        const totalWidth = nodesInLayer.length * nodeWidth + (nodesInLayer.length - 1) * nodeGap;
+        const startX = (width - totalWidth) / 2;
+        nodesInLayer.forEach((node, idx) => {
+            node.x = startX + idx * (nodeWidth + nodeGap) + nodeWidth / 2;
+            node.y = 60 + layerIdx * layerGap + nodeHeight / 2;
+        });
+    });
+}
+
+function layoutHorizontal() {
+    // Left-to-right flow based on layers
+    Object.keys(layerMap).sort((a,b) => a-b).forEach((layer, layerIdx) => {
+        const nodesInLayer = layerMap[layer];
+        const totalHeight = nodesInLayer.length * nodeHeight + (nodesInLayer.length - 1) * nodeGap;
+        const startY = (height - totalHeight) / 2;
+        nodesInLayer.forEach((node, idx) => {
+            node.x = 100 + layerIdx * (nodeWidth + layerGap);
+            node.y = startY + idx * (nodeHeight + nodeGap) + nodeHeight / 2;
+        });
+    });
+}
+
+function layoutCircular() {
+    const cx = width / 2, cy = height / 2;
+    const radius = Math.min(width, height) / 2 - 100;
+    const n = nodes.length;
+    nodes.forEach((node, i) => {
+        const angle = (2 * Math.PI * i) / n - Math.PI / 2;
+        node.x = cx + radius * Math.cos(angle);
+        node.y = cy + radius * Math.sin(angle);
+    });
+}
+
+function layoutGrid() {
+    const cols = Math.ceil(Math.sqrt(nodes.length));
+    const cellW = nodeWidth + nodeGap * 2;
+    const cellH = nodeHeight + layerGap;
+    const startX = (width - cols * cellW) / 2 + cellW / 2;
+    const startY = 80;
+    nodes.forEach((node, i) => {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        node.x = startX + col * cellW;
+        node.y = startY + row * cellH;
+    });
+}
+
+function setLayout(layout) {
+    currentLayout = layout;
+    // Update button styles
+    ['hierarchical', 'horizontal', 'circular', 'grid'].forEach(l => {
+        document.getElementById('btn-' + l).style.background = l === layout ? '#00d4ff' : '#4a4a8a';
+    });
+    // Apply layout
+    if (layout === 'hierarchical') layoutHierarchical();
+    else if (layout === 'horizontal') layoutHorizontal();
+    else if (layout === 'circular') layoutCircular();
+    else if (layout === 'grid') layoutGrid();
+    // Update node positions with animation
+    node.transition().duration(500).attr("transform", d => `translate(${d.x - nodeWidth/2},${d.y - nodeHeight/2})`);
+    // Update links and labels
+    setTimeout(() => { updateLinks(); updateLinkLabels(); }, 50);
+    setTimeout(() => { updateLinks(); updateLinkLabels(); }, 250);
+    setTimeout(() => { updateLinks(); updateLinkLabels(); }, 500);
+}
+
+// Initial hierarchical layout
+layoutHierarchical();
+
+// Create node lookup
+const nodeById = {};
+nodes.forEach(n => nodeById[n.id] = n);
+
+// Build adjacency maps for upstream tracing
+const outgoing = {};  // node -> [links going out]
+const incoming = {};  // node -> [links coming in]
+nodes.forEach(n => { outgoing[n.id] = []; incoming[n.id] = []; });
+
+// Resolve link sources/targets to node objects
+links.forEach(l => {
+    l.sourceNode = nodeById[l.source] || nodeById[l.source.id];
+    l.targetNode = nodeById[l.target] || nodeById[l.target.id];
+    if (l.sourceNode && l.targetNode) {
+        outgoing[l.sourceNode.id].push(l);
+        incoming[l.targetNode.id].push(l);
+    }
+});
+
+// Function to trace all upstream paths
+function traceUpstream(nodeId, visited = new Set()) {
+    if (visited.has(nodeId)) return [];
+    visited.add(nodeId);
+    const paths = [];
+    incoming[nodeId].forEach(link => {
+        const srcId = link.sourceNode.id;
+        if (srcId !== nodeId) {  // skip self-loops
+            paths.push({ from: srcId, to: nodeId, event: link.label, gates: link.gates });
+            paths.push(...traceUpstream(srcId, visited));
+        }
+    });
+    return paths;
+}
+
+const svg = d3.select("svg").attr("width", width).attr("height", height);
+const g = svg.append("g");
+
+const zoom = d3.zoom()
+    .scaleExtent([0.2, 3])
+    .filter(e => !e.target.closest('.node'))  // Prevent zoom/pan when clicking on nodes
+    .on("zoom", (e) => g.attr("transform", e.transform));
+svg.call(zoom);
+
+// Arrow markers
+const defs = svg.append("defs");
+defs.append("marker")
+    .attr("id", "arrow").attr("viewBox", "0 -5 10 10").attr("refX", 10).attr("refY", 0)
+    .attr("markerWidth", 8).attr("markerHeight", 8).attr("orient", "auto")
+  .append("path").attr("d", "M0,-4L10,0L0,4").attr("fill", "#666");
+defs.append("marker")
+    .attr("id", "arrow-upstream").attr("viewBox", "0 -5 10 10").attr("refX", 10).attr("refY", 0)
+    .attr("markerWidth", 8).attr("markerHeight", 8).attr("orient", "auto")
+  .append("path").attr("d", "M0,-4L10,0L0,4").attr("fill", "#ff00ff");
+defs.append("marker")
+    .attr("id", "arrow-failure").attr("viewBox", "0 -5 10 10").attr("refX", 10).attr("refY", 0)
+    .attr("markerWidth", 8).attr("markerHeight", 8).attr("orient", "auto")
+  .append("path").attr("d", "M0,-4L10,0L0,4").attr("fill", "#ff4444");
+defs.append("marker")
+    .attr("id", "arrow-happy").attr("viewBox", "0 -5 10 10").attr("refX", 10).attr("refY", 0)
+    .attr("markerWidth", 8).attr("markerHeight", 8).attr("orient", "auto")
+  .append("path").attr("d", "M0,-4L10,0L0,4").attr("fill", "#44ff44");
+defs.append("marker")
+    .attr("id", "arrow-reset").attr("viewBox", "0 -5 10 10").attr("refX", 10).attr("refY", 0)
+    .attr("markerWidth", 8).attr("markerHeight", 8).attr("orient", "auto")
+  .append("path").attr("d", "M0,-4L10,0L0,4").attr("fill", "#ffaa00");
+defs.append("marker")
+    .attr("id", "arrow-error").attr("viewBox", "0 -5 10 10").attr("refX", 10).attr("refY", 0)
+    .attr("markerWidth", 8).attr("markerHeight", 8).attr("orient", "auto")
+  .append("path").attr("d", "M0,-4L10,0L0,4").attr("fill", "#ff6b6b");
+
+// Track self-loop index for offset calculation
+const selfLoopIndex = {};
+links.forEach((l, idx) => {
+    if (l.sourceNode && l.targetNode && l.sourceNode.id === l.targetNode.id) {
+        const key = l.sourceNode.id;
+        if (!selfLoopIndex[key]) selfLoopIndex[key] = [];
+        selfLoopIndex[key].push(idx);
+    }
+});
+
+// Function to update link paths
+function updateLinks() {
+    link.attr("d", (d, i) => {
+        if (!d.sourceNode || !d.targetNode) return "";
+        const sx = d.sourceNode.x, sy = d.sourceNode.y;
+        const tx = d.targetNode.x, ty = d.targetNode.y;
+
+        // Self-loop - draw on right side with offset for multiple self-loops
+        if (d.sourceNode.id === d.targetNode.id) {
+            const loopIdx = selfLoopIndex[d.sourceNode.id]?.indexOf(i) || 0;
+            const loopOffset = loopIdx * 20;  // Offset for multiple self-loops
+            const loopSize = 40 + loopOffset;
+            const startX = sx + nodeWidth/2;
+            const startY = sy - 5;
+            const endX = sx + nodeWidth/2;
+            const endY = sy + 5;
+            // Draw a loop on the right side
+            return `M${startX},${startY} ` +
+                   `C${startX + loopSize},${startY - loopSize/2} ` +
+                   `${startX + loopSize},${endY + loopSize/2} ` +
+                   `${endX},${endY}`;
+        }
+
+        // Normal curved path - exit from bottom of source, enter top of target
+        const sourceBottom = { x: sx, y: sy + nodeHeight/2 };
+        const targetTop = { x: tx, y: ty - nodeHeight/2 };
+        const midY = (sourceBottom.y + targetTop.y) / 2;
+
+        return `M${sourceBottom.x},${sourceBottom.y} ` +
+               `C${sourceBottom.x},${midY} ${targetTop.x},${midY} ${targetTop.x},${targetTop.y}`;
+    });
+}
+
+// Find all error states and terminal/complete states (defined early for link coloring)
+const errorStates = new Set();
+const terminalStates = new Set();
+const resetTargets = new Set();  // States that are "back to start" targets
+const entryStateNode = nodes.find(n => n.isEntry);
+
+nodes.forEach(n => {
+    const id = n.id.toLowerCase();
+    // Error states
+    if (id === 'error' || id.includes('error') || id.includes('fail') || id === 'rejected') {
+        errorStates.add(n.id);
+    }
+    // Terminal states - explicit or by naming convention
+    if (n.isTerminal) {
+        terminalStates.add(n.id);
+    } else if (id === 'complete' || id === 'completed' || id === 'done' ||
+               id === 'success' || id === 'finished' || id === 'certified') {
+        // Treat these as terminal-like for happy path detection
+        terminalStates.add(n.id);
+    }
+    // Reset targets (entry-like states)
+    if (n.isEntry || id === 'idle' || id === 'init' || id === 'start' || id === 'ready') {
+        resetTargets.add(n.id);
+    }
+});
+
+// Function to get link color by type
+function getLinkColor(l) {
+    if (!l.sourceNode || !l.targetNode) return "#556";
+    const tgtId = l.targetNode.id;
+    const srcId = l.sourceNode.id;
+    // To error = red
+    if (errorStates.has(tgtId)) return "#ff6b6b";
+    // Reset/back to idle = orange
+    if (resetTargets.has(tgtId) && !resetTargets.has(srcId)) return "#ffaa00";
+    // Self-loop on terminal = very dim (almost hidden)
+    if (srcId === tgtId && terminalStates.has(srcId)) return "#333";
+    return "#556";
+}
+
+function getLinkMarker(l) {
+    if (!l.sourceNode || !l.targetNode) return "url(#arrow)";
+    const tgtId = l.targetNode.id;
+    const srcId = l.sourceNode.id;
+    if (errorStates.has(tgtId)) return "url(#arrow-error)";
+    if (resetTargets.has(tgtId) && !resetTargets.has(srcId)) return "url(#arrow-reset)";
+    return "url(#arrow)";
+}
+
+// Draw links with curved paths
+const link = g.append("g").selectAll("path").data(links).join("path")
+    .attr("class", "link")
+    .attr("stroke", getLinkColor)
+    .attr("stroke-width", l => {
+        // Make terminal self-loops thinner
+        if (l.sourceNode && l.targetNode && l.sourceNode.id === l.targetNode.id && terminalStates.has(l.sourceNode.id)) return 1;
+        return 2;
+    })
+    .attr("stroke-dasharray", l => {
+        // Dash reset links
+        if (l.sourceNode && l.targetNode && resetTargets.has(l.targetNode.id) && !resetTargets.has(l.sourceNode.id)) return "5,3";
+        return null;
+    })
+    .attr("marker-end", getLinkMarker);
+
+// Draw edge labels (event names and gates)
+const linkLabelGroup = g.append("g").attr("class", "link-labels");
+
+// Create label groups for each link
+const linkLabels = linkLabelGroup.selectAll("g").data(links).join("g")
+    .attr("class", "link-label-group");
+
+// Background rect for label readability
+linkLabels.append("rect")
+    .attr("class", "link-label-bg")
+    .attr("rx", 3).attr("ry", 3);
+
+// Event label text
+linkLabels.append("text")
+    .attr("class", "link-label")
+    .text(d => {
+        // Shorten long event names
+        let label = d.label || "";
+        if (label.length > 15) label = label.slice(0, 13) + "..";
+        return label;
+    });
+
+// Gate label (if present)
+linkLabels.append("text")
+    .attr("class", "gate-label")
+    .attr("dy", 12)
+    .text(d => {
+        if (!d.gates) return "";
+        // Shorten gate names
+        let g = d.gates;
+        if (g.length > 20) g = g.slice(0, 18) + "..";
+        return g ? `[${g}]` : "";
+    });
+
+// Function to update edge label positions
+function updateLinkLabels() {
+    linkLabels.each(function(d, i) {
+        if (!d.sourceNode || !d.targetNode) return;
+        const sx = d.sourceNode.x, sy = d.sourceNode.y;
+        const tx = d.targetNode.x, ty = d.targetNode.y;
+
+        let labelX, labelY;
+
+        // Self-loop - position label to the right
+        if (d.sourceNode.id === d.targetNode.id) {
+            const loopIdx = selfLoopIndex[d.sourceNode.id]?.indexOf(i) || 0;
+            const loopOffset = loopIdx * 20;
+            labelX = sx + nodeWidth/2 + 50 + loopOffset;
+            labelY = sy;
+        } else {
+            // Normal link - position at midpoint
+            const sourceBottom = sy + nodeHeight/2;
+            const targetTop = ty - nodeHeight/2;
+            labelX = (sx + tx) / 2;
+            labelY = (sourceBottom + targetTop) / 2;
+        }
+
+        const textElem = d3.select(this).select("text.link-label");
+        const gateElem = d3.select(this).select("text.gate-label");
+        const bgRect = d3.select(this).select("rect.link-label-bg");
+
+        textElem.attr("x", labelX).attr("y", labelY);
+        gateElem.attr("x", labelX).attr("y", labelY);
+
+        // Size background to fit text
+        const bbox = textElem.node()?.getBBox();
+        if (bbox && bbox.width > 0) {
+            const hasGate = d.gates && d.gates.length > 0;
+            const height = hasGate ? 24 : 14;
+            bgRect.attr("x", bbox.x - 4)
+                  .attr("y", bbox.y - 2)
+                  .attr("width", bbox.width + 8)
+                  .attr("height", height);
+        } else {
+            bgRect.attr("width", 0).attr("height", 0);
+        }
+    });
+}
+
+updateLinks();
+updateLinkLabels();
+
+// Drag behavior for nodes with click detection
+// Track drag state to distinguish clicks from drags
+let dragStartPos = null;
+let isDragging = false;
+const DRAG_THRESHOLD = 5;  // Minimum pixels to consider it a drag
+
+const drag = d3.drag()
+    .on("start", function(e, d) {
+        e.sourceEvent.stopPropagation();
+        dragStartPos = { x: e.x, y: e.y };
+        isDragging = false;
+    })
+    .on("drag", function(e, d) {
+        // Check if we've moved enough to be considered dragging
+        const dx = e.x - dragStartPos.x;
+        const dy = e.y - dragStartPos.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+
+        if (dist > DRAG_THRESHOLD) {
+            isDragging = true;
+            d3.select(this).raise().select("rect").attr("stroke", "#ff0").attr("stroke-width", 4);
+            d.x = e.x + nodeWidth/2;
+            d.y = e.y + nodeHeight/2;
+            d3.select(this).attr("transform", `translate(${e.x},${e.y})`);
+            updateLinks();
+            updateLinkLabels();
+        }
+    })
+    .on("end", function(e, d) {
+        if (isDragging) {
+            d3.select(this).select("rect").attr("stroke", "#fff").attr("stroke-width", 2);
+        }
+        dragStartPos = null;
+        isDragging = false;
+    });
+
+// Draw nodes as rounded rectangles
+const node = g.append("g").selectAll("g").data(nodes).join("g")
+    .attr("class", "node")
+    .attr("transform", d => `translate(${d.x - nodeWidth/2},${d.y - nodeHeight/2})`)
+    .call(drag);
+
+node.append("rect")
+    .attr("class", "node-rect")
+    .attr("width", nodeWidth)
+    .attr("height", nodeHeight)
+    .attr("fill", d => {
+        if (d.isEntry) return "#00d4ff";
+        if (d.isTerminal) return "#ff6b6b";
+        if (d.id === "error") return "#ffa500";
+        return "#4a4a8a";
+    })
+    .attr("stroke", "#fff")
+    .attr("stroke-width", 2);
+
+node.append("text")
+    .attr("class", "node-label")
+    .attr("x", nodeWidth/2)
+    .attr("y", nodeHeight/2 - 5)
+    .text(d => d.id.length > 16 ? d.id.slice(0,14) + ".." : d.id);
+
+node.append("text")
+    .attr("class", "node-desc")
+    .attr("x", nodeWidth/2)
+    .attr("y", nodeHeight/2 + 10)
+    .text(d => {
+        if (!d.description) return "";
+        return d.description.length > 22 ? d.description.slice(0,20) + ".." : d.description;
+    });
+
+// Tooltip
+const tooltip = d3.select("#tooltip");
+node.on("mouseover", (e, d) => {
+    let html = "<b>" + d.id + "</b>";
+    if (d.description) html += "<br><br>" + d.description;
+    tooltip.style("display", "block").html(html);
+}).on("mousemove", (e) => {
+    tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 10) + "px");
+}).on("mouseout", () => tooltip.style("display", "none"));
+
+// Track selected node for upstream view
+let selectedNode = null;
+let showUpstream = false;
+
+// Click to highlight and show transitions (only if not dragging)
+node.on("click", (e, d) => {
+    // Skip if this was a drag operation
+    if (isDragging) return;
+    e.stopPropagation();
+    selectedNode = d;
+    
+    // Highlight selected node
+    node.select("rect")
+        .attr("stroke", n => n.id === d.id ? "#ff0" : "#fff")
+        .attr("stroke-width", n => n.id === d.id ? 4 : 2);
+    
+    // Highlight connected links with type-based coloring
+    if (showUpstream) {
+        highlightUpstream(d.id);
+    } else {
+        link.attr("stroke", l => {
+            const src = l.sourceNode ? l.sourceNode.id : l.source;
+            const tgt = l.targetNode ? l.targetNode.id : l.target;
+            if (src === d.id) {
+                // Outgoing - differentiate by destination type
+                if (errorStates.has(tgt)) return "#ff6b6b";  // to error
+                if (resetTargets.has(tgt) && !resetTargets.has(src)) return "#ffaa00";  // reset
+                return "#00ff00";  // normal outgoing
+            }
+            if (tgt === d.id) return "#00d4ff";  // incoming
+            return getLinkColor(l);  // default coloring
+        }).attr("stroke-width", l => {
+            const src = l.sourceNode ? l.sourceNode.id : l.source;
+            const tgt = l.targetNode ? l.targetNode.id : l.target;
+            return (src === d.id || tgt === d.id) ? 3 : 2;
+        }).attr("stroke-dasharray", l => {
+            const src = l.sourceNode ? l.sourceNode.id : l.source;
+            const tgt = l.targetNode ? l.targetNode.id : l.target;
+            if (src === d.id && resetTargets.has(tgt) && !resetTargets.has(src)) return "5,3";
+            return null;
+        }).attr("marker-end", l => {
+            const src = l.sourceNode ? l.sourceNode.id : l.source;
+            const tgt = l.targetNode ? l.targetNode.id : l.target;
+            if (src === d.id) {
+                if (errorStates.has(tgt)) return "url(#arrow-error)";
+                if (resetTargets.has(tgt) && !resetTargets.has(src)) return "url(#arrow-reset)";
+            }
+            return "url(#arrow)";
+        });
+    }
+    
+    // Update info panel
+    let info = "<b>" + d.id + "</b><br>";
+    info += "<span style='color:#888'>Layer: " + d.layer + "</span><br>";
+    info += d.isEntry ? "<span style='color:#00d4ff'>⬤ Entry State</span><br>" : "";
+    info += d.isTerminal ? "<span style='color:#ff6b6b'>⬤ Terminal State</span><br>" : "";
+    if (d.description) info += "<br>" + d.description;
+    document.getElementById("details").innerHTML = info;
+    
+    // Show transitions - categorized by type
+    const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
+    const normalOut = outLinks.filter(l => {
+        const tgt = l.targetNode ? l.targetNode.id : l.target;
+        return !errorStates.has(tgt) && !(resetTargets.has(tgt) && !resetTargets.has(d.id));
+    });
+    const errorOut = outLinks.filter(l => errorStates.has(l.targetNode ? l.targetNode.id : l.target));
+    const resetOut = outLinks.filter(l => {
+        const tgt = l.targetNode ? l.targetNode.id : l.target;
+        return resetTargets.has(tgt) && !resetTargets.has(d.id) && !errorStates.has(tgt);
+    });
+
+    let flowHtml = "";
+    if (normalOut.length > 0) {
+        flowHtml += "<b style='color:#00ff00'>→ Forward</b><br>";
+        normalOut.forEach(l => {
+            const tgt = l.targetNode ? l.targetNode.id : l.target;
+            flowHtml += "<div>→ <b>" + tgt + "</b> [" + l.label + "]";
+            if (l.gates) flowHtml += "<br><i style='color:#666;font-size:10px'>" + l.gates + "</i>";
+            flowHtml += "</div>";
+        });
+    }
+    if (errorOut.length > 0) {
+        flowHtml += "<br><b style='color:#ff6b6b'>→ Error</b><br>";
+        errorOut.forEach(l => {
+            const tgt = l.targetNode ? l.targetNode.id : l.target;
+            flowHtml += "<div style='color:#ff6b6b'>→ <b>" + tgt + "</b> [" + l.label + "]";
+            if (l.gates) flowHtml += "<br><i style='color:#666;font-size:10px'>" + l.gates + "</i>";
+            flowHtml += "</div>";
+        });
+    }
+    if (resetOut.length > 0) {
+        flowHtml += "<br><b style='color:#ffaa00'>→ Reset</b><br>";
+        resetOut.forEach(l => {
+            const tgt = l.targetNode ? l.targetNode.id : l.target;
+            flowHtml += "<div style='color:#ffaa00'>→ <b>" + tgt + "</b> [" + l.label + "]";
+            if (l.gates) flowHtml += "<br><i style='color:#666;font-size:10px'>" + l.gates + "</i>";
+            flowHtml += "</div>";
+        });
+    }
+    flowHtml += "<br><b style='color:#00d4ff'>← Incoming</b><br>";
+    links.filter(l => (l.targetNode ? l.targetNode.id : l.target) === d.id).forEach(l => {
+        const src = l.sourceNode ? l.sourceNode.id : l.source;
+        flowHtml += "<div>← <b>" + src + "</b> [" + l.label + "]";
+        if (l.gates) flowHtml += "<br><i style='color:#666;font-size:10px'>" + l.gates + "</i>";
+        flowHtml += "</div>";
+    });
+    
+    // Show upstream trace
+    flowHtml += "<br><b style='color:#ff00ff'>⬆ Upstream Path</b><br>";
+    const upstreamPaths = traceUpstream(d.id);
+    if (upstreamPaths.length === 0) {
+        flowHtml += "<div style='color:#888'>No upstream (entry point)</div>";
+    } else {
+        // Group by depth for readable output
+        const seen = new Set();
+        upstreamPaths.forEach(p => {
+            const key = p.from + "->" + p.to;
+            if (!seen.has(key)) {
+                seen.add(key);
+                flowHtml += "<div><b>" + p.from + "</b> → " + p.to + " [" + p.event + "]";
+                if (p.gates) flowHtml += "<br><i style='color:#666;font-size:10px'>" + p.gates + "</i>";
+                flowHtml += "</div>";
+            }
+        });
+    }
+    document.getElementById("flow-list").innerHTML = flowHtml;
+});
+
+function highlightUpstream(nodeId) {
+    const upstreamNodes = new Set([nodeId]);
+    const upstreamLinks = new Set();
+    
+    function trace(nid) {
+        incoming[nid].forEach(link => {
+            const srcId = link.sourceNode.id;
+            if (srcId !== nid && !upstreamNodes.has(srcId)) {
+                upstreamNodes.add(srcId);
+                upstreamLinks.add(link);
+                trace(srcId);
+            } else if (srcId !== nid) {
+                upstreamLinks.add(link);
+            }
+        });
+    }
+    trace(nodeId);
+    
+    // Highlight upstream nodes
+    node.select("rect")
+        .attr("stroke", n => {
+            if (n.id === nodeId) return "#ff0";
+            if (upstreamNodes.has(n.id)) return "#ff00ff";
+            return "#fff";
+        })
+        .attr("stroke-width", n => upstreamNodes.has(n.id) ? 3 : 2);
+    
+    // Highlight upstream links
+    link.attr("stroke", l => {
+        if (upstreamLinks.has(l)) return "#ff00ff";
+        const src = l.sourceNode ? l.sourceNode.id : l.source;
+        const tgt = l.targetNode ? l.targetNode.id : l.target;
+        if (src === nodeId) return "#00ff00";
+        return "#556";
+    }).attr("stroke-width", l => {
+        if (upstreamLinks.has(l)) return 3;
+        const src = l.sourceNode ? l.sourceNode.id : l.source;
+        return src === nodeId ? 3 : 2;
+    }).attr("marker-end", l => upstreamLinks.has(l) ? "url(#arrow-upstream)" : "url(#arrow)");
+}
+
+// Link hover for gate conditions
+link.on("mouseover", (e, d) => {
+    let html = "<b>" + (d.sourceNode ? d.sourceNode.id : d.source) + " → " + (d.targetNode ? d.targetNode.id : d.target) + "</b>";
+    html += "<br>Event: <b>" + d.label + "</b>";
+    if (d.gates) html += "<br><br>Gates:<br><i>" + d.gates.split(", ").join("<br>") + "</i>";
+    tooltip.style("display", "block").html(html);
+}).on("mousemove", (e) => {
+    tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 10) + "px");
+}).on("mouseout", () => tooltip.style("display", "none"));
+
+function resetZoom() { svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity); }
+function centerGraph() { 
+    const bounds = g.node().getBBox(); 
+    const cx = bounds.x + bounds.width/2, cy = bounds.y + bounds.height/2;
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity.translate(width/2 - cx, height/2 - cy)); 
+}
+function fitToView() {
+    const bounds = g.node().getBBox();
+    const fullWidth = svg.attr("width"), fullHeight = svg.attr("height");
+    const scale = Math.min(fullWidth / bounds.width, fullHeight / bounds.height) * 0.9;
+    const tx = (fullWidth - bounds.width * scale) / 2 - bounds.x * scale;
+    const ty = (fullHeight - bounds.height * scale) / 2 - bounds.y * scale;
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+function toggleUpstream() {
+    showUpstream = !showUpstream;
+    showFailurePaths = false;
+    showHappyPaths = false;
+    updateHighlightButtons();
+    if (selectedNode) {
+        if (showUpstream) {
+            highlightUpstream(selectedNode.id);
+        } else {
+            resetHighlighting();
+        }
+    } else {
+        resetHighlighting();
+    }
+}
+
+// Track path highlighting modes
+let showFailurePaths = false;
+let showHappyPaths = false;
+
+// Reference entryState for happy path detection
+const entryState = entryStateNode;
+
+// Find paths leading to a target state set
+function findPathsTo(targetSet) {
+    const pathLinks = new Set();
+    const pathNodes = new Set(targetSet);
+
+    // BFS backward from target states
+    const queue = [...targetSet];
+    const visited = new Set(targetSet);
+
+    while (queue.length > 0) {
+        const curr = queue.shift();
+        incoming[curr].forEach(link => {
+            const srcId = link.sourceNode.id;
+            pathLinks.add(link);
+            if (!visited.has(srcId)) {
+                visited.add(srcId);
+                pathNodes.add(srcId);
+                queue.push(srcId);
+            }
+        });
+    }
+
+    return { nodes: pathNodes, links: pathLinks };
+}
+
+// Find happy paths from entry to terminal states
+function findHappyPaths() {
+    if (!entryState || terminalStates.size === 0) return { nodes: new Set(), links: new Set() };
+
+    const pathLinks = new Set();
+    const pathNodes = new Set();
+
+    // BFS forward from entry, only including paths that reach terminal
+    function dfs(nodeId, visited, path) {
+        if (visited.has(nodeId)) return false;
+        visited.add(nodeId);
+        path.push(nodeId);
+
+        if (terminalStates.has(nodeId)) {
+            // Found terminal - add all nodes and links in path
+            path.forEach(n => pathNodes.add(n));
+            for (let i = 0; i < path.length - 1; i++) {
+                const fromId = path[i];
+                const toId = path[i + 1];
+                links.forEach(l => {
+                    if (l.sourceNode && l.targetNode &&
+                        l.sourceNode.id === fromId && l.targetNode.id === toId) {
+                        pathLinks.add(l);
+                    }
+                });
+            }
+            visited.delete(nodeId);
+            path.pop();
+            return true;
+        }
+
+        let foundPath = false;
+        outgoing[nodeId].forEach(link => {
+            if (link.targetNode && !errorStates.has(link.targetNode.id)) {
+                if (dfs(link.targetNode.id, visited, path)) {
+                    pathLinks.add(link);
+                    foundPath = true;
+                }
+            }
+        });
+
+        visited.delete(nodeId);
+        path.pop();
+        return foundPath;
+    }
+
+    dfs(entryState.id, new Set(), []);
+    return { nodes: pathNodes, links: pathLinks };
+}
+
+function toggleFailurePaths() {
+    showFailurePaths = !showFailurePaths;
+    showUpstream = false;
+    showHappyPaths = false;
+    updateHighlightButtons();
+
+    if (showFailurePaths) {
+        const paths = findPathsTo(errorStates);
+        highlightPaths(paths, '#ff4444', 'Failure');
+    } else {
+        resetHighlighting();
+    }
+}
+
+function toggleHappyPaths() {
+    showHappyPaths = !showHappyPaths;
+    showUpstream = false;
+    showFailurePaths = false;
+    updateHighlightButtons();
+
+    if (showHappyPaths) {
+        const paths = findHappyPaths();
+        highlightPaths(paths, '#44ff44', 'Happy');
+    } else {
+        resetHighlighting();
+    }
+}
+
+function highlightPaths(paths, color, label) {
+    const markerId = label === 'Failure' ? 'arrow-failure' : (label === 'Happy' ? 'arrow-happy' : 'arrow');
+
+    // Highlight nodes on path
+    node.select("rect")
+        .attr("stroke", n => paths.nodes.has(n.id) ? color : "#fff")
+        .attr("stroke-width", n => paths.nodes.has(n.id) ? 4 : 2);
+
+    // Highlight links on path
+    link.attr("stroke", l => paths.links.has(l) ? color : "#556")
+        .attr("stroke-width", l => paths.links.has(l) ? 4 : 2)
+        .attr("marker-end", l => paths.links.has(l) ? `url(#${markerId})` : "url(#arrow)");
+
+    // Update info panel
+    document.getElementById("details").innerHTML = `<b>${label} Paths</b><br><br>` +
+        `<span style='color:${color}'>Nodes: ${paths.nodes.size}</span><br>` +
+        `<span style='color:${color}'>Links: ${paths.links.size}</span>`;
+
+    let flowHtml = `<b style='color:${color}'>${label} Path Nodes</b><br>`;
+    paths.nodes.forEach(nid => {
+        const n = nodeById[nid];
+        flowHtml += `<div>${nid}${n && n.isEntry ? ' (entry)' : ''}${n && n.isTerminal ? ' (terminal)' : ''}${errorStates.has(nid) ? ' (error)' : ''}</div>`;
+    });
+    document.getElementById("flow-list").innerHTML = flowHtml;
+}
+
+function updateHighlightButtons() {
+    document.getElementById("btn-upstream").className = showUpstream ? 'active' : '';
+    document.getElementById("btn-failure").className = showFailurePaths ? 'btn-error active' : 'btn-error';
+    document.getElementById("btn-happy").className = showHappyPaths ? 'btn-happy active' : 'btn-happy';
+}
+
+function resetHighlighting() {
+    node.select("rect").attr("stroke", "#fff").attr("stroke-width", 2);
+    link.attr("stroke", getLinkColor)
+        .attr("stroke-width", l => {
+            if (l.sourceNode && l.targetNode && l.sourceNode.id === l.targetNode.id && terminalStates.has(l.sourceNode.id)) return 1;
+            return 2;
+        })
+        .attr("marker-end", getLinkMarker);
+}
+
+// Auto-fit on load
+fitToView();
+
+// Click on background to deselect
+svg.on("click", (e) => {
+    if (e.target.tagName === 'svg' || e.target.tagName === 'g') {
+        selectedNode = null;
+        node.select("rect").attr("stroke", "#fff").attr("stroke-width", 2);
+        link.attr("stroke", l => l.gates && l.gates.includes("error") ? "#ff6b6b" : "#556")
+            .attr("stroke-width", 2)
+            .attr("marker-end", "url(#arrow)");
+        document.getElementById("details").innerHTML = "Click a node to see details";
+        document.getElementById("flow-list").innerHTML = "";
+    }
+});
+</script>
+</body>
+</html>

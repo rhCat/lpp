@@ -1,0 +1,41 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>Awaiting file path or source code"]):::entry
+    state_parsing(["<b>parsing</b><br/>Parsing Python source into AST"])
+    state_analyzing(["<b>analyzing</b><br/>Analyzing imports, functions, and control flow"])
+    state_error(["<b>error</b><br/>Decoding failed"])
+    state_inferring(["<b>inferring</b><br/>Inferring states, transitions, gates from code patterns"])
+    state_generating(["<b>generating</b><br/>Assembling final L++ blueprint"])
+    state_complete(["<b>complete</b><br/>Blueprint generated successfully"])
+    act_t_0_0[["loadFile"]]
+    state_idle -- "DECODE" --> act_t_0_0
+    act_t_0_0 --> state_parsing
+    act_t_1_0[["parseAst"]]
+    state_parsing -- "AUTO" --> act_t_1_0
+    act_t_1_0 --> state_analyzing
+    act_t_2_0[["analyzeImports, analyzeFunctions, analyzeControlFlow"]]
+    state_analyzing -- "AUTO" --> act_t_2_0
+    act_t_2_0 --> state_inferring
+    act_t_3_0[["inferStates, inferTransitions, inferActions"]]
+    state_inferring -- "AUTO" --> act_t_3_0
+    act_t_3_0 --> state_generating
+    act_t_4_0[["generateBlueprint"]]
+    state_generating -- "AUTO" --> act_t_4_0
+    act_t_4_0 --> state_complete
+    act_t_5_0[["setError, log_error"]]
+    state_parsing -- "ERROR" --> act_t_5_0
+    act_t_5_0 --> state_error
+    act_t_6_0[["setError, log_error"]]
+    state_analyzing -- "ERROR" --> act_t_6_0
+    act_t_6_0 --> state_error
+    act_t_7_0[["setError, log_error"]]
+    state_inferring -- "ERROR" --> act_t_7_0
+    act_t_7_0 --> state_error
+    act_t_8_0[["clearState"]]
+    state_complete -- "RESET" --> act_t_8_0
+    act_t_8_0 --> state_idle
+    act_t_9_0[["clearError, clearState"]]
+    state_error -- "RESET" --> act_t_9_0
+    act_t_9_0 --> state_idle
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

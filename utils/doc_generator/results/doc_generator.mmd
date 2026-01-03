@@ -1,0 +1,89 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>No blueprint loaded, waiting for input"]):::entry
+    state_error(["<b>error</b><br/>Error state"])
+    state_loaded(["<b>loaded</b><br/>Blueprint loaded, ready to generate docs"])
+    state_done(["<b>done</b><br/>Documentation generation complete"])
+    state_generating(["<b>generating</b><br/>Actively generating documentation sections"])
+    state_assembling(["<b>assembling</b><br/>Assembling all sections into final document"])
+    state_exporting(["<b>exporting</b><br/>Exporting documentation to file"])
+    gate_t_0_0{{"no_blueprint?"}}
+    state_idle -- "LOAD" --> gate_t_0_0
+    act_t_0_0[["load_blueprint, init_defaults"]]
+    gate_t_0_0 -- True --> act_t_0_0
+    act_t_0_0 --> state_loaded
+    act_t_1_0[["set_error"]]
+    state_idle -- "LOAD_FAILED" --> act_t_1_0
+    act_t_1_0 --> state_error
+    act_t_2_0[["load_blueprint, clear_sections"]]
+    state_loaded -- "LOAD" --> act_t_2_0
+    act_t_2_0 --> state_loaded
+    act_t_3_0[["load_blueprint, clear_sections"]]
+    state_done -- "LOAD" --> act_t_3_0
+    act_t_3_0 --> state_loaded
+    act_t_4_0[["set_format_markdown"]]
+    state_loaded -- "FORMAT_MARKDOWN" --> act_t_4_0
+    act_t_4_0 --> state_loaded
+    act_t_5_0[["set_format_html"]]
+    state_loaded -- "FORMAT_HTML" --> act_t_5_0
+    act_t_5_0 --> state_loaded
+    act_t_6_0[["set_format_json"]]
+    state_loaded -- "FORMAT_JSON" --> act_t_6_0
+    act_t_6_0 --> state_loaded
+    act_t_7_0[["toggle_mermaid"]]
+    state_loaded -- "TOGGLE_MERMAID" --> act_t_7_0
+    act_t_7_0 --> state_loaded
+    act_t_8_0[["toggle_tables"]]
+    state_loaded -- "TOGGLE_TABLES" --> act_t_8_0
+    act_t_8_0 --> state_loaded
+    act_t_9_0[["toggle_quickstart"]]
+    state_loaded -- "TOGGLE_QUICKSTART" --> act_t_9_0
+    act_t_9_0 --> state_loaded
+    act_t_10_0[["toggle_context"]]
+    state_loaded -- "TOGGLE_CONTEXT" --> act_t_10_0
+    act_t_10_0 --> state_loaded
+    gate_t_11_0{{"has_blueprint?"}}
+    state_loaded -- "GENERATE" --> gate_t_11_0
+    act_t_11_0[["extract_metadata, generate_overview, generate_mermaid, generate_states, generate_transitions, generate_gates, generate_actions, generate_context, generate_events, generate_quickstart"]]
+    gate_t_11_0 -- True --> act_t_11_0
+    act_t_11_0 --> state_generating
+    gate_t_12_0{{"format_is_markdown?"}}
+    state_generating -- "ASSEMBLE" --> gate_t_12_0
+    act_t_12_0[["assemble_markdown"]]
+    gate_t_12_0 -- True --> act_t_12_0
+    act_t_12_0 --> state_assembling
+    gate_t_13_0{{"format_is_html?"}}
+    state_generating -- "ASSEMBLE" --> gate_t_13_0
+    act_t_13_0[["assemble_html"]]
+    gate_t_13_0 -- True --> act_t_13_0
+    act_t_13_0 --> state_assembling
+    gate_t_14_0{{"format_is_json?"}}
+    state_generating -- "ASSEMBLE" --> gate_t_14_0
+    act_t_14_0[["assemble_json"]]
+    gate_t_14_0 -- True --> act_t_14_0
+    act_t_14_0 --> state_assembling
+    gate_t_15_0{{"has_assembled_doc?"}}
+    state_assembling -- "EXPORT" --> gate_t_15_0
+    act_t_15_0[["export_docs"]]
+    gate_t_15_0 -- True --> act_t_15_0
+    act_t_15_0 --> state_exporting
+    state_exporting -- "DONE" --> state_done
+    gate_t_17_0{{"has_blueprint?"}}
+    state_loaded -- "GENERATE_FULL" --> gate_t_17_0
+    act_t_17_0[["extract_metadata, generate_overview, generate_mermaid, generate_states, generate_transitions, generate_gates, generate_actions, generate_context, generate_events, generate_quickstart, assemble_markdown, export_docs"]]
+    gate_t_17_0 -- True --> act_t_17_0
+    act_t_17_0 --> state_done
+    state_generating -- "BACK" --> state_loaded
+    state_assembling -- "BACK" --> state_loaded
+    state_done -- "BACK" --> state_loaded
+    act_t_21_0[["unload_blueprint, clear_sections"]]
+    state_loaded -- "UNLOAD" --> act_t_21_0
+    act_t_21_0 --> state_idle
+    act_t_22_0[["unload_blueprint, clear_sections"]]
+    state_done -- "UNLOAD" --> act_t_22_0
+    act_t_22_0 --> state_idle
+    act_t_23_0[["clear_error"]]
+    state_error -- "CLEAR" --> act_t_23_0
+    act_t_23_0 --> state_idle
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

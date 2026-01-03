@@ -1,0 +1,142 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>No trace active, ready to initialize"]):::entry
+    state_configured(["<b>configured</b><br/>Tracer configured, ready to start trace"])
+    state_error(["<b>error</b><br/>Error state"])
+    state_tracing(["<b>tracing</b><br/>Actively recording trace events"])
+    state_completed(["<b>completed</b><br/>Trace completed, ready for export/analysis"])
+    state_paused(["<b>paused</b><br/>Tracing paused, can resume"])
+    act_t_0_0[["init_tracer"]]
+    state_idle -- "INIT" --> act_t_0_0
+    act_t_0_0 --> state_configured
+    act_t_1_0[["set_error"]]
+    state_idle -- "INIT_FAILED" --> act_t_1_0
+    act_t_1_0 --> state_error
+    act_t_2_0[["init_tracer"]]
+    state_configured -- "INIT" --> act_t_2_0
+    act_t_2_0 --> state_configured
+    gate_t_3_0{{"has_config?"}}
+    state_configured -- "START_TRACE" --> gate_t_3_0
+    act_t_3_0[["start_trace"]]
+    gate_t_3_0 -- True --> act_t_3_0
+    act_t_3_0 --> state_tracing
+    act_t_4_0[["init_tracer, start_trace"]]
+    state_idle -- "START_TRACE" --> act_t_4_0
+    act_t_4_0 --> state_tracing
+    gate_t_5_0{{"has_trace?"}}
+    state_tracing -- "RECORD_SPAN" --> gate_t_5_0
+    act_t_5_0[["record_span"]]
+    gate_t_5_0 -- True --> act_t_5_0
+    act_t_5_0 --> state_tracing
+    gate_t_6_0{{"has_trace?"}}
+    state_tracing -- "START_SPAN" --> gate_t_6_0
+    act_t_6_0[["start_span"]]
+    gate_t_6_0 -- True --> act_t_6_0
+    act_t_6_0 --> state_tracing
+    gate_t_7_0{{"has_trace?"}}
+    state_tracing -- "END_SPAN" --> gate_t_7_0
+    act_t_7_0[["end_span"]]
+    gate_t_7_0 -- True --> act_t_7_0
+    act_t_7_0 --> state_tracing
+    gate_t_8_0{{"has_trace?"}}
+    state_tracing -- "STATE_CHANGE" --> gate_t_8_0
+    act_t_8_0[["record_state_change"]]
+    gate_t_8_0 -- True --> act_t_8_0
+    act_t_8_0 --> state_tracing
+    gate_t_9_0{{"has_trace?"}}
+    state_tracing -- "GATE_EVAL" --> gate_t_9_0
+    act_t_9_0[["record_gate_eval"]]
+    gate_t_9_0 -- True --> act_t_9_0
+    act_t_9_0 --> state_tracing
+    gate_t_10_0{{"has_trace?"}}
+    state_tracing -- "ACTION" --> gate_t_10_0
+    act_t_10_0[["record_action"]]
+    gate_t_10_0 -- True --> act_t_10_0
+    act_t_10_0 --> state_tracing
+    gate_t_11_0{{"has_trace?"}}
+    state_tracing -- "EVENT" --> gate_t_11_0
+    act_t_11_0[["record_event"]]
+    gate_t_11_0 -- True --> act_t_11_0
+    act_t_11_0 --> state_tracing
+    gate_t_12_0{{"has_trace?"}}
+    state_tracing -- "CONTEXT_CHANGE" --> gate_t_12_0
+    act_t_12_0[["record_context_change"]]
+    gate_t_12_0 -- True --> act_t_12_0
+    act_t_12_0 --> state_tracing
+    state_tracing -- "PAUSE" --> state_paused
+    state_paused -- "RESUME" --> state_tracing
+    gate_t_15_0{{"has_trace?"}}
+    state_tracing -- "END_TRACE" --> gate_t_15_0
+    act_t_15_0[["end_trace"]]
+    gate_t_15_0 -- True --> act_t_15_0
+    act_t_15_0 --> state_completed
+    gate_t_16_0{{"has_trace?"}}
+    state_paused -- "END_TRACE" --> gate_t_16_0
+    act_t_16_0[["end_trace"]]
+    gate_t_16_0 -- True --> act_t_16_0
+    act_t_16_0 --> state_completed
+    gate_t_17_0{{"has_spans?"}}
+    state_completed -- "FORMAT_OTLP" --> gate_t_17_0
+    act_t_17_0[["format_otlp"]]
+    gate_t_17_0 -- True --> act_t_17_0
+    act_t_17_0 --> state_completed
+    gate_t_18_0{{"has_spans?"}}
+    state_completed -- "FORMAT_JSONL" --> gate_t_18_0
+    act_t_18_0[["format_jsonl"]]
+    gate_t_18_0 -- True --> act_t_18_0
+    act_t_18_0 --> state_completed
+    gate_t_19_0{{"has_spans?"}}
+    state_completed -- "FORMAT_HUMAN" --> gate_t_19_0
+    act_t_19_0[["format_human"]]
+    gate_t_19_0 -- True --> act_t_19_0
+    act_t_19_0 --> state_completed
+    gate_t_20_0{{"has_spans?"}}
+    state_completed -- "FORMAT_TIMELINE" --> gate_t_20_0
+    act_t_20_0[["format_timeline"]]
+    gate_t_20_0 -- True --> act_t_20_0
+    act_t_20_0 --> state_completed
+    act_t_21_0[["export_trace"]]
+    state_completed -- "EXPORT" --> act_t_21_0
+    act_t_21_0 --> state_completed
+    gate_t_22_0{{"has_spans?"}}
+    state_completed -- "ANALYZE" --> gate_t_22_0
+    act_t_22_0[["analyze_trace"]]
+    gate_t_22_0 -- True --> act_t_22_0
+    act_t_22_0 --> state_completed
+    act_t_23_0[["render_status"]]
+    state_tracing -- "STATUS" --> act_t_23_0
+    act_t_23_0 --> state_tracing
+    act_t_24_0[["render_status"]]
+    state_paused -- "STATUS" --> act_t_24_0
+    act_t_24_0 --> state_paused
+    act_t_25_0[["render_status"]]
+    state_completed -- "STATUS" --> act_t_25_0
+    act_t_25_0 --> state_completed
+    act_t_26_0[["set_format"]]
+    state_configured -- "SET_FORMAT" --> act_t_26_0
+    act_t_26_0 --> state_configured
+    act_t_27_0[["set_format"]]
+    state_completed -- "SET_FORMAT" --> act_t_27_0
+    act_t_27_0 --> state_completed
+    act_t_28_0[["clear_trace"]]
+    state_completed -- "CLEAR" --> act_t_28_0
+    act_t_28_0 --> state_configured
+    gate_t_29_0{{"has_config?"}}
+    state_completed -- "START_TRACE" --> gate_t_29_0
+    act_t_29_0[["clear_trace, start_trace"]]
+    gate_t_29_0 -- True --> act_t_29_0
+    act_t_29_0 --> state_tracing
+    act_t_30_0[["clear_trace"]]
+    state_configured -- "RESET" --> act_t_30_0
+    act_t_30_0 --> state_idle
+    act_t_31_0[["clear_trace"]]
+    state_tracing -- "RESET" --> act_t_31_0
+    act_t_31_0 --> state_idle
+    act_t_32_0[["clear_trace"]]
+    state_completed -- "RESET" --> act_t_32_0
+    act_t_32_0 --> state_idle
+    act_t_33_0[["clear_error, clear_trace"]]
+    state_error -- "CLEAR" --> act_t_33_0
+    act_t_33_0 --> state_idle
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

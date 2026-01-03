@@ -1,0 +1,92 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>No blueprint loaded, waiting for input"]):::entry
+    state_error(["<b>error</b><br/>Error state"])
+    state_loaded(["<b>loaded</b><br/>Blueprint loaded, ready to visualize"])
+    state_viewing(["<b>viewing</b><br/>Actively viewing/exploring the blueprint"])
+    act_t_0_0[["load_blueprint, init_defaults"]]
+    state_idle -- "LOAD" --> act_t_0_0
+    act_t_0_0 --> state_loaded
+    act_t_1_0[["set_error"]]
+    state_idle -- "LOAD_FAILED" --> act_t_1_0
+    act_t_1_0 --> state_error
+    act_t_2_0[["load_blueprint"]]
+    state_loaded -- "LOAD" --> act_t_2_0
+    act_t_2_0 --> state_loaded
+    act_t_3_0[["load_blueprint, clear_selection"]]
+    state_viewing -- "LOAD" --> act_t_3_0
+    act_t_3_0 --> state_loaded
+    act_t_4_0[["render_graph"]]
+    state_loaded -- "VIEW" --> act_t_4_0
+    act_t_4_0 --> state_viewing
+    act_t_5_0[["set_view_graph, render_graph"]]
+    state_viewing -- "VIEW_GRAPH" --> act_t_5_0
+    act_t_5_0 --> state_viewing
+    act_t_6_0[["set_view_table, render_table"]]
+    state_viewing -- "VIEW_TABLE" --> act_t_6_0
+    act_t_6_0 --> state_viewing
+    act_t_7_0[["set_view_mermaid, render_mermaid"]]
+    state_viewing -- "VIEW_MERMAID" --> act_t_7_0
+    act_t_7_0 --> state_viewing
+    act_t_8_0[["select_node"]]
+    state_viewing -- "SELECT" --> act_t_8_0
+    act_t_8_0 --> state_viewing
+    act_t_9_0[["clear_selection"]]
+    state_viewing -- "DESELECT" --> act_t_9_0
+    act_t_9_0 --> state_viewing
+    act_t_10_0[["zoom_in"]]
+    state_viewing -- "ZOOM_IN" --> act_t_10_0
+    act_t_10_0 --> state_viewing
+    act_t_11_0[["zoom_out"]]
+    state_viewing -- "ZOOM_OUT" --> act_t_11_0
+    act_t_11_0 --> state_viewing
+    act_t_12_0[["toggle_gates"]]
+    state_viewing -- "TOGGLE_GATES" --> act_t_12_0
+    act_t_12_0 --> state_viewing
+    act_t_13_0[["toggle_actions"]]
+    state_viewing -- "TOGGLE_ACTIONS" --> act_t_13_0
+    act_t_13_0 --> state_viewing
+    act_t_14_0[["clear_selection"]]
+    state_viewing -- "BACK" --> act_t_14_0
+    act_t_14_0 --> state_loaded
+    act_t_15_0[["unload_blueprint"]]
+    state_loaded -- "UNLOAD" --> act_t_15_0
+    act_t_15_0 --> state_idle
+    act_t_16_0[["unload_blueprint, clear_selection"]]
+    state_viewing -- "UNLOAD" --> act_t_16_0
+    act_t_16_0 --> state_idle
+    act_t_17_0[["generate_readme, write_readme"]]
+    state_loaded -- "EXPORT_README" --> act_t_17_0
+    act_t_17_0 --> state_loaded
+    act_t_18_0[["generate_readme, write_readme"]]
+    state_viewing -- "EXPORT_README" --> act_t_18_0
+    act_t_18_0 --> state_viewing
+    act_t_19_0[["clear_error"]]
+    state_error -- "CLEAR" --> act_t_19_0
+    act_t_19_0 --> state_idle
+    act_t_20_0[["load_tree, init_defaults"]]
+    state_idle -- "LOAD_TREE" --> act_t_20_0
+    act_t_20_0 --> state_loaded
+    act_t_21_0[["set_tree"]]
+    state_loaded -- "SET_TREE" --> act_t_21_0
+    act_t_21_0 --> state_loaded
+    gate_t_22_0{{"has_tree?"}}
+    state_loaded -- "VIEW_TREE" --> gate_t_22_0
+    act_t_22_0[["set_view_tree, render_tree"]]
+    gate_t_22_0 -- True --> act_t_22_0
+    act_t_22_0 --> state_viewing
+    gate_t_23_0{{"has_tree?"}}
+    state_viewing -- "VIEW_TREE" --> gate_t_23_0
+    act_t_23_0[["set_view_tree, render_tree"]]
+    gate_t_23_0 -- True --> act_t_23_0
+    act_t_23_0 --> state_viewing
+    gate_t_24_0{{"has_tree?"}}
+    state_viewing -- "VIEW_TREE_MERMAID" --> gate_t_24_0
+    act_t_24_0[["set_view_tree_mermaid, render_tree_mermaid"]]
+    gate_t_24_0 -- True --> act_t_24_0
+    act_t_24_0 --> state_viewing
+    act_t_25_0[["unload_tree"]]
+    state_viewing -- "UNLOAD_TREE" --> act_t_25_0
+    act_t_25_0 --> state_loaded
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

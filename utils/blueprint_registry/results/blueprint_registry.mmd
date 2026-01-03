@@ -1,0 +1,146 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>No registry loaded, waiting for initialization"]):::entry
+    state_error(["<b>error</b><br/>Error state"])
+    state_ready(["<b>ready</b><br/>Registry loaded and ready for operations"])
+    state_searching(["<b>searching</b><br/>Displaying search results"])
+    state_viewing(["<b>viewing</b><br/>Viewing a specific blueprint"])
+    state_comparing(["<b>comparing</b><br/>Comparing two versions"])
+    act_t_0_0[["init_registry, save_registry"]]
+    state_idle -- "INIT" --> act_t_0_0
+    act_t_0_0 --> state_ready
+    act_t_1_0[["load_registry"]]
+    state_idle -- "LOAD" --> act_t_1_0
+    act_t_1_0 --> state_ready
+    act_t_2_0[["load_registry"]]
+    state_ready -- "LOAD" --> act_t_2_0
+    act_t_2_0 --> state_ready
+    gate_t_3_0{{"has_registry?"}}
+    state_ready -- "REGISTER" --> gate_t_3_0
+    act_t_3_0[["register_blueprint, save_registry"]]
+    gate_t_3_0 -- True --> act_t_3_0
+    act_t_3_0 --> state_ready
+    gate_t_4_0{{"has_registry, has_permission?"}}
+    state_ready -- "UPDATE" --> gate_t_4_0
+    act_t_4_0[["update_blueprint, save_registry, log_update"]]
+    gate_t_4_0 -- True --> act_t_4_0
+    act_t_4_0 --> state_ready
+    gate_t_5_0{{"has_current, has_permission?"}}
+    state_viewing -- "UPDATE" --> gate_t_5_0
+    act_t_5_0[["update_blueprint, save_registry, log_update"]]
+    gate_t_5_0 -- True --> act_t_5_0
+    act_t_5_0 --> state_viewing
+    gate_t_6_0{{"has_registry?"}}
+    state_ready -- "GET" --> gate_t_6_0
+    act_t_6_0[["get_blueprint"]]
+    gate_t_6_0 -- True --> act_t_6_0
+    act_t_6_0 --> state_viewing
+    act_t_7_0[["get_blueprint"]]
+    state_viewing -- "GET" --> act_t_7_0
+    act_t_7_0 --> state_viewing
+    gate_t_8_0{{"has_registry?"}}
+    state_ready -- "LIST" --> gate_t_8_0
+    act_t_8_0[["list_blueprints"]]
+    gate_t_8_0 -- True --> act_t_8_0
+    act_t_8_0 --> state_searching
+    gate_t_9_0{{"has_registry?"}}
+    state_ready -- "SEARCH" --> gate_t_9_0
+    act_t_9_0[["search_blueprints"]]
+    gate_t_9_0 -- True --> act_t_9_0
+    act_t_9_0 --> state_searching
+    act_t_10_0[["search_blueprints"]]
+    state_searching -- "SEARCH" --> act_t_10_0
+    act_t_10_0 --> state_searching
+    gate_t_11_0{{"has_search_results?"}}
+    state_searching -- "SELECT" --> gate_t_11_0
+    act_t_11_0[["get_blueprint"]]
+    gate_t_11_0 -- True --> act_t_11_0
+    act_t_11_0 --> state_viewing
+    gate_t_12_0{{"has_current?"}}
+    state_viewing -- "VERSIONS" --> gate_t_12_0
+    act_t_12_0[["get_versions"]]
+    gate_t_12_0 -- True --> act_t_12_0
+    act_t_12_0 --> state_viewing
+    gate_t_13_0{{"has_versions?"}}
+    state_viewing -- "COMPARE" --> gate_t_13_0
+    act_t_13_0[["compare_versions"]]
+    gate_t_13_0 -- True --> act_t_13_0
+    act_t_13_0 --> state_comparing
+    act_t_14_0[["compare_versions"]]
+    state_comparing -- "COMPARE" --> act_t_14_0
+    act_t_14_0 --> state_comparing
+    gate_t_15_0{{"has_versions?"}}
+    state_viewing -- "ROLLBACK" --> gate_t_15_0
+    act_t_15_0[["rollback_version, save_registry"]]
+    gate_t_15_0 -- True --> act_t_15_0
+    act_t_15_0 --> state_viewing
+    gate_t_16_0{{"has_current?"}}
+    state_viewing -- "DEPS" --> gate_t_16_0
+    act_t_16_0[["get_dependencies"]]
+    gate_t_16_0 -- True --> act_t_16_0
+    act_t_16_0 --> state_viewing
+    gate_t_17_0{{"has_current?"}}
+    state_viewing -- "CHECK_DEPS" --> gate_t_17_0
+    act_t_17_0[["check_circular_deps"]]
+    gate_t_17_0 -- True --> act_t_17_0
+    act_t_17_0 --> state_viewing
+    gate_t_18_0{{"has_current, not_deprecated?"}}
+    state_viewing -- "DEPRECATE" --> gate_t_18_0
+    act_t_18_0[["deprecate_blueprint, save_registry"]]
+    gate_t_18_0 -- True --> act_t_18_0
+    act_t_18_0 --> state_viewing
+    gate_t_19_0{{"has_current, has_permission?"}}
+    state_viewing -- "DELETE" --> gate_t_19_0
+    act_t_19_0[["delete_blueprint, save_registry, clear_current, log_delete"]]
+    gate_t_19_0 -- True --> act_t_19_0
+    act_t_19_0 --> state_ready
+    gate_t_20_0{{"has_registry, has_permission?"}}
+    state_ready -- "DELETE" --> gate_t_20_0
+    act_t_20_0[["delete_blueprint, save_registry, log_delete"]]
+    gate_t_20_0 -- True --> act_t_20_0
+    act_t_20_0 --> state_ready
+    gate_t_21_0{{"has_registry?"}}
+    state_ready -- "EXPORT" --> gate_t_21_0
+    act_t_21_0[["export_registry"]]
+    gate_t_21_0 -- True --> act_t_21_0
+    act_t_21_0 --> state_ready
+    act_t_22_0[["export_registry"]]
+    state_viewing -- "EXPORT" --> act_t_22_0
+    act_t_22_0 --> state_viewing
+    gate_t_23_0{{"has_registry?"}}
+    state_ready -- "STATS" --> gate_t_23_0
+    act_t_23_0[["get_stats"]]
+    gate_t_23_0 -- True --> act_t_23_0
+    act_t_23_0 --> state_ready
+    act_t_24_0[["clear_current"]]
+    state_viewing -- "BACK" --> act_t_24_0
+    act_t_24_0 --> state_ready
+    act_t_25_0[["clear_search"]]
+    state_searching -- "BACK" --> act_t_25_0
+    act_t_25_0 --> state_ready
+    act_t_26_0[["clear_diff"]]
+    state_comparing -- "BACK" --> act_t_26_0
+    act_t_26_0 --> state_viewing
+    act_t_27_0[["clear_error"]]
+    state_error -- "CLEAR" --> act_t_27_0
+    act_t_27_0 --> state_idle
+    act_t_28_0[["set_error"]]
+    state_idle -- "LOAD_FAILED" --> act_t_28_0
+    act_t_28_0 --> state_error
+    act_t_28_1[["set_error"]]
+    state_error -- "LOAD_FAILED" --> act_t_28_1
+    act_t_28_1 --> state_error
+    act_t_28_2[["set_error"]]
+    state_ready -- "LOAD_FAILED" --> act_t_28_2
+    act_t_28_2 --> state_error
+    act_t_28_3[["set_error"]]
+    state_searching -- "LOAD_FAILED" --> act_t_28_3
+    act_t_28_3 --> state_error
+    act_t_28_4[["set_error"]]
+    state_viewing -- "LOAD_FAILED" --> act_t_28_4
+    act_t_28_4 --> state_error
+    act_t_28_5[["set_error"]]
+    state_comparing -- "LOAD_FAILED" --> act_t_28_5
+    act_t_28_5 --> state_error
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

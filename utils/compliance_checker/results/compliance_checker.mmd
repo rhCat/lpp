@@ -1,0 +1,110 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>No blueprint loaded, waiting for input"]):::entry
+    state_blueprint_loaded(["<b>blueprint_loaded</b><br/>Blueprint loaded, ready to load policies"])
+    state_error(["<b>error</b><br/>Error state"])
+    state_ready(["<b>ready</b><br/>Blueprint and policies loaded, ready to check"])
+    state_checking(["<b>checking</b><br/>Running compliance checks"])
+    state_report_ready(["<b>report_ready</b><br/>Compliance report generated"])
+    gate_t_0_0{{"no_blueprint?"}}
+    state_idle -- "LOAD_BLUEPRINT" --> gate_t_0_0
+    act_t_0_0[["load_blueprint"]]
+    gate_t_0_0 -- True --> act_t_0_0
+    act_t_0_0 --> state_blueprint_loaded
+    act_t_1_0[["set_error"]]
+    state_idle -- "LOAD_FAILED" --> act_t_1_0
+    act_t_1_0 --> state_error
+    act_t_2_0[["load_blueprint, clear_findings, clear_report"]]
+    state_blueprint_loaded -- "LOAD_BLUEPRINT" --> act_t_2_0
+    act_t_2_0 --> state_blueprint_loaded
+    act_t_3_0[["load_blueprint, clear_findings, clear_report"]]
+    state_ready -- "LOAD_BLUEPRINT" --> act_t_3_0
+    act_t_3_0 --> state_ready
+    act_t_4_0[["load_blueprint, clear_findings, clear_report"]]
+    state_report_ready -- "LOAD_BLUEPRINT" --> act_t_4_0
+    act_t_4_0 --> state_ready
+    gate_t_5_0{{"has_blueprint?"}}
+    state_blueprint_loaded -- "LOAD_POLICIES" --> gate_t_5_0
+    act_t_5_0[["load_policies"]]
+    gate_t_5_0 -- True --> act_t_5_0
+    act_t_5_0 --> state_ready
+    gate_t_6_0{{"has_blueprint?"}}
+    state_blueprint_loaded -- "LOAD_POLICY" --> gate_t_6_0
+    act_t_6_0[["load_policy"]]
+    gate_t_6_0 -- True --> act_t_6_0
+    act_t_6_0 --> state_ready
+    act_t_7_0[["load_policies, clear_findings, clear_report"]]
+    state_ready -- "LOAD_POLICIES" --> act_t_7_0
+    act_t_7_0 --> state_ready
+    act_t_8_0[["load_policies, clear_findings, clear_report"]]
+    state_report_ready -- "LOAD_POLICIES" --> act_t_8_0
+    act_t_8_0 --> state_ready
+    act_t_9_0[["load_policy"]]
+    state_ready -- "LOAD_POLICY" --> act_t_9_0
+    act_t_9_0 --> state_ready
+    gate_t_10_0{{"has_blueprint, has_policies?"}}
+    state_ready -- "CHECK" --> gate_t_10_0
+    act_t_10_0[["check_all_policies"]]
+    gate_t_10_0 -- True --> act_t_10_0
+    act_t_10_0 --> state_checking
+    gate_t_11_0{{"has_blueprint?"}}
+    state_ready -- "CHECK_POLICY" --> gate_t_11_0
+    act_t_11_0[["check_policy"]]
+    gate_t_11_0 -- True --> act_t_11_0
+    act_t_11_0 --> state_checking
+    gate_t_12_0{{"has_findings?"}}
+    state_checking -- "GENERATE_REPORT" --> gate_t_12_0
+    act_t_12_0[["generate_report"]]
+    gate_t_12_0 -- True --> act_t_12_0
+    act_t_12_0 --> state_report_ready
+    act_t_13_0[["generate_report"]]
+    state_checking -- "AUTO" --> act_t_13_0
+    act_t_13_0 --> state_report_ready
+    gate_t_14_0{{"has_report?"}}
+    state_report_ready -- "EXPORT" --> gate_t_14_0
+    act_t_14_0[["export_report"]]
+    gate_t_14_0 -- True --> act_t_14_0
+    act_t_14_0 --> state_report_ready
+    gate_t_15_0{{"has_blueprint, has_policies?"}}
+    state_report_ready -- "CHECK" --> gate_t_15_0
+    act_t_15_0[["clear_report, check_all_policies"]]
+    gate_t_15_0 -- True --> act_t_15_0
+    act_t_15_0 --> state_checking
+    act_t_16_0[["clear_report"]]
+    state_report_ready -- "BACK" --> act_t_16_0
+    act_t_16_0 --> state_ready
+    act_t_17_0[["unload_policies, clear_findings"]]
+    state_ready -- "BACK" --> act_t_17_0
+    act_t_17_0 --> state_blueprint_loaded
+    act_t_18_0[["unload_blueprint"]]
+    state_blueprint_loaded -- "UNLOAD" --> act_t_18_0
+    act_t_18_0 --> state_idle
+    act_t_19_0[["unload_blueprint, unload_policies, clear_findings"]]
+    state_ready -- "UNLOAD" --> act_t_19_0
+    act_t_19_0 --> state_idle
+    act_t_20_0[["unload_blueprint, unload_policies, clear_findings, clear_report"]]
+    state_report_ready -- "UNLOAD" --> act_t_20_0
+    act_t_20_0 --> state_idle
+    act_t_21_0[["clear_error"]]
+    state_error -- "CLEAR" --> act_t_21_0
+    act_t_21_0 --> state_idle
+    act_t_22_0[["set_error"]]
+    state_idle -- "ERROR" --> act_t_22_0
+    act_t_22_0 --> state_error
+    act_t_22_1[["set_error"]]
+    state_blueprint_loaded -- "ERROR" --> act_t_22_1
+    act_t_22_1 --> state_error
+    act_t_22_2[["set_error"]]
+    state_error -- "ERROR" --> act_t_22_2
+    act_t_22_2 --> state_error
+    act_t_22_3[["set_error"]]
+    state_ready -- "ERROR" --> act_t_22_3
+    act_t_22_3 --> state_error
+    act_t_22_4[["set_error"]]
+    state_checking -- "ERROR" --> act_t_22_4
+    act_t_22_4 --> state_error
+    act_t_22_5[["set_error"]]
+    state_report_ready -- "ERROR" --> act_t_22_5
+    act_t_22_5 --> state_error
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

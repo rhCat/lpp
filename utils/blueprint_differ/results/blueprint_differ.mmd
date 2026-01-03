@@ -1,0 +1,143 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>No blueprints loaded, waiting for input"]):::entry
+    state_error(["<b>error</b><br/>Error state"])
+    state_left_loaded(["<b>left_loaded</b><br/>Left blueprint loaded, waiting for right"])
+    state_ready(["<b>ready</b><br/>Both blueprints loaded, ready to diff/merge"])
+    state_diff_complete(["<b>diff_complete</b><br/>Diff computed, results available"])
+    state_diffing(["<b>diffing</b><br/>Computing semantic diff"])
+    state_merge_complete(["<b>merge_complete</b><br/>Merge complete, result available"])
+    state_merging(["<b>merging</b><br/>Performing merge operation"])
+    state_conflict(["<b>conflict</b><br/>Merge conflicts detected, awaiting resolution"])
+    act_t_0_0[["load_left"]]
+    state_idle -- "LOAD_LEFT" --> act_t_0_0
+    act_t_0_0 --> state_left_loaded
+    act_t_1_0[["load_right"]]
+    state_left_loaded -- "LOAD_RIGHT" --> act_t_1_0
+    act_t_1_0 --> state_ready
+    act_t_2_0[["load_base"]]
+    state_ready -- "LOAD_BASE" --> act_t_2_0
+    act_t_2_0 --> state_ready
+    act_t_3_0[["load_left, clear_diff, clear_merge"]]
+    state_ready -- "LOAD_LEFT" --> act_t_3_0
+    act_t_3_0 --> state_ready
+    act_t_4_0[["load_right, clear_diff, clear_merge"]]
+    state_ready -- "LOAD_RIGHT" --> act_t_4_0
+    act_t_4_0 --> state_ready
+    gate_t_5_0{{"has_both?"}}
+    state_ready -- "DIFF" --> gate_t_5_0
+    act_t_5_0[["compute_diff"]]
+    gate_t_5_0 -- True --> act_t_5_0
+    act_t_5_0 --> state_diffing
+    act_t_6_0[["format_diff_unified"]]
+    state_diffing -- "DIFF_DONE" --> act_t_6_0
+    act_t_6_0 --> state_diff_complete
+    gate_t_7_0{{"has_both?"}}
+    state_ready -- "DIFF_ALL" --> gate_t_7_0
+    act_t_7_0[["compute_diff, format_diff_unified"]]
+    gate_t_7_0 -- True --> act_t_7_0
+    act_t_7_0 --> state_diff_complete
+    gate_t_8_0{{"has_diff?"}}
+    state_diff_complete -- "SHOW_SUMMARY" --> gate_t_8_0
+    act_t_8_0[["format_diff_summary"]]
+    gate_t_8_0 -- True --> act_t_8_0
+    act_t_8_0 --> state_diff_complete
+    gate_t_9_0{{"has_diff?"}}
+    state_diff_complete -- "SHOW_UNIFIED" --> gate_t_9_0
+    act_t_9_0[["format_diff_unified"]]
+    gate_t_9_0 -- True --> act_t_9_0
+    act_t_9_0 --> state_diff_complete
+    gate_t_10_0{{"has_diff?"}}
+    state_diff_complete -- "SHOW_PATCH" --> gate_t_10_0
+    act_t_10_0[["generate_json_patch"]]
+    gate_t_10_0 -- True --> act_t_10_0
+    act_t_10_0 --> state_diff_complete
+    gate_t_11_0{{"has_diff?"}}
+    state_diff_complete -- "MERGE" --> gate_t_11_0
+    act_t_11_0[["detect_conflicts"]]
+    gate_t_11_0 -- True --> act_t_11_0
+    act_t_11_0 --> state_merging
+    gate_t_12_0{{"no_conflicts?"}}
+    state_merging -- "MERGE_AUTO" --> gate_t_12_0
+    act_t_12_0[["merge_auto"]]
+    gate_t_12_0 -- True --> act_t_12_0
+    act_t_12_0 --> state_merge_complete
+    gate_t_13_0{{"has_conflicts?"}}
+    state_merging -- "CONFLICT_DETECTED" --> gate_t_13_0
+    act_t_13_0[["set_strategy_manual"]]
+    gate_t_13_0 -- True --> act_t_13_0
+    act_t_13_0 --> state_conflict
+    act_t_14_0[["merge_take_left"]]
+    state_conflict -- "TAKE_LEFT" --> act_t_14_0
+    act_t_14_0 --> state_merge_complete
+    act_t_15_0[["merge_take_right"]]
+    state_conflict -- "TAKE_RIGHT" --> act_t_15_0
+    act_t_15_0 --> state_merge_complete
+    gate_t_16_0{{"has_diff?"}}
+    state_diff_complete -- "MERGE_LEFT" --> gate_t_16_0
+    act_t_16_0[["detect_conflicts, merge_take_left"]]
+    gate_t_16_0 -- True --> act_t_16_0
+    act_t_16_0 --> state_merge_complete
+    gate_t_17_0{{"has_diff?"}}
+    state_diff_complete -- "MERGE_RIGHT" --> gate_t_17_0
+    act_t_17_0[["detect_conflicts, merge_take_right"]]
+    gate_t_17_0 -- True --> act_t_17_0
+    act_t_17_0 --> state_merge_complete
+    gate_t_18_0{{"has_merged?"}}
+    state_merge_complete -- "EXPORT" --> gate_t_18_0
+    act_t_18_0[["export_merged"]]
+    gate_t_18_0 -- True --> act_t_18_0
+    act_t_18_0 --> state_merge_complete
+    act_t_19_0[["clear_merge"]]
+    state_merge_complete -- "BACK" --> act_t_19_0
+    act_t_19_0 --> state_diff_complete
+    act_t_20_0[["clear_merge"]]
+    state_conflict -- "BACK" --> act_t_20_0
+    act_t_20_0 --> state_diff_complete
+    act_t_21_0[["compute_diff, format_diff_unified"]]
+    state_diff_complete -- "DIFF_ALL" --> act_t_21_0
+    act_t_21_0 --> state_diff_complete
+    act_t_22_0[["clear_diff, clear_merge"]]
+    state_diff_complete -- "RESET" --> act_t_22_0
+    act_t_22_0 --> state_ready
+    act_t_23_0[["clear_all"]]
+    state_ready -- "CLEAR" --> act_t_23_0
+    act_t_23_0 --> state_idle
+    act_t_24_0[["clear_all"]]
+    state_diff_complete -- "CLEAR" --> act_t_24_0
+    act_t_24_0 --> state_idle
+    act_t_25_0[["clear_all"]]
+    state_merge_complete -- "CLEAR" --> act_t_25_0
+    act_t_25_0 --> state_idle
+    act_t_26_0[["clear_error, clear_all"]]
+    state_error -- "CLEAR" --> act_t_26_0
+    act_t_26_0 --> state_idle
+    act_t_27_0[["set_error"]]
+    state_idle -- "LOAD_FAILED" --> act_t_27_0
+    act_t_27_0 --> state_error
+    act_t_27_1[["set_error"]]
+    state_error -- "LOAD_FAILED" --> act_t_27_1
+    act_t_27_1 --> state_error
+    act_t_27_2[["set_error"]]
+    state_left_loaded -- "LOAD_FAILED" --> act_t_27_2
+    act_t_27_2 --> state_error
+    act_t_27_3[["set_error"]]
+    state_ready -- "LOAD_FAILED" --> act_t_27_3
+    act_t_27_3 --> state_error
+    act_t_27_4[["set_error"]]
+    state_diff_complete -- "LOAD_FAILED" --> act_t_27_4
+    act_t_27_4 --> state_error
+    act_t_27_5[["set_error"]]
+    state_diffing -- "LOAD_FAILED" --> act_t_27_5
+    act_t_27_5 --> state_error
+    act_t_27_6[["set_error"]]
+    state_merge_complete -- "LOAD_FAILED" --> act_t_27_6
+    act_t_27_6 --> state_error
+    act_t_27_7[["set_error"]]
+    state_merging -- "LOAD_FAILED" --> act_t_27_7
+    act_t_27_7 --> state_error
+    act_t_27_8[["set_error"]]
+    state_conflict -- "LOAD_FAILED" --> act_t_27_8
+    act_t_27_8 --> state_error
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

@@ -1,0 +1,130 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>No blueprint loaded, waiting for input"]):::entry
+    state_batch_mode(["<b>batch_mode</b><br/>Processing batch migration"])
+    state_error(["<b>error</b><br/>Error state"])
+    state_loaded(["<b>loaded</b><br/>Blueprint loaded, version detected"])
+    state_complete(["<b>complete</b><br/>Migration complete, ready to export"])
+    state_planned(["<b>planned</b><br/>Migration plan ready, awaiting execution"])
+    state_planning(["<b>planning</b><br/>Planning migration path"])
+    state_migrating(["<b>migrating</b><br/>Applying migration steps"])
+    state_validating(["<b>validating</b><br/>Validating migrated blueprint"])
+    gate_t_0_0{{"no_blueprint?"}}
+    state_idle -- "LOAD" --> gate_t_0_0
+    act_t_0_0[["load_blueprint, detect_version, list_migrations"]]
+    gate_t_0_0 -- True --> act_t_0_0
+    act_t_0_0 --> state_loaded
+    act_t_1_0[["set_error"]]
+    state_idle -- "LOAD_FAILED" --> act_t_1_0
+    act_t_1_0 --> state_error
+    act_t_2_0[["load_blueprint, detect_version, clear_migration"]]
+    state_loaded -- "LOAD" --> act_t_2_0
+    act_t_2_0 --> state_loaded
+    act_t_3_0[["load_blueprint, detect_version, clear_migration"]]
+    state_complete -- "LOAD" --> act_t_3_0
+    act_t_3_0 --> state_loaded
+    gate_t_4_0{{"has_blueprint?"}}
+    state_loaded -- "SET_TARGET" --> gate_t_4_0
+    act_t_4_0[["set_target_version"]]
+    gate_t_4_0 -- True --> act_t_4_0
+    act_t_4_0 --> state_planning
+    gate_t_5_0{{"has_blueprint?"}}
+    state_loaded -- "MIGRATE_LATEST" --> gate_t_5_0
+    act_t_5_0[["set_target_latest"]]
+    gate_t_5_0 -- True --> act_t_5_0
+    act_t_5_0 --> state_planning
+    act_t_6_0[["plan_migration, analyze_changes"]]
+    state_planning -- "PLAN" --> act_t_6_0
+    act_t_6_0 --> state_planned
+    gate_t_7_0{{"has_blueprint?"}}
+    state_loaded -- "PLAN_TO" --> gate_t_7_0
+    act_t_7_0[["set_target_version, plan_migration, analyze_changes"]]
+    gate_t_7_0 -- True --> act_t_7_0
+    act_t_7_0 --> state_planned
+    gate_t_8_0{{"has_blueprint?"}}
+    state_loaded -- "PLAN_LATEST" --> gate_t_8_0
+    act_t_8_0[["set_target_latest, plan_migration, analyze_changes"]]
+    gate_t_8_0 -- True --> act_t_8_0
+    act_t_8_0 --> state_planned
+    gate_t_9_0{{"has_migration_plan?"}}
+    state_planned -- "DRY_RUN" --> gate_t_9_0
+    act_t_9_0[["set_dry_run_on, dry_run, generate_report"]]
+    gate_t_9_0 -- True --> act_t_9_0
+    act_t_9_0 --> state_complete
+    gate_t_10_0{{"has_migration_plan?"}}
+    state_planned -- "EXECUTE" --> gate_t_10_0
+    act_t_10_0[["set_dry_run_off, apply_migration"]]
+    gate_t_10_0 -- True --> act_t_10_0
+    act_t_10_0 --> state_migrating
+    gate_t_11_0{{"has_migrated_blueprint?"}}
+    state_migrating -- "VALIDATE" --> gate_t_11_0
+    act_t_11_0[["validate_blueprint"]]
+    gate_t_11_0 -- True --> act_t_11_0
+    act_t_11_0 --> state_validating
+    gate_t_12_0{{"has_migrated_blueprint?"}}
+    state_migrating -- "AUTO_CONTINUE" --> gate_t_12_0
+    act_t_12_0[["validate_blueprint"]]
+    gate_t_12_0 -- True --> act_t_12_0
+    act_t_12_0 --> state_validating
+    gate_t_13_0{{"validation_passed?"}}
+    state_validating -- "FINALIZE" --> gate_t_13_0
+    act_t_13_0[["generate_report"]]
+    gate_t_13_0 -- True --> act_t_13_0
+    act_t_13_0 --> state_complete
+    act_t_14_0[["generate_report"]]
+    state_validating -- "FORCE_FINALIZE" --> act_t_14_0
+    act_t_14_0 --> state_complete
+    gate_t_15_0{{"has_blueprint?"}}
+    state_loaded -- "MIGRATE_ALL" --> gate_t_15_0
+    act_t_15_0[["set_target_latest, plan_migration, analyze_changes, set_dry_run_off, apply_migration, validate_blueprint, generate_report"]]
+    gate_t_15_0 -- True --> act_t_15_0
+    act_t_15_0 --> state_complete
+    gate_t_16_0{{"has_blueprint?"}}
+    state_loaded -- "PREVIEW_ALL" --> gate_t_16_0
+    act_t_16_0[["set_target_latest, plan_migration, analyze_changes, set_dry_run_on, dry_run, generate_report"]]
+    gate_t_16_0 -- True --> act_t_16_0
+    act_t_16_0 --> state_complete
+    gate_t_17_0{{"has_migrated_blueprint?"}}
+    state_complete -- "EXPORT" --> gate_t_17_0
+    act_t_17_0[["export_migrated"]]
+    gate_t_17_0 -- True --> act_t_17_0
+    act_t_17_0 --> state_complete
+    act_t_18_0[["set_batch_paths, set_target_latest"]]
+    state_idle -- "BATCH" --> act_t_18_0
+    act_t_18_0 --> state_batch_mode
+    act_t_19_0[["set_batch_paths, set_target_version"]]
+    state_idle -- "BATCH_TO" --> act_t_19_0
+    act_t_19_0 --> state_batch_mode
+    gate_t_20_0{{"has_batch_paths?"}}
+    state_batch_mode -- "RUN_BATCH" --> gate_t_20_0
+    act_t_20_0[["batch_migrate, generate_report"]]
+    gate_t_20_0 -- True --> act_t_20_0
+    act_t_20_0 --> state_complete
+    act_t_21_0[["clear_migration"]]
+    state_planned -- "BACK" --> act_t_21_0
+    act_t_21_0 --> state_loaded
+    act_t_22_0[["clear_migration"]]
+    state_complete -- "BACK" --> act_t_22_0
+    act_t_22_0 --> state_loaded
+    act_t_23_0[["clear_migration"]]
+    state_planned -- "REPLAN" --> act_t_23_0
+    act_t_23_0 --> state_planning
+    act_t_24_0[["unload_blueprint"]]
+    state_loaded -- "UNLOAD" --> act_t_24_0
+    act_t_24_0 --> state_idle
+    act_t_25_0[["unload_blueprint"]]
+    state_complete -- "UNLOAD" --> act_t_25_0
+    act_t_25_0 --> state_idle
+    act_t_26_0[["unload_blueprint"]]
+    state_planned -- "UNLOAD" --> act_t_26_0
+    act_t_26_0 --> state_idle
+    act_t_27_0[["clear_error, unload_blueprint"]]
+    state_error -- "CLEAR" --> act_t_27_0
+    act_t_27_0 --> state_idle
+    gate_t_28_0{{"has_blueprint?"}}
+    state_error -- "RETRY" --> gate_t_28_0
+    act_t_28_0[["clear_error"]]
+    gate_t_28_0 -- True --> act_t_28_0
+    act_t_28_0 --> state_loaded
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

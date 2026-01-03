@@ -1,0 +1,148 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>Ready to receive blueprint for certification"]):::entry
+    state_error(["<b>error</b><br/>Error during certification process"])
+    state_loading(["<b>loading</b><br/>Loading and parsing blueprint"])
+    state_auditing(["<b>auditing</b><br/>Auditing Trinity and Flange structure"])
+    state_generating_tla(["<b>generating_tla</b><br/>Generating TLA+ specification"])
+    state_rejected(["<b>rejected</b><br/>Blueprint failed verification"]):::terminal
+    state_tlc_verifying(["<b>tlc_verifying</b><br/>Running TLC model checker (empirical)"])
+    state_tlc_verified(["<b>tlc_verified</b><br/>TLC verification passed"])
+    state_certified(["<b>certified</b><br/>TLAPS certification complete - Seal granted"]):::terminal
+    state_tlaps_proving(["<b>tlaps_proving</b><br/>Running TLAPS theorem prover (axiomatic)"])
+    act_t_0_0[["setPath"]]
+    state_idle -- "CERTIFY" --> act_t_0_0
+    act_t_0_0 --> state_loading
+    gate_t_1_0{{"noError?"}}
+    state_loading -- "AUTO" --> gate_t_1_0
+    act_t_1_0[["loadBlueprint"]]
+    gate_t_1_0 -- True --> act_t_1_0
+    act_t_1_0 --> state_auditing
+    gate_t_2_0{{"hasBlueprint, noError?"}}
+    state_auditing -- "AUTO" --> gate_t_2_0
+    act_t_2_0[["auditTrinity, auditFlange"]]
+    gate_t_2_0 -- True --> act_t_2_0
+    act_t_2_0 --> state_generating_tla
+    gate_t_3_0{{"trinityValid, flangeValid, noError?"}}
+    state_generating_tla -- "AUTO" --> gate_t_3_0
+    act_t_3_0[["generateTla"]]
+    gate_t_3_0 -- True --> act_t_3_0
+    act_t_3_0 --> state_tlc_verifying
+    gate_t_4_0{{"hasTlaSpec, noError?"}}
+    state_tlc_verifying -- "AUTO" --> gate_t_4_0
+    act_t_4_0[["runTlc"]]
+    gate_t_4_0 -- True --> act_t_4_0
+    act_t_4_0 --> state_tlc_verified
+    gate_t_5_0{{"tlcPassed?"}}
+    state_tlc_verified -- "PROVE" --> gate_t_5_0
+    gate_t_5_0 -- True --> state_tlaps_proving
+    gate_t_6_0{{"noError?"}}
+    state_tlaps_proving -- "AUTO" --> gate_t_6_0
+    act_t_6_0[["runTlaps, generateCertificate"]]
+    gate_t_6_0 -- True --> act_t_6_0
+    act_t_6_0 --> state_certified
+    gate_t_7_0{{"tlcPassed?"}}
+    state_tlc_verified -- "SEAL_TLC" --> gate_t_7_0
+    act_t_7_0[["generateCertificate"]]
+    gate_t_7_0 -- True --> act_t_7_0
+    act_t_7_0 --> state_certified
+    gate_t_8_0{{"hasError?"}}
+    state_auditing -- "AUTO" --> gate_t_8_0
+    act_t_8_0[["setRejected"]]
+    gate_t_8_0 -- True --> act_t_8_0
+    act_t_8_0 --> state_rejected
+    gate_t_9_0{{"hasError?"}}
+    state_tlc_verifying -- "AUTO" --> gate_t_9_0
+    act_t_9_0[["setRejected"]]
+    gate_t_9_0 -- True --> act_t_9_0
+    act_t_9_0 --> state_rejected
+    gate_t_10_0{{"hasError?"}}
+    state_tlaps_proving -- "AUTO" --> gate_t_10_0
+    act_t_10_0[["setRejected"]]
+    gate_t_10_0 -- True --> act_t_10_0
+    act_t_10_0 --> state_rejected
+    gate_t_11_0{{"hasError?"}}
+    state_idle -- "ERROR" --> gate_t_11_0
+    act_t_11_0[["log_error"]]
+    gate_t_11_0 -- True --> act_t_11_0
+    act_t_11_0 --> state_error
+    gate_t_11_1{{"hasError?"}}
+    state_error -- "ERROR" --> gate_t_11_1
+    act_t_11_1[["log_error"]]
+    gate_t_11_1 -- True --> act_t_11_1
+    act_t_11_1 --> state_error
+    gate_t_11_2{{"hasError?"}}
+    state_loading -- "ERROR" --> gate_t_11_2
+    act_t_11_2[["log_error"]]
+    gate_t_11_2 -- True --> act_t_11_2
+    act_t_11_2 --> state_error
+    gate_t_11_3{{"hasError?"}}
+    state_auditing -- "ERROR" --> gate_t_11_3
+    act_t_11_3[["log_error"]]
+    gate_t_11_3 -- True --> act_t_11_3
+    act_t_11_3 --> state_error
+    gate_t_11_4{{"hasError?"}}
+    state_generating_tla -- "ERROR" --> gate_t_11_4
+    act_t_11_4[["log_error"]]
+    gate_t_11_4 -- True --> act_t_11_4
+    act_t_11_4 --> state_error
+    gate_t_11_5{{"hasError?"}}
+    state_rejected -- "ERROR" --> gate_t_11_5
+    act_t_11_5[["log_error"]]
+    gate_t_11_5 -- True --> act_t_11_5
+    act_t_11_5 --> state_error
+    gate_t_11_6{{"hasError?"}}
+    state_tlc_verifying -- "ERROR" --> gate_t_11_6
+    act_t_11_6[["log_error"]]
+    gate_t_11_6 -- True --> act_t_11_6
+    act_t_11_6 --> state_error
+    gate_t_11_7{{"hasError?"}}
+    state_tlc_verified -- "ERROR" --> gate_t_11_7
+    act_t_11_7[["log_error"]]
+    gate_t_11_7 -- True --> act_t_11_7
+    act_t_11_7 --> state_error
+    gate_t_11_8{{"hasError?"}}
+    state_certified -- "ERROR" --> gate_t_11_8
+    act_t_11_8[["log_error"]]
+    gate_t_11_8 -- True --> act_t_11_8
+    act_t_11_8 --> state_error
+    gate_t_11_9{{"hasError?"}}
+    state_tlaps_proving -- "ERROR" --> gate_t_11_9
+    act_t_11_9[["log_error"]]
+    gate_t_11_9 -- True --> act_t_11_9
+    act_t_11_9 --> state_error
+    act_t_12_0[["resetContext"]]
+    state_idle -- "RESET" --> act_t_12_0
+    act_t_12_0 --> state_idle
+    act_t_12_1[["resetContext"]]
+    state_error -- "RESET" --> act_t_12_1
+    act_t_12_1 --> state_idle
+    act_t_12_2[["resetContext"]]
+    state_loading -- "RESET" --> act_t_12_2
+    act_t_12_2 --> state_idle
+    act_t_12_3[["resetContext"]]
+    state_auditing -- "RESET" --> act_t_12_3
+    act_t_12_3 --> state_idle
+    act_t_12_4[["resetContext"]]
+    state_generating_tla -- "RESET" --> act_t_12_4
+    act_t_12_4 --> state_idle
+    act_t_12_5[["resetContext"]]
+    state_rejected -- "RESET" --> act_t_12_5
+    act_t_12_5 --> state_idle
+    act_t_12_6[["resetContext"]]
+    state_tlc_verifying -- "RESET" --> act_t_12_6
+    act_t_12_6 --> state_idle
+    act_t_12_7[["resetContext"]]
+    state_tlc_verified -- "RESET" --> act_t_12_7
+    act_t_12_7 --> state_idle
+    act_t_12_8[["resetContext"]]
+    state_certified -- "RESET" --> act_t_12_8
+    act_t_12_8 --> state_idle
+    act_t_12_9[["resetContext"]]
+    state_tlaps_proving -- "RESET" --> act_t_12_9
+    act_t_12_9 --> state_idle
+    gate_t_13_0{{"tlapsPassed?"}}
+    state_certified -- "VIEW" --> gate_t_13_0
+    gate_t_13_0 -- True --> state_certified
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

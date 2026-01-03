@@ -1,0 +1,141 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>No blueprints loaded, waiting for input"]):::entry
+    state_composed(["<b>composed</b><br/>Composition complete, ready to validate or export"])
+    state_error(["<b>error</b><br/>Error state"])
+    state_parent_loaded(["<b>parent_loaded</b><br/>Parent blueprint loaded, waiting for child or embedding"])
+    state_embedding_ready(["<b>embedding_ready</b><br/>Embedding defined, ready to compose or add more"])
+    state_validated(["<b>validated</b><br/>Validation complete, results available"])
+    state_child_loaded(["<b>child_loaded</b><br/>Both parent and child loaded, ready to define embedding"])
+    state_defining_embedding(["<b>defining_embedding</b><br/>Defining embedding parameters (target state, contract, event map)"])
+    act_t_0_0[["load_parent"]]
+    state_idle -- "LOAD_PARENT" --> act_t_0_0
+    act_t_0_0 --> state_parent_loaded
+    act_t_1_0[["load_manifest, compose_from_manifest"]]
+    state_idle -- "LOAD_MANIFEST" --> act_t_1_0
+    act_t_1_0 --> state_composed
+    gate_t_2_0{{"has_parent?"}}
+    state_parent_loaded -- "LOAD_CHILD" --> gate_t_2_0
+    act_t_2_0[["load_child"]]
+    gate_t_2_0 -- True --> act_t_2_0
+    act_t_2_0 --> state_child_loaded
+    act_t_3_0[["load_parent, clear_embeddings"]]
+    state_parent_loaded -- "LOAD_PARENT" --> act_t_3_0
+    act_t_3_0 --> state_parent_loaded
+    act_t_4_0[["load_child"]]
+    state_child_loaded -- "LOAD_CHILD" --> act_t_4_0
+    act_t_4_0 --> state_child_loaded
+    gate_t_5_0{{"has_both?"}}
+    state_child_loaded -- "DEFINE" --> gate_t_5_0
+    act_t_5_0[["init_embedding"]]
+    gate_t_5_0 -- True --> act_t_5_0
+    act_t_5_0 --> state_defining_embedding
+    gate_t_6_0{{"has_embedding?"}}
+    state_defining_embedding -- "SET_INPUT" --> gate_t_6_0
+    act_t_6_0[["set_input_contract"]]
+    gate_t_6_0 -- True --> act_t_6_0
+    act_t_6_0 --> state_defining_embedding
+    gate_t_7_0{{"has_embedding?"}}
+    state_defining_embedding -- "SET_OUTPUT" --> gate_t_7_0
+    act_t_7_0[["set_output_contract"]]
+    gate_t_7_0 -- True --> act_t_7_0
+    act_t_7_0 --> state_defining_embedding
+    gate_t_8_0{{"has_embedding?"}}
+    state_defining_embedding -- "SET_EVENTS" --> gate_t_8_0
+    act_t_8_0[["set_event_map"]]
+    gate_t_8_0 -- True --> act_t_8_0
+    act_t_8_0 --> state_defining_embedding
+    gate_t_9_0{{"has_embedding?"}}
+    state_defining_embedding -- "DONE" --> gate_t_9_0
+    act_t_9_0[["finalize_embedding"]]
+    gate_t_9_0 -- True --> act_t_9_0
+    act_t_9_0 --> state_embedding_ready
+    act_t_10_0[["clear_child"]]
+    state_embedding_ready -- "ADD_MORE" --> act_t_10_0
+    act_t_10_0 --> state_child_loaded
+    gate_t_11_0{{"has_embeddings?"}}
+    state_embedding_ready -- "COMPOSE" --> gate_t_11_0
+    act_t_11_0[["compose"]]
+    gate_t_11_0 -- True --> act_t_11_0
+    act_t_11_0 --> state_composed
+    gate_t_12_0{{"has_both?"}}
+    state_child_loaded -- "QUICK_COMPOSE" --> gate_t_12_0
+    act_t_12_0[["init_embedding, finalize_embedding, compose"]]
+    gate_t_12_0 -- True --> act_t_12_0
+    act_t_12_0 --> state_composed
+    gate_t_13_0{{"has_composed?"}}
+    state_composed -- "VALIDATE" --> gate_t_13_0
+    act_t_13_0[["validate_composition"]]
+    gate_t_13_0 -- True --> act_t_13_0
+    act_t_13_0 --> state_validated
+    gate_t_14_0{{"has_composed?"}}
+    state_composed -- "FLATTEN" --> gate_t_14_0
+    act_t_14_0[["flatten"]]
+    gate_t_14_0 -- True --> act_t_14_0
+    act_t_14_0 --> state_composed
+    gate_t_15_0{{"has_composed?"}}
+    state_composed -- "EXPORT" --> gate_t_15_0
+    act_t_15_0[["export_composed"]]
+    gate_t_15_0 -- True --> act_t_15_0
+    act_t_15_0 --> state_composed
+    gate_t_16_0{{"has_composed?"}}
+    state_validated -- "EXPORT" --> gate_t_16_0
+    act_t_16_0[["export_composed"]]
+    gate_t_16_0 -- True --> act_t_16_0
+    act_t_16_0 --> state_validated
+    gate_t_17_0{{"has_embeddings, has_valid_data?"}}
+    state_embedding_ready -- "SAVE_MANIFEST" --> gate_t_17_0
+    act_t_17_0[["generate_manifest, export_manifest"]]
+    gate_t_17_0 -- True --> act_t_17_0
+    act_t_17_0 --> state_embedding_ready
+    gate_t_18_0{{"has_composed?"}}
+    state_validated -- "VALIDATE" --> gate_t_18_0
+    act_t_18_0[["validate_composition"]]
+    gate_t_18_0 -- True --> act_t_18_0
+    act_t_18_0 --> state_validated
+    state_validated -- "BACK" --> state_composed
+    act_t_20_0[["clear_composed"]]
+    state_composed -- "BACK" --> act_t_20_0
+    act_t_20_0 --> state_embedding_ready
+    state_defining_embedding -- "CANCEL" --> state_child_loaded
+    act_t_22_0[["clear_all"]]
+    state_composed -- "RESET" --> act_t_22_0
+    act_t_22_0 --> state_idle
+    act_t_23_0[["clear_all"]]
+    state_validated -- "RESET" --> act_t_23_0
+    act_t_23_0 --> state_idle
+    act_t_24_0[["clear_all"]]
+    state_parent_loaded -- "CLEAR" --> act_t_24_0
+    act_t_24_0 --> state_idle
+    act_t_25_0[["clear_all"]]
+    state_child_loaded -- "CLEAR" --> act_t_25_0
+    act_t_25_0 --> state_idle
+    act_t_26_0[["clear_error, clear_all"]]
+    state_error -- "CLEAR" --> act_t_26_0
+    act_t_26_0 --> state_idle
+    act_t_27_0[["set_error"]]
+    state_idle -- "LOAD_FAILED" --> act_t_27_0
+    act_t_27_0 --> state_error
+    act_t_27_1[["set_error"]]
+    state_composed -- "LOAD_FAILED" --> act_t_27_1
+    act_t_27_1 --> state_error
+    act_t_27_2[["set_error"]]
+    state_error -- "LOAD_FAILED" --> act_t_27_2
+    act_t_27_2 --> state_error
+    act_t_27_3[["set_error"]]
+    state_parent_loaded -- "LOAD_FAILED" --> act_t_27_3
+    act_t_27_3 --> state_error
+    act_t_27_4[["set_error"]]
+    state_embedding_ready -- "LOAD_FAILED" --> act_t_27_4
+    act_t_27_4 --> state_error
+    act_t_27_5[["set_error"]]
+    state_validated -- "LOAD_FAILED" --> act_t_27_5
+    act_t_27_5 --> state_error
+    act_t_27_6[["set_error"]]
+    state_child_loaded -- "LOAD_FAILED" --> act_t_27_6
+    act_t_27_6 --> state_error
+    act_t_27_7[["set_error"]]
+    state_defining_embedding -- "LOAD_FAILED" --> act_t_27_7
+    act_t_27_7 --> state_error
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

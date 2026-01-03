@@ -707,22 +707,9 @@ def inferTransitions(params: dict) -> dict:
 
     stateIds = [s["id"] for s in states]
 
-    # Build transitions from state pairs
-    for i, state in enumerate(states[:-1]):
-        nextState = states[i + 1] if i + 1 < len(states) else None
-        if nextState:
-            event = f"{state['id'].upper()}_DONE"
-            transitions.append({
-                "id": f"t{tId}",
-                "from": state["id"],
-                "to": nextState["id"],
-                "on_event": event,
-                "inferred_from": "state_sequence"
-            })
-            tId += 1
-
-    # Infer gates from control flow branches
+    # Infer gates from control flow branches first
     nodes = controlFlow.get("nodes", [])
+    gateConditions = []
     for node in nodes:
         if node.get("type") == "branch":
             label = node.get("label", "")
@@ -735,10 +722,42 @@ def inferTransitions(params: dict) -> dict:
                     "expression": cond,
                     "inferred_from": f"line:{node.get('line')}"
                 })
+                gateConditions.append(gateId)
                 gId += 1
+
+    # Build transitions from state pairs with optional gate associations
+    gateIdx = 0
+    for i, state in enumerate(states[:-1]):
+        nextState = states[i + 1] if i + 1 < len(states) else None
+        if nextState:
+            event = f"{state['id'].upper()}_DONE"
+            trans = {
+                "id": f"t{tId}",
+                "from": state["id"],
+                "to": nextState["id"],
+                "on_event": event,
+                "inferred_from": "state_sequence"
+            }
+            # Associate a gate with validation/check transitions
+            if any(kw in state["id"] for kw in ["validat", "check", "verify"]):
+                if gateIdx < len(gateConditions):
+                    trans["gates"] = [gateConditions[gateIdx]]
+                    gateIdx += 1
+            transitions.append(trans)
+            tId += 1
 
     # Add error transition if error state exists
     if "error" in stateIds:
+        # Add hasError gate
+        errorGateId = f"g{gId}"
+        gates.append({
+            "id": errorGateId,
+            "type": "expression",
+            "expression": "error is not None",
+            "inferred_from": "error_pattern"
+        })
+        gId += 1
+
         for state in states:
             if state["id"] not in ("error", "complete"):
                 transitions.append({
@@ -746,6 +765,7 @@ def inferTransitions(params: dict) -> dict:
                     "from": state["id"],
                     "to": "error",
                     "on_event": "ERROR",
+                    "gates": [errorGateId],
                     "inferred_from": "error_pattern"
                 })
                 tId += 1
@@ -871,6 +891,9 @@ def generateBlueprint(params: dict) -> dict:
             "to": t["to"],
             "on_event": t["on_event"]
         }
+        # Include gates if present
+        if t.get("gates"):
+            trans["gates"] = t["gates"]
         transArr.append(trans)
 
     blueprint = {

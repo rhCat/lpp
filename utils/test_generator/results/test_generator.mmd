@@ -1,0 +1,81 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>No blueprint loaded, waiting for input"]):::entry
+    state_error(["<b>error</b><br/>Error state"])
+    state_loaded(["<b>loaded</b><br/>Blueprint loaded, ready to analyze"])
+    state_analyzing(["<b>analyzing</b><br/>Analyzing blueprint structure"])
+    state_generating(["<b>generating</b><br/>Generating test cases"])
+    state_complete(["<b>complete</b><br/>Tests generated, ready to export"])
+    gate_t_0_0{{"no_blueprint?"}}
+    state_idle -- "LOAD" --> gate_t_0_0
+    act_t_0_0[["load_blueprint"]]
+    gate_t_0_0 -- True --> act_t_0_0
+    act_t_0_0 --> state_loaded
+    act_t_1_0[["clear_state, load_blueprint"]]
+    state_loaded -- "LOAD" --> act_t_1_0
+    act_t_1_0 --> state_loaded
+    act_t_2_0[["clear_state, load_blueprint"]]
+    state_complete -- "LOAD" --> act_t_2_0
+    act_t_2_0 --> state_loaded
+    gate_t_3_0{{"has_blueprint?"}}
+    state_loaded -- "ANALYZE" --> gate_t_3_0
+    act_t_3_0[["build_graph, analyze_paths, analyze_gates"]]
+    gate_t_3_0 -- True --> act_t_3_0
+    act_t_3_0 --> state_analyzing
+    gate_t_4_0{{"has_paths?"}}
+    state_analyzing -- "GENERATE" --> gate_t_4_0
+    act_t_4_0[["generate_path_tests, generate_state_tests, generate_gate_tests, generate_negative_tests, generate_property_tests"]]
+    gate_t_4_0 -- True --> act_t_4_0
+    act_t_4_0 --> state_generating
+    gate_t_5_0{{"has_blueprint?"}}
+    state_loaded -- "GENERATE_ALL" --> gate_t_5_0
+    act_t_5_0[["build_graph, analyze_paths, analyze_gates, generate_path_tests, generate_state_tests, generate_gate_tests, generate_negative_tests, generate_property_tests"]]
+    gate_t_5_0 -- True --> act_t_5_0
+    act_t_5_0 --> state_generating
+    gate_t_6_0{{"has_path_tests?"}}
+    state_generating -- "COMBINE" --> gate_t_6_0
+    act_t_6_0[["combine_tests"]]
+    gate_t_6_0 -- True --> act_t_6_0
+    act_t_6_0 --> state_complete
+    gate_t_7_0{{"has_path_tests?"}}
+    state_generating -- "AUTO" --> gate_t_7_0
+    act_t_7_0[["combine_tests"]]
+    gate_t_7_0 -- True --> act_t_7_0
+    act_t_7_0 --> state_complete
+    gate_t_8_0{{"has_tests?"}}
+    state_complete -- "FORMAT_JSON" --> gate_t_8_0
+    act_t_8_0[["set_format_json, format_as_json"]]
+    gate_t_8_0 -- True --> act_t_8_0
+    act_t_8_0 --> state_complete
+    gate_t_9_0{{"has_tests?"}}
+    state_complete -- "FORMAT_PYTEST" --> gate_t_9_0
+    act_t_9_0[["set_format_pytest, format_as_pytest"]]
+    gate_t_9_0 -- True --> act_t_9_0
+    act_t_9_0 --> state_complete
+    gate_t_10_0{{"has_output?"}}
+    state_complete -- "EXPORT" --> gate_t_10_0
+    act_t_10_0[["export_tests"]]
+    gate_t_10_0 -- True --> act_t_10_0
+    act_t_10_0 --> state_complete
+    gate_t_11_0{{"has_tests?"}}
+    state_complete -- "COVERAGE" --> gate_t_11_0
+    gate_t_11_0 -- True --> state_complete
+    act_t_12_0[["clear_state"]]
+    state_complete -- "RESET" --> act_t_12_0
+    act_t_12_0 --> state_idle
+    act_t_13_0[["clear_error, clear_state"]]
+    state_error -- "RESET" --> act_t_13_0
+    act_t_13_0 --> state_idle
+    act_t_14_0[["set_error"]]
+    state_idle -- "ERROR" --> act_t_14_0
+    act_t_14_0 --> state_error
+    act_t_15_0[["set_error"]]
+    state_analyzing -- "ERROR" --> act_t_15_0
+    act_t_15_0 --> state_error
+    act_t_16_0[["set_error"]]
+    state_generating -- "ERROR" --> act_t_16_0
+    act_t_16_0 --> state_error
+    state_analyzing -- "BACK" --> state_loaded
+    state_complete -- "BACK" --> state_loaded
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

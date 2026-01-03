@@ -1,0 +1,49 @@
+flowchart TD
+    %% L++ Logic CAD Export
+    state_idle(["<b>idle</b><br/>Ready for research query"]):::entry
+    state_searching(["<b>searching</b><br/>Searching academic sources"])
+    state_error(["<b>error</b><br/>Error occurred"])
+    state_reviewing(["<b>reviewing</b><br/>Reviewing search results"])
+    state_analyzing(["<b>analyzing</b><br/>LLM analyzing selected papers"])
+    state_chatting(["<b>chatting</b><br/>Interactive Q&A about research"])
+    act_t_0_0[["initConfig"]]
+    state_idle -- "INIT" --> act_t_0_0
+    act_t_0_0 --> state_idle
+    act_t_1_0[["setQuery, searchAll"]]
+    state_idle -- "SEARCH" --> act_t_1_0
+    act_t_1_0 --> state_searching
+    gate_t_2_0{{"noError?"}}
+    state_searching -- "DONE" --> gate_t_2_0
+    gate_t_2_0 -- True --> state_reviewing
+    gate_t_3_0{{"hasError?"}}
+    state_searching -- "DONE" --> gate_t_3_0
+    gate_t_3_0 -- True --> state_error
+    act_t_4_0[["clearSelection, clearSynthesis, setQuery, searchAll"]]
+    state_reviewing -- "SEARCH" --> act_t_4_0
+    act_t_4_0 --> state_searching
+    act_t_5_0[["selectPapers, fetchDetails, synthesize"]]
+    state_reviewing -- "SELECT" --> act_t_5_0
+    act_t_5_0 --> state_analyzing
+    gate_t_6_0{{"noError?"}}
+    state_analyzing -- "DONE" --> gate_t_6_0
+    gate_t_6_0 -- True --> state_chatting
+    gate_t_7_0{{"hasError?"}}
+    state_analyzing -- "DONE" --> gate_t_7_0
+    gate_t_7_0 -- True --> state_error
+    act_t_8_0[["chat"]]
+    state_chatting -- "ASK" --> act_t_8_0
+    act_t_8_0 --> state_chatting
+    act_t_9_0[["clearResults, clearSelection, clearSynthesis, setQuery, searchAll"]]
+    state_chatting -- "SEARCH" --> act_t_9_0
+    act_t_9_0 --> state_searching
+    act_t_10_0[["clearSynthesis"]]
+    state_chatting -- "BACK" --> act_t_10_0
+    act_t_10_0 --> state_reviewing
+    act_t_11_0[["clearResults, clearSelection"]]
+    state_reviewing -- "RESET" --> act_t_11_0
+    act_t_11_0 --> state_idle
+    act_t_12_0[["clearError"]]
+    state_error -- "RETRY" --> act_t_12_0
+    act_t_12_0 --> state_idle
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px

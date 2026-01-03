@@ -161,8 +161,9 @@ svg {{ background: #0f0f23; border-radius: 8px; }}
 .node-label {{ font-size: 12px; fill: #fff; text-anchor: middle; pointer-events: none; font-weight: bold; }}
 .node-desc {{ font-size: 9px; fill: #aaa; text-anchor: middle; pointer-events: none; }}
 .link {{ stroke-opacity: 0.7; fill: none; transition: stroke 0.2s, stroke-width 0.2s; }}
-.link-label {{ font-size: 8px; fill: #888; pointer-events: none; }}
-.gate-label {{ font-size: 7px; fill: #666; pointer-events: none; font-style: italic; }}
+.link-label {{ font-size: 9px; fill: #aaa; pointer-events: none; text-anchor: middle; dominant-baseline: middle; }}
+.link-label-bg {{ fill: #0f0f23; opacity: 0.85; }}
+.gate-label {{ font-size: 8px; fill: #88aaff; pointer-events: none; font-style: italic; text-anchor: middle; }}
 #tooltip {{ position: absolute; background: #16213e; border: 1px solid #00d4ff; padding: 10px; border-radius: 4px; pointer-events: none; display: none; max-width: 350px; z-index: 100; font-size: 12px; }}
 .controls {{ margin-bottom: 10px; }}
 .controls button {{ background: #4a4a8a; color: #fff; border: none; padding: 8px 16px; margin-right: 5px; margin-bottom: 5px; cursor: pointer; border-radius: 4px; font-size: 12px; }}
@@ -216,14 +217,19 @@ h3, h4 {{ margin: 10px 0 5px 0; color: #00d4ff; }}
     <h4>Transitions</h4>
     <div id="flow-list"></div>
     <div class="legend">
-      <h4>Legend</h4>
+      <h4>States</h4>
       <div class="legend-item"><div class="legend-color" style="background:#00d4ff"></div> Entry State</div>
       <div class="legend-item"><div class="legend-color" style="background:#ff6b6b"></div> Terminal State</div>
       <div class="legend-item"><div class="legend-color" style="background:#4a4a8a"></div> Normal State</div>
       <div class="legend-item"><div class="legend-color" style="background:#ffa500"></div> Error State</div>
+      <h4>Transitions</h4>
+      <div class="legend-item"><div class="legend-color" style="background:#00ff00"></div> Forward (normal)</div>
+      <div class="legend-item"><div class="legend-color" style="background:#ff6b6b"></div> To Error</div>
+      <div class="legend-item"><div class="legend-color" style="background:#ffaa00;border:1px dashed #000"></div> Reset (back to idle)</div>
+      <div class="legend-item"><div class="legend-color" style="background:#00d4ff"></div> Incoming</div>
       <h4>Path Highlights</h4>
-      <div class="legend-item"><div class="legend-color" style="background:#ff4444"></div> Failure Path (to error)</div>
-      <div class="legend-item"><div class="legend-color" style="background:#44ff44"></div> Happy Path (entry→terminal)</div>
+      <div class="legend-item"><div class="legend-color" style="background:#ff4444"></div> Failure Path</div>
+      <div class="legend-item"><div class="legend-color" style="background:#44ff44"></div> Happy Path</div>
       <div class="legend-item"><div class="legend-color" style="background:#ff00ff"></div> Upstream Trace</div>
     </div>
   </div>
@@ -316,10 +322,10 @@ function setLayout(layout) {{
     else if (layout === 'grid') layoutGrid();
     // Update node positions with animation
     node.transition().duration(500).attr("transform", d => `translate(${{d.x - nodeWidth/2}},${{d.y - nodeHeight/2}})`);
-    // Update links
-    setTimeout(updateLinks, 50);
-    setTimeout(updateLinks, 250);
-    setTimeout(updateLinks, 500);
+    // Update links and labels
+    setTimeout(() => {{ updateLinks(); updateLinkLabels(); }}, 50);
+    setTimeout(() => {{ updateLinks(); updateLinkLabels(); }}, 250);
+    setTimeout(() => {{ updateLinks(); updateLinkLabels(); }}, 500);
 }}
 
 // Initial hierarchical layout
@@ -386,6 +392,14 @@ defs.append("marker")
     .attr("id", "arrow-happy").attr("viewBox", "0 -5 10 10").attr("refX", 10).attr("refY", 0)
     .attr("markerWidth", 8).attr("markerHeight", 8).attr("orient", "auto")
   .append("path").attr("d", "M0,-4L10,0L0,4").attr("fill", "#44ff44");
+defs.append("marker")
+    .attr("id", "arrow-reset").attr("viewBox", "0 -5 10 10").attr("refX", 10).attr("refY", 0)
+    .attr("markerWidth", 8).attr("markerHeight", 8).attr("orient", "auto")
+  .append("path").attr("d", "M0,-4L10,0L0,4").attr("fill", "#ffaa00");
+defs.append("marker")
+    .attr("id", "arrow-error").attr("viewBox", "0 -5 10 10").attr("refX", 10).attr("refY", 0)
+    .attr("markerWidth", 8).attr("markerHeight", 8).attr("orient", "auto")
+  .append("path").attr("d", "M0,-4L10,0L0,4").attr("fill", "#ff6b6b");
 
 // Track self-loop index for offset calculation
 const selfLoopIndex = {{}};
@@ -430,13 +444,152 @@ function updateLinks() {{
     }});
 }}
 
+// Find all error states and terminal/complete states (defined early for link coloring)
+const errorStates = new Set();
+const terminalStates = new Set();
+const resetTargets = new Set();  // States that are "back to start" targets
+const entryStateNode = nodes.find(n => n.isEntry);
+
+nodes.forEach(n => {{
+    const id = n.id.toLowerCase();
+    // Error states
+    if (id === 'error' || id.includes('error') || id.includes('fail') || id === 'rejected') {{
+        errorStates.add(n.id);
+    }}
+    // Terminal states - explicit or by naming convention
+    if (n.isTerminal) {{
+        terminalStates.add(n.id);
+    }} else if (id === 'complete' || id === 'completed' || id === 'done' ||
+               id === 'success' || id === 'finished' || id === 'certified') {{
+        // Treat these as terminal-like for happy path detection
+        terminalStates.add(n.id);
+    }}
+    // Reset targets (entry-like states)
+    if (n.isEntry || id === 'idle' || id === 'init' || id === 'start' || id === 'ready') {{
+        resetTargets.add(n.id);
+    }}
+}});
+
+// Function to get link color by type
+function getLinkColor(l) {{
+    if (!l.sourceNode || !l.targetNode) return "#556";
+    const tgtId = l.targetNode.id;
+    const srcId = l.sourceNode.id;
+    // To error = red
+    if (errorStates.has(tgtId)) return "#ff6b6b";
+    // Reset/back to idle = orange
+    if (resetTargets.has(tgtId) && !resetTargets.has(srcId)) return "#ffaa00";
+    // Self-loop on terminal = very dim (almost hidden)
+    if (srcId === tgtId && terminalStates.has(srcId)) return "#333";
+    return "#556";
+}}
+
+function getLinkMarker(l) {{
+    if (!l.sourceNode || !l.targetNode) return "url(#arrow)";
+    const tgtId = l.targetNode.id;
+    const srcId = l.sourceNode.id;
+    if (errorStates.has(tgtId)) return "url(#arrow-error)";
+    if (resetTargets.has(tgtId) && !resetTargets.has(srcId)) return "url(#arrow-reset)";
+    return "url(#arrow)";
+}}
+
 // Draw links with curved paths
 const link = g.append("g").selectAll("path").data(links).join("path")
     .attr("class", "link")
-    .attr("stroke", l => l.gates && l.gates.includes("error") ? "#ff6b6b" : "#556")
-    .attr("stroke-width", 2)
-    .attr("marker-end", "url(#arrow)");
+    .attr("stroke", getLinkColor)
+    .attr("stroke-width", l => {{
+        // Make terminal self-loops thinner
+        if (l.sourceNode && l.targetNode && l.sourceNode.id === l.targetNode.id && terminalStates.has(l.sourceNode.id)) return 1;
+        return 2;
+    }})
+    .attr("stroke-dasharray", l => {{
+        // Dash reset links
+        if (l.sourceNode && l.targetNode && resetTargets.has(l.targetNode.id) && !resetTargets.has(l.sourceNode.id)) return "5,3";
+        return null;
+    }})
+    .attr("marker-end", getLinkMarker);
+
+// Draw edge labels (event names and gates)
+const linkLabelGroup = g.append("g").attr("class", "link-labels");
+
+// Create label groups for each link
+const linkLabels = linkLabelGroup.selectAll("g").data(links).join("g")
+    .attr("class", "link-label-group");
+
+// Background rect for label readability
+linkLabels.append("rect")
+    .attr("class", "link-label-bg")
+    .attr("rx", 3).attr("ry", 3);
+
+// Event label text
+linkLabels.append("text")
+    .attr("class", "link-label")
+    .text(d => {{
+        // Shorten long event names
+        let label = d.label || "";
+        if (label.length > 15) label = label.slice(0, 13) + "..";
+        return label;
+    }});
+
+// Gate label (if present)
+linkLabels.append("text")
+    .attr("class", "gate-label")
+    .attr("dy", 12)
+    .text(d => {{
+        if (!d.gates) return "";
+        // Shorten gate names
+        let g = d.gates;
+        if (g.length > 20) g = g.slice(0, 18) + "..";
+        return g ? `[${{g}}]` : "";
+    }});
+
+// Function to update edge label positions
+function updateLinkLabels() {{
+    linkLabels.each(function(d, i) {{
+        if (!d.sourceNode || !d.targetNode) return;
+        const sx = d.sourceNode.x, sy = d.sourceNode.y;
+        const tx = d.targetNode.x, ty = d.targetNode.y;
+
+        let labelX, labelY;
+
+        // Self-loop - position label to the right
+        if (d.sourceNode.id === d.targetNode.id) {{
+            const loopIdx = selfLoopIndex[d.sourceNode.id]?.indexOf(i) || 0;
+            const loopOffset = loopIdx * 20;
+            labelX = sx + nodeWidth/2 + 50 + loopOffset;
+            labelY = sy;
+        }} else {{
+            // Normal link - position at midpoint
+            const sourceBottom = sy + nodeHeight/2;
+            const targetTop = ty - nodeHeight/2;
+            labelX = (sx + tx) / 2;
+            labelY = (sourceBottom + targetTop) / 2;
+        }}
+
+        const textElem = d3.select(this).select("text.link-label");
+        const gateElem = d3.select(this).select("text.gate-label");
+        const bgRect = d3.select(this).select("rect.link-label-bg");
+
+        textElem.attr("x", labelX).attr("y", labelY);
+        gateElem.attr("x", labelX).attr("y", labelY);
+
+        // Size background to fit text
+        const bbox = textElem.node()?.getBBox();
+        if (bbox && bbox.width > 0) {{
+            const hasGate = d.gates && d.gates.length > 0;
+            const height = hasGate ? 24 : 14;
+            bgRect.attr("x", bbox.x - 4)
+                  .attr("y", bbox.y - 2)
+                  .attr("width", bbox.width + 8)
+                  .attr("height", height);
+        }} else {{
+            bgRect.attr("width", 0).attr("height", 0);
+        }}
+    }});
+}}
+
 updateLinks();
+updateLinkLabels();
 
 // Drag behavior for nodes with click detection
 // Track drag state to distinguish clicks from drags
@@ -463,6 +616,7 @@ const drag = d3.drag()
             d.y = e.y + nodeHeight/2;
             d3.select(this).attr("transform", `translate(${{e.x}},${{e.y}})`);
             updateLinks();
+            updateLinkLabels();
         }}
     }})
     .on("end", function(e, d) {{
@@ -533,21 +687,39 @@ node.on("click", (e, d) => {{
         .attr("stroke", n => n.id === d.id ? "#ff0" : "#fff")
         .attr("stroke-width", n => n.id === d.id ? 4 : 2);
     
-    // Highlight connected links
+    // Highlight connected links with type-based coloring
     if (showUpstream) {{
         highlightUpstream(d.id);
     }} else {{
         link.attr("stroke", l => {{
             const src = l.sourceNode ? l.sourceNode.id : l.source;
             const tgt = l.targetNode ? l.targetNode.id : l.target;
-            if (src === d.id) return "#00ff00";  // outgoing
-            if (tgt === d.id) return "#ffaa00";  // incoming
-            return "#556";
+            if (src === d.id) {{
+                // Outgoing - differentiate by destination type
+                if (errorStates.has(tgt)) return "#ff6b6b";  // to error
+                if (resetTargets.has(tgt) && !resetTargets.has(src)) return "#ffaa00";  // reset
+                return "#00ff00";  // normal outgoing
+            }}
+            if (tgt === d.id) return "#00d4ff";  // incoming
+            return getLinkColor(l);  // default coloring
         }}).attr("stroke-width", l => {{
             const src = l.sourceNode ? l.sourceNode.id : l.source;
             const tgt = l.targetNode ? l.targetNode.id : l.target;
             return (src === d.id || tgt === d.id) ? 3 : 2;
-        }}).attr("marker-end", "url(#arrow)");
+        }}).attr("stroke-dasharray", l => {{
+            const src = l.sourceNode ? l.sourceNode.id : l.source;
+            const tgt = l.targetNode ? l.targetNode.id : l.target;
+            if (src === d.id && resetTargets.has(tgt) && !resetTargets.has(src)) return "5,3";
+            return null;
+        }}).attr("marker-end", l => {{
+            const src = l.sourceNode ? l.sourceNode.id : l.source;
+            const tgt = l.targetNode ? l.targetNode.id : l.target;
+            if (src === d.id) {{
+                if (errorStates.has(tgt)) return "url(#arrow-error)";
+                if (resetTargets.has(tgt) && !resetTargets.has(src)) return "url(#arrow-reset)";
+            }}
+            return "url(#arrow)";
+        }});
     }}
     
     // Update info panel
@@ -558,15 +730,47 @@ node.on("click", (e, d) => {{
     if (d.description) info += "<br>" + d.description;
     document.getElementById("details").innerHTML = info;
     
-    // Show transitions
-    let flowHtml = "<b style='color:#00ff00'>Outgoing →</b><br>";
-    links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id).forEach(l => {{
+    // Show transitions - categorized by type
+    const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
+    const normalOut = outLinks.filter(l => {{
         const tgt = l.targetNode ? l.targetNode.id : l.target;
-        flowHtml += "<div>→ <b>" + tgt + "</b> [" + l.label + "]";
-        if (l.gates) flowHtml += "<br><i style='color:#666;font-size:10px'>" + l.gates + "</i>";
-        flowHtml += "</div>";
+        return !errorStates.has(tgt) && !(resetTargets.has(tgt) && !resetTargets.has(d.id));
     }});
-    flowHtml += "<br><b style='color:#ffaa00'>← Incoming</b><br>";
+    const errorOut = outLinks.filter(l => errorStates.has(l.targetNode ? l.targetNode.id : l.target));
+    const resetOut = outLinks.filter(l => {{
+        const tgt = l.targetNode ? l.targetNode.id : l.target;
+        return resetTargets.has(tgt) && !resetTargets.has(d.id) && !errorStates.has(tgt);
+    }});
+
+    let flowHtml = "";
+    if (normalOut.length > 0) {{
+        flowHtml += "<b style='color:#00ff00'>→ Forward</b><br>";
+        normalOut.forEach(l => {{
+            const tgt = l.targetNode ? l.targetNode.id : l.target;
+            flowHtml += "<div>→ <b>" + tgt + "</b> [" + l.label + "]";
+            if (l.gates) flowHtml += "<br><i style='color:#666;font-size:10px'>" + l.gates + "</i>";
+            flowHtml += "</div>";
+        }});
+    }}
+    if (errorOut.length > 0) {{
+        flowHtml += "<br><b style='color:#ff6b6b'>→ Error</b><br>";
+        errorOut.forEach(l => {{
+            const tgt = l.targetNode ? l.targetNode.id : l.target;
+            flowHtml += "<div style='color:#ff6b6b'>→ <b>" + tgt + "</b> [" + l.label + "]";
+            if (l.gates) flowHtml += "<br><i style='color:#666;font-size:10px'>" + l.gates + "</i>";
+            flowHtml += "</div>";
+        }});
+    }}
+    if (resetOut.length > 0) {{
+        flowHtml += "<br><b style='color:#ffaa00'>→ Reset</b><br>";
+        resetOut.forEach(l => {{
+            const tgt = l.targetNode ? l.targetNode.id : l.target;
+            flowHtml += "<div style='color:#ffaa00'>→ <b>" + tgt + "</b> [" + l.label + "]";
+            if (l.gates) flowHtml += "<br><i style='color:#666;font-size:10px'>" + l.gates + "</i>";
+            flowHtml += "</div>";
+        }});
+    }}
+    flowHtml += "<br><b style='color:#00d4ff'>← Incoming</b><br>";
     links.filter(l => (l.targetNode ? l.targetNode.id : l.target) === d.id).forEach(l => {{
         const src = l.sourceNode ? l.sourceNode.id : l.source;
         flowHtml += "<div>← <b>" + src + "</b> [" + l.label + "]";
@@ -680,18 +884,8 @@ function toggleUpstream() {{
 let showFailurePaths = false;
 let showHappyPaths = false;
 
-// Find all error states (named 'error' or terminal states)
-const errorStates = new Set();
-const terminalStates = new Set();
-const entryState = nodes.find(n => n.isEntry);
-nodes.forEach(n => {{
-    if (n.id === 'error' || n.id.includes('error') || n.id.includes('fail')) {{
-        errorStates.add(n.id);
-    }}
-    if (n.isTerminal) {{
-        terminalStates.add(n.id);
-    }}
-}});
+// Reference entryState for happy path detection
+const entryState = entryStateNode;
 
 // Find paths leading to a target state set
 function findPathsTo(targetSet) {{
@@ -830,9 +1024,12 @@ function updateHighlightButtons() {{
 
 function resetHighlighting() {{
     node.select("rect").attr("stroke", "#fff").attr("stroke-width", 2);
-    link.attr("stroke", l => l.gates && l.gates.includes("error") ? "#ff6b6b" : "#556")
-        .attr("stroke-width", 2)
-        .attr("marker-end", "url(#arrow)");
+    link.attr("stroke", getLinkColor)
+        .attr("stroke-width", l => {{
+            if (l.sourceNode && l.targetNode && l.sourceNode.id === l.targetNode.id && terminalStates.has(l.sourceNode.id)) return 1;
+            return 2;
+        }})
+        .attr("marker-end", getLinkMarker);
 }}
 
 // Auto-fit on load
