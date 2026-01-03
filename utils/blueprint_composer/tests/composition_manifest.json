@@ -1,0 +1,21 @@
+{
+  "parent": "parent_workflow.json",
+  "embeddings": [
+    {
+      "target_state": "processing",
+      "child": "child_processor.json",
+      "namespace_prefix": "proc",
+      "contract": {
+        "input_map": {
+          "input_data": "process_input"
+        },
+        "output_map": {
+          "process_result": "output_data"
+        }
+      },
+      "event_map": {
+        "PROCESS_COMPLETE": "COMPLETE"
+      }
+    }
+  ]
+}

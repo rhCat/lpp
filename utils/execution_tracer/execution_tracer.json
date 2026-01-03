@@ -1,0 +1,724 @@
+{
+  "$schema": "lpp/v0.1.2",
+  "id": "lpp_execution_tracer",
+  "name": "L++ Execution Tracer",
+  "version": "1.0.0",
+  "description": "Structured logging and tracing for L++ blueprint execution with OpenTelemetry support",
+
+  "context_schema": {
+    "properties": {
+      "config": { "type": "object", "description": "Tracer configuration" },
+      "trace_id": { "type": "string", "description": "Current trace UUID" },
+      "root_span_id": { "type": "string", "description": "Root span ID" },
+      "spans": { "type": "array", "description": "All recorded spans" },
+      "active_spans": { "type": "object", "description": "Currently open spans by ID" },
+      "events": { "type": "array", "description": "Trace events" },
+      "blueprint_id": { "type": "string", "description": "Blueprint being traced" },
+      "blueprint_name": { "type": "string", "description": "Blueprint name" },
+      "start_time": { "type": "string", "description": "Trace start timestamp" },
+      "end_time": { "type": "string", "description": "Trace end timestamp" },
+      "output_format": { "type": "string", "description": "Current output format" },
+      "export_path": { "type": "string", "description": "Export file path" },
+      "analysis_result": { "type": "object", "description": "Trace analysis results" },
+      "formatted_output": { "type": "string", "description": "Formatted trace output" },
+      "output": { "type": "string", "description": "Display output" },
+      "error": { "type": "string", "description": "Error message if any" }
+    }
+  },
+
+  "states": {
+    "idle": { "description": "No trace active, ready to initialize" },
+    "configured": { "description": "Tracer configured, ready to start trace" },
+    "tracing": { "description": "Actively recording trace events" },
+    "paused": { "description": "Tracing paused, can resume" },
+    "completed": { "description": "Trace completed, ready for export/analysis" },
+    "analyzing": { "description": "Analyzing trace data" },
+    "exporting": { "description": "Exporting trace data" },
+    "error": { "description": "Error state" }
+  },
+
+  "entry_state": "idle",
+  "terminal_states": [],
+
+  "gates": {
+    "has_config": {
+      "type": "expression",
+      "expression": "config is not None"
+    },
+    "no_config": {
+      "type": "expression",
+      "expression": "config is None"
+    },
+    "has_trace": {
+      "type": "expression",
+      "expression": "trace_id is not None"
+    },
+    "no_trace": {
+      "type": "expression",
+      "expression": "trace_id is None"
+    },
+    "has_spans": {
+      "type": "expression",
+      "expression": "spans is not None and len(spans) > 0"
+    },
+    "has_active_spans": {
+      "type": "expression",
+      "expression": "active_spans is not None and len(active_spans) > 0"
+    },
+    "has_events": {
+      "type": "expression",
+      "expression": "events is not None and len(events) > 0"
+    },
+    "has_analysis": {
+      "type": "expression",
+      "expression": "analysis_result is not None"
+    },
+    "is_idle": {
+      "type": "expression",
+      "expression": "_state == 'idle'"
+    },
+    "is_configured": {
+      "type": "expression",
+      "expression": "_state == 'configured'"
+    },
+    "is_tracing": {
+      "type": "expression",
+      "expression": "_state == 'tracing'"
+    },
+    "is_paused": {
+      "type": "expression",
+      "expression": "_state == 'paused'"
+    },
+    "is_completed": {
+      "type": "expression",
+      "expression": "_state == 'completed'"
+    },
+    "is_analyzing": {
+      "type": "expression",
+      "expression": "_state == 'analyzing'"
+    },
+    "is_exporting": {
+      "type": "expression",
+      "expression": "_state == 'exporting'"
+    },
+    "is_error": {
+      "type": "expression",
+      "expression": "_state == 'error'"
+    }
+  },
+
+  "actions": {
+    "init_tracer": {
+      "type": "compute",
+      "compute_unit": "tracer:init_tracer",
+      "input_map": {
+        "output_format": "event.payload.output_format",
+        "include_context": "event.payload.include_context",
+        "include_timing": "event.payload.include_timing",
+        "max_spans": "event.payload.max_spans"
+      },
+      "output_map": {
+        "config": "config",
+        "output_format": "output_format",
+        "output": "output"
+      }
+    },
+    "start_trace": {
+      "type": "compute",
+      "compute_unit": "tracer:start_trace",
+      "input_map": {
+        "config": "config",
+        "blueprint_id": "event.payload.blueprint_id",
+        "blueprint_name": "event.payload.blueprint_name",
+        "metadata": "event.payload.metadata"
+      },
+      "output_map": {
+        "trace_id": "trace_id",
+        "root_span_id": "root_span_id",
+        "spans": "spans",
+        "active_spans": "active_spans",
+        "events": "events",
+        "blueprint_id": "blueprint_id",
+        "blueprint_name": "blueprint_name",
+        "start_time": "start_time",
+        "output": "output"
+      }
+    },
+    "end_trace": {
+      "type": "compute",
+      "compute_unit": "tracer:end_trace",
+      "input_map": {
+        "trace_id": "trace_id",
+        "root_span_id": "root_span_id",
+        "spans": "spans",
+        "active_spans": "active_spans",
+        "start_time": "start_time"
+      },
+      "output_map": {
+        "spans": "spans",
+        "active_spans": "active_spans",
+        "end_time": "end_time",
+        "output": "output"
+      }
+    },
+    "record_span": {
+      "type": "compute",
+      "compute_unit": "tracer:record_span",
+      "input_map": {
+        "trace_id": "trace_id",
+        "spans": "spans",
+        "span_type": "event.payload.span_type",
+        "name": "event.payload.name",
+        "parent_span_id": "event.payload.parent_span_id",
+        "attributes": "event.payload.attributes",
+        "start_time": "event.payload.start_time",
+        "end_time": "event.payload.end_time",
+        "duration_ms": "event.payload.duration_ms"
+      },
+      "output_map": {
+        "spans": "spans",
+        "output": "output"
+      }
+    },
+    "start_span": {
+      "type": "compute",
+      "compute_unit": "tracer:start_span",
+      "input_map": {
+        "trace_id": "trace_id",
+        "spans": "spans",
+        "active_spans": "active_spans",
+        "span_type": "event.payload.span_type",
+        "name": "event.payload.name",
+        "parent_span_id": "event.payload.parent_span_id",
+        "attributes": "event.payload.attributes"
+      },
+      "output_map": {
+        "spans": "spans",
+        "active_spans": "active_spans",
+        "output": "output"
+      }
+    },
+    "end_span": {
+      "type": "compute",
+      "compute_unit": "tracer:end_span",
+      "input_map": {
+        "span_id": "event.payload.span_id",
+        "spans": "spans",
+        "active_spans": "active_spans",
+        "attributes": "event.payload.attributes",
+        "status": "event.payload.status"
+      },
+      "output_map": {
+        "spans": "spans",
+        "active_spans": "active_spans",
+        "output": "output"
+      }
+    },
+    "record_state_change": {
+      "type": "compute",
+      "compute_unit": "tracer:record_state_change",
+      "input_map": {
+        "trace_id": "trace_id",
+        "spans": "spans",
+        "events": "events",
+        "active_spans": "active_spans",
+        "from_state": "event.payload.from_state",
+        "to_state": "event.payload.to_state",
+        "transition_id": "event.payload.transition_id",
+        "trigger_event": "event.payload.trigger_event"
+      },
+      "output_map": {
+        "spans": "spans",
+        "events": "events",
+        "output": "output"
+      }
+    },
+    "record_gate_eval": {
+      "type": "compute",
+      "compute_unit": "tracer:record_gate_eval",
+      "input_map": {
+        "trace_id": "trace_id",
+        "spans": "spans",
+        "events": "events",
+        "active_spans": "active_spans",
+        "gate_id": "event.payload.gate_id",
+        "expression": "event.payload.expression",
+        "result": "event.payload.result",
+        "input_values": "event.payload.input_values"
+      },
+      "output_map": {
+        "spans": "spans",
+        "events": "events",
+        "output": "output"
+      }
+    },
+    "record_action": {
+      "type": "compute",
+      "compute_unit": "tracer:record_action",
+      "input_map": {
+        "trace_id": "trace_id",
+        "spans": "spans",
+        "events": "events",
+        "active_spans": "active_spans",
+        "action_id": "event.payload.action_id",
+        "action_type": "event.payload.action_type",
+        "input_map": "event.payload.input_map",
+        "output_map": "event.payload.output_map",
+        "duration_ms": "event.payload.duration_ms"
+      },
+      "output_map": {
+        "spans": "spans",
+        "events": "events",
+        "output": "output"
+      }
+    },
+    "record_event": {
+      "type": "compute",
+      "compute_unit": "tracer:record_event",
+      "input_map": {
+        "trace_id": "trace_id",
+        "events": "events",
+        "active_spans": "active_spans",
+        "event_name": "event.payload.event_name",
+        "event_payload": "event.payload.event_payload"
+      },
+      "output_map": {
+        "events": "events",
+        "output": "output"
+      }
+    },
+    "record_context_change": {
+      "type": "compute",
+      "compute_unit": "tracer:record_context_change",
+      "input_map": {
+        "trace_id": "trace_id",
+        "events": "events",
+        "active_spans": "active_spans",
+        "key": "event.payload.key",
+        "old_value": "event.payload.old_value",
+        "new_value": "event.payload.new_value"
+      },
+      "output_map": {
+        "events": "events",
+        "output": "output"
+      }
+    },
+    "format_otlp": {
+      "type": "compute",
+      "compute_unit": "tracer:format_otlp",
+      "input_map": {
+        "trace_id": "trace_id",
+        "spans": "spans",
+        "events": "events",
+        "blueprint_id": "blueprint_id",
+        "blueprint_name": "blueprint_name",
+        "start_time": "start_time",
+        "end_time": "end_time"
+      },
+      "output_map": {
+        "formatted_output": "formatted_output",
+        "output": "output"
+      }
+    },
+    "format_jsonl": {
+      "type": "compute",
+      "compute_unit": "tracer:format_jsonl",
+      "input_map": {
+        "trace_id": "trace_id",
+        "spans": "spans",
+        "events": "events"
+      },
+      "output_map": {
+        "formatted_output": "formatted_output",
+        "output": "output"
+      }
+    },
+    "format_human": {
+      "type": "compute",
+      "compute_unit": "tracer:format_human",
+      "input_map": {
+        "trace_id": "trace_id",
+        "spans": "spans",
+        "events": "events",
+        "blueprint_name": "blueprint_name",
+        "start_time": "start_time",
+        "end_time": "end_time"
+      },
+      "output_map": {
+        "formatted_output": "formatted_output",
+        "output": "output"
+      }
+    },
+    "format_timeline": {
+      "type": "compute",
+      "compute_unit": "tracer:format_timeline",
+      "input_map": {
+        "trace_id": "trace_id",
+        "spans": "spans",
+        "events": "events",
+        "blueprint_name": "blueprint_name",
+        "start_time": "start_time",
+        "end_time": "end_time"
+      },
+      "output_map": {
+        "formatted_output": "formatted_output",
+        "output": "output"
+      }
+    },
+    "export_trace": {
+      "type": "compute",
+      "compute_unit": "tracer:export_trace",
+      "input_map": {
+        "formatted_output": "formatted_output",
+        "output_format": "output_format",
+        "path": "event.payload.path",
+        "trace_id": "trace_id",
+        "spans": "spans",
+        "events": "events",
+        "blueprint_id": "blueprint_id",
+        "blueprint_name": "blueprint_name",
+        "start_time": "start_time",
+        "end_time": "end_time"
+      },
+      "output_map": {
+        "export_path": "export_path",
+        "output": "output"
+      }
+    },
+    "analyze_trace": {
+      "type": "compute",
+      "compute_unit": "tracer:analyze_trace",
+      "input_map": {
+        "trace_id": "trace_id",
+        "spans": "spans",
+        "events": "events",
+        "start_time": "start_time",
+        "end_time": "end_time"
+      },
+      "output_map": {
+        "analysis_result": "analysis_result",
+        "output": "output"
+      }
+    },
+    "render_status": {
+      "type": "compute",
+      "compute_unit": "tracer:render_status",
+      "input_map": {
+        "trace_id": "trace_id",
+        "blueprint_name": "blueprint_name",
+        "spans": "spans",
+        "events": "events",
+        "active_spans": "active_spans",
+        "start_time": "start_time",
+        "output_format": "output_format"
+      },
+      "output_map": {
+        "output": "output"
+      }
+    },
+    "clear_trace": {
+      "type": "compute",
+      "compute_unit": "tracer:clear_trace",
+      "input_map": {},
+      "output_map": {
+        "trace_id": "trace_id",
+        "root_span_id": "root_span_id",
+        "spans": "spans",
+        "active_spans": "active_spans",
+        "events": "events",
+        "start_time": "start_time",
+        "end_time": "end_time",
+        "analysis_result": "analysis_result",
+        "formatted_output": "formatted_output",
+        "output": "output"
+      }
+    },
+    "set_format": {
+      "type": "set",
+      "target": "output_format",
+      "value_from": "event.payload.format"
+    },
+    "set_error": {
+      "type": "set",
+      "target": "error",
+      "value_from": "event.payload.message"
+    },
+    "clear_error": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    }
+  },
+
+  "display": {
+    "rules": [
+      { "gate": "is_error", "template": "ERROR: {error}" },
+      { "gate": "is_idle", "template": "[IDLE] No tracer configured" },
+      { "gate": "is_configured", "template": "[READY] Tracer configured, format: {output_format}" },
+      { "gate": "is_tracing", "template": "[TRACING] {blueprint_name} - {trace_id}" },
+      { "gate": "is_paused", "template": "[PAUSED] {blueprint_name} - {trace_id}" },
+      { "gate": "is_completed", "template": "[DONE] {blueprint_name} - {trace_id}" },
+      { "gate": "is_analyzing", "template": "[ANALYZING] {trace_id}" },
+      { "gate": "is_exporting", "template": "[EXPORTING] {trace_id}" },
+      { "template": "L++ Execution Tracer" }
+    ]
+  },
+
+  "transitions": [
+    {
+      "id": "t_init",
+      "from": "idle",
+      "to": "configured",
+      "on_event": "INIT",
+      "actions": ["init_tracer"]
+    },
+    {
+      "id": "t_init_error",
+      "from": "idle",
+      "to": "error",
+      "on_event": "INIT_FAILED",
+      "actions": ["set_error"]
+    },
+    {
+      "id": "t_reconfigure",
+      "from": "configured",
+      "to": "configured",
+      "on_event": "INIT",
+      "actions": ["init_tracer"]
+    },
+    {
+      "id": "t_start_trace",
+      "from": "configured",
+      "to": "tracing",
+      "on_event": "START_TRACE",
+      "gates": ["has_config"],
+      "actions": ["start_trace"]
+    },
+    {
+      "id": "t_start_trace_idle",
+      "from": "idle",
+      "to": "tracing",
+      "on_event": "START_TRACE",
+      "actions": ["init_tracer", "start_trace"]
+    },
+    {
+      "id": "t_record_span",
+      "from": "tracing",
+      "to": "tracing",
+      "on_event": "RECORD_SPAN",
+      "gates": ["has_trace"],
+      "actions": ["record_span"]
+    },
+    {
+      "id": "t_start_span",
+      "from": "tracing",
+      "to": "tracing",
+      "on_event": "START_SPAN",
+      "gates": ["has_trace"],
+      "actions": ["start_span"]
+    },
+    {
+      "id": "t_end_span",
+      "from": "tracing",
+      "to": "tracing",
+      "on_event": "END_SPAN",
+      "gates": ["has_trace"],
+      "actions": ["end_span"]
+    },
+    {
+      "id": "t_record_state",
+      "from": "tracing",
+      "to": "tracing",
+      "on_event": "STATE_CHANGE",
+      "gates": ["has_trace"],
+      "actions": ["record_state_change"]
+    },
+    {
+      "id": "t_record_gate",
+      "from": "tracing",
+      "to": "tracing",
+      "on_event": "GATE_EVAL",
+      "gates": ["has_trace"],
+      "actions": ["record_gate_eval"]
+    },
+    {
+      "id": "t_record_action",
+      "from": "tracing",
+      "to": "tracing",
+      "on_event": "ACTION",
+      "gates": ["has_trace"],
+      "actions": ["record_action"]
+    },
+    {
+      "id": "t_record_event",
+      "from": "tracing",
+      "to": "tracing",
+      "on_event": "EVENT",
+      "gates": ["has_trace"],
+      "actions": ["record_event"]
+    },
+    {
+      "id": "t_record_context",
+      "from": "tracing",
+      "to": "tracing",
+      "on_event": "CONTEXT_CHANGE",
+      "gates": ["has_trace"],
+      "actions": ["record_context_change"]
+    },
+    {
+      "id": "t_pause_trace",
+      "from": "tracing",
+      "to": "paused",
+      "on_event": "PAUSE",
+      "actions": []
+    },
+    {
+      "id": "t_resume_trace",
+      "from": "paused",
+      "to": "tracing",
+      "on_event": "RESUME",
+      "actions": []
+    },
+    {
+      "id": "t_end_trace",
+      "from": "tracing",
+      "to": "completed",
+      "on_event": "END_TRACE",
+      "gates": ["has_trace"],
+      "actions": ["end_trace"]
+    },
+    {
+      "id": "t_end_trace_paused",
+      "from": "paused",
+      "to": "completed",
+      "on_event": "END_TRACE",
+      "gates": ["has_trace"],
+      "actions": ["end_trace"]
+    },
+    {
+      "id": "t_format_otlp",
+      "from": "completed",
+      "to": "completed",
+      "on_event": "FORMAT_OTLP",
+      "gates": ["has_spans"],
+      "actions": ["format_otlp"]
+    },
+    {
+      "id": "t_format_jsonl",
+      "from": "completed",
+      "to": "completed",
+      "on_event": "FORMAT_JSONL",
+      "gates": ["has_spans"],
+      "actions": ["format_jsonl"]
+    },
+    {
+      "id": "t_format_human",
+      "from": "completed",
+      "to": "completed",
+      "on_event": "FORMAT_HUMAN",
+      "gates": ["has_spans"],
+      "actions": ["format_human"]
+    },
+    {
+      "id": "t_format_timeline",
+      "from": "completed",
+      "to": "completed",
+      "on_event": "FORMAT_TIMELINE",
+      "gates": ["has_spans"],
+      "actions": ["format_timeline"]
+    },
+    {
+      "id": "t_export",
+      "from": "completed",
+      "to": "completed",
+      "on_event": "EXPORT",
+      "actions": ["export_trace"]
+    },
+    {
+      "id": "t_analyze",
+      "from": "completed",
+      "to": "completed",
+      "on_event": "ANALYZE",
+      "gates": ["has_spans"],
+      "actions": ["analyze_trace"]
+    },
+    {
+      "id": "t_status_tracing",
+      "from": "tracing",
+      "to": "tracing",
+      "on_event": "STATUS",
+      "actions": ["render_status"]
+    },
+    {
+      "id": "t_status_paused",
+      "from": "paused",
+      "to": "paused",
+      "on_event": "STATUS",
+      "actions": ["render_status"]
+    },
+    {
+      "id": "t_status_completed",
+      "from": "completed",
+      "to": "completed",
+      "on_event": "STATUS",
+      "actions": ["render_status"]
+    },
+    {
+      "id": "t_set_format_conf",
+      "from": "configured",
+      "to": "configured",
+      "on_event": "SET_FORMAT",
+      "actions": ["set_format"]
+    },
+    {
+      "id": "t_set_format_completed",
+      "from": "completed",
+      "to": "completed",
+      "on_event": "SET_FORMAT",
+      "actions": ["set_format"]
+    },
+    {
+      "id": "t_clear_completed",
+      "from": "completed",
+      "to": "configured",
+      "on_event": "CLEAR",
+      "actions": ["clear_trace"]
+    },
+    {
+      "id": "t_new_trace",
+      "from": "completed",
+      "to": "tracing",
+      "on_event": "START_TRACE",
+      "gates": ["has_config"],
+      "actions": ["clear_trace", "start_trace"]
+    },
+    {
+      "id": "t_reset",
+      "from": "configured",
+      "to": "idle",
+      "on_event": "RESET",
+      "actions": ["clear_trace"]
+    },
+    {
+      "id": "t_reset_tracing",
+      "from": "tracing",
+      "to": "idle",
+      "on_event": "RESET",
+      "actions": ["clear_trace"]
+    },
+    {
+      "id": "t_reset_completed",
+      "from": "completed",
+      "to": "idle",
+      "on_event": "RESET",
+      "actions": ["clear_trace"]
+    },
+    {
+      "id": "t_recover",
+      "from": "error",
+      "to": "idle",
+      "on_event": "CLEAR",
+      "actions": ["clear_error", "clear_trace"]
+    }
+  ]
+}

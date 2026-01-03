@@ -1,0 +1,41 @@
+{
+  "policy_id": "SEC-001",
+  "name": "Authentication Required",
+  "description": "Sensitive transitions must have authentication gates",
+  "category": "security",
+  "severity": "error",
+  "rules": [
+    {
+      "type": "transition_requires_gate",
+      "description": "DELETE operations require authentication gate",
+      "condition": {
+        "on_event_pattern": "^DELETE.*"
+      },
+      "required_gate_pattern": ".*auth.*|.*authenticated.*|.*is_admin.*|.*has_permission.*"
+    },
+    {
+      "type": "transition_requires_gate",
+      "description": "UPDATE operations require authentication gate",
+      "condition": {
+        "on_event_pattern": "^UPDATE.*"
+      },
+      "required_gate_pattern": ".*auth.*|.*authenticated.*|.*is_admin.*|.*has_permission.*"
+    },
+    {
+      "type": "transition_requires_gate",
+      "description": "CREATE operations require authentication gate",
+      "condition": {
+        "on_event_pattern": "^CREATE.*"
+      },
+      "required_gate_pattern": ".*auth.*|.*authenticated.*|.*is_admin.*|.*has_permission.*"
+    },
+    {
+      "type": "transition_requires_gate",
+      "description": "ADMIN operations require admin gate",
+      "condition": {
+        "on_event_pattern": "^ADMIN.*"
+      },
+      "required_gate_pattern": ".*admin.*|.*is_admin.*|.*has_admin.*"
+    }
+  ]
+}

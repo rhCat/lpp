@@ -1,0 +1,85 @@
+{
+  "$schema": "lpp/v0.1.2",
+  "id": "test_old_workflow",
+  "name": "Test Old Workflow",
+  "version": "1.0.0",
+  "description": "A test blueprint using old v0.1.1 schema",
+  "context_schema": {
+    "properties": {
+      "status": {
+        "type": "string",
+        "description": "Current status"
+      },
+      "data": {
+        "type": "object",
+        "description": "Workflow data"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "Waiting for input"
+    },
+    "processing": {
+      "description": "Processing data"
+    },
+    "done": {
+      "description": "Workflow complete"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "done"
+  ],
+  "gates": {
+    "has_data": {
+      "type": "expression",
+      "expression": "data is not None"
+    },
+    "is_valid": {
+      "type": "expression",
+      "expression": "status == 'valid'"
+    }
+  },
+  "actions": {
+    "set_processing": {
+      "type": "set",
+      "target": "status",
+      "value": "processing"
+    },
+    "set_done": {
+      "type": "set",
+      "target": "status",
+      "value": "done"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_start",
+      "from": "idle",
+      "to": "processing",
+      "on_event": "START",
+      "actions": [
+        "set_processing"
+      ],
+      "gates": [
+        "has_data"
+      ]
+    },
+    {
+      "id": "t_complete",
+      "from": "processing",
+      "to": "done",
+      "on_event": "COMPLETE",
+      "actions": [
+        "set_done"
+      ],
+      "gates": [
+        "is_valid"
+      ]
+    }
+  ],
+  "display": {
+    "rules": []
+  }
+}

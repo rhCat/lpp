@@ -1,0 +1,33 @@
+{
+  "from_version": "lpp/v0.1.0",
+  "to_version": "lpp/v0.1.1",
+  "description": "Standardize event naming and context schema structure",
+  "changes": [
+    {
+      "type": "rename_field",
+      "path": "transitions[*]",
+      "from": "event",
+      "to": "on_event",
+      "description": "Rename event field to on_event for clarity"
+    },
+    {
+      "type": "rename_field",
+      "path": "",
+      "from": "context",
+      "to": "context_schema",
+      "description": "Rename context to context_schema for schema clarity"
+    },
+    {
+      "type": "add_field",
+      "path": "context_schema",
+      "field": "properties",
+      "default": {},
+      "condition": "missing",
+      "description": "Ensure context_schema has properties field"
+    }
+  ],
+  "notes": [
+    "This migration standardizes the event naming convention",
+    "The context_schema field now follows JSON Schema conventions"
+  ]
+}

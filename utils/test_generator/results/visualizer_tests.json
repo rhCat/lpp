@@ -1,0 +1,2204 @@
+{
+  "test_suite": "lpp_visualizer_tests",
+  "blueprint_id": "lpp_visualizer",
+  "blueprint_version": "1.1.0",
+  "generated_at": "auto",
+  "tests": [
+    {
+      "id": "path_1",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "viewing"
+    },
+    {
+      "id": "path_2",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "loaded"
+    },
+    {
+      "id": "path_3",
+      "type": "path_coverage",
+      "description": "Path: idle -> error",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD_FAILED",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "error"
+    },
+    {
+      "id": "path_5",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing -> viewing",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        },
+        {
+          "event": "VIEW_TREE_MERMAID",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "viewing"
+    },
+    {
+      "id": "path_6",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing -> loaded",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        },
+        {
+          "event": "LOAD",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "loaded"
+    },
+    {
+      "id": "path_7",
+      "type": "path_coverage",
+      "description": "Path: idle -> error -> idle",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD_FAILED",
+          "payload": {}
+        },
+        {
+          "event": "CLEAR",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "idle"
+    },
+    {
+      "id": "path_8",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> idle",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "UNLOAD",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "idle"
+    },
+    {
+      "id": "path_9",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing -> viewing",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        },
+        {
+          "event": "SELECT",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "viewing"
+    },
+    {
+      "id": "path_10",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing -> viewing",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        },
+        {
+          "event": "ZOOM_IN",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "viewing"
+    },
+    {
+      "id": "path_11",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> loaded",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "SET_TREE",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "loaded"
+    },
+    {
+      "id": "path_12",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing -> idle",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        },
+        {
+          "event": "UNLOAD",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "idle"
+    },
+    {
+      "id": "path_13",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing -> viewing",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        },
+        {
+          "event": "TOGGLE_ACTIONS",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "viewing"
+    },
+    {
+      "id": "path_14",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> loaded",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "EXPORT_README",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "loaded"
+    },
+    {
+      "id": "path_15",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing -> loaded",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        },
+        {
+          "event": "UNLOAD_TREE",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "loaded"
+    },
+    {
+      "id": "path_16",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing -> viewing",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        },
+        {
+          "event": "TOGGLE_GATES",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "viewing"
+    },
+    {
+      "id": "path_17",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing -> viewing",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        },
+        {
+          "event": "ZOOM_OUT",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "viewing"
+    },
+    {
+      "id": "path_18",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing -> viewing",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        },
+        {
+          "event": "DESELECT",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "viewing"
+    },
+    {
+      "id": "path_19",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing -> viewing",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        },
+        {
+          "event": "VIEW_MERMAID",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "viewing"
+    },
+    {
+      "id": "path_20",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing -> loaded",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        },
+        {
+          "event": "BACK",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "loaded"
+    },
+    {
+      "id": "path_21",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing -> viewing",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        },
+        {
+          "event": "VIEW_TABLE",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "viewing"
+    },
+    {
+      "id": "path_22",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> loaded",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "LOAD",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "loaded"
+    },
+    {
+      "id": "path_23",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing -> viewing",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        },
+        {
+          "event": "VIEW_GRAPH",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "viewing"
+    },
+    {
+      "id": "path_24",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing -> viewing",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        },
+        {
+          "event": "VIEW_TREE",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "viewing"
+    },
+    {
+      "id": "path_25",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW_TREE",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "viewing"
+    },
+    {
+      "id": "path_26",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded -> viewing -> viewing",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        },
+        {
+          "event": "EXPORT_README",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "viewing"
+    },
+    {
+      "id": "path_27",
+      "type": "path_coverage",
+      "description": "Path: idle -> loaded",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD_TREE",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "loaded"
+    },
+    {
+      "id": "state_coverage_1",
+      "type": "state_coverage",
+      "description": "Covers states: idle, loaded, viewing",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD",
+          "payload": {}
+        },
+        {
+          "event": "VIEW",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "viewing"
+    },
+    {
+      "id": "state_coverage_2",
+      "type": "state_coverage",
+      "description": "Covers states: idle, error",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "LOAD_FAILED",
+          "payload": {}
+        }
+      ],
+      "expected_final_state": "error"
+    },
+    {
+      "id": "gate_null_1",
+      "type": "gate_null_check",
+      "description": "Gate has_tree: tree = None",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": null,
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "VIEW_TREE",
+          "payload": {}
+        }
+      ]
+    },
+    {
+      "id": "gate_null_2",
+      "type": "gate_null_check",
+      "description": "Gate has_tree: tree = some_value",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": "some_value",
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "VIEW_TREE",
+          "payload": {}
+        }
+      ]
+    },
+    {
+      "id": "negative_invalid_event_1",
+      "type": "negative_invalid_event",
+      "description": "Invalid event 'VIEW_MERMAID' in state 'idle'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "VIEW_MERMAID",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "no_transition"
+    },
+    {
+      "id": "negative_invalid_event_2",
+      "type": "negative_invalid_event",
+      "description": "Invalid event 'UNLOAD' in state 'idle'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "UNLOAD",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "no_transition"
+    },
+    {
+      "id": "negative_invalid_event_3",
+      "type": "negative_invalid_event",
+      "description": "Invalid event 'TOGGLE_ACTIONS' in state 'idle'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "TOGGLE_ACTIONS",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "no_transition"
+    },
+    {
+      "id": "negative_invalid_event_4",
+      "type": "negative_invalid_event",
+      "description": "Invalid event 'BACK' in state 'loaded'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "BACK",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "no_transition"
+    },
+    {
+      "id": "negative_invalid_event_5",
+      "type": "negative_invalid_event",
+      "description": "Invalid event 'VIEW_MERMAID' in state 'loaded'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "VIEW_MERMAID",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "no_transition"
+    },
+    {
+      "id": "negative_invalid_event_6",
+      "type": "negative_invalid_event",
+      "description": "Invalid event 'ZOOM_IN' in state 'loaded'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "ZOOM_IN",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "no_transition"
+    },
+    {
+      "id": "negative_invalid_event_7",
+      "type": "negative_invalid_event",
+      "description": "Invalid event 'CLEAR' in state 'viewing'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "CLEAR",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "no_transition"
+    },
+    {
+      "id": "negative_invalid_event_8",
+      "type": "negative_invalid_event",
+      "description": "Invalid event 'SET_TREE' in state 'viewing'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "SET_TREE",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "no_transition"
+    },
+    {
+      "id": "negative_invalid_event_9",
+      "type": "negative_invalid_event",
+      "description": "Invalid event 'VIEW' in state 'viewing'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "VIEW",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "no_transition"
+    },
+    {
+      "id": "negative_invalid_event_10",
+      "type": "negative_invalid_event",
+      "description": "Invalid event 'VIEW_MERMAID' in state 'exporting'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "VIEW_MERMAID",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "no_transition"
+    },
+    {
+      "id": "negative_invalid_event_11",
+      "type": "negative_invalid_event",
+      "description": "Invalid event 'UNLOAD' in state 'exporting'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "UNLOAD",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "no_transition"
+    },
+    {
+      "id": "negative_invalid_event_12",
+      "type": "negative_invalid_event",
+      "description": "Invalid event 'TOGGLE_ACTIONS' in state 'exporting'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "TOGGLE_ACTIONS",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "no_transition"
+    },
+    {
+      "id": "negative_invalid_event_13",
+      "type": "negative_invalid_event",
+      "description": "Invalid event 'VIEW_MERMAID' in state 'error'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "VIEW_MERMAID",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "no_transition"
+    },
+    {
+      "id": "negative_invalid_event_14",
+      "type": "negative_invalid_event",
+      "description": "Invalid event 'UNLOAD' in state 'error'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "UNLOAD",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "no_transition"
+    },
+    {
+      "id": "negative_invalid_event_15",
+      "type": "negative_invalid_event",
+      "description": "Invalid event 'TOGGLE_ACTIONS' in state 'error'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": [
+        {
+          "event": "TOGGLE_ACTIONS",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "no_transition"
+    },
+    {
+      "id": "negative_gate_fail_16",
+      "type": "negative_gate_failure",
+      "description": "Gate should block transition t_view_tree",
+      "initial_context": {},
+      "events": [
+        {
+          "event": "VIEW_TREE",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "gate_blocked"
+    },
+    {
+      "id": "negative_gate_fail_17",
+      "type": "negative_gate_failure",
+      "description": "Gate should block transition t_switch_to_tree",
+      "initial_context": {},
+      "events": [
+        {
+          "event": "VIEW_TREE",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "gate_blocked"
+    },
+    {
+      "id": "negative_gate_fail_18",
+      "type": "negative_gate_failure",
+      "description": "Gate should block transition t_switch_to_tree_mermaid",
+      "initial_context": {},
+      "events": [
+        {
+          "event": "VIEW_TREE_MERMAID",
+          "payload": {}
+        }
+      ],
+      "expected_behavior": "gate_blocked"
+    },
+    {
+      "id": "property_1",
+      "type": "property_based",
+      "description": "Property blueprint = {}",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_2",
+      "type": "property_based",
+      "description": "Property blueprint = {'key': 'value'}",
+      "initial_context": {
+        "blueprint": {
+          "key": "value"
+        },
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_3",
+      "type": "property_based",
+      "description": "Property blueprint_name = ''",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_4",
+      "type": "property_based",
+      "description": "Property blueprint_name = 'test'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "test",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_5",
+      "type": "property_based",
+      "description": "Property blueprint_id = ''",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_6",
+      "type": "property_based",
+      "description": "Property blueprint_id = 'test'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "test",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_7",
+      "type": "property_based",
+      "description": "Property view_mode = ''",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_8",
+      "type": "property_based",
+      "description": "Property view_mode = 'test'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "test",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_9",
+      "type": "property_based",
+      "description": "Property selected_node = ''",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_10",
+      "type": "property_based",
+      "description": "Property selected_node = 'test'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "test",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_11",
+      "type": "property_based",
+      "description": "Property zoom_level = 0",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_12",
+      "type": "property_based",
+      "description": "Property zoom_level = 1",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 1,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_13",
+      "type": "property_based",
+      "description": "Property show_gates = True",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": true,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_14",
+      "type": "property_based",
+      "description": "Property show_gates = False",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_15",
+      "type": "property_based",
+      "description": "Property show_actions = True",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": true,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_16",
+      "type": "property_based",
+      "description": "Property show_actions = False",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_17",
+      "type": "property_based",
+      "description": "Property output = ''",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_18",
+      "type": "property_based",
+      "description": "Property output = 'test'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "test",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_19",
+      "type": "property_based",
+      "description": "Property readme_content = ''",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_20",
+      "type": "property_based",
+      "description": "Property readme_content = 'test'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "test",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_21",
+      "type": "property_based",
+      "description": "Property export_path = ''",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_22",
+      "type": "property_based",
+      "description": "Property export_path = 'test'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "test",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_23",
+      "type": "property_based",
+      "description": "Property tree = {}",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_24",
+      "type": "property_based",
+      "description": "Property tree = {'key': 'value'}",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {
+          "key": "value"
+        },
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_25",
+      "type": "property_based",
+      "description": "Property tree_name = ''",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_26",
+      "type": "property_based",
+      "description": "Property tree_name = 'test'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "test",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_27",
+      "type": "property_based",
+      "description": "Property tree_output = ''",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_28",
+      "type": "property_based",
+      "description": "Property tree_output = 'test'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "test",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_29",
+      "type": "property_based",
+      "description": "Property error = ''",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": ""
+      },
+      "events": []
+    },
+    {
+      "id": "property_30",
+      "type": "property_based",
+      "description": "Property error = 'test'",
+      "initial_context": {
+        "blueprint": {},
+        "blueprint_name": "",
+        "blueprint_id": "",
+        "view_mode": "",
+        "selected_node": "",
+        "zoom_level": 0,
+        "show_gates": false,
+        "show_actions": false,
+        "output": "",
+        "readme_content": "",
+        "export_path": "",
+        "tree": {},
+        "tree_name": "",
+        "tree_output": "",
+        "error": "test"
+      },
+      "events": []
+    }
+  ]
+}

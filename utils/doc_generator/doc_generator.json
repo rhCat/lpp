@@ -1,0 +1,551 @@
+{
+  "$schema": "lpp/v0.1.2",
+  "id": "lpp_doc_generator",
+  "name": "L++ Documentation Generator",
+  "version": "1.0.0",
+  "description": "Auto-generates comprehensive documentation from L++ blueprints in multiple formats",
+
+  "context_schema": {
+    "properties": {
+      "blueprint": { "type": "object", "description": "The loaded Blueprint object" },
+      "blueprint_path": { "type": "string", "description": "Path to the loaded blueprint" },
+      "blueprint_name": { "type": "string", "description": "Blueprint name" },
+      "blueprint_id": { "type": "string", "description": "Blueprint ID" },
+      "output_format": { "type": "string", "description": "Output format: markdown | html | json" },
+      "output_path": { "type": "string", "description": "Path where docs were exported" },
+      "metadata": { "type": "object", "description": "Extracted metadata (name, version, desc)" },
+      "overview_section": { "type": "string", "description": "Generated overview section" },
+      "mermaid_section": { "type": "string", "description": "Generated mermaid diagram" },
+      "states_section": { "type": "string", "description": "Generated states documentation" },
+      "transitions_section": { "type": "string", "description": "Generated transitions table" },
+      "gates_section": { "type": "string", "description": "Generated gates documentation" },
+      "actions_section": { "type": "string", "description": "Generated actions documentation" },
+      "context_section": { "type": "string", "description": "Generated context schema docs" },
+      "events_section": { "type": "string", "description": "Generated events documentation" },
+      "quickstart_section": { "type": "string", "description": "Generated quick-start guide" },
+      "assembled_doc": { "type": "string", "description": "Fully assembled documentation" },
+      "include_mermaid": { "type": "boolean", "description": "Include mermaid diagram" },
+      "include_tables": { "type": "boolean", "description": "Include detailed tables" },
+      "include_quickstart": { "type": "boolean", "description": "Include quick-start guide" },
+      "include_context": { "type": "boolean", "description": "Include context schema docs" },
+      "error": { "type": "string", "description": "Error message if any" }
+    }
+  },
+
+  "states": {
+    "idle": { "description": "No blueprint loaded, waiting for input" },
+    "loaded": { "description": "Blueprint loaded, ready to generate docs" },
+    "generating": { "description": "Actively generating documentation sections" },
+    "assembling": { "description": "Assembling all sections into final document" },
+    "exporting": { "description": "Exporting documentation to file" },
+    "done": { "description": "Documentation generation complete" },
+    "error": { "description": "Error state" }
+  },
+
+  "entry_state": "idle",
+  "terminal_states": [],
+
+  "gates": {
+    "has_blueprint": {
+      "type": "expression",
+      "expression": "blueprint is not None"
+    },
+    "no_blueprint": {
+      "type": "expression",
+      "expression": "blueprint is None"
+    },
+    "format_is_markdown": {
+      "type": "expression",
+      "expression": "output_format == 'markdown'"
+    },
+    "format_is_html": {
+      "type": "expression",
+      "expression": "output_format == 'html'"
+    },
+    "format_is_json": {
+      "type": "expression",
+      "expression": "output_format == 'json'"
+    },
+    "has_assembled_doc": {
+      "type": "expression",
+      "expression": "assembled_doc is not None"
+    },
+    "wants_mermaid": {
+      "type": "expression",
+      "expression": "include_mermaid == True"
+    },
+    "wants_tables": {
+      "type": "expression",
+      "expression": "include_tables == True"
+    },
+    "wants_quickstart": {
+      "type": "expression",
+      "expression": "include_quickstart == True"
+    },
+    "wants_context": {
+      "type": "expression",
+      "expression": "include_context == True"
+    },
+    "is_idle": {
+      "type": "expression",
+      "expression": "_state == 'idle'"
+    },
+    "is_loaded": {
+      "type": "expression",
+      "expression": "_state == 'loaded'"
+    },
+    "is_generating": {
+      "type": "expression",
+      "expression": "_state == 'generating'"
+    },
+    "is_assembling": {
+      "type": "expression",
+      "expression": "_state == 'assembling'"
+    },
+    "is_exporting": {
+      "type": "expression",
+      "expression": "_state == 'exporting'"
+    },
+    "is_done": {
+      "type": "expression",
+      "expression": "_state == 'done'"
+    },
+    "is_error": {
+      "type": "expression",
+      "expression": "_state == 'error'"
+    }
+  },
+
+  "actions": {
+    "load_blueprint": {
+      "type": "compute",
+      "compute_unit": "doc:load_blueprint",
+      "input_map": { "path": "event.payload.path" },
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprint_path": "blueprint_path",
+        "blueprint_name": "blueprint_name",
+        "blueprint_id": "blueprint_id",
+        "error": "error"
+      }
+    },
+    "init_defaults": {
+      "type": "compute",
+      "compute_unit": "doc:init_defaults",
+      "input_map": {},
+      "output_map": {
+        "output_format": "output_format",
+        "include_mermaid": "include_mermaid",
+        "include_tables": "include_tables",
+        "include_quickstart": "include_quickstart",
+        "include_context": "include_context"
+      }
+    },
+    "set_format_markdown": {
+      "type": "set",
+      "target": "output_format",
+      "value": "markdown"
+    },
+    "set_format_html": {
+      "type": "set",
+      "target": "output_format",
+      "value": "html"
+    },
+    "set_format_json": {
+      "type": "set",
+      "target": "output_format",
+      "value": "json"
+    },
+    "toggle_mermaid": {
+      "type": "compute",
+      "compute_unit": "doc:toggle",
+      "input_map": { "current": "include_mermaid" },
+      "output_map": { "include_mermaid": "result" }
+    },
+    "toggle_tables": {
+      "type": "compute",
+      "compute_unit": "doc:toggle",
+      "input_map": { "current": "include_tables" },
+      "output_map": { "include_tables": "result" }
+    },
+    "toggle_quickstart": {
+      "type": "compute",
+      "compute_unit": "doc:toggle",
+      "input_map": { "current": "include_quickstart" },
+      "output_map": { "include_quickstart": "result" }
+    },
+    "toggle_context": {
+      "type": "compute",
+      "compute_unit": "doc:toggle",
+      "input_map": { "current": "include_context" },
+      "output_map": { "include_context": "result" }
+    },
+    "extract_metadata": {
+      "type": "compute",
+      "compute_unit": "doc:extract_metadata",
+      "input_map": { "blueprint": "blueprint" },
+      "output_map": { "metadata": "metadata" }
+    },
+    "generate_overview": {
+      "type": "compute",
+      "compute_unit": "doc:generate_overview",
+      "input_map": { "blueprint": "blueprint", "metadata": "metadata" },
+      "output_map": { "overview_section": "section" }
+    },
+    "generate_mermaid": {
+      "type": "compute",
+      "compute_unit": "doc:generate_mermaid",
+      "input_map": { "blueprint": "blueprint" },
+      "output_map": { "mermaid_section": "section" }
+    },
+    "generate_states": {
+      "type": "compute",
+      "compute_unit": "doc:generate_states_table",
+      "input_map": { "blueprint": "blueprint" },
+      "output_map": { "states_section": "section" }
+    },
+    "generate_transitions": {
+      "type": "compute",
+      "compute_unit": "doc:generate_transitions_table",
+      "input_map": { "blueprint": "blueprint" },
+      "output_map": { "transitions_section": "section" }
+    },
+    "generate_gates": {
+      "type": "compute",
+      "compute_unit": "doc:generate_gates_table",
+      "input_map": { "blueprint": "blueprint" },
+      "output_map": { "gates_section": "section" }
+    },
+    "generate_actions": {
+      "type": "compute",
+      "compute_unit": "doc:generate_actions_table",
+      "input_map": { "blueprint": "blueprint" },
+      "output_map": { "actions_section": "section" }
+    },
+    "generate_context": {
+      "type": "compute",
+      "compute_unit": "doc:generate_context_docs",
+      "input_map": { "blueprint": "blueprint" },
+      "output_map": { "context_section": "section" }
+    },
+    "generate_events": {
+      "type": "compute",
+      "compute_unit": "doc:generate_events_list",
+      "input_map": { "blueprint": "blueprint" },
+      "output_map": { "events_section": "section" }
+    },
+    "generate_quickstart": {
+      "type": "compute",
+      "compute_unit": "doc:generate_quickstart",
+      "input_map": { "blueprint": "blueprint" },
+      "output_map": { "quickstart_section": "section" }
+    },
+    "assemble_markdown": {
+      "type": "compute",
+      "compute_unit": "doc:assemble_markdown",
+      "input_map": {
+        "overview_section": "overview_section",
+        "mermaid_section": "mermaid_section",
+        "states_section": "states_section",
+        "transitions_section": "transitions_section",
+        "gates_section": "gates_section",
+        "actions_section": "actions_section",
+        "context_section": "context_section",
+        "events_section": "events_section",
+        "quickstart_section": "quickstart_section",
+        "include_mermaid": "include_mermaid",
+        "include_tables": "include_tables",
+        "include_quickstart": "include_quickstart",
+        "include_context": "include_context"
+      },
+      "output_map": { "assembled_doc": "doc" }
+    },
+    "assemble_html": {
+      "type": "compute",
+      "compute_unit": "doc:assemble_html",
+      "input_map": {
+        "overview_section": "overview_section",
+        "mermaid_section": "mermaid_section",
+        "states_section": "states_section",
+        "transitions_section": "transitions_section",
+        "gates_section": "gates_section",
+        "actions_section": "actions_section",
+        "context_section": "context_section",
+        "events_section": "events_section",
+        "quickstart_section": "quickstart_section",
+        "include_mermaid": "include_mermaid",
+        "include_tables": "include_tables",
+        "include_quickstart": "include_quickstart",
+        "include_context": "include_context",
+        "blueprint_name": "blueprint_name"
+      },
+      "output_map": { "assembled_doc": "doc" }
+    },
+    "assemble_json": {
+      "type": "compute",
+      "compute_unit": "doc:assemble_json",
+      "input_map": {
+        "blueprint": "blueprint",
+        "metadata": "metadata"
+      },
+      "output_map": { "assembled_doc": "doc" }
+    },
+    "export_docs": {
+      "type": "compute",
+      "compute_unit": "doc:export_docs",
+      "input_map": {
+        "content": "assembled_doc",
+        "path": "event.payload.path",
+        "format": "output_format"
+      },
+      "output_map": { "output_path": "path", "error": "error" }
+    },
+    "set_error": {
+      "type": "set",
+      "target": "error",
+      "value_from": "event.payload.message"
+    },
+    "clear_error": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    },
+    "unload_blueprint": {
+      "type": "set",
+      "target": "blueprint",
+      "value": null
+    },
+    "clear_sections": {
+      "type": "compute",
+      "compute_unit": "doc:clear_sections",
+      "input_map": {},
+      "output_map": {
+        "overview_section": "overview_section",
+        "mermaid_section": "mermaid_section",
+        "states_section": "states_section",
+        "transitions_section": "transitions_section",
+        "gates_section": "gates_section",
+        "actions_section": "actions_section",
+        "context_section": "context_section",
+        "events_section": "events_section",
+        "quickstart_section": "quickstart_section",
+        "assembled_doc": "assembled_doc"
+      }
+    }
+  },
+
+  "display": {
+    "rules": [
+      { "gate": "is_error", "template": "ERROR: {error}" },
+      { "gate": "is_idle", "template": "No blueprint loaded. Use LOAD command." },
+      { "gate": "is_done", "template": "Done! Exported to: {output_path}" },
+      { "gate": "is_exporting", "template": "Exporting {output_format}..." },
+      { "gate": "is_assembling", "template": "Assembling {output_format} document..." },
+      { "gate": "is_generating", "template": "Generating sections for: {blueprint_name}" },
+      { "gate": "is_loaded", "template": "Loaded: {blueprint_name} [{output_format}]" },
+      { "template": "L++ Documentation Generator" }
+    ]
+  },
+
+  "transitions": [
+    {
+      "id": "t_load",
+      "from": "idle",
+      "to": "loaded",
+      "on_event": "LOAD",
+      "gates": ["no_blueprint"],
+      "actions": ["load_blueprint", "init_defaults"]
+    },
+    {
+      "id": "t_load_error",
+      "from": "idle",
+      "to": "error",
+      "on_event": "LOAD_FAILED",
+      "actions": ["set_error"]
+    },
+    {
+      "id": "t_reload",
+      "from": "loaded",
+      "to": "loaded",
+      "on_event": "LOAD",
+      "actions": ["load_blueprint", "clear_sections"]
+    },
+    {
+      "id": "t_reload_from_done",
+      "from": "done",
+      "to": "loaded",
+      "on_event": "LOAD",
+      "actions": ["load_blueprint", "clear_sections"]
+    },
+    {
+      "id": "t_set_markdown",
+      "from": "loaded",
+      "to": "loaded",
+      "on_event": "FORMAT_MARKDOWN",
+      "actions": ["set_format_markdown"]
+    },
+    {
+      "id": "t_set_html",
+      "from": "loaded",
+      "to": "loaded",
+      "on_event": "FORMAT_HTML",
+      "actions": ["set_format_html"]
+    },
+    {
+      "id": "t_set_json",
+      "from": "loaded",
+      "to": "loaded",
+      "on_event": "FORMAT_JSON",
+      "actions": ["set_format_json"]
+    },
+    {
+      "id": "t_toggle_mermaid",
+      "from": "loaded",
+      "to": "loaded",
+      "on_event": "TOGGLE_MERMAID",
+      "actions": ["toggle_mermaid"]
+    },
+    {
+      "id": "t_toggle_tables",
+      "from": "loaded",
+      "to": "loaded",
+      "on_event": "TOGGLE_TABLES",
+      "actions": ["toggle_tables"]
+    },
+    {
+      "id": "t_toggle_quickstart",
+      "from": "loaded",
+      "to": "loaded",
+      "on_event": "TOGGLE_QUICKSTART",
+      "actions": ["toggle_quickstart"]
+    },
+    {
+      "id": "t_toggle_context",
+      "from": "loaded",
+      "to": "loaded",
+      "on_event": "TOGGLE_CONTEXT",
+      "actions": ["toggle_context"]
+    },
+    {
+      "id": "t_start_generate",
+      "from": "loaded",
+      "to": "generating",
+      "on_event": "GENERATE",
+      "gates": ["has_blueprint"],
+      "actions": [
+        "extract_metadata",
+        "generate_overview",
+        "generate_mermaid",
+        "generate_states",
+        "generate_transitions",
+        "generate_gates",
+        "generate_actions",
+        "generate_context",
+        "generate_events",
+        "generate_quickstart"
+      ]
+    },
+    {
+      "id": "t_assemble_markdown",
+      "from": "generating",
+      "to": "assembling",
+      "on_event": "ASSEMBLE",
+      "gates": ["format_is_markdown"],
+      "actions": ["assemble_markdown"]
+    },
+    {
+      "id": "t_assemble_html",
+      "from": "generating",
+      "to": "assembling",
+      "on_event": "ASSEMBLE",
+      "gates": ["format_is_html"],
+      "actions": ["assemble_html"]
+    },
+    {
+      "id": "t_assemble_json",
+      "from": "generating",
+      "to": "assembling",
+      "on_event": "ASSEMBLE",
+      "gates": ["format_is_json"],
+      "actions": ["assemble_json"]
+    },
+    {
+      "id": "t_export",
+      "from": "assembling",
+      "to": "exporting",
+      "on_event": "EXPORT",
+      "gates": ["has_assembled_doc"],
+      "actions": ["export_docs"]
+    },
+    {
+      "id": "t_finish",
+      "from": "exporting",
+      "to": "done",
+      "on_event": "DONE",
+      "actions": []
+    },
+    {
+      "id": "t_generate_full",
+      "from": "loaded",
+      "to": "done",
+      "on_event": "GENERATE_FULL",
+      "gates": ["has_blueprint"],
+      "actions": [
+        "extract_metadata",
+        "generate_overview",
+        "generate_mermaid",
+        "generate_states",
+        "generate_transitions",
+        "generate_gates",
+        "generate_actions",
+        "generate_context",
+        "generate_events",
+        "generate_quickstart",
+        "assemble_markdown",
+        "export_docs"
+      ]
+    },
+    {
+      "id": "t_back_to_loaded",
+      "from": "generating",
+      "to": "loaded",
+      "on_event": "BACK",
+      "actions": []
+    },
+    {
+      "id": "t_back_from_assembling",
+      "from": "assembling",
+      "to": "loaded",
+      "on_event": "BACK",
+      "actions": []
+    },
+    {
+      "id": "t_back_from_done",
+      "from": "done",
+      "to": "loaded",
+      "on_event": "BACK",
+      "actions": []
+    },
+    {
+      "id": "t_unload",
+      "from": "loaded",
+      "to": "idle",
+      "on_event": "UNLOAD",
+      "actions": ["unload_blueprint", "clear_sections"]
+    },
+    {
+      "id": "t_unload_from_done",
+      "from": "done",
+      "to": "idle",
+      "on_event": "UNLOAD",
+      "actions": ["unload_blueprint", "clear_sections"]
+    },
+    {
+      "id": "t_recover",
+      "from": "error",
+      "to": "idle",
+      "on_event": "CLEAR",
+      "actions": ["clear_error"]
+    }
+  ]
+}

@@ -1,0 +1,635 @@
+{
+  "module": "composer_compute",
+  "filePath": "/Users/ruihe/mnt/lpp/lpp/utils/blueprint_composer/src/composer_compute.py",
+  "inbound": [
+    {
+      "type": "function",
+      "name": "load_parent",
+      "module": "composer_compute",
+      "line": 25,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Load the parent blueprint from a JSON file.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "load_child",
+      "module": "composer_compute",
+      "line": 49,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Load a child blueprint to be embedded.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "init_embedding",
+      "module": "composer_compute",
+      "line": 96,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Initialize a new embedding definition.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "set_input_contract",
+      "module": "composer_compute",
+      "line": 122,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Set the input contract mapping for an embedding.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "set_output_contract",
+      "module": "composer_compute",
+      "line": 134,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Set the output contract mapping for an embedding.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "set_event_map",
+      "module": "composer_compute",
+      "line": 146,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Set the event mapping for an embedding.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "finalize_embedding",
+      "module": "composer_compute",
+      "line": 158,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Finalize the current embedding and add to list.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "compose",
+      "module": "composer_compute",
+      "line": 181,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Execute the composition - embed child blueprints into parent.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "validate_composition",
+      "module": "composer_compute",
+      "line": 480,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Validate the composed blueprint.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "flatten",
+      "module": "composer_compute",
+      "line": 683,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Flatten nested compositions (resolve all namespace prefixes).",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "export_composed",
+      "module": "composer_compute",
+      "line": 701,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Export composed blueprint to file.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "load_manifest",
+      "module": "composer_compute",
+      "line": 728,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Load a composition manifest file.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "compose_from_manifest",
+      "module": "composer_compute",
+      "line": 839,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Compose blueprints based on a loaded manifest.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "generate_manifest",
+      "module": "composer_compute",
+      "line": 861,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Generate a composition manifest from current state.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "export_manifest",
+      "module": "composer_compute",
+      "line": 888,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Export composition manifest to file.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "clear_all",
+      "module": "composer_compute",
+      "line": 911,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Clear all state.",
+      "decorators": []
+    }
+  ],
+  "outbound": [
+    {
+      "module": "json",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "copy",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "pathlib",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Path",
+          "alias": "Path"
+        }
+      ]
+    },
+    {
+      "module": "typing",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Any",
+          "alias": "Any"
+        },
+        {
+          "name": "Dict",
+          "alias": "Dict"
+        },
+        {
+          "name": "List",
+          "alias": "List"
+        },
+        {
+          "name": "Set",
+          "alias": "Set"
+        },
+        {
+          "name": "Optional",
+          "alias": "Optional"
+        },
+        {
+          "name": "Tuple",
+          "alias": "Tuple"
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "composer_compute",
+      "type": "module",
+      "label": "composer_compute",
+      "metrics": {
+        "fanIn": 16,
+        "fanOut": 4,
+        "instability": 0.2,
+        "internalEdges": 2,
+        "externalCallCount": 24,
+        "localCallCount": 0,
+        "callsByCategory": {
+          "stdlib": 24
+        },
+        "localDependencies": []
+      }
+    },
+    {
+      "id": "composer_compute.load_parent",
+      "type": "function",
+      "label": "load_parent",
+      "direction": "inbound",
+      "parent": "composer_compute",
+      "line": 25,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "composer_compute.load_child",
+      "type": "function",
+      "label": "load_child",
+      "direction": "inbound",
+      "parent": "composer_compute",
+      "line": 49,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "composer_compute.init_embedding",
+      "type": "function",
+      "label": "init_embedding",
+      "direction": "inbound",
+      "parent": "composer_compute",
+      "line": 96,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "composer_compute.set_input_contract",
+      "type": "function",
+      "label": "set_input_contract",
+      "direction": "inbound",
+      "parent": "composer_compute",
+      "line": 122,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "composer_compute.set_output_contract",
+      "type": "function",
+      "label": "set_output_contract",
+      "direction": "inbound",
+      "parent": "composer_compute",
+      "line": 134,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "composer_compute.set_event_map",
+      "type": "function",
+      "label": "set_event_map",
+      "direction": "inbound",
+      "parent": "composer_compute",
+      "line": 146,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "composer_compute.finalize_embedding",
+      "type": "function",
+      "label": "finalize_embedding",
+      "direction": "inbound",
+      "parent": "composer_compute",
+      "line": 158,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "composer_compute.compose",
+      "type": "function",
+      "label": "compose",
+      "direction": "inbound",
+      "parent": "composer_compute",
+      "line": 181,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "composer_compute.validate_composition",
+      "type": "function",
+      "label": "validate_composition",
+      "direction": "inbound",
+      "parent": "composer_compute",
+      "line": 480,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "composer_compute.flatten",
+      "type": "function",
+      "label": "flatten",
+      "direction": "inbound",
+      "parent": "composer_compute",
+      "line": 683,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "composer_compute.export_composed",
+      "type": "function",
+      "label": "export_composed",
+      "direction": "inbound",
+      "parent": "composer_compute",
+      "line": 701,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "composer_compute.load_manifest",
+      "type": "function",
+      "label": "load_manifest",
+      "direction": "inbound",
+      "parent": "composer_compute",
+      "line": 728,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "composer_compute.compose_from_manifest",
+      "type": "function",
+      "label": "compose_from_manifest",
+      "direction": "inbound",
+      "parent": "composer_compute",
+      "line": 839,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "composer_compute.generate_manifest",
+      "type": "function",
+      "label": "generate_manifest",
+      "direction": "inbound",
+      "parent": "composer_compute",
+      "line": 861,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "composer_compute.export_manifest",
+      "type": "function",
+      "label": "export_manifest",
+      "direction": "inbound",
+      "parent": "composer_compute",
+      "line": 888,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "composer_compute.clear_all",
+      "type": "function",
+      "label": "clear_all",
+      "direction": "inbound",
+      "parent": "composer_compute",
+      "line": 911,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "json",
+      "type": "dependency",
+      "label": "json",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "copy",
+      "type": "dependency",
+      "label": "copy",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "pathlib",
+      "type": "dependency",
+      "label": "pathlib",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "typing",
+      "type": "dependency",
+      "label": "typing",
+      "direction": "outbound",
+      "category": "stdlib"
+    }
+  ],
+  "edges": [
+    {
+      "from": "composer_compute.load_manifest",
+      "to": "composer_compute.load_parent",
+      "type": "internal",
+      "line": 770
+    },
+    {
+      "from": "composer_compute.load_manifest",
+      "to": "composer_compute.load_child",
+      "type": "internal",
+      "line": 788
+    },
+    {
+      "from": "composer_compute.load_parent",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 32
+    },
+    {
+      "from": "composer_compute.load_parent",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 38
+    },
+    {
+      "from": "composer_compute.load_child",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 56
+    },
+    {
+      "from": "composer_compute.load_child",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 62
+    },
+    {
+      "from": "composer_compute.set_input_contract",
+      "to": "copy",
+      "type": "external",
+      "category": "stdlib",
+      "line": 124
+    },
+    {
+      "from": "composer_compute.set_output_contract",
+      "to": "copy",
+      "type": "external",
+      "category": "stdlib",
+      "line": 136
+    },
+    {
+      "from": "composer_compute.set_event_map",
+      "to": "copy",
+      "type": "external",
+      "category": "stdlib",
+      "line": 148
+    },
+    {
+      "from": "composer_compute.finalize_embedding",
+      "to": "copy",
+      "type": "external",
+      "category": "stdlib",
+      "line": 160
+    },
+    {
+      "from": "composer_compute.compose",
+      "to": "copy",
+      "type": "external",
+      "category": "stdlib",
+      "line": 193
+    },
+    {
+      "from": "composer_compute._apply_embedding",
+      "to": "copy",
+      "type": "external",
+      "category": "stdlib",
+      "line": 217
+    },
+    {
+      "from": "composer_compute._prefix_child",
+      "to": "copy",
+      "type": "external",
+      "category": "stdlib",
+      "line": 277
+    },
+    {
+      "from": "composer_compute._prefix_child",
+      "to": "copy",
+      "type": "external",
+      "category": "stdlib",
+      "line": 306
+    },
+    {
+      "from": "composer_compute._prefix_child",
+      "to": "copy",
+      "type": "external",
+      "category": "stdlib",
+      "line": 312
+    },
+    {
+      "from": "composer_compute._map_action_contracts",
+      "to": "copy",
+      "type": "external",
+      "category": "stdlib",
+      "line": 371
+    },
+    {
+      "from": "composer_compute._map_transitions",
+      "to": "copy",
+      "type": "external",
+      "category": "stdlib",
+      "line": 407
+    },
+    {
+      "from": "composer_compute._rewire_parent_transitions",
+      "to": "copy",
+      "type": "external",
+      "category": "stdlib",
+      "line": 436
+    },
+    {
+      "from": "composer_compute._rewire_parent_transitions",
+      "to": "copy",
+      "type": "external",
+      "category": "stdlib",
+      "line": 448
+    },
+    {
+      "from": "composer_compute.flatten",
+      "to": "copy",
+      "type": "external",
+      "category": "stdlib",
+      "line": 692
+    },
+    {
+      "from": "composer_compute.export_composed",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 713
+    },
+    {
+      "from": "composer_compute.export_composed",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 717
+    },
+    {
+      "from": "composer_compute.load_manifest",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 742
+    },
+    {
+      "from": "composer_compute.load_manifest",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 753
+    },
+    {
+      "from": "composer_compute.export_manifest",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 900
+    },
+    {
+      "from": "composer_compute.export_manifest",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 904
+    }
+  ],
+  "coupling": {
+    "fanIn": 16,
+    "fanOut": 4,
+    "instability": 0.2,
+    "internalEdges": 2,
+    "externalCallCount": 24,
+    "localCallCount": 0,
+    "callsByCategory": {
+      "stdlib": 24
+    },
+    "localDependencies": []
+  }
+}

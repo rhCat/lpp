@@ -1,0 +1,170 @@
+{
+  "$schema": "lpp/v0.1.2",
+  "id": "parent_workflow",
+  "name": "Parent Workflow",
+  "version": "1.0.0",
+  "description": "A workflow with a placeholder processing state for embedding",
+
+  "context_schema": {
+    "properties": {
+      "input_data": {
+        "type": "object",
+        "description": "Input data for processing"
+      },
+      "output_data": {
+        "type": "object",
+        "description": "Output data from processing"
+      },
+      "status": {
+        "type": "string",
+        "description": "Current workflow status"
+      },
+      "error_message": {
+        "type": "string",
+        "description": "Error message if any"
+      }
+    }
+  },
+
+  "states": {
+    "idle": {
+      "description": "Waiting for input"
+    },
+    "validating": {
+      "description": "Validating input data"
+    },
+    "processing": {
+      "description": "Placeholder for processing logic - to be embedded"
+    },
+    "complete": {
+      "description": "Processing complete, output available"
+    },
+    "error": {
+      "description": "Error state"
+    }
+  },
+
+  "entry_state": "idle",
+  "terminal_states": [],
+
+  "gates": {
+    "has_input": {
+      "type": "expression",
+      "expression": "input_data is not None"
+    },
+    "input_valid": {
+      "type": "expression",
+      "expression": "status == 'validated'"
+    },
+    "has_output": {
+      "type": "expression",
+      "expression": "output_data is not None"
+    }
+  },
+
+  "actions": {
+    "set_status_validating": {
+      "type": "set",
+      "target": "status",
+      "value": "validating"
+    },
+    "set_status_validated": {
+      "type": "set",
+      "target": "status",
+      "value": "validated"
+    },
+    "set_status_processing": {
+      "type": "set",
+      "target": "status",
+      "value": "processing"
+    },
+    "set_status_complete": {
+      "type": "set",
+      "target": "status",
+      "value": "complete"
+    },
+    "set_status_error": {
+      "type": "set",
+      "target": "status",
+      "value": "error"
+    },
+    "set_error_message": {
+      "type": "set",
+      "target": "error_message",
+      "value_from": "event.payload.message"
+    },
+    "clear_state": {
+      "type": "compute",
+      "compute_unit": "workflow:clear",
+      "input_map": {},
+      "output_map": {
+        "input_data": "input_data",
+        "output_data": "output_data",
+        "status": "status",
+        "error_message": "error_message"
+      }
+    }
+  },
+
+  "transitions": [
+    {
+      "id": "t_submit",
+      "from": "idle",
+      "to": "validating",
+      "on_event": "SUBMIT",
+      "gates": ["has_input"],
+      "actions": ["set_status_validating"]
+    },
+    {
+      "id": "t_validated",
+      "from": "validating",
+      "to": "processing",
+      "on_event": "VALIDATED",
+      "actions": ["set_status_validated", "set_status_processing"]
+    },
+    {
+      "id": "t_validation_failed",
+      "from": "validating",
+      "to": "error",
+      "on_event": "VALIDATION_FAILED",
+      "actions": ["set_status_error", "set_error_message"]
+    },
+    {
+      "id": "t_process_complete",
+      "from": "processing",
+      "to": "complete",
+      "on_event": "PROCESS_COMPLETE",
+      "gates": ["has_output"],
+      "actions": ["set_status_complete"]
+    },
+    {
+      "id": "t_process_error",
+      "from": "processing",
+      "to": "error",
+      "on_event": "PROCESS_ERROR",
+      "actions": ["set_status_error", "set_error_message"]
+    },
+    {
+      "id": "t_reset_from_complete",
+      "from": "complete",
+      "to": "idle",
+      "on_event": "RESET",
+      "actions": ["clear_state"]
+    },
+    {
+      "id": "t_reset_from_error",
+      "from": "error",
+      "to": "idle",
+      "on_event": "RESET",
+      "actions": ["clear_state"]
+    },
+    {
+      "id": "t_retry",
+      "from": "error",
+      "to": "validating",
+      "on_event": "RETRY",
+      "gates": ["has_input"],
+      "actions": ["set_status_validating"]
+    }
+  ]
+}

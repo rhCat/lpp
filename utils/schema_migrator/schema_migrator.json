@@ -1,0 +1,597 @@
+{
+  "$schema": "lpp/v0.1.2",
+  "id": "lpp_schema_migrator",
+  "name": "L++ Schema Migrator",
+  "version": "1.0.0",
+  "description": "Tool for migrating L++ blueprints between schema versions",
+
+  "context_schema": {
+    "properties": {
+      "blueprint": {
+        "type": "object",
+        "description": "The loaded blueprint to migrate"
+      },
+      "blueprint_path": {
+        "type": "string",
+        "description": "Path to the blueprint file"
+      },
+      "source_version": {
+        "type": "string",
+        "description": "Detected source schema version"
+      },
+      "target_version": {
+        "type": "string",
+        "description": "Target schema version for migration"
+      },
+      "available_migrations": {
+        "type": "array",
+        "description": "List of available migration definitions"
+      },
+      "migration_plan": {
+        "type": "array",
+        "description": "Ordered list of migrations to apply"
+      },
+      "migration_changes": {
+        "type": "array",
+        "description": "Detailed list of changes to be made"
+      },
+      "migrated_blueprint": {
+        "type": "object",
+        "description": "The blueprint after migration"
+      },
+      "validation_result": {
+        "type": "object",
+        "description": "Validation result against target schema"
+      },
+      "report": {
+        "type": "string",
+        "description": "Generated migration report"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message if any"
+      },
+      "dry_run_mode": {
+        "type": "boolean",
+        "description": "If true, preview changes without applying"
+      },
+      "batch_paths": {
+        "type": "array",
+        "description": "Paths for batch migration"
+      },
+      "batch_results": {
+        "type": "array",
+        "description": "Results of batch migration"
+      }
+    }
+  },
+
+  "states": {
+    "idle": {
+      "description": "No blueprint loaded, waiting for input"
+    },
+    "loaded": {
+      "description": "Blueprint loaded, version detected"
+    },
+    "planning": {
+      "description": "Planning migration path"
+    },
+    "planned": {
+      "description": "Migration plan ready, awaiting execution"
+    },
+    "migrating": {
+      "description": "Applying migration steps"
+    },
+    "validating": {
+      "description": "Validating migrated blueprint"
+    },
+    "complete": {
+      "description": "Migration complete, ready to export"
+    },
+    "batch_mode": {
+      "description": "Processing batch migration"
+    },
+    "error": {
+      "description": "Error state"
+    }
+  },
+
+  "entry_state": "idle",
+  "terminal_states": [],
+
+  "gates": {
+    "has_blueprint": {
+      "type": "expression",
+      "expression": "blueprint is not None"
+    },
+    "no_blueprint": {
+      "type": "expression",
+      "expression": "blueprint is None"
+    },
+    "has_migration_plan": {
+      "type": "expression",
+      "expression": "migration_plan is not None and len(migration_plan) > 0"
+    },
+    "no_migration_needed": {
+      "type": "expression",
+      "expression": "source_version == target_version"
+    },
+    "has_migrated_blueprint": {
+      "type": "expression",
+      "expression": "migrated_blueprint is not None"
+    },
+    "validation_passed": {
+      "type": "expression",
+      "expression": "validation_result is not None and validation_result.get('valid', False)"
+    },
+    "validation_failed": {
+      "type": "expression",
+      "expression": "validation_result is not None and not validation_result.get('valid', True)"
+    },
+    "is_dry_run": {
+      "type": "expression",
+      "expression": "dry_run_mode == True"
+    },
+    "has_batch_paths": {
+      "type": "expression",
+      "expression": "batch_paths is not None and len(batch_paths) > 0"
+    }
+  },
+
+  "actions": {
+    "load_blueprint": {
+      "type": "compute",
+      "compute_unit": "migrate:load_blueprint",
+      "input_map": {
+        "path": "event.payload.path"
+      },
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprint_path": "path",
+        "error": "error"
+      }
+    },
+    "detect_version": {
+      "type": "compute",
+      "compute_unit": "migrate:detect_version",
+      "input_map": {
+        "blueprint": "blueprint"
+      },
+      "output_map": {
+        "source_version": "source_version",
+        "error": "error"
+      }
+    },
+    "set_target_version": {
+      "type": "set",
+      "target": "target_version",
+      "value_from": "event.payload.version"
+    },
+    "set_target_latest": {
+      "type": "compute",
+      "compute_unit": "migrate:get_latest_version",
+      "input_map": {},
+      "output_map": {
+        "target_version": "version"
+      }
+    },
+    "list_migrations": {
+      "type": "compute",
+      "compute_unit": "migrate:list_migrations",
+      "input_map": {},
+      "output_map": {
+        "available_migrations": "migrations"
+      }
+    },
+    "plan_migration": {
+      "type": "compute",
+      "compute_unit": "migrate:plan_migration",
+      "input_map": {
+        "source_version": "source_version",
+        "target_version": "target_version",
+        "available_migrations": "available_migrations"
+      },
+      "output_map": {
+        "migration_plan": "plan",
+        "error": "error"
+      }
+    },
+    "analyze_changes": {
+      "type": "compute",
+      "compute_unit": "migrate:analyze_changes",
+      "input_map": {
+        "blueprint": "blueprint",
+        "migration_plan": "migration_plan"
+      },
+      "output_map": {
+        "migration_changes": "changes"
+      }
+    },
+    "apply_migration": {
+      "type": "compute",
+      "compute_unit": "migrate:apply_migration",
+      "input_map": {
+        "blueprint": "blueprint",
+        "migration_plan": "migration_plan"
+      },
+      "output_map": {
+        "migrated_blueprint": "blueprint",
+        "error": "error"
+      }
+    },
+    "validate_blueprint": {
+      "type": "compute",
+      "compute_unit": "migrate:validate_blueprint",
+      "input_map": {
+        "blueprint": "migrated_blueprint",
+        "target_version": "target_version"
+      },
+      "output_map": {
+        "validation_result": "result"
+      }
+    },
+    "generate_report": {
+      "type": "compute",
+      "compute_unit": "migrate:generate_report",
+      "input_map": {
+        "blueprint_path": "blueprint_path",
+        "source_version": "source_version",
+        "target_version": "target_version",
+        "migration_plan": "migration_plan",
+        "migration_changes": "migration_changes",
+        "validation_result": "validation_result",
+        "dry_run_mode": "dry_run_mode"
+      },
+      "output_map": {
+        "report": "report"
+      }
+    },
+    "export_migrated": {
+      "type": "compute",
+      "compute_unit": "migrate:export_migrated",
+      "input_map": {
+        "blueprint": "migrated_blueprint",
+        "path": "event.payload.path"
+      },
+      "output_map": {
+        "error": "error"
+      }
+    },
+    "dry_run": {
+      "type": "compute",
+      "compute_unit": "migrate:dry_run",
+      "input_map": {
+        "blueprint": "blueprint",
+        "migration_plan": "migration_plan"
+      },
+      "output_map": {
+        "migration_changes": "changes",
+        "migrated_blueprint": "preview_blueprint"
+      }
+    },
+    "set_dry_run_on": {
+      "type": "set",
+      "target": "dry_run_mode",
+      "value": true
+    },
+    "set_dry_run_off": {
+      "type": "set",
+      "target": "dry_run_mode",
+      "value": false
+    },
+    "set_batch_paths": {
+      "type": "set",
+      "target": "batch_paths",
+      "value_from": "event.payload.paths"
+    },
+    "batch_migrate": {
+      "type": "compute",
+      "compute_unit": "migrate:batch_migrate",
+      "input_map": {
+        "paths": "batch_paths",
+        "target_version": "target_version"
+      },
+      "output_map": {
+        "batch_results": "results"
+      }
+    },
+    "set_error": {
+      "type": "set",
+      "target": "error",
+      "value_from": "event.payload.message"
+    },
+    "clear_error": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    },
+    "clear_migration": {
+      "type": "compute",
+      "compute_unit": "migrate:clear_migration",
+      "input_map": {},
+      "output_map": {
+        "migration_plan": "plan",
+        "migration_changes": "changes",
+        "migrated_blueprint": "blueprint",
+        "validation_result": "validation",
+        "report": "report"
+      }
+    },
+    "unload_blueprint": {
+      "type": "compute",
+      "compute_unit": "migrate:unload_blueprint",
+      "input_map": {},
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprint_path": "path",
+        "source_version": "version",
+        "target_version": "target",
+        "migration_plan": "plan",
+        "migration_changes": "changes",
+        "migrated_blueprint": "migrated",
+        "validation_result": "validation",
+        "report": "report"
+      }
+    }
+  },
+
+  "display": {
+    "rules": [
+      {
+        "gate": "validation_failed",
+        "template": "VALIDATION FAILED: {validation_result.errors}"
+      },
+      {
+        "gate": "validation_passed",
+        "template": "Migration validated successfully"
+      },
+      {
+        "gate": "has_migration_plan",
+        "template": "Plan: {source_version} -> {target_version} ({migration_plan} steps)"
+      },
+      {
+        "gate": "has_blueprint",
+        "template": "Loaded: {blueprint_path} (schema: {source_version})"
+      },
+      {
+        "template": "L++ Schema Migrator"
+      }
+    ]
+  },
+
+  "transitions": [
+    {
+      "id": "t_load",
+      "from": "idle",
+      "to": "loaded",
+      "on_event": "LOAD",
+      "gates": ["no_blueprint"],
+      "actions": ["load_blueprint", "detect_version", "list_migrations"]
+    },
+    {
+      "id": "t_load_error",
+      "from": "idle",
+      "to": "error",
+      "on_event": "LOAD_FAILED",
+      "actions": ["set_error"]
+    },
+    {
+      "id": "t_reload",
+      "from": "loaded",
+      "to": "loaded",
+      "on_event": "LOAD",
+      "actions": ["load_blueprint", "detect_version", "clear_migration"]
+    },
+    {
+      "id": "t_reload_from_complete",
+      "from": "complete",
+      "to": "loaded",
+      "on_event": "LOAD",
+      "actions": ["load_blueprint", "detect_version", "clear_migration"]
+    },
+    {
+      "id": "t_set_target",
+      "from": "loaded",
+      "to": "planning",
+      "on_event": "SET_TARGET",
+      "gates": ["has_blueprint"],
+      "actions": ["set_target_version"]
+    },
+    {
+      "id": "t_set_target_latest",
+      "from": "loaded",
+      "to": "planning",
+      "on_event": "MIGRATE_LATEST",
+      "gates": ["has_blueprint"],
+      "actions": ["set_target_latest"]
+    },
+    {
+      "id": "t_plan",
+      "from": "planning",
+      "to": "planned",
+      "on_event": "PLAN",
+      "actions": ["plan_migration", "analyze_changes"]
+    },
+    {
+      "id": "t_auto_plan",
+      "from": "loaded",
+      "to": "planned",
+      "on_event": "PLAN_TO",
+      "gates": ["has_blueprint"],
+      "actions": ["set_target_version", "plan_migration", "analyze_changes"]
+    },
+    {
+      "id": "t_auto_plan_latest",
+      "from": "loaded",
+      "to": "planned",
+      "on_event": "PLAN_LATEST",
+      "gates": ["has_blueprint"],
+      "actions": ["set_target_latest", "plan_migration", "analyze_changes"]
+    },
+    {
+      "id": "t_dry_run",
+      "from": "planned",
+      "to": "complete",
+      "on_event": "DRY_RUN",
+      "gates": ["has_migration_plan"],
+      "actions": ["set_dry_run_on", "dry_run", "generate_report"]
+    },
+    {
+      "id": "t_execute",
+      "from": "planned",
+      "to": "migrating",
+      "on_event": "EXECUTE",
+      "gates": ["has_migration_plan"],
+      "actions": ["set_dry_run_off", "apply_migration"]
+    },
+    {
+      "id": "t_validate",
+      "from": "migrating",
+      "to": "validating",
+      "on_event": "VALIDATE",
+      "gates": ["has_migrated_blueprint"],
+      "actions": ["validate_blueprint"]
+    },
+    {
+      "id": "t_auto_validate",
+      "from": "migrating",
+      "to": "validating",
+      "on_event": "AUTO_CONTINUE",
+      "gates": ["has_migrated_blueprint"],
+      "actions": ["validate_blueprint"]
+    },
+    {
+      "id": "t_finalize",
+      "from": "validating",
+      "to": "complete",
+      "on_event": "FINALIZE",
+      "gates": ["validation_passed"],
+      "actions": ["generate_report"]
+    },
+    {
+      "id": "t_finalize_with_warnings",
+      "from": "validating",
+      "to": "complete",
+      "on_event": "FORCE_FINALIZE",
+      "actions": ["generate_report"]
+    },
+    {
+      "id": "t_migrate_all",
+      "from": "loaded",
+      "to": "complete",
+      "on_event": "MIGRATE_ALL",
+      "gates": ["has_blueprint"],
+      "actions": [
+        "set_target_latest",
+        "plan_migration",
+        "analyze_changes",
+        "set_dry_run_off",
+        "apply_migration",
+        "validate_blueprint",
+        "generate_report"
+      ]
+    },
+    {
+      "id": "t_preview_all",
+      "from": "loaded",
+      "to": "complete",
+      "on_event": "PREVIEW_ALL",
+      "gates": ["has_blueprint"],
+      "actions": [
+        "set_target_latest",
+        "plan_migration",
+        "analyze_changes",
+        "set_dry_run_on",
+        "dry_run",
+        "generate_report"
+      ]
+    },
+    {
+      "id": "t_export",
+      "from": "complete",
+      "to": "complete",
+      "on_event": "EXPORT",
+      "gates": ["has_migrated_blueprint"],
+      "actions": ["export_migrated"]
+    },
+    {
+      "id": "t_start_batch",
+      "from": "idle",
+      "to": "batch_mode",
+      "on_event": "BATCH",
+      "actions": ["set_batch_paths", "set_target_latest"]
+    },
+    {
+      "id": "t_batch_with_target",
+      "from": "idle",
+      "to": "batch_mode",
+      "on_event": "BATCH_TO",
+      "actions": ["set_batch_paths", "set_target_version"]
+    },
+    {
+      "id": "t_run_batch",
+      "from": "batch_mode",
+      "to": "complete",
+      "on_event": "RUN_BATCH",
+      "gates": ["has_batch_paths"],
+      "actions": ["batch_migrate", "generate_report"]
+    },
+    {
+      "id": "t_back_to_loaded",
+      "from": "planned",
+      "to": "loaded",
+      "on_event": "BACK",
+      "actions": ["clear_migration"]
+    },
+    {
+      "id": "t_back_from_complete",
+      "from": "complete",
+      "to": "loaded",
+      "on_event": "BACK",
+      "actions": ["clear_migration"]
+    },
+    {
+      "id": "t_replan",
+      "from": "planned",
+      "to": "planning",
+      "on_event": "REPLAN",
+      "actions": ["clear_migration"]
+    },
+    {
+      "id": "t_unload",
+      "from": "loaded",
+      "to": "idle",
+      "on_event": "UNLOAD",
+      "actions": ["unload_blueprint"]
+    },
+    {
+      "id": "t_unload_from_complete",
+      "from": "complete",
+      "to": "idle",
+      "on_event": "UNLOAD",
+      "actions": ["unload_blueprint"]
+    },
+    {
+      "id": "t_unload_from_planned",
+      "from": "planned",
+      "to": "idle",
+      "on_event": "UNLOAD",
+      "actions": ["unload_blueprint"]
+    },
+    {
+      "id": "t_recover",
+      "from": "error",
+      "to": "idle",
+      "on_event": "CLEAR",
+      "actions": ["clear_error", "unload_blueprint"]
+    },
+    {
+      "id": "t_recover_to_loaded",
+      "from": "error",
+      "to": "loaded",
+      "on_event": "RETRY",
+      "gates": ["has_blueprint"],
+      "actions": ["clear_error"]
+    }
+  ]
+}

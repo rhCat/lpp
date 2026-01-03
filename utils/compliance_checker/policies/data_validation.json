@@ -1,0 +1,39 @@
+{
+  "policy_id": "DATA-001",
+  "name": "Data Validation Requirements",
+  "description": "Data operations must have proper validation",
+  "category": "data",
+  "severity": "warning",
+  "rules": [
+    {
+      "type": "transition_requires_gate",
+      "description": "SAVE operations require validation gate",
+      "condition": {
+        "on_event_pattern": "^SAVE.*"
+      },
+      "required_gate_pattern": ".*valid.*|.*is_valid.*|.*has_data.*|.*can_save.*"
+    },
+    {
+      "type": "transition_requires_gate",
+      "description": "IMPORT operations require validation gate",
+      "condition": {
+        "on_event_pattern": "^IMPORT.*"
+      },
+      "required_gate_pattern": ".*valid.*|.*is_valid.*|.*can_import.*"
+    },
+    {
+      "type": "transition_requires_gate",
+      "description": "PROCESS operations require data presence gate",
+      "condition": {
+        "on_event_pattern": "^PROCESS.*"
+      },
+      "required_gate_pattern": ".*has_.*|.*is_ready.*|.*can_process.*"
+    },
+    {
+      "type": "gate_expression_check",
+      "description": "Validation gates should check for None",
+      "gate_pattern": ".*valid.*",
+      "required_expression_pattern": "is not None|!= None|is None"
+    }
+  ]
+}

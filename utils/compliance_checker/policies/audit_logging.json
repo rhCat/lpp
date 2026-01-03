@@ -1,0 +1,38 @@
+{
+  "policy_id": "AUD-001",
+  "name": "Audit Trail Requirements",
+  "description": "Critical transitions must have audit logging actions",
+  "category": "audit",
+  "severity": "warning",
+  "rules": [
+    {
+      "type": "transition_requires_action",
+      "description": "DELETE operations must have logging action",
+      "condition": {
+        "on_event_pattern": "^DELETE.*"
+      },
+      "required_action_pattern": ".*log.*|.*audit.*|.*record.*|.*track.*"
+    },
+    {
+      "type": "transition_requires_action",
+      "description": "UPDATE operations must have logging action",
+      "condition": {
+        "on_event_pattern": "^UPDATE.*"
+      },
+      "required_action_pattern": ".*log.*|.*audit.*|.*record.*|.*track.*"
+    },
+    {
+      "type": "transition_requires_action",
+      "description": "State changes to error must be logged",
+      "condition": {
+        "on_event_pattern": ".*ERROR.*|.*FAIL.*"
+      },
+      "required_action_pattern": ".*log.*|.*audit.*|.*set_error.*|.*record.*"
+    },
+    {
+      "type": "context_property_required",
+      "description": "Context should have error tracking property",
+      "required_properties": ["error"]
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "from_version": "lpp/v0.1.1",
+  "to_version": "lpp/v0.1.2",
+  "description": "Trinity Refinement: Rename guard to gates, add display field",
+  "changes": [
+    {
+      "type": "rename_field",
+      "path": "transitions[*]",
+      "from": "guard",
+      "to": "gates",
+      "transform": "wrap_array",
+      "description": "Convert singular guard to gates array"
+    },
+    {
+      "type": "add_field",
+      "path": "",
+      "field": "display",
+      "default": {
+        "rules": []
+      },
+      "condition": "missing",
+      "description": "Add display field for UI rendering rules"
+    },
+    {
+      "type": "convert_type",
+      "path": "terminal_states",
+      "from": "string",
+      "to": "array",
+      "transform": "string_to_array",
+      "description": "Convert terminal_states from string to array"
+    },
+    {
+      "type": "remove_field",
+      "path": "",
+      "field": "fork_join_patterns",
+      "condition": "exists",
+      "description": "Remove deprecated fork_join_patterns (parallelism now in Design Patterns)"
+    }
+  ],
+  "notes": [
+    "This migration handles the v0.1.2 Trinity Refinement",
+    "FORK/JOIN patterns should be reimplemented using the new Design Patterns approach"
+  ]
+}

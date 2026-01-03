@@ -1,0 +1,38 @@
+{
+  "policy_id": "WF-001",
+  "name": "Approval Workflow Patterns",
+  "description": "Critical operations should have approval workflows",
+  "category": "workflow",
+  "severity": "warning",
+  "rules": [
+    {
+      "type": "state_exists",
+      "description": "Approval workflow should have pending approval state",
+      "required_states": []
+    },
+    {
+      "type": "transition_requires_gate",
+      "description": "APPROVE operations require authorization gate",
+      "condition": {
+        "on_event_pattern": "^APPROVE.*"
+      },
+      "required_gate_pattern": ".*auth.*|.*can_approve.*|.*is_approver.*|.*has_permission.*"
+    },
+    {
+      "type": "transition_requires_gate",
+      "description": "REJECT operations require authorization gate",
+      "condition": {
+        "on_event_pattern": "^REJECT.*"
+      },
+      "required_gate_pattern": ".*auth.*|.*can_reject.*|.*is_approver.*|.*has_permission.*"
+    },
+    {
+      "type": "transition_requires_gate",
+      "description": "SUBMIT operations should have validation gate",
+      "condition": {
+        "on_event_pattern": "^SUBMIT.*"
+      },
+      "required_gate_pattern": ".*valid.*|.*complete.*|.*can_submit.*"
+    }
+  ]
+}

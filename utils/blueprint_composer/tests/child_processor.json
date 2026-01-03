@@ -1,0 +1,159 @@
+{
+  "$schema": "lpp/v0.1.2",
+  "id": "child_processor",
+  "name": "Child Processor",
+  "version": "1.0.0",
+  "description": "A specific processing implementation to be embedded",
+
+  "context_schema": {
+    "properties": {
+      "process_input": {
+        "type": "object",
+        "description": "Input data for processing"
+      },
+      "process_result": {
+        "type": "object",
+        "description": "Result of processing"
+      },
+      "step_count": {
+        "type": "number",
+        "description": "Current processing step"
+      },
+      "intermediate_data": {
+        "type": "object",
+        "description": "Intermediate processing data"
+      }
+    }
+  },
+
+  "states": {
+    "init": {
+      "description": "Initialize processing"
+    },
+    "step1": {
+      "description": "First processing step - data extraction"
+    },
+    "step2": {
+      "description": "Second processing step - transformation"
+    },
+    "step3": {
+      "description": "Third processing step - aggregation"
+    },
+    "done": {
+      "description": "Processing complete"
+    }
+  },
+
+  "entry_state": "init",
+  "terminal_states": ["done"],
+
+  "gates": {
+    "has_process_input": {
+      "type": "expression",
+      "expression": "process_input is not None"
+    },
+    "step1_complete": {
+      "type": "expression",
+      "expression": "step_count >= 1"
+    },
+    "step2_complete": {
+      "type": "expression",
+      "expression": "step_count >= 2"
+    },
+    "all_steps_complete": {
+      "type": "expression",
+      "expression": "step_count >= 3"
+    }
+  },
+
+  "actions": {
+    "init_processing": {
+      "type": "set",
+      "target": "step_count",
+      "value": 0
+    },
+    "execute_step1": {
+      "type": "compute",
+      "compute_unit": "process:extract",
+      "input_map": {
+        "data": "process_input"
+      },
+      "output_map": {
+        "intermediate_data": "extracted",
+        "step_count": "step"
+      }
+    },
+    "execute_step2": {
+      "type": "compute",
+      "compute_unit": "process:transform",
+      "input_map": {
+        "data": "intermediate_data"
+      },
+      "output_map": {
+        "intermediate_data": "transformed",
+        "step_count": "step"
+      }
+    },
+    "execute_step3": {
+      "type": "compute",
+      "compute_unit": "process:aggregate",
+      "input_map": {
+        "data": "intermediate_data"
+      },
+      "output_map": {
+        "process_result": "aggregated",
+        "step_count": "step"
+      }
+    },
+    "finalize": {
+      "type": "compute",
+      "compute_unit": "process:finalize",
+      "input_map": {
+        "result": "process_result"
+      },
+      "output_map": {
+        "process_result": "final"
+      }
+    }
+  },
+
+  "transitions": [
+    {
+      "id": "t_start_processing",
+      "from": "init",
+      "to": "step1",
+      "on_event": "START",
+      "gates": ["has_process_input"],
+      "actions": ["init_processing"]
+    },
+    {
+      "id": "t_step1_execute",
+      "from": "step1",
+      "to": "step2",
+      "on_event": "NEXT",
+      "actions": ["execute_step1"]
+    },
+    {
+      "id": "t_step2_execute",
+      "from": "step2",
+      "to": "step3",
+      "on_event": "NEXT",
+      "gates": ["step1_complete"],
+      "actions": ["execute_step2"]
+    },
+    {
+      "id": "t_step3_execute",
+      "from": "step3",
+      "to": "done",
+      "on_event": "NEXT",
+      "gates": ["step2_complete"],
+      "actions": ["execute_step3", "finalize"]
+    },
+    {
+      "id": "t_complete",
+      "from": "done",
+      "to": "done",
+      "on_event": "COMPLETE"
+    }
+  ]
+}

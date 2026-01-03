@@ -1,0 +1,334 @@
+{
+  "$schema": "lpp/v0.1.2",
+  "id": "extracted_sample_state_machine",
+  "name": "Extracted: Sample State Machine",
+  "version": "1.0.0",
+  "description": "State machine extracted from utils/legacy_extractor/tests/sample_state_machine.py",
+  "context_schema": {
+    "properties": {
+      "currentState": {
+        "type": "string"
+      },
+      "self.rejection_reason": {
+        "type": "object"
+      },
+      "self.tracking": {
+        "type": "object"
+      },
+      "self.data": {
+        "type": "object"
+      },
+      "self.error_message": {
+        "type": "object"
+      },
+      "self.host": {
+        "type": "object"
+      },
+      "error": {
+        "type": "string"
+      }
+    }
+  },
+  "states": {
+    "pending": {
+      "description": "From enum OrderState.PENDING"
+    },
+    "submitted": {
+      "description": "From enum OrderState.SUBMITTED"
+    },
+    "approved": {
+      "description": "From enum OrderState.APPROVED"
+    },
+    "rejected": {
+      "description": "From enum OrderState.REJECTED"
+    },
+    "shipped": {
+      "description": "From enum OrderState.SHIPPED"
+    },
+    "delivered": {
+      "description": "From enum OrderState.DELIVERED"
+    },
+    "cancelled": {
+      "description": "From enum OrderState.CANCELLED"
+    },
+    "idle": {
+      "description": "From constant CURRENT_STATE"
+    },
+    "init": {
+      "description": "From constant STATE_INIT"
+    },
+    "error": {
+      "description": "From constant STATE_ERROR"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_0",
+      "from": "pending",
+      "to": "submitted",
+      "on_event": "SUBMIT"
+    },
+    {
+      "id": "t_1",
+      "from": "submitted",
+      "to": "approved",
+      "on_event": "APPROVE"
+    },
+    {
+      "id": "t_2",
+      "from": "submitted",
+      "to": "rejected",
+      "on_event": "REJECT"
+    },
+    {
+      "id": "t_3",
+      "from": "approved",
+      "to": "shipped",
+      "on_event": "SHIP"
+    },
+    {
+      "id": "t_4",
+      "from": "shipped",
+      "to": "delivered",
+      "on_event": "DELIVER"
+    },
+    {
+      "id": "t_5",
+      "from": "*",
+      "to": "cancelled",
+      "on_event": "CANCEL"
+    },
+    {
+      "id": "t_6",
+      "from": "idle",
+      "to": "running",
+      "on_event": "ON_START"
+    },
+    {
+      "id": "t_7",
+      "from": "running",
+      "to": "paused",
+      "on_event": "ON_PAUSE"
+    },
+    {
+      "id": "t_8",
+      "from": "paused",
+      "to": "running",
+      "on_event": "ON_RESUME"
+    },
+    {
+      "id": "t_9",
+      "from": "*",
+      "to": "stopped",
+      "on_event": "ON_STOP"
+    },
+    {
+      "id": "t_10",
+      "from": "*",
+      "to": "error",
+      "on_event": "ON_ERROR"
+    },
+    {
+      "id": "t_11",
+      "from": "*",
+      "to": "idle",
+      "on_event": "HANDLE_RESET"
+    },
+    {
+      "id": "t_12",
+      "from": "*",
+      "to": "state_connecting",
+      "on_event": "CONNECT"
+    },
+    {
+      "id": "t_13",
+      "from": "state_connected",
+      "to": "state_disconnected",
+      "on_event": "DISCONNECT"
+    },
+    {
+      "id": "t_14",
+      "from": "*",
+      "to": "running",
+      "on_event": "START"
+    },
+    {
+      "id": "t_15",
+      "from": "*",
+      "to": "paused",
+      "on_event": "PAUSE"
+    },
+    {
+      "id": "t_16",
+      "from": "*",
+      "to": "running",
+      "on_event": "RESUME"
+    },
+    {
+      "id": "t_17",
+      "from": "*",
+      "to": "stopped",
+      "on_event": "STOP"
+    },
+    {
+      "id": "t_18",
+      "from": "*",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t_19",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {
+    "g_0": {
+      "type": "expression",
+      "expression": "order.state == 'pending'"
+    },
+    "g_1": {
+      "type": "expression",
+      "expression": "order.state == 'submitted'"
+    },
+    "g_2": {
+      "type": "expression",
+      "expression": "order.state == 'approved'"
+    },
+    "g_3": {
+      "type": "expression",
+      "expression": "order.state == 'shipped'"
+    },
+    "g_4": {
+      "type": "expression",
+      "expression": "order.state == 'delivered'"
+    },
+    "g_5": {
+      "type": "expression",
+      "expression": "order.state == 'submitted'"
+    },
+    "g_6": {
+      "type": "expression",
+      "expression": "order.state == 'approved'"
+    },
+    "g_7": {
+      "type": "expression",
+      "expression": "order.state == 'shipped'"
+    },
+    "g_8": {
+      "type": "expression",
+      "expression": "order.state == 'delivered'"
+    },
+    "g_9": {
+      "type": "expression",
+      "expression": "order.state == 'approved'"
+    },
+    "g_10": {
+      "type": "expression",
+      "expression": "order.state == 'shipped'"
+    },
+    "g_11": {
+      "type": "expression",
+      "expression": "order.state == 'delivered'"
+    },
+    "g_12": {
+      "type": "expression",
+      "expression": "order.state == 'shipped'"
+    },
+    "g_13": {
+      "type": "expression",
+      "expression": "order.state == 'delivered'"
+    }
+  },
+  "actions": {
+    "a_0": {
+      "type": "compute",
+      "compute_unit": "impl:self._notify_admin",
+      "input_map": {},
+      "output_map": {}
+    },
+    "a_1": {
+      "type": "compute",
+      "compute_unit": "impl:self._create_invoice",
+      "input_map": {},
+      "output_map": {}
+    },
+    "a_2": {
+      "type": "set",
+      "target": "self.rejection_reason",
+      "value_from": "reason"
+    },
+    "a_3": {
+      "type": "compute",
+      "compute_unit": "impl:self._notify_customer",
+      "input_map": {},
+      "output_map": {}
+    },
+    "a_4": {
+      "type": "set",
+      "target": "self.tracking",
+      "value_from": "tracking_number"
+    },
+    "a_5": {
+      "type": "compute",
+      "compute_unit": "impl:self._send_tracking_email",
+      "input_map": {},
+      "output_map": {}
+    },
+    "a_6": {
+      "type": "compute",
+      "compute_unit": "impl:self._complete_order",
+      "input_map": {},
+      "output_map": {}
+    },
+    "a_7": {
+      "type": "compute",
+      "compute_unit": "impl:self._process_refund",
+      "input_map": {},
+      "output_map": {}
+    },
+    "a_8": {
+      "type": "set",
+      "target": "self.data",
+      "value_from": "data"
+    },
+    "a_9": {
+      "type": "set",
+      "target": "self.data",
+      "value_from": "None"
+    },
+    "a_10": {
+      "type": "set",
+      "target": "self.error_message",
+      "value_from": "str(...)"
+    },
+    "a_11": {
+      "type": "set",
+      "target": "self.data",
+      "value_from": "None"
+    },
+    "a_12": {
+      "type": "set",
+      "target": "self.host",
+      "value_from": "host"
+    },
+    "a_13": {
+      "type": "set",
+      "target": "self.host",
+      "value_from": "None"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "pending",
+    "rejected",
+    "delivered",
+    "cancelled",
+    "init",
+    "error"
+  ],
+  "display": {
+    "rules": []
+  }
+}

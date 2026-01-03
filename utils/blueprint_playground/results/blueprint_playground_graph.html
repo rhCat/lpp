@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8"/>
-<title>Decoded: graph_visualizer_compute - State Machine</title>
+<title>L++ Blueprint Playground - State Machine</title>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <style>
 body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #1a1a2e; color: #eee; }
@@ -32,7 +32,7 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 </style>
 </head>
 <body>
-<h1>Decoded: graph_visualizer_compute</h1>
+<h1>L++ Blueprint Playground</h1>
 <div class="controls">
   <button onclick="resetZoom()">Reset View</button>
   <button onclick="centerGraph()">Center</button>
@@ -62,8 +62,8 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 </div>
 <div id="tooltip"></div>
 <script>
-const nodes = [{"id": "idle", "label": "idle", "description": "Initial state", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0}, {"id": "processing", "label": "processing", "description": "From function: process", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1}, {"id": "complete", "label": "complete", "description": "Terminal state", "type": "state", "isEntry": false, "isTerminal": true, "layer": 3}];
-const links = [{"source": "idle", "target": "processing", "label": "IDLE_DONE", "gates": ""}, {"source": "processing", "target": "complete", "label": "PROCESSING_DONE", "gates": ""}];
+const nodes = [{"id": "idle", "label": "idle", "description": "No blueprint loaded, waiting for input", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0}, {"id": "editing", "label": "editing", "description": "Blueprint loaded and being edited", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1}, {"id": "validating", "label": "validating", "description": "Validating blueprint JSON/structure", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}, {"id": "simulating", "label": "simulating", "description": "Running interactive simulation", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}, {"id": "serving", "label": "serving", "description": "Web server is running", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}, {"id": "error", "label": "error", "description": "Error state", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}];
+const links = [{"source": "idle", "target": "editing", "label": "LOAD", "gates": ""}, {"source": "idle", "target": "editing", "label": "LOAD_FROM_URL", "gates": ""}, {"source": "editing", "target": "editing", "label": "LOAD", "gates": ""}, {"source": "editing", "target": "editing", "label": "UPDATE", "gates": ""}, {"source": "editing", "target": "editing", "label": "VALIDATE", "gates": "has_blueprint"}, {"source": "editing", "target": "editing", "label": "FORMAT", "gates": "has_blueprint, is_valid_json"}, {"source": "editing", "target": "editing", "label": "REGENERATE_DIAGRAM", "gates": "has_blueprint, is_valid_blueprint"}, {"source": "editing", "target": "simulating", "label": "START_SIM", "gates": "has_blueprint, is_valid_blueprint"}, {"source": "simulating", "target": "simulating", "label": "DISPATCH", "gates": "has_simulation"}, {"source": "simulating", "target": "simulating", "label": "RESET_SIM", "gates": ""}, {"source": "simulating", "target": "editing", "label": "STOP_SIM", "gates": ""}, {"source": "editing", "target": "editing", "label": "SHARE", "gates": "has_blueprint"}, {"source": "simulating", "target": "simulating", "label": "SHARE", "gates": "has_blueprint"}, {"source": "editing", "target": "editing", "label": "EXPORT", "gates": "has_blueprint"}, {"source": "simulating", "target": "simulating", "label": "EXPORT", "gates": "has_blueprint"}, {"source": "editing", "target": "idle", "label": "UNLOAD", "gates": ""}, {"source": "simulating", "target": "idle", "label": "UNLOAD", "gates": ""}, {"source": "editing", "target": "error", "label": "ERROR", "gates": ""}, {"source": "simulating", "target": "error", "label": "ERROR", "gates": ""}, {"source": "error", "target": "idle", "label": "CLEAR", "gates": ""}, {"source": "error", "target": "editing", "label": "RETRY", "gates": "has_blueprint"}];
 
 // Calculate layout dimensions based on layers
 const layerMap = {};
@@ -194,7 +194,10 @@ function traceUpstream(nodeId, visited = new Set()) {
 const svg = d3.select("svg").attr("width", width).attr("height", height);
 const g = svg.append("g");
 
-const zoom = d3.zoom().scaleExtent([0.2, 3]).on("zoom", (e) => g.attr("transform", e.transform));
+const zoom = d3.zoom()
+    .scaleExtent([0.2, 3])
+    .filter(e => !e.target.closest('.node'))  // Prevent zoom/pan when clicking on nodes
+    .on("zoom", (e) => g.attr("transform", e.transform));
 svg.call(zoom);
 
 // Arrow markers
@@ -235,6 +238,7 @@ updateLinks();
 // Drag behavior for nodes
 const drag = d3.drag()
     .on("start", function(e, d) {
+        e.sourceEvent.stopPropagation();  // Prevent zoom interference
         d3.select(this).raise().select("rect").attr("stroke", "#ff0").attr("stroke-width", 4);
     })
     .on("drag", function(e, d) {
@@ -458,6 +462,19 @@ function toggleUpstream() {
 
 // Auto-fit on load
 fitToView();
+
+// Click on background to deselect
+svg.on("click", (e) => {
+    if (e.target.tagName === 'svg' || e.target.tagName === 'g') {
+        selectedNode = null;
+        node.select("rect").attr("stroke", "#fff").attr("stroke-width", 2);
+        link.attr("stroke", l => l.gates && l.gates.includes("error") ? "#ff6b6b" : "#556")
+            .attr("stroke-width", 2)
+            .attr("marker-end", "url(#arrow)");
+        document.getElementById("details").innerHTML = "Click a node to see details";
+        document.getElementById("flow-list").innerHTML = "";
+    }
+});
 </script>
 </body>
 </html>

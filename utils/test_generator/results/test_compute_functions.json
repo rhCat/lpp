@@ -1,0 +1,526 @@
+{
+  "module": "test_compute",
+  "filePath": "/Users/ruihe/mnt/lpp/lpp/utils/test_generator/src/test_compute.py",
+  "inbound": [
+    {
+      "type": "function",
+      "name": "load_blueprint",
+      "module": "test_compute",
+      "line": 22,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Load an L++ blueprint from a JSON file.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "build_graph",
+      "module": "test_compute",
+      "line": 87,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Build adjacency graph from blueprint transitions.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "analyze_paths",
+      "module": "test_compute",
+      "line": 138,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Find all paths through the state machine using BFS for efficiency.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "analyze_gates",
+      "module": "test_compute",
+      "line": 266,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Analyze gate expressions to extract boundary conditions.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "generate_path_tests",
+      "module": "test_compute",
+      "line": 394,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Generate tests for path coverage.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "generate_state_tests",
+      "module": "test_compute",
+      "line": 428,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Generate tests for state coverage.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "generate_gate_tests",
+      "module": "test_compute",
+      "line": 481,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Generate boundary condition tests for gates.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "generate_negative_tests",
+      "module": "test_compute",
+      "line": 584,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Generate tests for invalid inputs and edge cases.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "generate_property_tests",
+      "module": "test_compute",
+      "line": 638,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Generate property-based tests from context schema.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "combine_tests",
+      "module": "test_compute",
+      "line": 723,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Combine all test types and compute coverage.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "format_json",
+      "module": "test_compute",
+      "line": 785,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Format tests as L++ JSON test suite.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "format_pytest",
+      "module": "test_compute",
+      "line": 822,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Format tests as Python pytest module.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "export_tests",
+      "module": "test_compute",
+      "line": 916,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Write formatted tests to file.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "clear_state",
+      "module": "test_compute",
+      "line": 947,
+      "args": [
+        "params"
+      ],
+      "returns": "Dict[]",
+      "docstring": "Reset all analysis state.",
+      "decorators": []
+    }
+  ],
+  "outbound": [
+    {
+      "module": "json",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "re",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "collections",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "deque",
+          "alias": "deque"
+        }
+      ]
+    },
+    {
+      "module": "pathlib",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Path",
+          "alias": "Path"
+        }
+      ]
+    },
+    {
+      "module": "typing",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Any",
+          "alias": "Any"
+        },
+        {
+          "name": "Dict",
+          "alias": "Dict"
+        },
+        {
+          "name": "List",
+          "alias": "List"
+        },
+        {
+          "name": "Optional",
+          "alias": "Optional"
+        },
+        {
+          "name": "Set",
+          "alias": "Set"
+        },
+        {
+          "name": "Tuple",
+          "alias": "Tuple"
+        }
+      ]
+    },
+    {
+      "module": "frame_py.loader",
+      "category": "pip",
+      "names": [
+        {
+          "name": "BlueprintLoader",
+          "alias": "BlueprintLoader"
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "test_compute",
+      "type": "module",
+      "label": "test_compute",
+      "metrics": {
+        "fanIn": 14,
+        "fanOut": 6,
+        "instability": 0.3,
+        "internalEdges": 0,
+        "externalCallCount": 11,
+        "localCallCount": 0,
+        "callsByCategory": {
+          "stdlib": 10,
+          "pip": 1
+        },
+        "localDependencies": []
+      }
+    },
+    {
+      "id": "test_compute.load_blueprint",
+      "type": "function",
+      "label": "load_blueprint",
+      "direction": "inbound",
+      "parent": "test_compute",
+      "line": 22,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "test_compute.build_graph",
+      "type": "function",
+      "label": "build_graph",
+      "direction": "inbound",
+      "parent": "test_compute",
+      "line": 87,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "test_compute.analyze_paths",
+      "type": "function",
+      "label": "analyze_paths",
+      "direction": "inbound",
+      "parent": "test_compute",
+      "line": 138,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "test_compute.analyze_gates",
+      "type": "function",
+      "label": "analyze_gates",
+      "direction": "inbound",
+      "parent": "test_compute",
+      "line": 266,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "test_compute.generate_path_tests",
+      "type": "function",
+      "label": "generate_path_tests",
+      "direction": "inbound",
+      "parent": "test_compute",
+      "line": 394,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "test_compute.generate_state_tests",
+      "type": "function",
+      "label": "generate_state_tests",
+      "direction": "inbound",
+      "parent": "test_compute",
+      "line": 428,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "test_compute.generate_gate_tests",
+      "type": "function",
+      "label": "generate_gate_tests",
+      "direction": "inbound",
+      "parent": "test_compute",
+      "line": 481,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "test_compute.generate_negative_tests",
+      "type": "function",
+      "label": "generate_negative_tests",
+      "direction": "inbound",
+      "parent": "test_compute",
+      "line": 584,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "test_compute.generate_property_tests",
+      "type": "function",
+      "label": "generate_property_tests",
+      "direction": "inbound",
+      "parent": "test_compute",
+      "line": 638,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "test_compute.combine_tests",
+      "type": "function",
+      "label": "combine_tests",
+      "direction": "inbound",
+      "parent": "test_compute",
+      "line": 723,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "test_compute.format_json",
+      "type": "function",
+      "label": "format_json",
+      "direction": "inbound",
+      "parent": "test_compute",
+      "line": 785,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "test_compute.format_pytest",
+      "type": "function",
+      "label": "format_pytest",
+      "direction": "inbound",
+      "parent": "test_compute",
+      "line": 822,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "test_compute.export_tests",
+      "type": "function",
+      "label": "export_tests",
+      "direction": "inbound",
+      "parent": "test_compute",
+      "line": 916,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "test_compute.clear_state",
+      "type": "function",
+      "label": "clear_state",
+      "direction": "inbound",
+      "parent": "test_compute",
+      "line": 947,
+      "signature": "(params) -> Dict[]"
+    },
+    {
+      "id": "json",
+      "type": "dependency",
+      "label": "json",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "re",
+      "type": "dependency",
+      "label": "re",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "collections",
+      "type": "dependency",
+      "label": "collections",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "pathlib",
+      "type": "dependency",
+      "label": "pathlib",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "typing",
+      "type": "dependency",
+      "label": "typing",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "frame_py.loader",
+      "type": "dependency",
+      "label": "loader",
+      "direction": "outbound",
+      "category": "pip"
+    }
+  ],
+  "edges": [
+    {
+      "from": "test_compute.load_blueprint",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 29
+    },
+    {
+      "from": "test_compute.load_blueprint",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 35
+    },
+    {
+      "from": "test_compute.load_blueprint",
+      "to": "frame_py",
+      "type": "external",
+      "category": "pip",
+      "line": 37
+    },
+    {
+      "from": "test_compute._bfsPath",
+      "to": "collections",
+      "type": "external",
+      "category": "stdlib",
+      "line": 236
+    },
+    {
+      "from": "test_compute._extractBoundaries",
+      "to": "re",
+      "type": "external",
+      "category": "stdlib",
+      "line": 307
+    },
+    {
+      "from": "test_compute._extractBooleans",
+      "to": "re",
+      "type": "external",
+      "category": "stdlib",
+      "line": 347
+    },
+    {
+      "from": "test_compute._extractNullChecks",
+      "to": "re",
+      "type": "external",
+      "category": "stdlib",
+      "line": 370
+    },
+    {
+      "from": "test_compute._extractVariables",
+      "to": "re",
+      "type": "external",
+      "category": "stdlib",
+      "line": 386
+    },
+    {
+      "from": "test_compute.format_json",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 819
+    },
+    {
+      "from": "test_compute._toPythonName",
+      "to": "re",
+      "type": "external",
+      "category": "stdlib",
+      "line": 909
+    },
+    {
+      "from": "test_compute.export_tests",
+      "to": "pathlib",
+      "type": "external",
+      "category": "stdlib",
+      "line": 926
+    }
+  ],
+  "coupling": {
+    "fanIn": 14,
+    "fanOut": 6,
+    "instability": 0.3,
+    "internalEdges": 0,
+    "externalCallCount": 11,
+    "localCallCount": 0,
+    "callsByCategory": {
+      "stdlib": 10,
+      "pip": 1
+    },
+    "localDependencies": []
+  }
+}

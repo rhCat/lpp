@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L++ Blueprint Visualizer - Documentation</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --code-bg: #f1f5f9;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: var(--bg);
+            color: var(--text);
+        }
+        h1, h2, h3 { color: var(--primary); }
+        h1 { border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; }
+        h2 { margin-top: 2rem; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid var(--border);
+        }
+        th { background: var(--primary); color: white; }
+        tr:nth-child(even) { background: var(--bg); }
+        code {
+            background: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        pre code { background: none; color: inherit; }
+        .mermaid { background: white; padding: 1rem; border-radius: 8px; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+<h1>L++ Blueprint Visualizer</h1>
+<p>L++ visualizing itself - a meta-example demonstrating self-reference</p>
+<h2>Overview</h2>
+<table>
+<thead><tr>
+<th>Property</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>ID</strong></td>
+<td><code>lpp_visualizer</code></td>
+</tr>
+<tr>
+<td><strong>Version</strong></td>
+<td>1.1.0</td>
+</tr>
+<tr>
+<td><strong>Schema</strong></td>
+<td>lpp/v0.1.2</td>
+</tr>
+<tr>
+<td><strong>Entry State</strong></td>
+<td><code>idle</code></td>
+</tr>
+<tr>
+<td><strong>Terminal States</strong></td>
+<td><em>none</em></td>
+</tr>
+<tr>
+<td><strong>States</strong></td>
+<td>5</td>
+</tr>
+<tr>
+<td><strong>Transitions</strong></td>
+<td>26</td>
+</tr>
+<tr>
+<td><strong>Gates</strong></td>
+<td>18</td>
+</tr>
+<tr>
+<td><strong>Actions</strong></td>
+<td>26</td>
+</tr>
+</tbody></table>
+<h2>Quick Start Guide</h2>
+<h3>Basic Usage</h3>
+<pre><code>
+# Load and compile the blueprint
+from frame_py.compiler import compile_blueprint
+
+compile_blueprint("lpp_visualizer.json", "compiled.py")
+
+# Create operator instance
+from compiled import create_operator
+op = create_operator(compute_registry)
+
+# Dispatch events
+op.dispatch("YOUR_EVENT_HERE")
+</code></pre>
+<h3>Example Event Sequences</h3>
+<p><em>No example paths found.</em></p>
+<h2>State Machine Diagram</h2>
+<div class="mermaid">
+stateDiagram-v2
+    [*] --> idle
+
+    idle: idle\nNo blueprint loaded, waiting for input
+    loaded: loaded\nBlueprint loaded, ready to visualize
+    viewing: viewing\nActively viewing/exploring the blueprint
+    exporting: exporting\nGenerating export output
+    error: error\nError state
+
+    idle --> loaded: LOAD
+    idle --> error: LOAD_FAILED
+    viewing --> loaded: LOAD
+    loaded --> viewing: VIEW
+    viewing --> loaded: BACK
+    loaded --> idle: UNLOAD
+    viewing --> idle: UNLOAD
+    error --> idle: CLEAR
+    idle --> loaded: LOAD_TREE
+    loaded --> viewing: VIEW_TREE [has_tree]
+    viewing --> loaded: UNLOAD_TREE
+
+</div>
+<h2>States</h2>
+<table>
+<thead><tr>
+<th>State</th>
+<th>Type</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>idle</code></td>
+<td>Entry</td>
+<td>No blueprint loaded, waiting for input</td>
+</tr>
+<tr>
+<td><code>loaded</code></td>
+<td>Normal</td>
+<td>Blueprint loaded, ready to visualize</td>
+</tr>
+<tr>
+<td><code>viewing</code></td>
+<td>Normal</td>
+<td>Actively viewing/exploring the blueprint</td>
+</tr>
+<tr>
+<td><code>exporting</code></td>
+<td>Normal</td>
+<td>Generating export output</td>
+</tr>
+<tr>
+<td><code>error</code></td>
+<td>Normal</td>
+<td>Error state</td>
+</tr>
+</tbody></table>
+<h2>Transitions</h2>
+<table>
+<thead><tr>
+<th>ID</th>
+<th>From</th>
+<th>To</th>
+<th>Event</th>
+<th>Gate(s)</th>
+<th>Action(s)</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>t_load</code></td>
+<td><code>idle</code></td>
+<td><code>loaded</code></td>
+<td><code>LOAD</code></td>
+<td>-</td>
+<td>load<em>blueprint, init</em>defaults</td>
+</tr>
+<tr>
+<td><code>t<em>load</em>error</code></td>
+<td><code>idle</code></td>
+<td><code>error</code></td>
+<td><code>LOAD_FAILED</code></td>
+<td>-</td>
+<td>set_error</td>
+</tr>
+<tr>
+<td><code>t_reload</code></td>
+<td><code>loaded</code></td>
+<td><code>loaded</code></td>
+<td><code>LOAD</code></td>
+<td>-</td>
+<td>load_blueprint</td>
+</tr>
+<tr>
+<td><code>t<em>reload</em>from_viewing</code></td>
+<td><code>viewing</code></td>
+<td><code>loaded</code></td>
+<td><code>LOAD</code></td>
+<td>-</td>
+<td>load<em>blueprint, clear</em>selection</td>
+</tr>
+<tr>
+<td><code>t<em>start</em>view</code></td>
+<td><code>loaded</code></td>
+<td><code>viewing</code></td>
+<td><code>VIEW</code></td>
+<td>-</td>
+<td>render_graph</td>
+</tr>
+<tr>
+<td><code>t<em>switch</em>to_graph</code></td>
+<td><code>viewing</code></td>
+<td><code>viewing</code></td>
+<td><code>VIEW_GRAPH</code></td>
+<td>-</td>
+<td>set<em>view</em>graph, render_graph</td>
+</tr>
+<tr>
+<td><code>t<em>switch</em>to_table</code></td>
+<td><code>viewing</code></td>
+<td><code>viewing</code></td>
+<td><code>VIEW_TABLE</code></td>
+<td>-</td>
+<td>set<em>view</em>table, render_table</td>
+</tr>
+<tr>
+<td><code>t<em>switch</em>to_mermaid</code></td>
+<td><code>viewing</code></td>
+<td><code>viewing</code></td>
+<td><code>VIEW_MERMAID</code></td>
+<td>-</td>
+<td>set<em>view</em>mermaid, render_mermaid</td>
+</tr>
+<tr>
+<td><code>t_select</code></td>
+<td><code>viewing</code></td>
+<td><code>viewing</code></td>
+<td><code>SELECT</code></td>
+<td>-</td>
+<td>select_node</td>
+</tr>
+<tr>
+<td><code>t_deselect</code></td>
+<td><code>viewing</code></td>
+<td><code>viewing</code></td>
+<td><code>DESELECT</code></td>
+<td>-</td>
+<td>clear_selection</td>
+</tr>
+<tr>
+<td><code>t<em>zoom</em>in</code></td>
+<td><code>viewing</code></td>
+<td><code>viewing</code></td>
+<td><code>ZOOM_IN</code></td>
+<td>-</td>
+<td>zoom_in</td>
+</tr>
+<tr>
+<td><code>t<em>zoom</em>out</code></td>
+<td><code>viewing</code></td>
+<td><code>viewing</code></td>
+<td><code>ZOOM_OUT</code></td>
+<td>-</td>
+<td>zoom_out</td>
+</tr>
+<tr>
+<td><code>t<em>toggle</em>gates</code></td>
+<td><code>viewing</code></td>
+<td><code>viewing</code></td>
+<td><code>TOGGLE_GATES</code></td>
+<td>-</td>
+<td>toggle_gates</td>
+</tr>
+<tr>
+<td><code>t<em>toggle</em>actions</code></td>
+<td><code>viewing</code></td>
+<td><code>viewing</code></td>
+<td><code>TOGGLE_ACTIONS</code></td>
+<td>-</td>
+<td>toggle_actions</td>
+</tr>
+<tr>
+<td><code>t<em>back</em>to_loaded</code></td>
+<td><code>viewing</code></td>
+<td><code>loaded</code></td>
+<td><code>BACK</code></td>
+<td>-</td>
+<td>clear_selection</td>
+</tr>
+<tr>
+<td><code>t_unload</code></td>
+<td><code>loaded</code></td>
+<td><code>idle</code></td>
+<td><code>UNLOAD</code></td>
+<td>-</td>
+<td>unload_blueprint</td>
+</tr>
+<tr>
+<td><code>t<em>unload</em>from_viewing</code></td>
+<td><code>viewing</code></td>
+<td><code>idle</code></td>
+<td><code>UNLOAD</code></td>
+<td>-</td>
+<td>unload<em>blueprint, clear</em>selection</td>
+</tr>
+<tr>
+<td><code>t<em>export</em>readme<em>from</em>loaded</code></td>
+<td><code>loaded</code></td>
+<td><code>loaded</code></td>
+<td><code>EXPORT_README</code></td>
+<td>-</td>
+<td>generate<em>readme, write</em>readme</td>
+</tr>
+<tr>
+<td><code>t<em>export</em>readme<em>from</em>viewing</code></td>
+<td><code>viewing</code></td>
+<td><code>viewing</code></td>
+<td><code>EXPORT_README</code></td>
+<td>-</td>
+<td>generate<em>readme, write</em>readme</td>
+</tr>
+<tr>
+<td><code>t_recover</code></td>
+<td><code>error</code></td>
+<td><code>idle</code></td>
+<td><code>CLEAR</code></td>
+<td>-</td>
+<td>clear_error</td>
+</tr>
+<tr>
+<td><code>t<em>load</em>tree</code></td>
+<td><code>idle</code></td>
+<td><code>loaded</code></td>
+<td><code>LOAD_TREE</code></td>
+<td>-</td>
+<td>load<em>tree, init</em>defaults</td>
+</tr>
+<tr>
+<td><code>t<em>set</em>tree</code></td>
+<td><code>loaded</code></td>
+<td><code>loaded</code></td>
+<td><code>SET_TREE</code></td>
+<td>-</td>
+<td>set_tree</td>
+</tr>
+<tr>
+<td><code>t<em>view</em>tree</code></td>
+<td><code>loaded</code></td>
+<td><code>viewing</code></td>
+<td><code>VIEW_TREE</code></td>
+<td>has_tree</td>
+<td>set<em>view</em>tree, render_tree</td>
+</tr>
+<tr>
+<td><code>t<em>switch</em>to_tree</code></td>
+<td><code>viewing</code></td>
+<td><code>viewing</code></td>
+<td><code>VIEW_TREE</code></td>
+<td>has_tree</td>
+<td>set<em>view</em>tree, render_tree</td>
+</tr>
+<tr>
+<td><code>t<em>switch</em>to<em>tree</em>mermaid</code></td>
+<td><code>viewing</code></td>
+<td><code>viewing</code></td>
+<td><code>VIEW<em>TREE</em>MERMAID</code></td>
+<td>has_tree</td>
+<td>set<em>view</em>tree<em>mermaid, render</em>tree_mermaid</td>
+</tr>
+<tr>
+<td><code>t<em>unload</em>tree</code></td>
+<td><code>viewing</code></td>
+<td><code>loaded</code></td>
+<td><code>UNLOAD_TREE</code></td>
+<td>-</td>
+<td>unload_tree</td>
+</tr>
+</tbody></table>
+<h2>Gates</h2>
+<p>Gates are boolean guards that control transition eligibility.</p>
+<table>
+<thead><tr>
+<th>Gate</th>
+<th>Type</th>
+<th>Expression</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>has_blueprint</code></td>
+<td>expression</td>
+<td><code>blueprint is not None</code></td>
+</tr>
+<tr>
+<td><code>no_blueprint</code></td>
+<td>expression</td>
+<td><code>blueprint is None</code></td>
+</tr>
+<tr>
+<td><code>is_idle</code></td>
+<td>expression</td>
+<td><code>_state == 'idle'</code></td>
+</tr>
+<tr>
+<td><code>is_loaded</code></td>
+<td>expression</td>
+<td><code>_state == 'loaded'</code></td>
+</tr>
+<tr>
+<td><code>is_viewing</code></td>
+<td>expression</td>
+<td><code>_state == 'viewing'</code></td>
+</tr>
+<tr>
+<td><code>is_error</code></td>
+<td>expression</td>
+<td><code>_state == 'error'</code></td>
+</tr>
+<tr>
+<td><code>view<em>is</em>graph</code></td>
+<td>expression</td>
+<td><code>view_mode == 'graph'</code></td>
+</tr>
+<tr>
+<td><code>view<em>is</em>table</code></td>
+<td>expression</td>
+<td><code>view_mode == 'table'</code></td>
+</tr>
+<tr>
+<td><code>view<em>is</em>mermaid</code></td>
+<td>expression</td>
+<td><code>view_mode == 'mermaid'</code></td>
+</tr>
+<tr>
+<td><code>has_selection</code></td>
+<td>expression</td>
+<td><code>selected_node is not None</code></td>
+</tr>
+<tr>
+<td><code>can<em>zoom</em>in</code></td>
+<td>expression</td>
+<td><code>zoom_level < 2.0</code></td>
+</tr>
+<tr>
+<td><code>can<em>zoom</em>out</code></td>
+<td>expression</td>
+<td><code>zoom_level > 0.5</code></td>
+</tr>
+<tr>
+<td><code>has_states</code></td>
+<td>expression</td>
+<td><code>blueprint is not None and len(blueprint.states) > 0</code></td>
+</tr>
+<tr>
+<td><code>has_transitions</code></td>
+<td>expression</td>
+<td><code>blueprint is not None and len(blueprint.transitions) > 0</code></td>
+</tr>
+<tr>
+<td><code>has_tree</code></td>
+<td>expression</td>
+<td><code>tree is not None</code></td>
+</tr>
+<tr>
+<td><code>no_tree</code></td>
+<td>expression</td>
+<td><code>tree is None</code></td>
+</tr>
+<tr>
+<td><code>view<em>is</em>tree</code></td>
+<td>expression</td>
+<td><code>view_mode == 'tree'</code></td>
+</tr>
+<tr>
+<td><code>view<em>is</em>tree_mermaid</code></td>
+<td>expression</td>
+<td><code>view<em>mode == 'tree</em>mermaid'</code></td>
+</tr>
+</tbody></table>
+<h2>Actions</h2>
+<p>Actions are side-effects executed during transitions.</p>
+<table>
+<thead><tr>
+<th>Action</th>
+<th>Type</th>
+<th>Details</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>load_blueprint</code></td>
+<td><code>compute</code></td>
+<td>unit: <code>viz:load_blueprint</code></td>
+</tr>
+<tr>
+<td><code>set<em>view</em>graph</code></td>
+<td><code>set</code></td>
+<td>target: <code>view_mode</code>, value: <code>graph</code></td>
+</tr>
+<tr>
+<td><code>set<em>view</em>table</code></td>
+<td><code>set</code></td>
+<td>target: <code>view_mode</code>, value: <code>table</code></td>
+</tr>
+<tr>
+<td><code>set<em>view</em>mermaid</code></td>
+<td><code>set</code></td>
+<td>target: <code>view_mode</code>, value: <code>mermaid</code></td>
+</tr>
+<tr>
+<td><code>select_node</code></td>
+<td><code>set</code></td>
+<td>target: <code>selected<em>node</code>, from: <code>event.payload.node</em>id</code></td>
+</tr>
+<tr>
+<td><code>clear_selection</code></td>
+<td><code>set</code></td>
+<td>target: <code>selected_node</code>, value: <code>None</code></td>
+</tr>
+<tr>
+<td><code>zoom_in</code></td>
+<td><code>compute</code></td>
+<td>unit: <code>viz:zoom</code></td>
+</tr>
+<tr>
+<td><code>zoom_out</code></td>
+<td><code>compute</code></td>
+<td>unit: <code>viz:zoom</code></td>
+</tr>
+<tr>
+<td><code>toggle_gates</code></td>
+<td><code>compute</code></td>
+<td>unit: <code>viz:toggle</code></td>
+</tr>
+<tr>
+<td><code>toggle_actions</code></td>
+<td><code>compute</code></td>
+<td>unit: <code>viz:toggle</code></td>
+</tr>
+<tr>
+<td><code>render_graph</code></td>
+<td><code>compute</code></td>
+<td>unit: <code>viz:render_graph</code></td>
+</tr>
+<tr>
+<td><code>render_table</code></td>
+<td><code>compute</code></td>
+<td>unit: <code>viz:render_table</code></td>
+</tr>
+<tr>
+<td><code>render_mermaid</code></td>
+<td><code>compute</code></td>
+<td>unit: <code>viz:render_mermaid</code></td>
+</tr>
+<tr>
+<td><code>load_tree</code></td>
+<td><code>compute</code></td>
+<td>unit: <code>viz:load_tree</code></td>
+</tr>
+<tr>
+<td><code>set_tree</code></td>
+<td><code>set</code></td>
+<td>target: <code>tree</code>, from: <code>event.payload.tree</code></td>
+</tr>
+<tr>
+<td><code>render_tree</code></td>
+<td><code>compute</code></td>
+<td>unit: <code>viz:render_tree</code></td>
+</tr>
+<tr>
+<td><code>render<em>tree</em>mermaid</code></td>
+<td><code>compute</code></td>
+<td>unit: <code>viz:render<em>tree</em>mermaid</code></td>
+</tr>
+<tr>
+<td><code>set<em>view</em>tree</code></td>
+<td><code>set</code></td>
+<td>target: <code>view_mode</code>, value: <code>tree</code></td>
+</tr>
+<tr>
+<td><code>set<em>view</em>tree_mermaid</code></td>
+<td><code>set</code></td>
+<td>target: <code>view<em>mode</code>, value: <code>tree</em>mermaid</code></td>
+</tr>
+<tr>
+<td><code>unload_tree</code></td>
+<td><code>set</code></td>
+<td>target: <code>tree</code>, value: <code>None</code></td>
+</tr>
+<tr>
+<td><code>set_error</code></td>
+<td><code>set</code></td>
+<td>target: <code>error</code>, from: <code>event.payload.message</code></td>
+</tr>
+<tr>
+<td><code>clear_error</code></td>
+<td><code>set</code></td>
+<td>target: <code>error</code>, value: <code>None</code></td>
+</tr>
+<tr>
+<td><code>init_defaults</code></td>
+<td><code>compute</code></td>
+<td>unit: <code>viz:init_defaults</code></td>
+</tr>
+<tr>
+<td><code>unload_blueprint</code></td>
+<td><code>set</code></td>
+<td>target: <code>blueprint</code>, value: <code>None</code></td>
+</tr>
+<tr>
+<td><code>generate_readme</code></td>
+<td><code>compute</code></td>
+<td>unit: <code>viz:generate_readme</code></td>
+</tr>
+<tr>
+<td><code>write_readme</code></td>
+<td><code>compute</code></td>
+<td>unit: <code>viz:write_readme</code></td>
+</tr>
+</tbody></table>
+<h2>Context Schema</h2>
+<p>The context schema defines the data interface ("Flange") for this blueprint.</p>
+<table>
+<thead><tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>blueprint</code></td>
+<td><code>object</code></td>
+<td>The loaded Blueprint object</td>
+</tr>
+<tr>
+<td><code>blueprint_name</code></td>
+<td><code>string</code></td>
+<td>Blueprint name (flattened for display)</td>
+</tr>
+<tr>
+<td><code>blueprint_id</code></td>
+<td><code>string</code></td>
+<td>Blueprint ID (flattened for display)</td>
+</tr>
+<tr>
+<td><code>view_mode</code></td>
+<td><code>string</code></td>
+<td>Current view: 'graph'</td>
+<td>'table'</td>
+<td>'mermaid'</td>
+</tr>
+<tr>
+<td><code>selected_node</code></td>
+<td><code>string</code></td>
+<td>Currently selected state/transition ID</td>
+</tr>
+<tr>
+<td><code>zoom_level</code></td>
+<td><code>number</code></td>
+<td>Zoom level 0.5 - 2.0</td>
+</tr>
+<tr>
+<td><code>show_gates</code></td>
+<td><code>boolean</code></td>
+<td>Whether to show gate expressions</td>
+</tr>
+<tr>
+<td><code>show_actions</code></td>
+<td><code>boolean</code></td>
+<td>Whether to show action details</td>
+</tr>
+<tr>
+<td><code>output</code></td>
+<td><code>string</code></td>
+<td>Generated visualization output</td>
+</tr>
+<tr>
+<td><code>readme_content</code></td>
+<td><code>string</code></td>
+<td>Generated README markdown content</td>
+</tr>
+<tr>
+<td><code>export_path</code></td>
+<td><code>string</code></td>
+<td>Path where README was exported</td>
+</tr>
+<tr>
+<td><code>tree</code></td>
+<td><code>object</code></td>
+<td>Hierarchical feature tree</td>
+</tr>
+<tr>
+<td><code>tree_name</code></td>
+<td><code>string</code></td>
+<td>Tree name for display</td>
+</tr>
+<tr>
+<td><code>tree_output</code></td>
+<td><code>string</code></td>
+<td>Rendered tree output</td>
+</tr>
+<tr>
+<td><code>error</code></td>
+<td><code>string</code></td>
+<td>Error message if any</td>
+</tr>
+</tbody></table>
+<h2>Events</h2>
+<p>Events trigger state transitions in the blueprint.</p>
+<table>
+<thead><tr>
+<th>Event</th>
+<th>Transitions</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>BACK</code></td>
+<td><code>viewing</code> -> <code>loaded</code></td>
+</tr>
+<tr>
+<td><code>CLEAR</code></td>
+<td><code>error</code> -> <code>idle</code></td>
+</tr>
+<tr>
+<td><code>DESELECT</code></td>
+<td><code>viewing</code> -> <code>viewing</code></td>
+</tr>
+<tr>
+<td><code>EXPORT_README</code></td>
+<td><code>loaded</code> -> <code>loaded</code>, <code>viewing</code> -> <code>viewing</code></td>
+</tr>
+<tr>
+<td><code>LOAD</code></td>
+<td><code>idle</code> -> <code>loaded</code>, <code>loaded</code> -> <code>loaded</code>, <code>viewing</code> -> <code>loaded</code></td>
+</tr>
+<tr>
+<td><code>LOAD_FAILED</code></td>
+<td><code>idle</code> -> <code>error</code></td>
+</tr>
+<tr>
+<td><code>LOAD_TREE</code></td>
+<td><code>idle</code> -> <code>loaded</code></td>
+</tr>
+<tr>
+<td><code>SELECT</code></td>
+<td><code>viewing</code> -> <code>viewing</code></td>
+</tr>
+<tr>
+<td><code>SET_TREE</code></td>
+<td><code>loaded</code> -> <code>loaded</code></td>
+</tr>
+<tr>
+<td><code>TOGGLE_ACTIONS</code></td>
+<td><code>viewing</code> -> <code>viewing</code></td>
+</tr>
+<tr>
+<td><code>TOGGLE_GATES</code></td>
+<td><code>viewing</code> -> <code>viewing</code></td>
+</tr>
+<tr>
+<td><code>UNLOAD</code></td>
+<td><code>loaded</code> -> <code>idle</code>, <code>viewing</code> -> <code>idle</code></td>
+</tr>
+<tr>
+<td><code>UNLOAD_TREE</code></td>
+<td><code>viewing</code> -> <code>loaded</code></td>
+</tr>
+<tr>
+<td><code>VIEW</code></td>
+<td><code>loaded</code> -> <code>viewing</code></td>
+</tr>
+<tr>
+<td><code>VIEW_GRAPH</code></td>
+<td><code>viewing</code> -> <code>viewing</code></td>
+</tr>
+<tr>
+<td><code>VIEW_MERMAID</code></td>
+<td><code>viewing</code> -> <code>viewing</code></td>
+</tr>
+<tr>
+<td><code>VIEW_TABLE</code></td>
+<td><code>viewing</code> -> <code>viewing</code></td>
+</tr>
+<tr>
+<td><code>VIEW_TREE</code></td>
+<td><code>loaded</code> -> <code>viewing</code>, <code>viewing</code> -> <code>viewing</code></td>
+</tr>
+<tr>
+<td><code>VIEW<em>TREE</em>MERMAID</code></td>
+<td><code>viewing</code> -> <code>viewing</code></td>
+</tr>
+<tr>
+<td><code>ZOOM_IN</code></td>
+<td><code>viewing</code> -> <code>viewing</code></td>
+</tr>
+<tr>
+<td><code>ZOOM_OUT</code></td>
+<td><code>viewing</code> -> <code>viewing</code></td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>Generated by L++ Documentation Generator</em></p>
+    <script>mermaid.initialize({startOnLoad:true});</script>
+</body>
+</html>

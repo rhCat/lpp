@@ -1,0 +1,601 @@
+{
+  "$schema": "lpp/v0.1.2",
+  "id": "lpp_blueprint_composer",
+  "name": "L++ Blueprint Composer",
+  "version": "1.0.0",
+  "description": "Hierarchical composition tool for L++ blueprints - embeds sub-blueprints as macro states",
+
+  "context_schema": {
+    "properties": {
+      "parent_blueprint": {
+        "type": "object",
+        "description": "The loaded parent blueprint"
+      },
+      "parent_path": {
+        "type": "string",
+        "description": "Path to the parent blueprint file"
+      },
+      "child_blueprint": {
+        "type": "object",
+        "description": "The loaded child blueprint to embed"
+      },
+      "child_path": {
+        "type": "string",
+        "description": "Path to the child blueprint file"
+      },
+      "embeddings": {
+        "type": "array",
+        "description": "List of embedding definitions"
+      },
+      "current_embedding": {
+        "type": "object",
+        "description": "Current embedding being defined"
+      },
+      "composed_blueprint": {
+        "type": "object",
+        "description": "Result of composition operation"
+      },
+      "validation_result": {
+        "type": "object",
+        "description": "Validation results with errors and warnings"
+      },
+      "manifest": {
+        "type": "object",
+        "description": "Full composition manifest"
+      },
+      "export_path": {
+        "type": "string",
+        "description": "Path where composed blueprint was exported"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message if any"
+      },
+      "namespace_prefix": {
+        "type": "string",
+        "description": "Prefix for child element namespacing"
+      }
+    }
+  },
+
+  "states": {
+    "idle": {
+      "description": "No blueprints loaded, waiting for input"
+    },
+    "parent_loaded": {
+      "description": "Parent blueprint loaded, waiting for child or embedding"
+    },
+    "child_loaded": {
+      "description": "Both parent and child loaded, ready to define embedding"
+    },
+    "defining_embedding": {
+      "description": "Defining embedding parameters (target state, contract, event map)"
+    },
+    "embedding_ready": {
+      "description": "Embedding defined, ready to compose or add more"
+    },
+    "composed": {
+      "description": "Composition complete, ready to validate or export"
+    },
+    "validated": {
+      "description": "Validation complete, results available"
+    },
+    "error": {
+      "description": "Error state"
+    }
+  },
+
+  "entry_state": "idle",
+  "terminal_states": [],
+
+  "gates": {
+    "has_parent": {
+      "type": "expression",
+      "expression": "parent_blueprint is not None"
+    },
+    "has_child": {
+      "type": "expression",
+      "expression": "child_blueprint is not None"
+    },
+    "has_both": {
+      "type": "expression",
+      "expression": "parent_blueprint is not None and child_blueprint is not None"
+    },
+    "has_embedding": {
+      "type": "expression",
+      "expression": "current_embedding is not None"
+    },
+    "has_embeddings": {
+      "type": "expression",
+      "expression": "embeddings is not None and len(embeddings) > 0"
+    },
+    "has_composed": {
+      "type": "expression",
+      "expression": "composed_blueprint is not None"
+    },
+    "has_validation": {
+      "type": "expression",
+      "expression": "validation_result is not None"
+    },
+    "is_valid": {
+      "type": "expression",
+      "expression": "validation_result is not None and len(validation_result.get('errors', [])) == 0"
+    },
+    "has_errors": {
+      "type": "expression",
+      "expression": "validation_result is not None and len(validation_result.get('errors', [])) > 0"
+    },
+    "has_manifest": {
+      "type": "expression",
+      "expression": "manifest is not None"
+    }
+  },
+
+  "actions": {
+    "load_parent": {
+      "type": "compute",
+      "compute_unit": "compose:load_parent",
+      "input_map": {
+        "path": "event.payload.path"
+      },
+      "output_map": {
+        "parent_blueprint": "blueprint",
+        "parent_path": "path",
+        "error": "error"
+      }
+    },
+    "load_child": {
+      "type": "compute",
+      "compute_unit": "compose:load_child",
+      "input_map": {
+        "path": "event.payload.path"
+      },
+      "output_map": {
+        "child_blueprint": "blueprint",
+        "child_path": "path",
+        "error": "error"
+      }
+    },
+    "init_embedding": {
+      "type": "compute",
+      "compute_unit": "compose:init_embedding",
+      "input_map": {
+        "target_state": "event.payload.target_state",
+        "namespace_prefix": "event.payload.namespace_prefix"
+      },
+      "output_map": {
+        "current_embedding": "embedding",
+        "namespace_prefix": "namespace_prefix"
+      }
+    },
+    "set_input_contract": {
+      "type": "compute",
+      "compute_unit": "compose:set_input_contract",
+      "input_map": {
+        "embedding": "current_embedding",
+        "input_map": "event.payload.input_map"
+      },
+      "output_map": {
+        "current_embedding": "embedding"
+      }
+    },
+    "set_output_contract": {
+      "type": "compute",
+      "compute_unit": "compose:set_output_contract",
+      "input_map": {
+        "embedding": "current_embedding",
+        "output_map": "event.payload.output_map"
+      },
+      "output_map": {
+        "current_embedding": "embedding"
+      }
+    },
+    "set_event_map": {
+      "type": "compute",
+      "compute_unit": "compose:set_event_map",
+      "input_map": {
+        "embedding": "current_embedding",
+        "event_map": "event.payload.event_map"
+      },
+      "output_map": {
+        "current_embedding": "embedding"
+      }
+    },
+    "finalize_embedding": {
+      "type": "compute",
+      "compute_unit": "compose:finalize_embedding",
+      "input_map": {
+        "embedding": "current_embedding",
+        "embeddings": "embeddings",
+        "child_blueprint": "child_blueprint",
+        "child_path": "child_path"
+      },
+      "output_map": {
+        "embeddings": "embeddings",
+        "current_embedding": "current_embedding"
+      }
+    },
+    "compose": {
+      "type": "compute",
+      "compute_unit": "compose:compose",
+      "input_map": {
+        "parent": "parent_blueprint",
+        "embeddings": "embeddings"
+      },
+      "output_map": {
+        "composed_blueprint": "composed",
+        "error": "error"
+      }
+    },
+    "validate_composition": {
+      "type": "compute",
+      "compute_unit": "compose:validate_composition",
+      "input_map": {
+        "composed": "composed_blueprint",
+        "parent": "parent_blueprint",
+        "embeddings": "embeddings"
+      },
+      "output_map": {
+        "validation_result": "result"
+      }
+    },
+    "flatten": {
+      "type": "compute",
+      "compute_unit": "compose:flatten",
+      "input_map": {
+        "composed": "composed_blueprint"
+      },
+      "output_map": {
+        "composed_blueprint": "flattened"
+      }
+    },
+    "export_composed": {
+      "type": "compute",
+      "compute_unit": "compose:export_composed",
+      "input_map": {
+        "blueprint": "composed_blueprint",
+        "path": "event.payload.path"
+      },
+      "output_map": {
+        "export_path": "path",
+        "error": "error"
+      }
+    },
+    "load_manifest": {
+      "type": "compute",
+      "compute_unit": "compose:load_manifest",
+      "input_map": {
+        "path": "event.payload.path"
+      },
+      "output_map": {
+        "manifest": "manifest",
+        "parent_blueprint": "parent",
+        "parent_path": "parent_path",
+        "embeddings": "embeddings",
+        "error": "error"
+      }
+    },
+    "compose_from_manifest": {
+      "type": "compute",
+      "compute_unit": "compose:compose_from_manifest",
+      "input_map": {
+        "manifest": "manifest"
+      },
+      "output_map": {
+        "composed_blueprint": "composed",
+        "error": "error"
+      }
+    },
+    "set_error": {
+      "type": "set",
+      "target": "error",
+      "value_from": "event.payload.message"
+    },
+    "clear_error": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    },
+    "clear_child": {
+      "type": "set",
+      "target": "child_blueprint",
+      "value": null
+    },
+    "clear_embeddings": {
+      "type": "set",
+      "target": "embeddings",
+      "value": null
+    },
+    "clear_composed": {
+      "type": "set",
+      "target": "composed_blueprint",
+      "value": null
+    },
+    "clear_all": {
+      "type": "compute",
+      "compute_unit": "compose:clear_all",
+      "input_map": {},
+      "output_map": {
+        "parent_blueprint": "parent_blueprint",
+        "child_blueprint": "child_blueprint",
+        "embeddings": "embeddings",
+        "current_embedding": "current_embedding",
+        "composed_blueprint": "composed_blueprint",
+        "validation_result": "validation_result",
+        "manifest": "manifest"
+      }
+    },
+    "generate_manifest": {
+      "type": "compute",
+      "compute_unit": "compose:generate_manifest",
+      "input_map": {
+        "parent_path": "parent_path",
+        "embeddings": "embeddings"
+      },
+      "output_map": {
+        "manifest": "manifest"
+      }
+    },
+    "export_manifest": {
+      "type": "compute",
+      "compute_unit": "compose:export_manifest",
+      "input_map": {
+        "manifest": "manifest",
+        "path": "event.payload.path"
+      },
+      "output_map": {
+        "export_path": "path",
+        "error": "error"
+      }
+    }
+  },
+
+  "display": {
+    "rules": [
+      {
+        "gate": "is_error",
+        "template": "ERROR: {error}"
+      },
+      {
+        "gate": "is_idle",
+        "template": "No blueprints loaded. Use LOAD_PARENT to start."
+      },
+      {
+        "gate": "is_parent_loaded",
+        "template": "Parent: {parent_path} | Use LOAD_CHILD to add child."
+      },
+      {
+        "gate": "is_child_loaded",
+        "template": "Parent: {parent_path} | Child: {child_path} | Use DEFINE to start embedding."
+      },
+      {
+        "gate": "is_embedding_ready",
+        "template": "Embedding defined. Use COMPOSE or ADD_MORE."
+      },
+      {
+        "gate": "is_composed",
+        "template": "Composition complete. Use VALIDATE or EXPORT."
+      },
+      {
+        "gate": "is_validated",
+        "template": "Validation: {validation_result}"
+      },
+      {
+        "template": "L++ Blueprint Composer"
+      }
+    ]
+  },
+
+  "transitions": [
+    {
+      "id": "t_load_parent_from_idle",
+      "from": "idle",
+      "to": "parent_loaded",
+      "on_event": "LOAD_PARENT",
+      "actions": ["load_parent"]
+    },
+    {
+      "id": "t_load_manifest",
+      "from": "idle",
+      "to": "composed",
+      "on_event": "LOAD_MANIFEST",
+      "actions": ["load_manifest", "compose_from_manifest"]
+    },
+    {
+      "id": "t_load_child",
+      "from": "parent_loaded",
+      "to": "child_loaded",
+      "on_event": "LOAD_CHILD",
+      "gates": ["has_parent"],
+      "actions": ["load_child"]
+    },
+    {
+      "id": "t_reload_parent",
+      "from": "parent_loaded",
+      "to": "parent_loaded",
+      "on_event": "LOAD_PARENT",
+      "actions": ["load_parent", "clear_embeddings"]
+    },
+    {
+      "id": "t_reload_child",
+      "from": "child_loaded",
+      "to": "child_loaded",
+      "on_event": "LOAD_CHILD",
+      "actions": ["load_child"]
+    },
+    {
+      "id": "t_define_embedding",
+      "from": "child_loaded",
+      "to": "defining_embedding",
+      "on_event": "DEFINE",
+      "gates": ["has_both"],
+      "actions": ["init_embedding"]
+    },
+    {
+      "id": "t_set_input",
+      "from": "defining_embedding",
+      "to": "defining_embedding",
+      "on_event": "SET_INPUT",
+      "gates": ["has_embedding"],
+      "actions": ["set_input_contract"]
+    },
+    {
+      "id": "t_set_output",
+      "from": "defining_embedding",
+      "to": "defining_embedding",
+      "on_event": "SET_OUTPUT",
+      "gates": ["has_embedding"],
+      "actions": ["set_output_contract"]
+    },
+    {
+      "id": "t_set_events",
+      "from": "defining_embedding",
+      "to": "defining_embedding",
+      "on_event": "SET_EVENTS",
+      "gates": ["has_embedding"],
+      "actions": ["set_event_map"]
+    },
+    {
+      "id": "t_done_defining",
+      "from": "defining_embedding",
+      "to": "embedding_ready",
+      "on_event": "DONE",
+      "gates": ["has_embedding"],
+      "actions": ["finalize_embedding"]
+    },
+    {
+      "id": "t_add_more",
+      "from": "embedding_ready",
+      "to": "child_loaded",
+      "on_event": "ADD_MORE",
+      "actions": ["clear_child"]
+    },
+    {
+      "id": "t_compose",
+      "from": "embedding_ready",
+      "to": "composed",
+      "on_event": "COMPOSE",
+      "gates": ["has_embeddings"],
+      "actions": ["compose"]
+    },
+    {
+      "id": "t_quick_compose",
+      "from": "child_loaded",
+      "to": "composed",
+      "on_event": "QUICK_COMPOSE",
+      "gates": ["has_both"],
+      "actions": ["init_embedding", "finalize_embedding", "compose"]
+    },
+    {
+      "id": "t_validate",
+      "from": "composed",
+      "to": "validated",
+      "on_event": "VALIDATE",
+      "gates": ["has_composed"],
+      "actions": ["validate_composition"]
+    },
+    {
+      "id": "t_flatten",
+      "from": "composed",
+      "to": "composed",
+      "on_event": "FLATTEN",
+      "gates": ["has_composed"],
+      "actions": ["flatten"]
+    },
+    {
+      "id": "t_export",
+      "from": "composed",
+      "to": "composed",
+      "on_event": "EXPORT",
+      "gates": ["has_composed"],
+      "actions": ["export_composed"]
+    },
+    {
+      "id": "t_export_after_validate",
+      "from": "validated",
+      "to": "validated",
+      "on_event": "EXPORT",
+      "gates": ["has_composed"],
+      "actions": ["export_composed"]
+    },
+    {
+      "id": "t_save_manifest",
+      "from": "embedding_ready",
+      "to": "embedding_ready",
+      "on_event": "SAVE_MANIFEST",
+      "gates": ["has_embeddings"],
+      "actions": ["generate_manifest", "export_manifest"]
+    },
+    {
+      "id": "t_revalidate",
+      "from": "validated",
+      "to": "validated",
+      "on_event": "VALIDATE",
+      "gates": ["has_composed"],
+      "actions": ["validate_composition"]
+    },
+    {
+      "id": "t_back_to_composed",
+      "from": "validated",
+      "to": "composed",
+      "on_event": "BACK",
+      "actions": []
+    },
+    {
+      "id": "t_back_to_embedding",
+      "from": "composed",
+      "to": "embedding_ready",
+      "on_event": "BACK",
+      "actions": ["clear_composed"]
+    },
+    {
+      "id": "t_back_from_defining",
+      "from": "defining_embedding",
+      "to": "child_loaded",
+      "on_event": "CANCEL",
+      "actions": []
+    },
+    {
+      "id": "t_reset",
+      "from": "composed",
+      "to": "idle",
+      "on_event": "RESET",
+      "actions": ["clear_all"]
+    },
+    {
+      "id": "t_reset_from_validated",
+      "from": "validated",
+      "to": "idle",
+      "on_event": "RESET",
+      "actions": ["clear_all"]
+    },
+    {
+      "id": "t_clear_from_parent",
+      "from": "parent_loaded",
+      "to": "idle",
+      "on_event": "CLEAR",
+      "actions": ["clear_all"]
+    },
+    {
+      "id": "t_clear_from_child",
+      "from": "child_loaded",
+      "to": "idle",
+      "on_event": "CLEAR",
+      "actions": ["clear_all"]
+    },
+    {
+      "id": "t_error_recover",
+      "from": "error",
+      "to": "idle",
+      "on_event": "CLEAR",
+      "actions": ["clear_error", "clear_all"]
+    },
+    {
+      "id": "t_load_error",
+      "from": "*",
+      "to": "error",
+      "on_event": "LOAD_FAILED",
+      "actions": ["set_error"]
+    }
+  ]
+}

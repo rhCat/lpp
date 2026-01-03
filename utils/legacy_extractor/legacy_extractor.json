@@ -1,0 +1,523 @@
+{
+  "$schema": "lpp/v0.1.2",
+  "id": "legacy_extractor",
+  "name": "Legacy Code State Machine Extractor",
+  "version": "1.0.0",
+  "description": "Extract state machine patterns from legacy Python code and convert to L++ blueprints",
+
+  "context_schema": {
+    "properties": {
+      "filePath": {"type": "string", "description": "Path to Python source file"},
+      "sourceCode": {"type": "string", "description": "Raw source code"},
+      "ast": {"type": "object", "description": "Parsed AST"},
+      "analysisMode": {
+        "type": "string",
+        "enum": ["heuristic", "annotated", "log", "hybrid"],
+        "description": "Analysis mode for extraction"
+      },
+      "patterns": {
+        "type": "object",
+        "description": "Detected state machine patterns"
+      },
+      "extractedStates": {
+        "type": "array",
+        "description": "States extracted from code"
+      },
+      "extractedTransitions": {
+        "type": "array",
+        "description": "Transitions extracted from methods"
+      },
+      "extractedGates": {
+        "type": "array",
+        "description": "Gates extracted from conditions"
+      },
+      "extractedActions": {
+        "type": "array",
+        "description": "Actions extracted from side effects"
+      },
+      "extractedEvents": {
+        "type": "array",
+        "description": "Events extracted from handlers"
+      },
+      "entryState": {"type": "string", "description": "Inferred entry state"},
+      "terminalStates": {"type": "array", "description": "Inferred terminal states"},
+      "blueprint": {"type": "object", "description": "Generated L++ blueprint"},
+      "blueprintJson": {"type": "string", "description": "JSON string of blueprint"},
+      "sourceMapping": {
+        "type": "object",
+        "description": "Mapping from source locations to blueprint elements"
+      },
+      "uncertainties": {
+        "type": "array",
+        "description": "Extractions requiring human review"
+      },
+      "extractionReport": {"type": "object", "description": "Summary report"},
+      "error": {"type": "string", "description": "Error message if any"}
+    }
+  },
+
+  "states": {
+    "idle": {
+      "description": "Awaiting source file or code input"
+    },
+    "loading": {
+      "description": "Loading source file from disk"
+    },
+    "parsing": {
+      "description": "Parsing Python source into AST"
+    },
+    "detecting": {
+      "description": "Detecting state machine patterns in code"
+    },
+    "extracting_states": {
+      "description": "Extracting state definitions from code"
+    },
+    "extracting_transitions": {
+      "description": "Extracting state transitions from methods"
+    },
+    "extracting_gates": {
+      "description": "Extracting gate conditions from if statements"
+    },
+    "extracting_actions": {
+      "description": "Extracting actions from side effects"
+    },
+    "analyzing_events": {
+      "description": "Analyzing event handler patterns"
+    },
+    "inferring_entry": {
+      "description": "Inferring entry and terminal states"
+    },
+    "generating": {
+      "description": "Generating L++ blueprint"
+    },
+    "mapping": {
+      "description": "Generating source-to-blueprint mapping"
+    },
+    "complete": {
+      "description": "Extraction complete, blueprint ready"
+    },
+    "error": {
+      "description": "Extraction failed"
+    }
+  },
+
+  "entry_state": "idle",
+  "terminal_states": [],
+
+  "gates": {
+    "hasFilePath": {
+      "type": "expression",
+      "expression": "filePath is not None and len(filePath) > 0"
+    },
+    "hasSourceCode": {
+      "type": "expression",
+      "expression": "sourceCode is not None and len(sourceCode) > 0"
+    },
+    "hasAst": {
+      "type": "expression",
+      "expression": "ast is not None"
+    },
+    "hasPatterns": {
+      "type": "expression",
+      "expression": "patterns is not None"
+    },
+    "hasStates": {
+      "type": "expression",
+      "expression": "extractedStates is not None and len(extractedStates) > 0"
+    },
+    "hasTransitions": {
+      "type": "expression",
+      "expression": "extractedTransitions is not None"
+    },
+    "hasGates": {
+      "type": "expression",
+      "expression": "extractedGates is not None"
+    },
+    "hasActions": {
+      "type": "expression",
+      "expression": "extractedActions is not None"
+    },
+    "hasEvents": {
+      "type": "expression",
+      "expression": "extractedEvents is not None"
+    },
+    "hasEntryState": {
+      "type": "expression",
+      "expression": "entryState is not None"
+    },
+    "hasBlueprint": {
+      "type": "expression",
+      "expression": "blueprint is not None"
+    },
+    "hasMapping": {
+      "type": "expression",
+      "expression": "sourceMapping is not None"
+    },
+    "hasError": {
+      "type": "expression",
+      "expression": "error is not None and len(error) > 0"
+    },
+    "noError": {
+      "type": "expression",
+      "expression": "error is None or len(error) == 0"
+    }
+  },
+
+  "actions": {
+    "loadSource": {
+      "type": "compute",
+      "compute_unit": "extract:loadSource",
+      "input_map": {"filePath": "filePath"},
+      "output_map": {"sourceCode": "sourceCode", "error": "error"},
+      "description": "Load Python source file from disk"
+    },
+    "parseAst": {
+      "type": "compute",
+      "compute_unit": "extract:parseAst",
+      "input_map": {"sourceCode": "sourceCode"},
+      "output_map": {"ast": "ast", "error": "error"},
+      "description": "Parse source code into AST"
+    },
+    "findStatePatterns": {
+      "type": "compute",
+      "compute_unit": "extract:findStatePatterns",
+      "input_map": {"ast": "ast", "analysisMode": "analysisMode"},
+      "output_map": {"patterns": "patterns"},
+      "description": "Detect state machine patterns in code"
+    },
+    "extractStates": {
+      "type": "compute",
+      "compute_unit": "extract:extractStates",
+      "input_map": {"ast": "ast", "patterns": "patterns"},
+      "output_map": {
+        "extractedStates": "states",
+        "uncertainties": "uncertainties"
+      },
+      "description": "Extract state definitions from code"
+    },
+    "extractTransitions": {
+      "type": "compute",
+      "compute_unit": "extract:extractTransitions",
+      "input_map": {
+        "ast": "ast",
+        "patterns": "patterns",
+        "extractedStates": "extractedStates"
+      },
+      "output_map": {
+        "extractedTransitions": "transitions",
+        "uncertainties": "uncertainties"
+      },
+      "description": "Extract state transitions from methods"
+    },
+    "extractGates": {
+      "type": "compute",
+      "compute_unit": "extract:extractGates",
+      "input_map": {
+        "ast": "ast",
+        "patterns": "patterns",
+        "extractedTransitions": "extractedTransitions"
+      },
+      "output_map": {
+        "extractedGates": "gates",
+        "uncertainties": "uncertainties"
+      },
+      "description": "Extract gate conditions from if statements"
+    },
+    "extractActions": {
+      "type": "compute",
+      "compute_unit": "extract:extractActions",
+      "input_map": {
+        "ast": "ast",
+        "patterns": "patterns",
+        "extractedTransitions": "extractedTransitions"
+      },
+      "output_map": {
+        "extractedActions": "actions",
+        "uncertainties": "uncertainties"
+      },
+      "description": "Extract actions from side effects"
+    },
+    "analyzeEventHandlers": {
+      "type": "compute",
+      "compute_unit": "extract:analyzeEventHandlers",
+      "input_map": {
+        "ast": "ast",
+        "patterns": "patterns",
+        "extractedStates": "extractedStates"
+      },
+      "output_map": {
+        "extractedEvents": "events",
+        "uncertainties": "uncertainties"
+      },
+      "description": "Analyze event handler patterns"
+    },
+    "inferEntryState": {
+      "type": "compute",
+      "compute_unit": "extract:inferEntryState",
+      "input_map": {
+        "ast": "ast",
+        "patterns": "patterns",
+        "extractedStates": "extractedStates",
+        "extractedTransitions": "extractedTransitions"
+      },
+      "output_map": {
+        "entryState": "entryState",
+        "terminalStates": "terminalStates"
+      },
+      "description": "Infer entry and terminal states"
+    },
+    "generateBlueprint": {
+      "type": "compute",
+      "compute_unit": "extract:generateBlueprint",
+      "input_map": {
+        "filePath": "filePath",
+        "extractedStates": "extractedStates",
+        "extractedTransitions": "extractedTransitions",
+        "extractedGates": "extractedGates",
+        "extractedActions": "extractedActions",
+        "extractedEvents": "extractedEvents",
+        "entryState": "entryState",
+        "terminalStates": "terminalStates"
+      },
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprintJson": "blueprintJson"
+      },
+      "description": "Generate L++ blueprint from extracted elements"
+    },
+    "generateMapping": {
+      "type": "compute",
+      "compute_unit": "extract:generateMapping",
+      "input_map": {
+        "filePath": "filePath",
+        "extractedStates": "extractedStates",
+        "extractedTransitions": "extractedTransitions",
+        "extractedGates": "extractedGates",
+        "extractedActions": "extractedActions",
+        "blueprint": "blueprint"
+      },
+      "output_map": {
+        "sourceMapping": "sourceMapping",
+        "extractionReport": "report"
+      },
+      "description": "Generate source-to-blueprint mapping"
+    },
+    "exportBlueprint": {
+      "type": "compute",
+      "compute_unit": "extract:exportBlueprint",
+      "input_map": {
+        "blueprintJson": "blueprintJson",
+        "outputPath": "event.payload.outputPath"
+      },
+      "output_map": {"error": "error"},
+      "description": "Export blueprint to file"
+    },
+    "exportReport": {
+      "type": "compute",
+      "compute_unit": "extract:exportReport",
+      "input_map": {
+        "extractionReport": "extractionReport",
+        "sourceMapping": "sourceMapping",
+        "uncertainties": "uncertainties",
+        "outputPath": "event.payload.outputPath"
+      },
+      "output_map": {"error": "error"},
+      "description": "Export extraction report"
+    },
+    "setMode": {
+      "type": "set",
+      "target": "analysisMode",
+      "value_from": "event.payload.mode"
+    },
+    "setError": {
+      "type": "set",
+      "target": "error",
+      "value_from": "event.payload.message"
+    },
+    "clearError": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    },
+    "clearState": {
+      "type": "compute",
+      "compute_unit": "extract:clearState",
+      "input_map": {},
+      "output_map": {
+        "sourceCode": "sourceCode",
+        "ast": "ast",
+        "patterns": "patterns",
+        "extractedStates": "extractedStates",
+        "extractedTransitions": "extractedTransitions",
+        "extractedGates": "extractedGates",
+        "extractedActions": "extractedActions",
+        "extractedEvents": "extractedEvents",
+        "entryState": "entryState",
+        "terminalStates": "terminalStates",
+        "blueprint": "blueprint",
+        "blueprintJson": "blueprintJson",
+        "sourceMapping": "sourceMapping",
+        "uncertainties": "uncertainties",
+        "extractionReport": "extractionReport",
+        "error": "error"
+      },
+      "description": "Reset all extraction state"
+    }
+  },
+
+  "transitions": [
+    {
+      "id": "t_set_mode",
+      "from": "idle",
+      "to": "idle",
+      "on_event": "SET_MODE",
+      "actions": ["setMode"]
+    },
+    {
+      "id": "t_start_extract",
+      "from": "idle",
+      "to": "loading",
+      "on_event": "EXTRACT",
+      "gates": ["hasFilePath"],
+      "actions": ["loadSource"]
+    },
+    {
+      "id": "t_load_error",
+      "from": "loading",
+      "to": "error",
+      "on_event": "AUTO",
+      "gates": ["hasError"]
+    },
+    {
+      "id": "t_load_done",
+      "from": "loading",
+      "to": "parsing",
+      "on_event": "AUTO",
+      "gates": ["hasSourceCode", "noError"],
+      "actions": ["parseAst"]
+    },
+    {
+      "id": "t_parse_error",
+      "from": "parsing",
+      "to": "error",
+      "on_event": "AUTO",
+      "gates": ["hasError"]
+    },
+    {
+      "id": "t_parse_done",
+      "from": "parsing",
+      "to": "detecting",
+      "on_event": "AUTO",
+      "gates": ["hasAst", "noError"],
+      "actions": ["findStatePatterns"]
+    },
+    {
+      "id": "t_detect_done",
+      "from": "detecting",
+      "to": "extracting_states",
+      "on_event": "AUTO",
+      "gates": ["hasPatterns"],
+      "actions": ["extractStates"]
+    },
+    {
+      "id": "t_states_done",
+      "from": "extracting_states",
+      "to": "extracting_transitions",
+      "on_event": "AUTO",
+      "gates": ["hasStates"],
+      "actions": ["extractTransitions"]
+    },
+    {
+      "id": "t_transitions_done",
+      "from": "extracting_transitions",
+      "to": "extracting_gates",
+      "on_event": "AUTO",
+      "gates": ["hasTransitions"],
+      "actions": ["extractGates"]
+    },
+    {
+      "id": "t_gates_done",
+      "from": "extracting_gates",
+      "to": "extracting_actions",
+      "on_event": "AUTO",
+      "gates": ["hasGates"],
+      "actions": ["extractActions"]
+    },
+    {
+      "id": "t_actions_done",
+      "from": "extracting_actions",
+      "to": "analyzing_events",
+      "on_event": "AUTO",
+      "gates": ["hasActions"],
+      "actions": ["analyzeEventHandlers"]
+    },
+    {
+      "id": "t_events_done",
+      "from": "analyzing_events",
+      "to": "inferring_entry",
+      "on_event": "AUTO",
+      "gates": ["hasEvents"],
+      "actions": ["inferEntryState"]
+    },
+    {
+      "id": "t_entry_done",
+      "from": "inferring_entry",
+      "to": "generating",
+      "on_event": "AUTO",
+      "gates": ["hasEntryState"],
+      "actions": ["generateBlueprint"]
+    },
+    {
+      "id": "t_generate_done",
+      "from": "generating",
+      "to": "mapping",
+      "on_event": "AUTO",
+      "gates": ["hasBlueprint"],
+      "actions": ["generateMapping"]
+    },
+    {
+      "id": "t_mapping_done",
+      "from": "mapping",
+      "to": "complete",
+      "on_event": "AUTO",
+      "gates": ["hasMapping"]
+    },
+    {
+      "id": "t_export_blueprint",
+      "from": "complete",
+      "to": "complete",
+      "on_event": "EXPORT_BLUEPRINT",
+      "gates": ["hasBlueprint"],
+      "actions": ["exportBlueprint"]
+    },
+    {
+      "id": "t_export_report",
+      "from": "complete",
+      "to": "complete",
+      "on_event": "EXPORT_REPORT",
+      "actions": ["exportReport"]
+    },
+    {
+      "id": "t_reset",
+      "from": "complete",
+      "to": "idle",
+      "on_event": "RESET",
+      "actions": ["clearState"]
+    },
+    {
+      "id": "t_error_reset",
+      "from": "error",
+      "to": "idle",
+      "on_event": "RESET",
+      "actions": ["clearError", "clearState"]
+    }
+  ],
+
+  "display": {
+    "rules": [
+      {"gate": "hasError", "template": "ERROR: {error}"},
+      {"gate": "hasBlueprint", "template": "Blueprint ready: {blueprint.id}"},
+      {"template": "Legacy Extractor [{analysisMode}]"}
+    ]
+  }
+}

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Coverage Report: L++ Blueprint Visualizer</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        .summary { background: #f5f5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .overall { font-size: 48px; font-weight: bold; color: #f44336; }
+        .metrics { display: flex; gap: 20px; flex-wrap: wrap; }
+        .metric { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); min-width: 150px; }
+        .metric-value { font-size: 24px; font-weight: bold; }
+        .metric-label { color: #666; font-size: 12px; text-transform: uppercase; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f5f5f5; }
+        .hit { background: #e8f5e9; }
+        .miss { background: #ffebee; }
+        .section { margin: 30px 0; }
+        .bar { height: 20px; border-radius: 10px; background: #eee; overflow: hidden; }
+        .bar-fill { height: 100%; transition: width 0.3s; }
+    </style>
+</head>
+<body>
+    <h1>Coverage Report: L++ Blueprint Visualizer</h1>
+    <p>Generated: 2026-01-03T12:25:20.216137</p>
+
+    <div class="summary">
+        <div class="overall">17.7%</div>
+        <div>Overall Coverage</div>
+    </div>
+
+    <div class="metrics">
+        <div class="metric">
+            <div class="metric-value" style="color: #ff9800">60.0%</div>
+            <div class="metric-label">State Coverage</div>
+            <div>3/5</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value" style="color: #f44336">7.7%</div>
+            <div class="metric-label">Transition Coverage</div>
+            <div>2/26</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value" style="color: #f44336">0.0%</div>
+            <div class="metric-label">Gate Coverage</div>
+            <div>0/18</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value" style="color: #f44336">0.0%</div>
+            <div class="metric-label">Action Coverage</div>
+            <div>0/26</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>States</h2>
+        <table>
+            <tr><th>State</th><th>Hits</th><th>Description</th></tr>
+            <tr class="miss"><td>error</td><td>0</td><td>Error state</td></tr>
+            <tr class="miss"><td>exporting</td><td>0</td><td>Generating export output</td></tr>
+            <tr class="hit"><td>idle</td><td>1</td><td>No blueprint loaded, waiting for input</td></tr>
+            <tr class="hit"><td>loaded</td><td>1</td><td>Blueprint loaded, ready to visualize</td></tr>
+            <tr class="hit"><td>viewing</td><td>1</td><td>Actively viewing/exploring the blueprint</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Transitions</h2>
+        <table>
+            <tr><th>ID</th><th>From</th><th>Event</th><th>To</th><th>Hits</th></tr>
+            <tr class="hit"><td>t_load</td><td>idle</td><td>LOAD</td><td>loaded</td><td>1</td></tr>
+            <tr class="miss"><td>t_load_error</td><td>idle</td><td>LOAD_FAILED</td><td>error</td><td>0</td></tr>
+            <tr class="miss"><td>t_reload</td><td>loaded</td><td>LOAD</td><td>loaded</td><td>0</td></tr>
+            <tr class="miss"><td>t_reload_from_viewing</td><td>viewing</td><td>LOAD</td><td>loaded</td><td>0</td></tr>
+            <tr class="hit"><td>t_start_view</td><td>loaded</td><td>VIEW</td><td>viewing</td><td>1</td></tr>
+            <tr class="miss"><td>t_switch_to_graph</td><td>viewing</td><td>VIEW_GRAPH</td><td>viewing</td><td>0</td></tr>
+            <tr class="miss"><td>t_switch_to_table</td><td>viewing</td><td>VIEW_TABLE</td><td>viewing</td><td>0</td></tr>
+            <tr class="miss"><td>t_switch_to_mermaid</td><td>viewing</td><td>VIEW_MERMAID</td><td>viewing</td><td>0</td></tr>
+            <tr class="miss"><td>t_select</td><td>viewing</td><td>SELECT</td><td>viewing</td><td>0</td></tr>
+            <tr class="miss"><td>t_deselect</td><td>viewing</td><td>DESELECT</td><td>viewing</td><td>0</td></tr>
+            <tr class="miss"><td>t_zoom_in</td><td>viewing</td><td>ZOOM_IN</td><td>viewing</td><td>0</td></tr>
+            <tr class="miss"><td>t_zoom_out</td><td>viewing</td><td>ZOOM_OUT</td><td>viewing</td><td>0</td></tr>
+            <tr class="miss"><td>t_toggle_gates</td><td>viewing</td><td>TOGGLE_GATES</td><td>viewing</td><td>0</td></tr>
+            <tr class="miss"><td>t_toggle_actions</td><td>viewing</td><td>TOGGLE_ACTIONS</td><td>viewing</td><td>0</td></tr>
+            <tr class="miss"><td>t_back_to_loaded</td><td>viewing</td><td>BACK</td><td>loaded</td><td>0</td></tr>
+            <tr class="miss"><td>t_unload</td><td>loaded</td><td>UNLOAD</td><td>idle</td><td>0</td></tr>
+            <tr class="miss"><td>t_unload_from_viewing</td><td>viewing</td><td>UNLOAD</td><td>idle</td><td>0</td></tr>
+            <tr class="miss"><td>t_export_readme_from_loaded</td><td>loaded</td><td>EXPORT_README</td><td>loaded</td><td>0</td></tr>
+            <tr class="miss"><td>t_export_readme_from_viewing</td><td>viewing</td><td>EXPORT_README</td><td>viewing</td><td>0</td></tr>
+            <tr class="miss"><td>t_recover</td><td>error</td><td>CLEAR</td><td>idle</td><td>0</td></tr>
+            <tr class="miss"><td>t_load_tree</td><td>idle</td><td>LOAD_TREE</td><td>loaded</td><td>0</td></tr>
+            <tr class="miss"><td>t_set_tree</td><td>loaded</td><td>SET_TREE</td><td>loaded</td><td>0</td></tr>
+            <tr class="miss"><td>t_view_tree</td><td>loaded</td><td>VIEW_TREE</td><td>viewing</td><td>0</td></tr>
+            <tr class="miss"><td>t_switch_to_tree</td><td>viewing</td><td>VIEW_TREE</td><td>viewing</td><td>0</td></tr>
+            <tr class="miss"><td>t_switch_to_tree_mermaid</td><td>viewing</td><td>VIEW_TREE_MERMAID</td><td>viewing</td><td>0</td></tr>
+            <tr class="miss"><td>t_unload_tree</td><td>viewing</td><td>UNLOAD_TREE</td><td>loaded</td><td>0</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Gates</h2>
+        <table>
+            <tr><th>Gate</th><th>Total Hits</th><th>True</th><th>False</th><th>Expression</th></tr>
+            <tr class="miss"><td>can_zoom_in</td><td>0</td><td>0</td><td>0</td><td>zoom_level < 2.0</td></tr>
+            <tr class="miss"><td>can_zoom_out</td><td>0</td><td>0</td><td>0</td><td>zoom_level > 0.5</td></tr>
+            <tr class="miss"><td>has_blueprint</td><td>0</td><td>0</td><td>0</td><td>blueprint is not None</td></tr>
+            <tr class="miss"><td>has_selection</td><td>0</td><td>0</td><td>0</td><td>selected_node is not None</td></tr>
+            <tr class="miss"><td>has_states</td><td>0</td><td>0</td><td>0</td><td>blueprint is not None and len(blueprint.states) > </td></tr>
+            <tr class="miss"><td>has_transitions</td><td>0</td><td>0</td><td>0</td><td>blueprint is not None and len(blueprint.transition</td></tr>
+            <tr class="miss"><td>has_tree</td><td>0</td><td>0</td><td>0</td><td>tree is not None</td></tr>
+            <tr class="miss"><td>is_error</td><td>0</td><td>0</td><td>0</td><td>_state == 'error'</td></tr>
+            <tr class="miss"><td>is_idle</td><td>0</td><td>0</td><td>0</td><td>_state == 'idle'</td></tr>
+            <tr class="miss"><td>is_loaded</td><td>0</td><td>0</td><td>0</td><td>_state == 'loaded'</td></tr>
+            <tr class="miss"><td>is_viewing</td><td>0</td><td>0</td><td>0</td><td>_state == 'viewing'</td></tr>
+            <tr class="miss"><td>no_blueprint</td><td>0</td><td>0</td><td>0</td><td>blueprint is None</td></tr>
+            <tr class="miss"><td>no_tree</td><td>0</td><td>0</td><td>0</td><td>tree is None</td></tr>
+            <tr class="miss"><td>view_is_graph</td><td>0</td><td>0</td><td>0</td><td>view_mode == 'graph'</td></tr>
+            <tr class="miss"><td>view_is_mermaid</td><td>0</td><td>0</td><td>0</td><td>view_mode == 'mermaid'</td></tr>
+            <tr class="miss"><td>view_is_table</td><td>0</td><td>0</td><td>0</td><td>view_mode == 'table'</td></tr>
+            <tr class="miss"><td>view_is_tree</td><td>0</td><td>0</td><td>0</td><td>view_mode == 'tree'</td></tr>
+            <tr class="miss"><td>view_is_tree_mermaid</td><td>0</td><td>0</td><td>0</td><td>view_mode == 'tree_mermaid'</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Actions</h2>
+        <table>
+            <tr><th>Action</th><th>Hits</th><th>Type</th></tr>
+            <tr class="miss"><td>clear_error</td><td>0</td><td>set</td></tr>
+            <tr class="miss"><td>clear_selection</td><td>0</td><td>set</td></tr>
+            <tr class="miss"><td>generate_readme</td><td>0</td><td>compute</td></tr>
+            <tr class="miss"><td>init_defaults</td><td>0</td><td>compute</td></tr>
+            <tr class="miss"><td>load_blueprint</td><td>0</td><td>compute</td></tr>
+            <tr class="miss"><td>load_tree</td><td>0</td><td>compute</td></tr>
+            <tr class="miss"><td>render_graph</td><td>0</td><td>compute</td></tr>
+            <tr class="miss"><td>render_mermaid</td><td>0</td><td>compute</td></tr>
+            <tr class="miss"><td>render_table</td><td>0</td><td>compute</td></tr>
+            <tr class="miss"><td>render_tree</td><td>0</td><td>compute</td></tr>
+            <tr class="miss"><td>render_tree_mermaid</td><td>0</td><td>compute</td></tr>
+            <tr class="miss"><td>select_node</td><td>0</td><td>set</td></tr>
+            <tr class="miss"><td>set_error</td><td>0</td><td>set</td></tr>
+            <tr class="miss"><td>set_tree</td><td>0</td><td>set</td></tr>
+            <tr class="miss"><td>set_view_graph</td><td>0</td><td>set</td></tr>
+            <tr class="miss"><td>set_view_mermaid</td><td>0</td><td>set</td></tr>
+            <tr class="miss"><td>set_view_table</td><td>0</td><td>set</td></tr>
+            <tr class="miss"><td>set_view_tree</td><td>0</td><td>set</td></tr>
+            <tr class="miss"><td>set_view_tree_mermaid</td><td>0</td><td>set</td></tr>
+            <tr class="miss"><td>toggle_actions</td><td>0</td><td>compute</td></tr>
+            <tr class="miss"><td>toggle_gates</td><td>0</td><td>compute</td></tr>
+            <tr class="miss"><td>unload_blueprint</td><td>0</td><td>set</td></tr>
+            <tr class="miss"><td>unload_tree</td><td>0</td><td>set</td></tr>
+            <tr class="miss"><td>write_readme</td><td>0</td><td>compute</td></tr>
+            <tr class="miss"><td>zoom_in</td><td>0</td><td>compute</td></tr>
+            <tr class="miss"><td>zoom_out</td><td>0</td><td>compute</td></tr>
+        </table>
+    </div>
+</body>
+</html>

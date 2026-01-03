@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L++ Blueprint Playground</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #0f0f23;
+            --accent: #00d4ff;
+            --accent-dim: #0088aa;
+            --success: #00ff88;
+            --error: #ff6b6b;
+            --warning: #ffa500;
+            --text-primary: #eee;
+            --text-secondary: #aaa;
+            --border: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background: var(--bg-secondary);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .logo span {
+            color: var(--text-secondary);
+            font-weight: normal;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 4px;
+            padding: 0 8px;
+            border-right: 1px solid var(--border);
+        }
+
+        .toolbar-group:last-child {
+            border-right: none;
+        }
+
+        button {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.primary {
+            background: var(--accent);
+            color: #000;
+            font-weight: bold;
+        }
+
+        button.primary:hover {
+            background: var(--accent-dim);
+            color: #fff;
+        }
+
+        button.success {
+            background: var(--success);
+            color: #000;
+        }
+
+        button.danger {
+            background: var(--error);
+            color: #fff;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Split Panes */
+        .pane {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .editor-pane {
+            flex: 1;
+            min-width: 400px;
+            border-right: 1px solid var(--border);
+        }
+
+        .viz-pane {
+            flex: 1;
+            min-width: 400px;
+        }
+
+        .pane-header {
+            background: var(--bg-secondary);
+            padding: 8px 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pane-content {
+            flex: 1;
+            overflow: auto;
+            position: relative;
+        }
+
+        /* Editor */
+        #editor {
+            width: 100%;
+            height: 100%;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: none;
+            padding: 12px;
+            font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+            tab-size: 2;
+        }
+
+        #editor:focus {
+            box-shadow: inset 0 0 0 2px var(--accent-dim);
+        }
+
+        /* Validation Status */
+        .validation-status {
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.valid {
+            background: var(--success);
+        }
+
+        .status-dot.invalid {
+            background: var(--error);
+        }
+
+        .status-dot.pending {
+            background: var(--warning);
+        }
+
+        /* Diagram Container */
+        #diagram-container {
+            padding: 20px;
+            background: var(--bg-tertiary);
+            min-height: 300px;
+        }
+
+        #diagram-container .mermaid {
+            text-align: center;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .tab.active {
+            border-bottom-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Simulation Panel */
+        .sim-panel {
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sim-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .sim-state {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .sim-state .state-name {
+            color: var(--accent);
+            padding: 4px 12px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+
+        .event-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .event-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        .event-btn:hover {
+            background: var(--accent);
+            color: #000;
+        }
+
+        /* Context Display */
+        .context-display {
+            margin-top: 16px;
+            background: var(--bg-tertiary);
+            padding: 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .context-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .context-key {
+            color: var(--accent);
+        }
+
+        .context-value {
+            color: var(--text-secondary);
+        }
+
+        /* Trace Display */
+        .trace-display {
+            margin-top: 16px;
+            background: var(--bg-tertiary);
+            padding: 12px;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .trace-step {
+            padding: 4px 8px;
+            margin: 4px 0;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .trace-step.current {
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            padding: 24px;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            margin-bottom: 16px;
+            color: var(--accent);
+        }
+
+        .modal input[type="text"],
+        .modal textarea {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: monospace;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        /* Share URL */
+        .share-url {
+            background: var(--bg-tertiary);
+            padding: 12px;
+            border-radius: 4px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 12px 0;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            background: var(--bg-secondary);
+            padding: 6px 16px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Responsive */
+        @media (max-width: 800px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .editor-pane,
+            .viz-pane {
+                min-width: unset;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .toolbar-group {
+                padding: 0 4px;
+            }
+        }
+
+        /* Syntax Highlighting (simple version) */
+        .json-key { color: #9cdcfe; }
+        .json-string { color: #ce9178; }
+        .json-number { color: #b5cea8; }
+        .json-boolean { color: #569cd6; }
+        .json-null { color: #569cd6; }
+
+        /* Sample Blueprints Dropdown */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: var(--bg-secondary);
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            z-index: 100;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Resizer */
+        .resizer {
+            width: 4px;
+            background: var(--border);
+            cursor: col-resize;
+            transition: background 0.2s;
+        }
+
+        .resizer:hover {
+            background: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">L++ <span>Blueprint Playground</span></div>
+        <div class="toolbar">
+            <div class="toolbar-group">
+                <div class="dropdown">
+                    <button>Load Sample</button>
+                    <div class="dropdown-content">
+                        <div class="dropdown-item" onclick="loadSample('counter')">Counter</div>
+                        <div class="dropdown-item" onclick="loadSample('traffic_light')">Traffic Light</div>
+                        <div class="dropdown-item" onclick="loadSample('order_flow')">Order Flow</div>
+                    </div>
+                </div>
+                <button onclick="loadFromFile()">Open File</button>
+                <input type="file" id="file-input" accept=".json" style="display:none" onchange="handleFileLoad(event)">
+            </div>
+            <div class="toolbar-group">
+                <button onclick="formatBlueprint()">Format</button>
+                <button onclick="validateBlueprint()">Validate</button>
+            </div>
+            <div class="toolbar-group">
+                <button class="primary" onclick="startSimulation()" id="btn-simulate">Simulate</button>
+                <button onclick="stopSimulation()" id="btn-stop" disabled>Stop</button>
+                <button onclick="resetSimulation()" id="btn-reset" disabled>Reset</button>
+            </div>
+            <div class="toolbar-group">
+                <button onclick="showShareModal()">Share</button>
+                <button onclick="exportBlueprint()">Export</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="pane editor-pane" id="editor-pane">
+            <div class="pane-header">
+                <span>Blueprint Editor</span>
+                <span id="blueprint-name">Untitled</span>
+            </div>
+            <div class="pane-content">
+                <textarea id="editor" spellcheck="false" placeholder="Paste your L++ blueprint JSON here..."></textarea>
+            </div>
+            <div class="validation-status">
+                <div class="status-item">
+                    <div class="status-dot pending" id="json-status"></div>
+                    <span>JSON</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot pending" id="schema-status"></div>
+                    <span>Schema</span>
+                </div>
+                <div class="status-item" id="error-display" style="color: var(--error); display: none;"></div>
+            </div>
+        </div>
+
+        <div class="resizer" id="resizer"></div>
+
+        <div class="pane viz-pane" id="viz-pane">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('diagram')">Diagram</div>
+                <div class="tab" onclick="switchTab('simulation')">Simulation</div>
+                <div class="tab" onclick="switchTab('trace')">Trace</div>
+            </div>
+            <div class="pane-content" id="tab-diagram">
+                <div id="diagram-container">
+                    <div class="mermaid" id="mermaid-diagram"></div>
+                </div>
+            </div>
+            <div class="pane-content" id="tab-simulation" style="display:none;">
+                <div class="sim-panel">
+                    <div class="sim-header">
+                        <div class="sim-state">
+                            Current State: <span class="state-name" id="current-state">-</span>
+                        </div>
+                        <span id="sim-step">Step: 0</span>
+                    </div>
+                    <div>
+                        <strong>Available Events:</strong>
+                        <div class="event-buttons" id="event-buttons">
+                            <span style="color: var(--text-secondary);">Start simulation to see events</span>
+                        </div>
+                    </div>
+                    <div class="context-display">
+                        <strong>Context:</strong>
+                        <div id="context-view">
+                            <div class="context-item">
+                                <span class="context-key">No context</span>
+                                <span class="context-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pane-content" id="tab-trace" style="display:none;">
+                <div class="trace-display" id="trace-view">
+                    <div class="trace-step">No trace recorded</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <span id="status-message">Ready</span>
+        <span>L++ Schema v0.1.2</span>
+    </div>
+
+    <!-- Share Modal -->
+    <div class="modal-overlay" id="share-modal">
+        <div class="modal">
+            <h2>Share Blueprint</h2>
+            <p>Copy this URL to share your blueprint:</p>
+            <div class="share-url" id="share-url">Generating...</div>
+            <div class="modal-actions">
+                <button onclick="copyShareUrl()">Copy URL</button>
+                <button onclick="closeModal('share-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal-overlay" id="import-modal">
+        <div class="modal">
+            <h2>Import from URL</h2>
+            <input type="text" id="import-url" placeholder="Paste share URL here...">
+            <div class="modal-actions">
+                <button class="primary" onclick="importFromUrl()">Import</button>
+                <button onclick="closeModal('import-modal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#00d4ff',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#00d4ff',
+                lineColor: '#666',
+                secondaryColor: '#16213e',
+                tertiaryColor: '#0f0f23'
+            }
+        });
+
+        // State
+        let blueprint = null;
+        let simulation = {
+            active: false,
+            state: null,
+            context: {},
+            trace: [],
+            availableEvents: []
+        };
+
+        // Sample Blueprints
+        const samples = {
+            counter: {
+                "$schema": "lpp/v0.1.2",
+                "id": "counter",
+                "name": "Simple Counter",
+                "version": "1.0.0",
+                "description": "A simple counter state machine",
+                "context_schema": {
+                    "properties": {
+                        "count": { "type": "number" }
+                    }
+                },
+                "states": {
+                    "idle": { "description": "Counter is idle" },
+                    "counting": { "description": "Counter is active" }
+                },
+                "entry_state": "idle",
+                "terminal_states": [],
+                "gates": {
+                    "count_below_10": {
+                        "type": "expression",
+                        "expression": "count is None or count < 10"
+                    }
+                },
+                "actions": {
+                    "init_count": {
+                        "type": "set",
+                        "target": "count",
+                        "value": 0
+                    },
+                    "increment": {
+                        "type": "set",
+                        "target": "count",
+                        "value_from": "count + 1"
+                    }
+                },
+                "transitions": [
+                    {
+                        "id": "t_start",
+                        "from": "idle",
+                        "to": "counting",
+                        "on_event": "START",
+                        "actions": ["init_count"]
+                    },
+                    {
+                        "id": "t_increment",
+                        "from": "counting",
+                        "to": "counting",
+                        "on_event": "INCREMENT",
+                        "gates": ["count_below_10"],
+                        "actions": ["increment"]
+                    },
+                    {
+                        "id": "t_reset",
+                        "from": "counting",
+                        "to": "idle",
+                        "on_event": "RESET"
+                    }
+                ]
+            },
+            traffic_light: {
+                "$schema": "lpp/v0.1.2",
+                "id": "traffic_light",
+                "name": "Traffic Light",
+                "version": "1.0.0",
+                "description": "Traffic light state machine",
+                "context_schema": { "properties": {} },
+                "states": {
+                    "red": { "description": "Stop" },
+                    "yellow": { "description": "Prepare to stop/go" },
+                    "green": { "description": "Go" }
+                },
+                "entry_state": "red",
+                "terminal_states": [],
+                "gates": {},
+                "actions": {},
+                "transitions": [
+                    { "id": "t_red_to_green", "from": "red", "to": "green", "on_event": "CHANGE" },
+                    { "id": "t_green_to_yellow", "from": "green", "to": "yellow", "on_event": "CHANGE" },
+                    { "id": "t_yellow_to_red", "from": "yellow", "to": "red", "on_event": "CHANGE" }
+                ]
+            },
+            order_flow: {
+                "$schema": "lpp/v0.1.2",
+                "id": "order_flow",
+                "name": "Order Processing",
+                "version": "1.0.0",
+                "description": "E-commerce order flow",
+                "context_schema": {
+                    "properties": {
+                        "order_id": { "type": "string" },
+                        "payment_status": { "type": "string" }
+                    }
+                },
+                "states": {
+                    "pending": { "description": "Order created, awaiting payment" },
+                    "paid": { "description": "Payment received" },
+                    "processing": { "description": "Order being processed" },
+                    "shipped": { "description": "Order shipped" },
+                    "delivered": { "description": "Order delivered" },
+                    "cancelled": { "description": "Order cancelled" }
+                },
+                "entry_state": "pending",
+                "terminal_states": ["delivered", "cancelled"],
+                "gates": {
+                    "is_paid": { "type": "expression", "expression": "payment_status == 'success'" }
+                },
+                "actions": {
+                    "set_paid": { "type": "set", "target": "payment_status", "value": "success" }
+                },
+                "transitions": [
+                    { "id": "t_pay", "from": "pending", "to": "paid", "on_event": "PAY", "actions": ["set_paid"] },
+                    { "id": "t_process", "from": "paid", "to": "processing", "on_event": "PROCESS" },
+                    { "id": "t_ship", "from": "processing", "to": "shipped", "on_event": "SHIP" },
+                    { "id": "t_deliver", "from": "shipped", "to": "delivered", "on_event": "DELIVER" },
+                    { "id": "t_cancel_pending", "from": "pending", "to": "cancelled", "on_event": "CANCEL" },
+                    { "id": "t_cancel_paid", "from": "paid", "to": "cancelled", "on_event": "CANCEL" }
+                ]
+            }
+        };
+
+        // Editor
+        const editor = document.getElementById('editor');
+        let debounceTimer;
+
+        editor.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                validateAndUpdate();
+            }, 500);
+        });
+
+        // Tab handling for editor
+        editor.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = editor.selectionStart;
+                const end = editor.selectionEnd;
+                editor.value = editor.value.substring(0, start) + '  ' + editor.value.substring(end);
+                editor.selectionStart = editor.selectionEnd = start + 2;
+            }
+        });
+
+        // Validate and Update
+        function validateAndUpdate() {
+            const json = editor.value.trim();
+            const jsonStatus = document.getElementById('json-status');
+            const schemaStatus = document.getElementById('schema-status');
+            const errorDisplay = document.getElementById('error-display');
+
+            if (!json) {
+                jsonStatus.className = 'status-dot pending';
+                schemaStatus.className = 'status-dot pending';
+                errorDisplay.style.display = 'none';
+                blueprint = null;
+                updateDiagram();
+                return;
+            }
+
+            // Validate JSON
+            try {
+                blueprint = JSON.parse(json);
+                jsonStatus.className = 'status-dot valid';
+
+                // Validate schema
+                const schemaErrors = validateSchema(blueprint);
+                if (schemaErrors.length === 0) {
+                    schemaStatus.className = 'status-dot valid';
+                    errorDisplay.style.display = 'none';
+                    document.getElementById('blueprint-name').textContent =
+                        blueprint.name || blueprint.id || 'Untitled';
+                    updateDiagram();
+                } else {
+                    schemaStatus.className = 'status-dot invalid';
+                    errorDisplay.textContent = schemaErrors[0];
+                    errorDisplay.style.display = 'block';
+                }
+            } catch (e) {
+                jsonStatus.className = 'status-dot invalid';
+                schemaStatus.className = 'status-dot pending';
+                errorDisplay.textContent = e.message;
+                errorDisplay.style.display = 'block';
+                blueprint = null;
+            }
+
+            setStatus('Blueprint updated');
+        }
+
+        // Schema Validation
+        function validateSchema(bp) {
+            const errors = [];
+
+            if (!bp.id) errors.push("Missing 'id'");
+            if (!bp.states || Object.keys(bp.states).length === 0)
+                errors.push("Missing or empty 'states'");
+            if (!bp.entry_state) errors.push("Missing 'entry_state'");
+            if (!bp.transitions) errors.push("Missing 'transitions'");
+
+            if (bp.entry_state && bp.states && !bp.states[bp.entry_state]) {
+                errors.push(`entry_state '${bp.entry_state}' not in states`);
+            }
+
+            return errors;
+        }
+
+        // Generate Mermaid Diagram
+        function generateMermaid(bp) {
+            if (!bp || !bp.states) return 'stateDiagram-v2\n    [*] --> idle';
+
+            let lines = ['stateDiagram-v2'];
+
+            // Entry state
+            if (bp.entry_state) {
+                lines.push(`    [*] --> ${bp.entry_state}`);
+            }
+
+            // State descriptions
+            for (const [sid, state] of Object.entries(bp.states)) {
+                if (state && state.description) {
+                    const desc = state.description.substring(0, 40).replace(/"/g, "'");
+                    lines.push(`    ${sid}: ${desc}`);
+                }
+            }
+
+            // Transitions
+            if (bp.transitions) {
+                for (const t of bp.transitions) {
+                    const from = t.from || '?';
+                    const to = t.to || '?';
+                    const event = t.on_event || '?';
+
+                    if (from === '*') {
+                        for (const sid of Object.keys(bp.states)) {
+                            if (sid !== to) {
+                                lines.push(`    ${sid} --> ${to}: ${event}`);
+                            }
+                        }
+                    } else {
+                        lines.push(`    ${from} --> ${to}: ${event}`);
+                    }
+                }
+            }
+
+            // Terminal states
+            if (bp.terminal_states) {
+                for (const term of bp.terminal_states) {
+                    lines.push(`    ${term} --> [*]`);
+                }
+            }
+
+            return lines.join('\n');
+        }
+
+        // Update Diagram
+        async function updateDiagram() {
+            const container = document.getElementById('mermaid-diagram');
+
+            if (!blueprint) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 40px;">Load a blueprint to see diagram</p>';
+                return;
+            }
+
+            const mermaidCode = generateMermaid(blueprint);
+
+            try {
+                const { svg } = await mermaid.render('diagram-' + Date.now(), mermaidCode);
+                container.innerHTML = svg;
+
+                // Highlight current state in simulation
+                if (simulation.active && simulation.state) {
+                    highlightState(simulation.state);
+                }
+            } catch (e) {
+                container.innerHTML = `<p style="color: var(--error);">Diagram error: ${e.message}</p>`;
+            }
+        }
+
+        // Highlight state in diagram
+        function highlightState(stateName) {
+            const nodes = document.querySelectorAll('.node');
+            nodes.forEach(node => {
+                const text = node.querySelector('text');
+                if (text && text.textContent.includes(stateName)) {
+                    node.style.filter = 'drop-shadow(0 0 10px var(--accent))';
+                } else {
+                    node.style.filter = '';
+                }
+            });
+        }
+
+        // Tab Switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.pane-content').forEach(p => p.style.display = 'none');
+
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabName).style.display = 'block';
+        }
+
+        // Simulation
+        function startSimulation() {
+            if (!blueprint) {
+                alert('Please load a valid blueprint first');
+                return;
+            }
+
+            simulation.active = true;
+            simulation.state = blueprint.entry_state;
+            simulation.context = { _state: blueprint.entry_state };
+            simulation.trace = [{
+                step: 0,
+                state: blueprint.entry_state,
+                event: null
+            }];
+
+            // Initialize context from schema
+            if (blueprint.context_schema && blueprint.context_schema.properties) {
+                for (const prop of Object.keys(blueprint.context_schema.properties)) {
+                    simulation.context[prop] = null;
+                }
+            }
+
+            updateSimulationUI();
+            switchTab('simulation');
+
+            document.getElementById('btn-simulate').disabled = true;
+            document.getElementById('btn-stop').disabled = false;
+            document.getElementById('btn-reset').disabled = false;
+
+            setStatus('Simulation started');
+        }
+
+        function stopSimulation() {
+            simulation.active = false;
+            document.getElementById('btn-simulate').disabled = false;
+            document.getElementById('btn-stop').disabled = true;
+            document.getElementById('btn-reset').disabled = true;
+            setStatus('Simulation stopped');
+        }
+
+        function resetSimulation() {
+            startSimulation();
+            setStatus('Simulation reset');
+        }
+
+        function updateSimulationUI() {
+            document.getElementById('current-state').textContent = simulation.state;
+            document.getElementById('sim-step').textContent = `Step: ${simulation.trace.length - 1}`;
+
+            // Get available events
+            const events = getAvailableEvents();
+            const eventButtons = document.getElementById('event-buttons');
+
+            if (events.length === 0) {
+                eventButtons.innerHTML = '<span style="color: var(--warning);">No events available (deadlock or terminal)</span>';
+            } else {
+                eventButtons.innerHTML = events.map(e =>
+                    `<button class="event-btn" onclick="dispatchEvent('${e}')">${e}</button>`
+                ).join('');
+            }
+
+            // Update context view
+            const contextView = document.getElementById('context-view');
+            contextView.innerHTML = Object.entries(simulation.context)
+                .filter(([k]) => k !== '_state')
+                .map(([k, v]) => `
+                    <div class="context-item">
+                        <span class="context-key">${k}</span>
+                        <span class="context-value">${JSON.stringify(v)}</span>
+                    </div>
+                `).join('') || '<div class="context-item"><span class="context-key">Empty context</span></div>';
+
+            // Update trace
+            const traceView = document.getElementById('trace-view');
+            traceView.innerHTML = simulation.trace.map((t, i) => `
+                <div class="trace-step ${i === simulation.trace.length - 1 ? 'current' : ''}">
+                    [${t.step}] ${t.event ? `${t.prevState || '?'} --[${t.event}]--> ` : 'Initial: '}${t.state}
+                </div>
+            `).join('');
+
+            // Highlight in diagram
+            updateDiagram();
+        }
+
+        function getAvailableEvents() {
+            if (!blueprint || !simulation.active) return [];
+
+            const events = [];
+            const currentState = simulation.state;
+
+            for (const t of blueprint.transitions) {
+                if (t.from !== '*' && t.from !== currentState) continue;
+
+                // Check gates (simplified - expression gates only)
+                let gatesPass = true;
+                if (t.gates) {
+                    for (const gateId of t.gates) {
+                        const gate = blueprint.gates?.[gateId];
+                        if (gate && gate.type === 'expression') {
+                            try {
+                                // Simple evaluation with context
+                                const ctx = { ...simulation.context };
+                                const result = evaluateExpression(gate.expression, ctx);
+                                if (!result) gatesPass = false;
+                            } catch {
+                                // If evaluation fails, assume gate passes
+                            }
+                        }
+                    }
+                }
+
+                if (gatesPass && t.on_event && !events.includes(t.on_event)) {
+                    events.push(t.on_event);
+                }
+            }
+
+            return events;
+        }
+
+        function evaluateExpression(expr, ctx) {
+            // Very simple expression evaluator
+            // Handles: x is None, x is not None, x == 'value', x < 10, etc.
+            try {
+                let js = expr
+                    .replace(/\bis None\b/g, '=== null')
+                    .replace(/\bis not None\b/g, '!== null')
+                    .replace(/\band\b/g, '&&')
+                    .replace(/\bor\b/g, '||')
+                    .replace(/\bnot\b/g, '!')
+                    .replace(/\bTrue\b/g, 'true')
+                    .replace(/\bFalse\b/g, 'false');
+
+                // Create function with context variables
+                const keys = Object.keys(ctx);
+                const values = Object.values(ctx);
+                const fn = new Function(...keys, `return ${js}`);
+                return fn(...values);
+            } catch {
+                return true;
+            }
+        }
+
+        function dispatchEvent(eventName) {
+            if (!simulation.active) return;
+
+            // Find matching transition
+            let matched = null;
+            for (const t of blueprint.transitions) {
+                if (t.on_event !== eventName) continue;
+                if (t.from !== '*' && t.from !== simulation.state) continue;
+
+                // Check gates
+                let gatesPass = true;
+                if (t.gates) {
+                    for (const gateId of t.gates) {
+                        const gate = blueprint.gates?.[gateId];
+                        if (gate && gate.type === 'expression') {
+                            try {
+                                if (!evaluateExpression(gate.expression, simulation.context)) {
+                                    gatesPass = false;
+                                }
+                            } catch {}
+                        }
+                    }
+                }
+
+                if (gatesPass) {
+                    matched = t;
+                    break;
+                }
+            }
+
+            if (!matched) {
+                setStatus(`No transition for event '${eventName}'`, 'error');
+                return;
+            }
+
+            // Execute actions (simplified - set actions only)
+            if (matched.actions) {
+                for (const actionId of matched.actions) {
+                    const action = blueprint.actions?.[actionId];
+                    if (action && action.type === 'set' && action.target) {
+                        if ('value' in action) {
+                            simulation.context[action.target] = action.value;
+                        }
+                    }
+                }
+            }
+
+            // Transition
+            const prevState = simulation.state;
+            simulation.state = matched.to;
+            simulation.context._state = matched.to;
+
+            // Record trace
+            simulation.trace.push({
+                step: simulation.trace.length,
+                state: matched.to,
+                prevState: prevState,
+                event: eventName,
+                transitionId: matched.id
+            });
+
+            updateSimulationUI();
+            setStatus(`${prevState} --[${eventName}]--> ${matched.to}`);
+        }
+
+        // Toolbar Actions
+        function loadSample(name) {
+            const sample = samples[name];
+            if (sample) {
+                editor.value = JSON.stringify(sample, null, 2);
+                validateAndUpdate();
+                setStatus(`Loaded sample: ${sample.name}`);
+            }
+        }
+
+        function loadFromFile() {
+            document.getElementById('file-input').click();
+        }
+
+        function handleFileLoad(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    editor.value = e.target.result;
+                    validateAndUpdate();
+                    setStatus(`Loaded: ${file.name}`);
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function formatBlueprint() {
+            try {
+                const obj = JSON.parse(editor.value);
+                editor.value = JSON.stringify(obj, null, 2);
+                setStatus('Blueprint formatted');
+            } catch (e) {
+                setStatus('Cannot format invalid JSON', 'error');
+            }
+        }
+
+        function validateBlueprint() {
+            validateAndUpdate();
+            if (blueprint) {
+                const errors = validateSchema(blueprint);
+                if (errors.length === 0) {
+                    setStatus('Blueprint is valid!', 'success');
+                } else {
+                    setStatus(`Validation errors: ${errors.length}`, 'error');
+                }
+            }
+        }
+
+        function showShareModal() {
+            if (!editor.value.trim()) {
+                alert('Nothing to share');
+                return;
+            }
+
+            // Generate share URL
+            try {
+                const compressed = pako.deflate(editor.value, { to: 'string' });
+                const encoded = btoa(compressed);
+                const url = window.location.origin + window.location.pathname + '?bp=' + encodeURIComponent(encoded);
+                document.getElementById('share-url').textContent = url;
+            } catch (e) {
+                // Fallback: simple base64
+                const encoded = btoa(unescape(encodeURIComponent(editor.value)));
+                const url = window.location.origin + window.location.pathname + '?bp=' + encodeURIComponent(encoded);
+                document.getElementById('share-url').textContent = url;
+            }
+
+            document.getElementById('share-modal').classList.add('show');
+        }
+
+        function copyShareUrl() {
+            const url = document.getElementById('share-url').textContent;
+            navigator.clipboard.writeText(url).then(() => {
+                setStatus('URL copied to clipboard');
+            });
+        }
+
+        function exportBlueprint() {
+            if (!editor.value.trim()) {
+                alert('Nothing to export');
+                return;
+            }
+
+            const name = blueprint?.id || 'blueprint';
+            const blob = new Blob([editor.value], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${name}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            setStatus(`Exported: ${name}.json`);
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        // Import from URL on load
+        function checkUrlImport() {
+            const params = new URLSearchParams(window.location.search);
+            const bp = params.get('bp');
+            if (bp) {
+                try {
+                    // Try decompression first
+                    const decoded = decodeURIComponent(bp);
+                    try {
+                        const decompressed = pako.inflate(atob(decoded), { to: 'string' });
+                        editor.value = decompressed;
+                    } catch {
+                        // Fallback: simple base64
+                        editor.value = decodeURIComponent(escape(atob(decoded)));
+                    }
+                    validateAndUpdate();
+                    setStatus('Blueprint imported from URL');
+                } catch (e) {
+                    console.error('Import error:', e);
+                }
+            }
+        }
+
+        // Status bar
+        function setStatus(msg, type = 'info') {
+            const status = document.getElementById('status-message');
+            status.textContent = msg;
+            status.style.color = type === 'error' ? 'var(--error)' :
+                                 type === 'success' ? 'var(--success)' :
+                                 'var(--text-secondary)';
+        }
+
+        // Resizer
+        const resizer = document.getElementById('resizer');
+        const editorPane = document.getElementById('editor-pane');
+        let isResizing = false;
+
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            document.body.style.cursor = 'col-resize';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            const containerRect = document.querySelector('.main-container').getBoundingClientRect();
+            const newWidth = e.clientX - containerRect.left;
+            if (newWidth > 300 && newWidth < containerRect.width - 300) {
+                editorPane.style.flex = 'none';
+                editorPane.style.width = newWidth + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isResizing = false;
+            document.body.style.cursor = '';
+        });
+
+        // Initialize
+        checkUrlImport();
+
+        // Load pako for compression (optional)
+        const pakoScript = document.createElement('script');
+        pakoScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js';
+        document.head.appendChild(pakoScript);
+    </script>
+</body>
+</html>

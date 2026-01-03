@@ -1,0 +1,259 @@
+{
+  "$schema": "lpp/v0.1",
+  "id": "decoded_extractor_compute",
+  "name": "Decoded: extractor_compute",
+  "version": "1.0.0",
+  "description": "Auto-decoded from utils/legacy_extractor/src/extractor_compute.py",
+  "context_schema": {
+    "properties": {
+      "error": {
+        "type": "string"
+      },
+      "result": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Initial state"
+    },
+    "loading": {
+      "name": "Loading",
+      "description": "From function: loadSource"
+    },
+    "analyzing": {
+      "name": "Analyzing",
+      "description": "From function: parseAst"
+    },
+    "querying": {
+      "name": "Querying",
+      "description": "From function: findStatePatterns"
+    },
+    "walk": {
+      "name": "Walk",
+      "description": "From function: walk"
+    },
+    "registering": {
+      "name": "Registering",
+      "description": "From function: addState"
+    },
+    "processing": {
+      "name": "Processing",
+      "description": "From function: analyzeEventHandlers"
+    },
+    "inferentrystate": {
+      "name": "Inferentrystate",
+      "description": "From function: inferEntryState"
+    },
+    "generating": {
+      "name": "Generating",
+      "description": "From function: generateBlueprint"
+    },
+    "listing": {
+      "name": "Listing",
+      "description": "From function: exportBlueprint"
+    },
+    "exportreport": {
+      "name": "Exportreport",
+      "description": "From function: exportReport"
+    },
+    "clearstate": {
+      "name": "Clearstate",
+      "description": "From function: clearState"
+    },
+    "complete": {
+      "name": "Complete",
+      "description": "Terminal state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "loading",
+      "on_event": "IDLE_DONE"
+    },
+    {
+      "id": "t1",
+      "from": "loading",
+      "to": "analyzing",
+      "on_event": "LOADING_DONE"
+    },
+    {
+      "id": "t2",
+      "from": "analyzing",
+      "to": "querying",
+      "on_event": "ANALYZING_DONE"
+    },
+    {
+      "id": "t3",
+      "from": "querying",
+      "to": "walk",
+      "on_event": "QUERYING_DONE"
+    },
+    {
+      "id": "t4",
+      "from": "walk",
+      "to": "registering",
+      "on_event": "WALK_DONE"
+    },
+    {
+      "id": "t5",
+      "from": "registering",
+      "to": "processing",
+      "on_event": "REGISTERING_DONE"
+    },
+    {
+      "id": "t6",
+      "from": "processing",
+      "to": "inferentrystate",
+      "on_event": "PROCESSING_DONE"
+    },
+    {
+      "id": "t7",
+      "from": "inferentrystate",
+      "to": "generating",
+      "on_event": "INFERENTRYSTATE_DONE"
+    },
+    {
+      "id": "t8",
+      "from": "generating",
+      "to": "listing",
+      "on_event": "GENERATING_DONE"
+    },
+    {
+      "id": "t9",
+      "from": "listing",
+      "to": "exportreport",
+      "on_event": "LISTING_DONE"
+    },
+    {
+      "id": "t10",
+      "from": "exportreport",
+      "to": "clearstate",
+      "on_event": "EXPORTREPORT_DONE"
+    },
+    {
+      "id": "t11",
+      "from": "clearstate",
+      "to": "complete",
+      "on_event": "CLEARSTATE_DONE"
+    },
+    {
+      "id": "t12",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a0": {
+      "type": "compute",
+      "compute_unit": "impl:params.get",
+      "description": "Inferred from function:loadSource"
+    },
+    "a1": {
+      "type": "compute",
+      "compute_unit": "impl:open",
+      "description": "Inferred from function:loadSource"
+    },
+    "a2": {
+      "type": "compute",
+      "compute_unit": "impl:f.read",
+      "description": "Inferred from function:loadSource"
+    },
+    "a3": {
+      "type": "compute",
+      "compute_unit": "impl:str",
+      "description": "Inferred from function:loadSource"
+    },
+    "a5": {
+      "type": "compute",
+      "compute_unit": "impl:ast.parse",
+      "description": "Inferred from function:parseAst"
+    },
+    "a6": {
+      "type": "compute",
+      "compute_unit": "impl:_astToDict",
+      "description": "Inferred from function:parseAst"
+    },
+    "a9": {
+      "type": "compute",
+      "compute_unit": "impl:isinstance",
+      "description": "Inferred from function:findStatePatterns"
+    },
+    "a10": {
+      "type": "compute",
+      "compute_unit": "impl:node.get",
+      "description": "Inferred from function:findStatePatterns"
+    },
+    "a12": {
+      "type": "compute",
+      "compute_unit": "impl:_getName",
+      "description": "Inferred from function:findStatePatterns"
+    },
+    "a14": {
+      "type": "compute",
+      "compute_unit": "impl:any",
+      "description": "Inferred from function:findStatePatterns"
+    },
+    "a17": {
+      "type": "compute",
+      "compute_unit": "impl:item.get",
+      "description": "Inferred from function:findStatePatterns"
+    },
+    "a19": {
+      "type": "compute",
+      "compute_unit": "impl:members.append",
+      "description": "Inferred from function:findStatePatterns"
+    },
+    "a22": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'patterns', 'ctx': {'_type': 'Load'}, 'lineno': 120}, 'slice': {'_type': 'Constant', 'value': 'enumDefinitions', 'kind': None, 'lineno': 120}, 'ctx': {'_type': 'Load'}, 'lineno': 120}.append",
+      "description": "Inferred from function:findStatePatterns"
+    },
+    "a25": {
+      "type": "compute",
+      "compute_unit": "impl:walk",
+      "description": "Inferred from function:findStatePatterns"
+    },
+    "a30": {
+      "type": "compute",
+      "compute_unit": "impl:_getName.lower",
+      "description": "Inferred from function:findStatePatterns"
+    },
+    "a36": {
+      "type": "compute",
+      "compute_unit": "impl:methods.append",
+      "description": "Inferred from function:findStatePatterns"
+    },
+    "a40": {
+      "type": "compute",
+      "compute_unit": "impl:stmt.get",
+      "description": "Inferred from function:findStatePatterns"
+    },
+    "a42": {
+      "type": "compute",
+      "compute_unit": "impl:t.get",
+      "description": "Inferred from function:findStatePatterns"
+    },
+    "a43": {
+      "type": "compute",
+      "compute_unit": "impl:t.get.lower",
+      "description": "Inferred from function:findStatePatterns"
+    },
+    "a47": {
+      "type": "compute",
+      "compute_unit": "impl:{'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'patterns', 'ctx': {'_type': 'Load'}, 'lineno': 165}, 'slice': {'_type': 'Constant', 'value': 'stateClasses', 'kind': None, 'lineno': 165}, 'ctx': {'_type': 'Load'}, 'lineno': 165}.append",
+      "description": "Inferred from function:findStatePatterns"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": [
+    "complete",
+    "error"
+  ]
+}

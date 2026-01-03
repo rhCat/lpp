@@ -1,0 +1,863 @@
+{
+  "module": "extractor_compute",
+  "filePath": "utils/legacy_extractor/src/extractor_compute.py",
+  "inbound": [
+    {
+      "type": "function",
+      "name": "loadSource",
+      "module": "extractor_compute",
+      "line": 37,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Load Python source file from disk.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "parseAst",
+      "module": "extractor_compute",
+      "line": 51,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Parse Python source into AST.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "findStatePatterns",
+      "module": "extractor_compute",
+      "line": 81,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Detect state machine patterns in code.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "extractStates",
+      "module": "extractor_compute",
+      "line": 344,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Extract state definitions from code.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "extractTransitions",
+      "module": "extractor_compute",
+      "line": 457,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Extract state transitions from methods.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "extractGates",
+      "module": "extractor_compute",
+      "line": 672,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Extract gate conditions from if statements.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "extractActions",
+      "module": "extractor_compute",
+      "line": 732,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Extract actions from side effects.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "analyzeEventHandlers",
+      "module": "extractor_compute",
+      "line": 875,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Analyze event handler patterns.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "inferEntryState",
+      "module": "extractor_compute",
+      "line": 926,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Infer entry and terminal states.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "generateBlueprint",
+      "module": "extractor_compute",
+      "line": 977,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Generate L++ blueprint from extracted elements.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "generateMapping",
+      "module": "extractor_compute",
+      "line": 1073,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Generate source-to-blueprint mapping.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "exportBlueprint",
+      "module": "extractor_compute",
+      "line": 1157,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Export blueprint to file.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "exportReport",
+      "module": "extractor_compute",
+      "line": 1173,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Export extraction report.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "clearState",
+      "module": "extractor_compute",
+      "line": 1198,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Reset all extraction state.",
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "walk",
+      "module": "extractor_compute",
+      "line": 98,
+      "args": [
+        "node",
+        "parent",
+        "className"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "addState",
+      "module": "extractor_compute",
+      "line": 353,
+      "args": [
+        "stateId",
+        "name",
+        "desc",
+        "source",
+        "line",
+        "confidence"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "addTransition",
+      "module": "extractor_compute",
+      "line": 468,
+      "args": [
+        "fromState",
+        "toState",
+        "event",
+        "source",
+        "line",
+        "confidence"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "walk",
+      "module": "extractor_compute",
+      "line": 566,
+      "args": [
+        "nodes",
+        "currentFrom"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "walk",
+      "module": "extractor_compute",
+      "line": 611,
+      "args": [
+        "nodes"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "addAction",
+      "module": "extractor_compute",
+      "line": 743,
+      "args": [
+        "name",
+        "actionType",
+        "target",
+        "value",
+        "source",
+        "line",
+        "confidence"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "walk",
+      "module": "extractor_compute",
+      "line": 830,
+      "args": [
+        "nodes"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "find",
+      "module": "extractor_compute",
+      "line": 1311,
+      "args": [
+        "node"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    },
+    {
+      "type": "function",
+      "name": "find",
+      "module": "extractor_compute",
+      "line": 1341,
+      "args": [
+        "node"
+      ],
+      "returns": null,
+      "docstring": null,
+      "decorators": []
+    }
+  ],
+  "outbound": [
+    {
+      "module": "ast",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "json",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "os",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "re",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "typing",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "Any",
+          "alias": "Any"
+        },
+        {
+          "name": "Dict",
+          "alias": "Dict"
+        },
+        {
+          "name": "List",
+          "alias": "List"
+        },
+        {
+          "name": "Optional",
+          "alias": "Optional"
+        },
+        {
+          "name": "Set",
+          "alias": "Set"
+        },
+        {
+          "name": "Tuple",
+          "alias": "Tuple"
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "extractor_compute",
+      "type": "module",
+      "label": "extractor_compute",
+      "metrics": {
+        "fanIn": 23,
+        "fanOut": 5,
+        "instability": 0.179,
+        "internalEdges": 31,
+        "externalCallCount": 7,
+        "localCallCount": 0,
+        "callsByCategory": {
+          "stdlib": 7
+        },
+        "localDependencies": []
+      }
+    },
+    {
+      "id": "extractor_compute.loadSource",
+      "type": "function",
+      "label": "loadSource",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 37,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "extractor_compute.parseAst",
+      "type": "function",
+      "label": "parseAst",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 51,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "extractor_compute.findStatePatterns",
+      "type": "function",
+      "label": "findStatePatterns",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 81,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "extractor_compute.extractStates",
+      "type": "function",
+      "label": "extractStates",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 344,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "extractor_compute.extractTransitions",
+      "type": "function",
+      "label": "extractTransitions",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 457,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "extractor_compute.extractGates",
+      "type": "function",
+      "label": "extractGates",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 672,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "extractor_compute.extractActions",
+      "type": "function",
+      "label": "extractActions",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 732,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "extractor_compute.analyzeEventHandlers",
+      "type": "function",
+      "label": "analyzeEventHandlers",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 875,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "extractor_compute.inferEntryState",
+      "type": "function",
+      "label": "inferEntryState",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 926,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "extractor_compute.generateBlueprint",
+      "type": "function",
+      "label": "generateBlueprint",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 977,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "extractor_compute.generateMapping",
+      "type": "function",
+      "label": "generateMapping",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 1073,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "extractor_compute.exportBlueprint",
+      "type": "function",
+      "label": "exportBlueprint",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 1157,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "extractor_compute.exportReport",
+      "type": "function",
+      "label": "exportReport",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 1173,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "extractor_compute.clearState",
+      "type": "function",
+      "label": "clearState",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 1198,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "extractor_compute.walk",
+      "type": "function",
+      "label": "walk",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 98,
+      "signature": "(node, parent, className)"
+    },
+    {
+      "id": "extractor_compute.addState",
+      "type": "function",
+      "label": "addState",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 353,
+      "signature": "(stateId, name, desc, source, line, confidence)"
+    },
+    {
+      "id": "extractor_compute.addTransition",
+      "type": "function",
+      "label": "addTransition",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 468,
+      "signature": "(fromState, toState, event, source, line, confidence)"
+    },
+    {
+      "id": "extractor_compute.walk",
+      "type": "function",
+      "label": "walk",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 566,
+      "signature": "(nodes, currentFrom)"
+    },
+    {
+      "id": "extractor_compute.walk",
+      "type": "function",
+      "label": "walk",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 611,
+      "signature": "(nodes)"
+    },
+    {
+      "id": "extractor_compute.addAction",
+      "type": "function",
+      "label": "addAction",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 743,
+      "signature": "(name, actionType, target, value, source, line, confidence)"
+    },
+    {
+      "id": "extractor_compute.walk",
+      "type": "function",
+      "label": "walk",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 830,
+      "signature": "(nodes)"
+    },
+    {
+      "id": "extractor_compute.find",
+      "type": "function",
+      "label": "find",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 1311,
+      "signature": "(node)"
+    },
+    {
+      "id": "extractor_compute.find",
+      "type": "function",
+      "label": "find",
+      "direction": "inbound",
+      "parent": "extractor_compute",
+      "line": 1341,
+      "signature": "(node)"
+    },
+    {
+      "id": "ast",
+      "type": "dependency",
+      "label": "ast",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "json",
+      "type": "dependency",
+      "label": "json",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "os",
+      "type": "dependency",
+      "label": "os",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "re",
+      "type": "dependency",
+      "label": "re",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "typing",
+      "type": "dependency",
+      "label": "typing",
+      "direction": "outbound",
+      "category": "stdlib"
+    }
+  ],
+  "edges": [
+    {
+      "from": "extractor_compute.walk",
+      "to": "extractor_compute.walk",
+      "type": "internal",
+      "line": 127
+    },
+    {
+      "from": "extractor_compute.walk",
+      "to": "extractor_compute.walk",
+      "type": "internal",
+      "line": 173
+    },
+    {
+      "from": "extractor_compute.walk",
+      "to": "extractor_compute.walk",
+      "type": "internal",
+      "line": 257
+    },
+    {
+      "from": "extractor_compute.walk",
+      "to": "extractor_compute.walk",
+      "type": "internal",
+      "line": 261
+    },
+    {
+      "from": "extractor_compute.findStatePatterns",
+      "to": "extractor_compute.walk",
+      "type": "internal",
+      "line": 263
+    },
+    {
+      "from": "extractor_compute.extractStates",
+      "to": "extractor_compute.addState",
+      "type": "internal",
+      "line": 384
+    },
+    {
+      "from": "extractor_compute.extractStates",
+      "to": "extractor_compute.addState",
+      "type": "internal",
+      "line": 401
+    },
+    {
+      "from": "extractor_compute.extractStates",
+      "to": "extractor_compute.addState",
+      "type": "internal",
+      "line": 415
+    },
+    {
+      "from": "extractor_compute.extractStates",
+      "to": "extractor_compute.addState",
+      "type": "internal",
+      "line": 425
+    },
+    {
+      "from": "extractor_compute.extractStates",
+      "to": "extractor_compute.addState",
+      "type": "internal",
+      "line": 439
+    },
+    {
+      "from": "extractor_compute.extractStates",
+      "to": "extractor_compute.addState",
+      "type": "internal",
+      "line": 450
+    },
+    {
+      "from": "extractor_compute.extractTransitions",
+      "to": "extractor_compute.addTransition",
+      "type": "internal",
+      "line": 512
+    },
+    {
+      "from": "extractor_compute.extractTransitions",
+      "to": "extractor_compute.addTransition",
+      "type": "internal",
+      "line": 527
+    },
+    {
+      "from": "extractor_compute.extractTransitions",
+      "to": "extractor_compute.addTransition",
+      "type": "internal",
+      "line": 542
+    },
+    {
+      "from": "extractor_compute.extractTransitions",
+      "to": "extractor_compute.addTransition",
+      "type": "internal",
+      "line": 556
+    },
+    {
+      "from": "extractor_compute.walk",
+      "to": "extractor_compute.walk",
+      "type": "internal",
+      "line": 588
+    },
+    {
+      "from": "extractor_compute._findStateChanges",
+      "to": "extractor_compute.walk",
+      "type": "internal",
+      "line": 603
+    },
+    {
+      "from": "extractor_compute.walk",
+      "to": "extractor_compute.walk",
+      "type": "internal",
+      "line": 633
+    },
+    {
+      "from": "extractor_compute._findStateChangesGeneric",
+      "to": "extractor_compute.walk",
+      "type": "internal",
+      "line": 635
+    },
+    {
+      "from": "extractor_compute.extractActions",
+      "to": "extractor_compute.addAction",
+      "type": "internal",
+      "line": 785
+    },
+    {
+      "from": "extractor_compute.extractActions",
+      "to": "extractor_compute.addAction",
+      "type": "internal",
+      "line": 801
+    },
+    {
+      "from": "extractor_compute.extractActions",
+      "to": "extractor_compute.addAction",
+      "type": "internal",
+      "line": 814
+    },
+    {
+      "from": "extractor_compute.extractActions",
+      "to": "extractor_compute.addAction",
+      "type": "internal",
+      "line": 819
+    },
+    {
+      "from": "extractor_compute.walk",
+      "to": "extractor_compute.walk",
+      "type": "internal",
+      "line": 869
+    },
+    {
+      "from": "extractor_compute._findSideEffects",
+      "to": "extractor_compute.walk",
+      "type": "internal",
+      "line": 871
+    },
+    {
+      "from": "extractor_compute.find",
+      "to": "extractor_compute.find",
+      "type": "internal",
+      "line": 1316
+    },
+    {
+      "from": "extractor_compute.find",
+      "to": "extractor_compute.find",
+      "type": "internal",
+      "line": 1321
+    },
+    {
+      "from": "extractor_compute._getClassBody",
+      "to": "extractor_compute.find",
+      "type": "internal",
+      "line": 1326
+    },
+    {
+      "from": "extractor_compute.find",
+      "to": "extractor_compute.find",
+      "type": "internal",
+      "line": 1347
+    },
+    {
+      "from": "extractor_compute.find",
+      "to": "extractor_compute.find",
+      "type": "internal",
+      "line": 1352
+    },
+    {
+      "from": "extractor_compute._getMethodBody",
+      "to": "extractor_compute.find",
+      "type": "internal",
+      "line": 1357
+    },
+    {
+      "from": "extractor_compute.parseAst",
+      "to": "ast",
+      "type": "external",
+      "category": "stdlib",
+      "line": 57
+    },
+    {
+      "from": "extractor_compute._astToDict",
+      "to": "ast",
+      "type": "external",
+      "category": "stdlib",
+      "line": 68
+    },
+    {
+      "from": "extractor_compute.extractTransitions",
+      "to": "re",
+      "type": "external",
+      "category": "stdlib",
+      "line": 551
+    },
+    {
+      "from": "extractor_compute.extractActions",
+      "to": "re",
+      "type": "external",
+      "category": "stdlib",
+      "line": 812
+    },
+    {
+      "from": "extractor_compute.generateBlueprint",
+      "to": "os",
+      "type": "external",
+      "category": "stdlib",
+      "line": 988
+    },
+    {
+      "from": "extractor_compute.generateBlueprint",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1069
+    },
+    {
+      "from": "extractor_compute.exportReport",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 1192
+    }
+  ],
+  "coupling": {
+    "fanIn": 23,
+    "fanOut": 5,
+    "instability": 0.179,
+    "internalEdges": 31,
+    "externalCallCount": 7,
+    "localCallCount": 0,
+    "callsByCategory": {
+      "stdlib": 7
+    },
+    "localDependencies": []
+  }
+}
