@@ -114,25 +114,60 @@ compare [s1] [s2] - Compare states at two steps
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: L++ Blueprint Debugger
     [*] --> idle
-    idle --> loaded: LOAD
-    idle --> error: LOAD_FAILED
-    loaded --> loaded: LOAD / SET_BREAKPOINT
-    loaded --> debugging: START
-    loaded --> idle: UNLOAD
-    debugging --> debugging: STEP / STEP_OVER / STEP_BACK / RUN
-    debugging --> debugging: SET_BREAKPOINT / REMOVE_BREAKPOINT
-    debugging --> debugging: INSPECT_STATE / INSPECT_CONTEXT / EVAL
-    debugging --> debugging: ADD_WATCH / GET_WATCHES / HISTORY / GOTO
-    debugging --> paused: PAUSE / STEP_HIT_BP / RUN_HIT_BP
-    debugging --> loaded: STOP
-    debugging --> idle: UNLOAD
-    paused --> debugging: CONTINUE / RUN / STEP_BACK / GOTO
-    paused --> paused: SET_BREAKPOINT / INSPECT_STATE / EVAL
-    paused --> loaded: STOP
-    paused --> idle: UNLOAD
-    error --> idle: CLEAR
+    idle --> loaded : LOAD [blueprint is None]
+    idle --> error : LOAD_FAILED
+    loaded --> loaded : LOAD
+    debugging --> loaded : LOAD
+    loaded --> debugging : START [blueprint is not None]
+    loaded --> loaded : SET_BREAKPOINT
+    debugging --> debugging : SET_BREAKPOINT
+    paused --> paused : SET_BREAKPOINT
+    debugging --> debugging : REMOVE_BREAKPOINT
+    paused --> paused : REMOVE_BREAKPOINT
+    debugging --> debugging : LIST_BREAKPOINTS
+    paused --> paused : LIST_BREAKPOINTS
+    debugging --> debugging : STEP [is_paused != True]
+    debugging --> paused : STEP_HIT_BP
+    debugging --> debugging : STEP_OVER [is_paused != True]
+    debugging --> debugging : STEP_BACK [history is not None and his...]
+    paused --> debugging : STEP_BACK [history is not None and his...]
+    debugging --> debugging : RUN
+    debugging --> paused : RUN_HIT_BP
+    paused --> debugging : CONTINUE
+    paused --> debugging : RUN
+    debugging --> paused : PAUSE
+    debugging --> loaded : STOP
+    paused --> loaded : STOP
+    debugging --> debugging : INSPECT_STATE
+    paused --> paused : INSPECT_STATE
+    debugging --> debugging : INSPECT_CONTEXT
+    paused --> paused : INSPECT_CONTEXT
+    debugging --> debugging : EVAL
+    paused --> paused : EVAL
+    debugging --> debugging : ADD_WATCH
+    paused --> paused : ADD_WATCH
+    debugging --> debugging : REMOVE_WATCH
+    debugging --> debugging : GET_WATCHES
+    paused --> paused : GET_WATCHES
+    debugging --> debugging : HISTORY
+    paused --> paused : HISTORY
+    debugging --> debugging : GOTO [history is not None and len...]
+    paused --> debugging : GOTO [history is not None and len...]
+    debugging --> debugging : COMPARE
+    paused --> paused : COMPARE
+    debugging --> debugging : RESET
+    paused --> debugging : RESET
+    debugging --> debugging : STATUS
+    paused --> paused : STATUS
+    loaded --> idle : UNLOAD
+    debugging --> idle : UNLOAD
+    paused --> idle : UNLOAD
+    error --> idle : CLEAR
 ```
+> **Interactive View:** [Open zoomable diagram](results/blueprint_debugger_diagram.html) for pan/zoom controls
+
 
 ## Architecture
 

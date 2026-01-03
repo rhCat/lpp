@@ -28,35 +28,32 @@ python interactive.py -c
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: L++ Blueprint Playground
     [*] --> idle
-    idle: No blueprint loaded, waiting for input
-    editing: Blueprint loaded and being edited
-    validating: Validating blueprint JSON/structure
-    simulating: Running interactive simulation
-    serving: Web server is running
-    error: Error state
-    idle --> editing: LOAD
-    idle --> editing: LOAD_FROM_URL
-    editing --> editing: LOAD
-    editing --> editing: UPDATE
-    editing --> editing: VALIDATE
-    editing --> editing: FORMAT
-    editing --> editing: REGENERATE_DIAGRAM
-    editing --> simulating: START_SIM
-    simulating --> simulating: DISPATCH
-    simulating --> simulating: RESET_SIM
-    simulating --> editing: STOP_SIM
-    editing --> editing: SHARE
-    simulating --> simulating: SHARE
-    editing --> editing: EXPORT
-    simulating --> simulating: EXPORT
-    editing --> idle: UNLOAD
-    simulating --> idle: UNLOAD
-    editing --> error: ERROR
-    simulating --> error: ERROR
-    error --> idle: CLEAR
-    error --> editing: RETRY
+    idle --> editing : LOAD
+    idle --> editing : LOAD_FROM_URL
+    editing --> editing : LOAD
+    editing --> editing : UPDATE [True]
+    editing --> editing : VALIDATE [blueprint_json is not None ...]
+    editing --> editing : FORMAT [blueprint_json is not None ... && is_valid_json is not None a...]
+    editing --> editing : REGENERATE_DIAGRAM [blueprint_json is not None ... && is_valid_blueprint is not N...]
+    editing --> simulating : START_SIM [blueprint_json is not None ... && is_valid_blueprint is not N...]
+    simulating --> simulating : DISPATCH [sim_state is not None]
+    simulating --> simulating : RESET_SIM
+    simulating --> editing : STOP_SIM
+    editing --> editing : SHARE [blueprint_json is not None ...]
+    simulating --> simulating : SHARE [blueprint_json is not None ...]
+    editing --> editing : EXPORT [blueprint_json is not None ...]
+    simulating --> simulating : EXPORT [blueprint_json is not None ...]
+    editing --> idle : UNLOAD
+    simulating --> idle : UNLOAD
+    editing --> error : ERROR
+    simulating --> error : ERROR
+    error --> idle : CLEAR
+    error --> editing : RETRY [blueprint_json is not None ...]
 ```
+> **Interactive View:** [Open zoomable diagram](results/blueprint_playground_diagram.html) for pan/zoom controls
+
 
 ## Features
 

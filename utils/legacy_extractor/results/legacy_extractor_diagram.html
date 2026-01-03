@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Legacy Code State Machine Extractor - State Diagram</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #1a1a2e; color: #eee; }
+.header { background: #16213e; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 18px; color: #00d4ff; }
+.controls { display: flex; gap: 8px; }
+.controls button { background: #4a4a8a; color: #fff; border: none; padding: 8px 16px; cursor: pointer; border-radius: 4px; font-size: 12px; }
+.controls button:hover { background: #5a5a9a; }
+.zoom-info { color: #888; font-size: 12px; margin-left: 15px; }
+.container { position: relative; width: 100%; height: calc(100vh - 60px); overflow: hidden; background: #0f0f23; }
+#diagram { position: absolute; transform-origin: 0 0; cursor: grab; }
+#diagram:active { cursor: grabbing; }
+#diagram svg { max-width: none !important; }
+.mermaid { background: transparent; }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>Legacy Code State Machine Extractor</h1>
+    <div class="controls">
+        <button onclick="zoomIn()">Zoom In (+)</button>
+        <button onclick="zoomOut()">Zoom Out (-)</button>
+        <button onclick="resetView()">Reset View</button>
+        <button onclick="fitToScreen()">Fit to Screen</button>
+        <span class="zoom-info" id="zoom-level">100%</span>
+    </div>
+</div>
+<div class="container" id="container">
+    <div id="diagram">
+        <pre class="mermaid">
+flowchart TD
+    %% L++ Logic CAD: Legacy Code State Machine Extractor
+        state_idle(["idle\nAwaiting source file or code input"]):::entry
+    subgraph Processing
+        state_loading(["loading\nLoading source file from disk"])
+        state_parsing(["parsing\nParsing Python source into AST"])
+        state_detecting(["detecting\nDetecting state machine patterns in code"])
+        state_extracting_states(["extracting_states\nExtracting state definitions from code"])
+        state_extracting_transitions(["extracting_transitions\nExtracting state transitions from method"])
+        state_extracting_gates(["extracting_gates\nExtracting gate conditions from if state"])
+        state_extracting_actions(["extracting_actions\nExtracting actions from side effects"])
+        state_analyzing_events(["analyzing_events\nAnalyzing event handler patterns"])
+        state_inferring_entry(["inferring_entry\nInferring entry and terminal states"])
+        state_generating(["generating\nGenerating L++ blueprint"])
+        state_mapping(["mapping\nGenerating source-to-blueprint mapping"])
+    end
+        state_complete(["complete\nExtraction complete, blueprint ready"])
+        state_error[["error\nExtraction failed"]]:::errorState
+
+    %% Transitions
+    act_t0s0[["setMode"]]:::action
+    state_idle -- "SET_MODE" --> act_t0s0
+    act_t0s0 --> state_idle
+    gate_t1s0{{"filePath is not None and le...?"}}:::gate
+    state_idle -- "EXTRACT" --> gate_t1s0
+    act_t1s0[["loadSource"]]:::action
+    gate_t1s0 -- ✓ --> act_t1s0
+    act_t1s0 --> state_loading
+    gate_t2s0{{"error is not None and len(e...?"}}:::gate
+    state_loading -- "AUTO" --> gate_t2s0
+    gate_t2s0 -- ✓ --> state_error
+    gate_t3s0{{"sourceCode is not None and ... && error is None or len(error)...?"}}:::gate
+    state_loading -- "AUTO" --> gate_t3s0
+    act_t3s0[["parseAst"]]:::action
+    gate_t3s0 -- ✓ --> act_t3s0
+    act_t3s0 --> state_parsing
+    gate_t4s0{{"error is not None and len(e...?"}}:::gate
+    state_parsing -- "AUTO" --> gate_t4s0
+    gate_t4s0 -- ✓ --> state_error
+    gate_t5s0{{"ast is not None && error is None or len(error)...?"}}:::gate
+    state_parsing -- "AUTO" --> gate_t5s0
+    act_t5s0[["findStatePatterns"]]:::action
+    gate_t5s0 -- ✓ --> act_t5s0
+    act_t5s0 --> state_detecting
+    gate_t6s0{{"patterns is not None?"}}:::gate
+    state_detecting -- "AUTO" --> gate_t6s0
+    act_t6s0[["extractStates"]]:::action
+    gate_t6s0 -- ✓ --> act_t6s0
+    act_t6s0 --> state_extracting_states
+    gate_t7s0{{"extractedStates is not None...?"}}:::gate
+    state_extracting_states -- "AUTO" --> gate_t7s0
+    act_t7s0[["extractTransitions"]]:::action
+    gate_t7s0 -- ✓ --> act_t7s0
+    act_t7s0 --> state_extracting_transitions
+    gate_t8s0{{"extractedTransitions is not...?"}}:::gate
+    state_extracting_transitions -- "AUTO" --> gate_t8s0
+    act_t8s0[["extractGates"]]:::action
+    gate_t8s0 -- ✓ --> act_t8s0
+    act_t8s0 --> state_extracting_gates
+    gate_t9s0{{"extractedGates is not None?"}}:::gate
+    state_extracting_gates -- "AUTO" --> gate_t9s0
+    act_t9s0[["extractActions"]]:::action
+    gate_t9s0 -- ✓ --> act_t9s0
+    act_t9s0 --> state_extracting_actions
+    gate_t10s0{{"extractedActions is not None?"}}:::gate
+    state_extracting_actions -- "AUTO" --> gate_t10s0
+    act_t10s0[["analyzeEventHandlers"]]:::action
+    gate_t10s0 -- ✓ --> act_t10s0
+    act_t10s0 --> state_analyzing_events
+    gate_t11s0{{"extractedEvents is not None?"}}:::gate
+    state_analyzing_events -- "AUTO" --> gate_t11s0
+    act_t11s0[["inferEntryState"]]:::action
+    gate_t11s0 -- ✓ --> act_t11s0
+    act_t11s0 --> state_inferring_entry
+    gate_t12s0{{"entryState is not None?"}}:::gate
+    state_inferring_entry -- "AUTO" --> gate_t12s0
+    act_t12s0[["generateBlueprint"]]:::action
+    gate_t12s0 -- ✓ --> act_t12s0
+    act_t12s0 --> state_generating
+    gate_t13s0{{"blueprint is not None?"}}:::gate
+    state_generating -- "AUTO" --> gate_t13s0
+    act_t13s0[["generateMapping"]]:::action
+    gate_t13s0 -- ✓ --> act_t13s0
+    act_t13s0 --> state_mapping
+    gate_t14s0{{"sourceMapping is not None?"}}:::gate
+    state_mapping -- "AUTO" --> gate_t14s0
+    gate_t14s0 -- ✓ --> state_complete
+    gate_t15s0{{"blueprint is not None?"}}:::gate
+    state_complete -- "EXPORT_BLUEPRINT" --> gate_t15s0
+    act_t15s0[["exportBlueprint"]]:::action
+    gate_t15s0 -- ✓ --> act_t15s0
+    act_t15s0 --> state_complete
+    act_t16s0[["exportReport"]]:::action
+    state_complete -- "EXPORT_REPORT" --> act_t16s0
+    act_t16s0 --> state_complete
+    act_t17s0[["clearState"]]:::action
+    state_complete -- "RESET" --> act_t17s0
+    act_t17s0 --> state_idle
+    act_t18s0[["clearError, clearState"]]:::action
+    state_error -- "RESET" --> act_t18s0
+    act_t18s0 --> state_idle
+
+    %% Styling
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+        </pre>
+    </div>
+</div>
+<script>
+mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel: 'loose' });
+
+let scale = 1;
+let translateX = 50;
+let translateY = 50;
+let isDragging = false;
+let startX, startY;
+
+const container = document.getElementById('container');
+const diagram = document.getElementById('diagram');
+
+function updateTransform() {
+    diagram.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    document.getElementById('zoom-level').textContent = Math.round(scale * 100) + '%';
+}
+
+function zoomIn() {
+    scale = Math.min(scale * 1.2, 5);
+    updateTransform();
+}
+
+function zoomOut() {
+    scale = Math.max(scale / 1.2, 0.1);
+    updateTransform();
+}
+
+function resetView() {
+    scale = 1;
+    translateX = 50;
+    translateY = 50;
+    updateTransform();
+}
+
+function fitToScreen() {
+    const svg = diagram.querySelector('svg');
+    if (!svg) return;
+    const svgRect = svg.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const scaleX = (containerRect.width - 100) / svgRect.width * scale;
+    const scaleY = (containerRect.height - 100) / svgRect.height * scale;
+    scale = Math.min(scaleX, scaleY, 1.5);
+    translateX = 50;
+    translateY = 50;
+    updateTransform();
+}
+
+// Mouse wheel zoom
+container.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const rect = container.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const prevScale = scale;
+    if (e.deltaY < 0) scale = Math.min(scale * 1.1, 5);
+    else scale = Math.max(scale / 1.1, 0.1);
+
+    // Zoom toward mouse position
+    translateX = mouseX - (mouseX - translateX) * (scale / prevScale);
+    translateY = mouseY - (mouseY - translateY) * (scale / prevScale);
+    updateTransform();
+});
+
+// Pan with mouse drag
+container.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startX = e.clientX - translateX;
+    startY = e.clientY - translateY;
+    diagram.style.cursor = 'grabbing';
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    translateX = e.clientX - startX;
+    translateY = e.clientY - startY;
+    updateTransform();
+});
+
+document.addEventListener('mouseup', () => {
+    isDragging = false;
+    diagram.style.cursor = 'grab';
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (e.key === '+' || e.key === '=') zoomIn();
+    else if (e.key === '-') zoomOut();
+    else if (e.key === '0') resetView();
+    else if (e.key === 'f') fitToScreen();
+});
+
+// Initial fit after render
+setTimeout(fitToScreen, 500);
+</script>
+</body>
+</html>

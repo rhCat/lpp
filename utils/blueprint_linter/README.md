@@ -64,28 +64,35 @@ python interactive.py
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: L++ Blueprint Linter
     [*] --> idle
-
-    idle --> loaded : LOAD
+    idle --> loaded : LOAD [blueprint is None]
     idle --> error : LOAD_FAILED
-    idle --> idle : CONFIGURE
-
     loaded --> loaded : LOAD
-    loaded --> loaded : CONFIGURE
-    loaded --> linting : LINT
-    loaded --> complete : LINT_ALL
-    loaded --> idle : UNLOAD
-
-    linting --> linting : CHECK_*
-    linting --> complete : FINALIZE
-
     complete --> loaded : LOAD
-    complete --> complete : LINT_ALL
+    loaded --> linting : LINT [blueprint is not None]
+    linting --> linting : CHECK_UNREACHABLE
+    linting --> linting : CHECK_DEAD_END
+    linting --> linting : CHECK_UNUSED_GATES
+    linting --> linting : CHECK_UNUSED_ACTIONS
+    linting --> linting : CHECK_UNUSED_CONTEXT
+    linting --> linting : CHECK_ORPHANED
+    linting --> linting : CHECK_GATE_REFS
+    linting --> linting : CHECK_ACTION_REFS
+    linting --> linting : CHECK_DUPLICATES
+    linting --> linting : CHECK_NAMING
+    linting --> complete : FINALIZE
+    loaded --> complete : LINT_ALL [blueprint is not None]
+    complete --> complete : LINT_ALL [blueprint is not None]
     complete --> loaded : BACK
+    loaded --> idle : UNLOAD
     complete --> idle : UNLOAD
-
+    idle --> idle : CONFIGURE
+    loaded --> loaded : CONFIGURE
     error --> idle : CLEAR
 ```
+> **Interactive View:** [Open zoomable diagram](results/blueprint_linter_diagram.html) for pan/zoom controls
+
 
 ## Architecture
 

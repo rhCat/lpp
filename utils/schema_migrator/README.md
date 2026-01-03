@@ -19,45 +19,40 @@ The Schema Migrator provides automated migration of L++ blueprints when the sche
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: L++ Schema Migrator
     [*] --> idle
-
-    idle --> loaded : LOAD
+    idle --> loaded : LOAD [blueprint is None]
     idle --> error : LOAD_FAILED
-    idle --> batch_mode : BATCH
-
-    loaded --> loaded : LOAD (reload)
-    loaded --> planning : SET_TARGET
-    loaded --> planning : MIGRATE_LATEST
-    loaded --> planned : PLAN_TO
-    loaded --> planned : PLAN_LATEST
-    loaded --> complete : MIGRATE_ALL
-    loaded --> complete : PREVIEW_ALL
-    loaded --> idle : UNLOAD
-
+    loaded --> loaded : LOAD
+    complete --> loaded : LOAD
+    loaded --> planning : SET_TARGET [blueprint is not None]
+    loaded --> planning : MIGRATE_LATEST [blueprint is not None]
     planning --> planned : PLAN
-
-    planned --> complete : DRY_RUN
-    planned --> migrating : EXECUTE
-    planned --> loaded : BACK
-    planned --> planning : REPLAN
-    planned --> idle : UNLOAD
-
-    migrating --> validating : VALIDATE
-    migrating --> validating : AUTO_CONTINUE
-
-    validating --> complete : FINALIZE
+    loaded --> planned : PLAN_TO [blueprint is not None]
+    loaded --> planned : PLAN_LATEST [blueprint is not None]
+    planned --> complete : DRY_RUN [migration_plan is not None ...]
+    planned --> migrating : EXECUTE [migration_plan is not None ...]
+    migrating --> validating : VALIDATE [migrated_blueprint is not None]
+    migrating --> validating : AUTO_CONTINUE [migrated_blueprint is not None]
+    validating --> complete : FINALIZE [validation_result is not No...]
     validating --> complete : FORCE_FINALIZE
-
-    complete --> complete : EXPORT
-    complete --> loaded : LOAD (reload)
+    loaded --> complete : MIGRATE_ALL [blueprint is not None]
+    loaded --> complete : PREVIEW_ALL [blueprint is not None]
+    complete --> complete : EXPORT [migrated_blueprint is not None]
+    idle --> batch_mode : BATCH
+    idle --> batch_mode : BATCH_TO
+    batch_mode --> complete : RUN_BATCH [batch_paths is not None and...]
+    planned --> loaded : BACK
     complete --> loaded : BACK
+    planned --> planning : REPLAN
+    loaded --> idle : UNLOAD
     complete --> idle : UNLOAD
-
-    batch_mode --> complete : RUN_BATCH
-
+    planned --> idle : UNLOAD
     error --> idle : CLEAR
-    error --> loaded : RETRY
+    error --> loaded : RETRY [blueprint is not None]
 ```
+> **Interactive View:** [Open zoomable diagram](results/schema_migrator_diagram.html) for pan/zoom controls
+
 
 ## Quick Start
 

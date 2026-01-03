@@ -1,92 +1,101 @@
 flowchart TD
-    %% L++ Logic CAD Export
-    state_idle(["<b>idle</b><br/>No blueprint loaded, waiting for input"]):::entry
-    state_error(["<b>error</b><br/>Error state"])
-    state_loaded(["<b>loaded</b><br/>Blueprint loaded, ready to visualize"])
-    state_viewing(["<b>viewing</b><br/>Actively viewing/exploring the blueprint"])
-    act_t_0_0[["load_blueprint, init_defaults"]]
-    state_idle -- "LOAD" --> act_t_0_0
-    act_t_0_0 --> state_loaded
-    act_t_1_0[["set_error"]]
-    state_idle -- "LOAD_FAILED" --> act_t_1_0
-    act_t_1_0 --> state_error
-    act_t_2_0[["load_blueprint"]]
-    state_loaded -- "LOAD" --> act_t_2_0
-    act_t_2_0 --> state_loaded
-    act_t_3_0[["load_blueprint, clear_selection"]]
-    state_viewing -- "LOAD" --> act_t_3_0
-    act_t_3_0 --> state_loaded
-    act_t_4_0[["render_graph"]]
-    state_loaded -- "VIEW" --> act_t_4_0
-    act_t_4_0 --> state_viewing
-    act_t_5_0[["set_view_graph, render_graph"]]
-    state_viewing -- "VIEW_GRAPH" --> act_t_5_0
-    act_t_5_0 --> state_viewing
-    act_t_6_0[["set_view_table, render_table"]]
-    state_viewing -- "VIEW_TABLE" --> act_t_6_0
-    act_t_6_0 --> state_viewing
-    act_t_7_0[["set_view_mermaid, render_mermaid"]]
-    state_viewing -- "VIEW_MERMAID" --> act_t_7_0
-    act_t_7_0 --> state_viewing
-    act_t_8_0[["select_node"]]
-    state_viewing -- "SELECT" --> act_t_8_0
-    act_t_8_0 --> state_viewing
-    act_t_9_0[["clear_selection"]]
-    state_viewing -- "DESELECT" --> act_t_9_0
-    act_t_9_0 --> state_viewing
-    act_t_10_0[["zoom_in"]]
-    state_viewing -- "ZOOM_IN" --> act_t_10_0
-    act_t_10_0 --> state_viewing
-    act_t_11_0[["zoom_out"]]
-    state_viewing -- "ZOOM_OUT" --> act_t_11_0
-    act_t_11_0 --> state_viewing
-    act_t_12_0[["toggle_gates"]]
-    state_viewing -- "TOGGLE_GATES" --> act_t_12_0
-    act_t_12_0 --> state_viewing
-    act_t_13_0[["toggle_actions"]]
-    state_viewing -- "TOGGLE_ACTIONS" --> act_t_13_0
-    act_t_13_0 --> state_viewing
-    act_t_14_0[["clear_selection"]]
-    state_viewing -- "BACK" --> act_t_14_0
-    act_t_14_0 --> state_loaded
-    act_t_15_0[["unload_blueprint"]]
-    state_loaded -- "UNLOAD" --> act_t_15_0
-    act_t_15_0 --> state_idle
-    act_t_16_0[["unload_blueprint, clear_selection"]]
-    state_viewing -- "UNLOAD" --> act_t_16_0
-    act_t_16_0 --> state_idle
-    act_t_17_0[["generate_readme, write_readme"]]
-    state_loaded -- "EXPORT_README" --> act_t_17_0
-    act_t_17_0 --> state_loaded
-    act_t_18_0[["generate_readme, write_readme"]]
-    state_viewing -- "EXPORT_README" --> act_t_18_0
-    act_t_18_0 --> state_viewing
-    act_t_19_0[["clear_error"]]
-    state_error -- "CLEAR" --> act_t_19_0
-    act_t_19_0 --> state_idle
-    act_t_20_0[["load_tree, init_defaults"]]
-    state_idle -- "LOAD_TREE" --> act_t_20_0
-    act_t_20_0 --> state_loaded
-    act_t_21_0[["set_tree"]]
-    state_loaded -- "SET_TREE" --> act_t_21_0
-    act_t_21_0 --> state_loaded
-    gate_t_22_0{{"has_tree?"}}
-    state_loaded -- "VIEW_TREE" --> gate_t_22_0
-    act_t_22_0[["set_view_tree, render_tree"]]
-    gate_t_22_0 -- True --> act_t_22_0
-    act_t_22_0 --> state_viewing
-    gate_t_23_0{{"has_tree?"}}
-    state_viewing -- "VIEW_TREE" --> gate_t_23_0
-    act_t_23_0[["set_view_tree, render_tree"]]
-    gate_t_23_0 -- True --> act_t_23_0
-    act_t_23_0 --> state_viewing
-    gate_t_24_0{{"has_tree?"}}
-    state_viewing -- "VIEW_TREE_MERMAID" --> gate_t_24_0
-    act_t_24_0[["set_view_tree_mermaid, render_tree_mermaid"]]
-    gate_t_24_0 -- True --> act_t_24_0
-    act_t_24_0 --> state_viewing
-    act_t_25_0[["unload_tree"]]
-    state_viewing -- "UNLOAD_TREE" --> act_t_25_0
-    act_t_25_0 --> state_loaded
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
-    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px
+    %% L++ Logic CAD: L++ Blueprint Visualizer
+        state_idle(["idle\nNo blueprint loaded, waiting for input"]):::entry
+    subgraph Processing
+        state_loaded(["loaded\nBlueprint loaded, ready to visualize"])
+        state_viewing(["viewing\nActively viewing/exploring the blueprint"])
+    end
+        state_error[["error\nError state"]]:::errorState
+
+    %% Transitions
+    act_t0s0[["load_blueprint, init_defaults"]]:::action
+    state_idle -- "LOAD" --> act_t0s0
+    act_t0s0 --> state_loaded
+    act_t1s0[["set_error"]]:::action
+    state_idle -- "LOAD_FAILED" --> act_t1s0
+    act_t1s0 --> state_error
+    act_t2s0[["load_blueprint"]]:::action
+    state_loaded -- "LOAD" --> act_t2s0
+    act_t2s0 --> state_loaded
+    act_t3s0[["load_blueprint, clear_selection"]]:::action
+    state_viewing -- "LOAD" --> act_t3s0
+    act_t3s0 --> state_loaded
+    act_t4s0[["render_graph"]]:::action
+    state_loaded -- "VIEW" --> act_t4s0
+    act_t4s0 --> state_viewing
+    act_t5s0[["set_view_graph, render_graph"]]:::action
+    state_viewing -- "VIEW_GRAPH" --> act_t5s0
+    act_t5s0 --> state_viewing
+    act_t6s0[["set_view_table, render_table"]]:::action
+    state_viewing -- "VIEW_TABLE" --> act_t6s0
+    act_t6s0 --> state_viewing
+    act_t7s0[["set_view_mermaid, render_mermaid"]]:::action
+    state_viewing -- "VIEW_MERMAID" --> act_t7s0
+    act_t7s0 --> state_viewing
+    act_t8s0[["select_node"]]:::action
+    state_viewing -- "SELECT" --> act_t8s0
+    act_t8s0 --> state_viewing
+    act_t9s0[["clear_selection"]]:::action
+    state_viewing -- "DESELECT" --> act_t9s0
+    act_t9s0 --> state_viewing
+    act_t10s0[["zoom_in"]]:::action
+    state_viewing -- "ZOOM_IN" --> act_t10s0
+    act_t10s0 --> state_viewing
+    act_t11s0[["zoom_out"]]:::action
+    state_viewing -- "ZOOM_OUT" --> act_t11s0
+    act_t11s0 --> state_viewing
+    act_t12s0[["toggle_gates"]]:::action
+    state_viewing -- "TOGGLE_GATES" --> act_t12s0
+    act_t12s0 --> state_viewing
+    act_t13s0[["toggle_actions"]]:::action
+    state_viewing -- "TOGGLE_ACTIONS" --> act_t13s0
+    act_t13s0 --> state_viewing
+    act_t14s0[["clear_selection"]]:::action
+    state_viewing -- "BACK" --> act_t14s0
+    act_t14s0 --> state_loaded
+    act_t15s0[["unload_blueprint"]]:::action
+    state_loaded -- "UNLOAD" --> act_t15s0
+    act_t15s0 --> state_idle
+    act_t16s0[["unload_blueprint, clear_selection"]]:::action
+    state_viewing -- "UNLOAD" --> act_t16s0
+    act_t16s0 --> state_idle
+    act_t17s0[["generate_readme, write_readme"]]:::action
+    state_loaded -- "EXPORT_README" --> act_t17s0
+    act_t17s0 --> state_loaded
+    act_t18s0[["generate_readme, write_readme"]]:::action
+    state_viewing -- "EXPORT_README" --> act_t18s0
+    act_t18s0 --> state_viewing
+    act_t19s0[["clear_error"]]:::action
+    state_error -- "CLEAR" --> act_t19s0
+    act_t19s0 --> state_idle
+    act_t20s0[["load_tree, init_defaults"]]:::action
+    state_idle -- "LOAD_TREE" --> act_t20s0
+    act_t20s0 --> state_loaded
+    act_t21s0[["set_tree"]]:::action
+    state_loaded -- "SET_TREE" --> act_t21s0
+    act_t21s0 --> state_loaded
+    gate_t22s0{{"tree is not None?"}}:::gate
+    state_loaded -- "VIEW_TREE" --> gate_t22s0
+    act_t22s0[["set_view_tree, render_tree"]]:::action
+    gate_t22s0 -- ✓ --> act_t22s0
+    act_t22s0 --> state_viewing
+    gate_t23s0{{"tree is not None?"}}:::gate
+    state_viewing -- "VIEW_TREE" --> gate_t23s0
+    act_t23s0[["set_view_tree, render_tree"]]:::action
+    gate_t23s0 -- ✓ --> act_t23s0
+    act_t23s0 --> state_viewing
+    gate_t24s0{{"tree is not None?"}}:::gate
+    state_viewing -- "VIEW_TREE_MERMAID" --> gate_t24s0
+    act_t24s0[["set_view_tree_mermaid, render_tree_mermaid"]]:::action
+    gate_t24s0 -- ✓ --> act_t24s0
+    act_t24s0 --> state_viewing
+    act_t25s0[["unload_tree"]]:::action
+    state_viewing -- "UNLOAD_TREE" --> act_t25s0
+    act_t25s0 --> state_loaded
+
+    %% Styling
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px

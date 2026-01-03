@@ -71,65 +71,233 @@ class LppVisualizer:
     # MERMAID LOGIC (The "Logic CAD" View)
     # =========================================================================
 
+    def _get_gate_expression(self, gate_id: str) -> str:
+        """Get the actual gate expression for display."""
+        gate = self.gates.get(gate_id, {})
+        if isinstance(gate, dict):
+            expr = gate.get("expression", gate.get("condition", ""))
+            if expr:
+                # Truncate long expressions
+                if len(expr) > 30:
+                    return expr[:27] + "..."
+                return expr
+        return gate_id
+
+    def _classify_transition(self, t: Dict) -> str:
+        """Classify transition type for styling."""
+        to_state = t.get("to", "")
+        event = t.get("on_event", "").upper()
+
+        if to_state == "error" or "ERROR" in event:
+            return "error"
+        if to_state == "idle" or "RESET" in event:
+            return "reset"
+        if to_state in self.terminal:
+            return "terminal"
+        return "normal"
+
+    def _group_states_by_phase(self) -> Dict[str, List[str]]:
+        """Group states into workflow phases based on naming patterns."""
+        phases = {
+            "init": [],
+            "validate": [],
+            "process": [],
+            "complete": [],
+            "error": []
+        }
+
+        for s_id in self.sorted_state_ids:
+            s_lower = s_id.lower()
+            if s_id == self.entry or "init" in s_lower or "start" in s_lower:
+                phases["init"].append(s_id)
+            elif "valid" in s_lower or "check" in s_lower or "verify" in s_lower:
+                phases["validate"].append(s_id)
+            elif "error" in s_lower or "fail" in s_lower:
+                phases["error"].append(s_id)
+            elif s_id in self.terminal or "complete" in s_lower or "done" in s_lower:
+                phases["complete"].append(s_id)
+            else:
+                phases["process"].append(s_id)
+
+        # Remove empty phases
+        return {k: v for k, v in phases.items() if v}
+
     def as_mermaid_logic(self) -> str:
         """
         Generates a Logic-First flowchart with
         Diamonds (Gates) and Rects (Actions).
+        Enhanced with gate expressions and transition styling.
         """
-        lines = ["flowchart TD", "    %% L++ Logic CAD Export"]
+        lines = ["flowchart TD", f"    %% L++ Logic CAD: {self.name}"]
 
-        # Define States
-        for s_id in self.sorted_state_ids:
-            desc = self.states.get(s_id, {}).get("description", "")
-            label = f"<b>{s_id}</b><br/>{desc}" if desc else s_id
-            shape = f'state_{s_id}(["{label}"])'
-            if s_id == self.entry:
-                shape += ":::entry"
-            if s_id in self.terminal:
-                shape += ":::terminal"
-            lines.append(f"    {shape}")
+        # Group states into phases
+        phases = self._group_states_by_phase()
 
-        # Define Transitions
+        # Define States with subgraph grouping
+        phase_labels = {
+            "init": "Initialization",
+            "validate": "Validation",
+            "process": "Processing",
+            "complete": "Completion",
+            "error": "Error Handling"
+        }
+
+        for phase, state_ids in phases.items():
+            if len(state_ids) > 1 and phase != "error":
+                lines.append(f"    subgraph {phase_labels.get(phase, phase)}")
+
+            for s_id in state_ids:
+                state_info = self.states.get(s_id, {})
+                desc = state_info.get("description", "") if isinstance(state_info, dict) else ""
+                # Escape quotes and truncate description
+                if desc:
+                    desc = desc.replace('"', "'")[:40]
+                    label = f"{s_id}\\n{desc}"
+                else:
+                    label = s_id
+
+                # Different shapes for different state types
+                if s_id == self.entry:
+                    shape = f'state_{s_id}(["{label}"]):::entry'
+                elif s_id in self.terminal:
+                    shape = f'state_{s_id}[["{label}"]]:::terminal'
+                elif "error" in s_id.lower():
+                    shape = f'state_{s_id}[["{label}"]]:::errorState'
+                else:
+                    shape = f'state_{s_id}(["{label}"])'
+                lines.append(f"        {shape}")
+
+            if len(state_ids) > 1 and phase != "error":
+                lines.append("    end")
+
+        lines.append("")
+        lines.append("    %% Transitions")
+
+        # Track which transitions to skip (wildcards expanded)
+        seen_transitions = set()
+
+        # Define Transitions with enhanced gate display
         for i, t in enumerate(self.transitions):
-            f, to, event = t.get("from"), t.get("to"), t.get("on_event", "ANY")
+            f, to = t.get("from"), t.get("to")
+            event = t.get("on_event", "ANY")
             gate_ids = t.get("gates", [])
             action_ids = t.get("actions", [])
+            trans_type = self._classify_transition(t)
 
-            sources = self.sorted_state_ids if f == "*" else [f]
+            # Skip invalid targets
+            if to not in self.states:
+                continue
+
+            # Handle wildcard source
+            if f == "*":
+                sources = [s for s in self.sorted_state_ids
+                           if s != to and s not in self.terminal]
+            elif f in self.states:
+                sources = [f]
+            else:
+                continue
 
             for s_idx, src in enumerate(sources):
-                path_id = f"t_{i}_{s_idx}"
+                # Deduplicate transitions
+                trans_key = f"{src}->{to}:{event}"
+                if trans_key in seen_transitions:
+                    continue
+                seen_transitions.add(trans_key)
+
+                path_id = f"t{i}s{s_idx}"
                 curr = f"state_{src}"
 
-                # 1. Evaluate (Gate)
+                # Build link style based on transition type
+                if trans_type == "error":
+                    link_style = "stroke:#ff6b6b,stroke-width:2px"
+                    arrow_class = ":::errorLink"
+                elif trans_type == "reset":
+                    link_style = "stroke:#ffaa00,stroke-dasharray:5"
+                    arrow_class = ":::resetLink"
+                else:
+                    link_style = ""
+                    arrow_class = ""
+
+                # 1. Evaluate (Gate) - Show actual expression
                 if gate_ids:
                     g_node = f"gate_{path_id}"
-                    gate_label = ", ".join(gate_ids)
-                    lines.append(f'    {g_node}{{{{"{gate_label}?"}}}}')
+                    # Get actual gate expressions
+                    gate_exprs = [self._get_gate_expression(g) for g in gate_ids]
+                    gate_label = " && ".join(gate_exprs)
+                    # Escape for mermaid
+                    gate_label = gate_label.replace('"', "'")
+                    lines.append(f'    {g_node}{{{{"{gate_label}?"}}}}:::gate')
                     lines.append(f'    {curr} -- "{event}" --> {g_node}')
                     curr = g_node
-                    link = " -- True --> "
+                    link = " -- ✓ --> "
                 else:
                     link = f' -- "{event}" --> '
 
                 # 2. Dispatch/Mutate (Actions)
                 if action_ids:
                     a_node = f"act_{path_id}"
-                    action_label = ", ".join(action_ids)
-                    lines.append(f'    {a_node}[["{action_label}"]]')
+                    action_label = ", ".join(action_ids[:3])  # Limit display
+                    if len(action_ids) > 3:
+                        action_label += f" +{len(action_ids)-3}"
+                    lines.append(f'    {a_node}[["{action_label}"]]:::action')
                     lines.append(f'    {curr}{link}{a_node}')
                     curr = a_node
                     link = " --> "
 
-                # 3. Transition
+                # 3. Transition to target
                 lines.append(f"    {curr}{link}state_{to}")
 
-        # Styling
-        lines.append(
-            "    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px")
-        lines.append(
-            "    classDef terminal fill:"
-            "#eceff1,stroke:#263238,stroke-width:4px")
+        lines.append("")
+        lines.append("    %% Styling")
+        # State styles
+        lines.append("    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px")
+        lines.append("    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px")
+        lines.append("    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px")
+        # Gate and action styles
+        lines.append("    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px")
+        lines.append("    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px")
+        # Link styles (note: linkStyle requires indices, using class instead)
+
+        return "\n".join(lines)
+
+    def as_mermaid_simple(self) -> str:
+        """
+        Generates a simplified state diagram without intermediate nodes.
+        Good for high-level overview.
+        """
+        lines = ["stateDiagram-v2", f"    %% L++ State Diagram: {self.name}"]
+
+        # Entry point
+        if self.entry:
+            lines.append(f"    [*] --> {self.entry}")
+
+        # Transitions with gate conditions as notes
+        for t in self.transitions:
+            f, to = t.get("from"), t.get("to")
+            event = t.get("on_event", "")
+            gate_ids = t.get("gates", [])
+
+            if to not in self.states:
+                continue
+
+            sources = [s for s in self.sorted_state_ids if s != to] if f == "*" else [f]
+
+            for src in sources:
+                if src not in self.states:
+                    continue
+
+                label = event
+                if gate_ids:
+                    gate_exprs = [self._get_gate_expression(g) for g in gate_ids]
+                    label += f" [{' && '.join(gate_exprs)}]"
+
+                lines.append(f"    {src} --> {to} : {label}")
+
+        # Terminal states
+        for term in self.terminal:
+            if term in self.states:
+                lines.append(f"    {term} --> [*]")
+
         return "\n".join(lines)
 
     # =========================================================================
@@ -204,7 +372,9 @@ def main():
     parser = argparse.ArgumentParser(description="L++ Blueprint Visualizer")
     parser.add_argument("file", help="Path to JSON blueprint")
     parser.add_argument(
-        "-f", "--format", choices=["ascii", "mermaid", "dot"], default="ascii")
+        "-f", "--format",
+        choices=["ascii", "mermaid", "mermaid-simple", "dot"],
+        default="ascii")
     parser.add_argument("-o", "--output", help="Output file path")
 
     args = parser.parse_args()
@@ -219,6 +389,8 @@ def main():
             result = viz.as_ascii()
         elif args.format == "mermaid":
             result = viz.as_mermaid_logic()
+        elif args.format == "mermaid-simple":
+            result = viz.as_mermaid_simple()
         else:
             result = viz.as_dot()
 

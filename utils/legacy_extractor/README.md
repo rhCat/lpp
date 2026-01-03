@@ -13,43 +13,30 @@ The Legacy Extractor analyzes Python source code to identify state machine patte
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: Legacy Code State Machine Extractor
     [*] --> idle
-
-    idle: Awaiting source file
-    loading: Loading source file
-    parsing: Parsing AST
-    detecting: Detecting patterns
-    extracting_states: Extracting states
-    extracting_transitions: Extracting transitions
-    extracting_gates: Extracting gates
-    extracting_actions: Extracting actions
-    analyzing_events: Analyzing events
-    inferring_entry: Inferring entry state
-    generating: Generating blueprint
-    mapping: Generating mapping
-    complete: Extraction complete
-    error: Error state
-
-    idle --> idle: SET_MODE
-    idle --> loading: EXTRACT [hasFilePath]
-    loading --> error: AUTO [hasError]
-    loading --> parsing: AUTO [hasSourceCode]
-    parsing --> error: AUTO [hasError]
-    parsing --> detecting: AUTO [hasAst]
-    detecting --> extracting_states: AUTO [hasPatterns]
-    extracting_states --> extracting_transitions: AUTO [hasStates]
-    extracting_transitions --> extracting_gates: AUTO [hasTransitions]
-    extracting_gates --> extracting_actions: AUTO [hasGates]
-    extracting_actions --> analyzing_events: AUTO [hasActions]
-    analyzing_events --> inferring_entry: AUTO [hasEvents]
-    inferring_entry --> generating: AUTO [hasEntryState]
-    generating --> mapping: AUTO [hasBlueprint]
-    mapping --> complete: AUTO [hasMapping]
-    complete --> complete: EXPORT_BLUEPRINT
-    complete --> complete: EXPORT_REPORT
-    complete --> idle: RESET
-    error --> idle: RESET
+    idle --> idle : SET_MODE
+    idle --> loading : EXTRACT [filePath is not None and le...]
+    loading --> error : AUTO [error is not None and len(e...]
+    loading --> parsing : AUTO [sourceCode is not None and ... && error is None or len(error)...]
+    parsing --> error : AUTO [error is not None and len(e...]
+    parsing --> detecting : AUTO [ast is not None && error is None or len(error)...]
+    detecting --> extracting_states : AUTO [patterns is not None]
+    extracting_states --> extracting_transitions : AUTO [extractedStates is not None...]
+    extracting_transitions --> extracting_gates : AUTO [extractedTransitions is not...]
+    extracting_gates --> extracting_actions : AUTO [extractedGates is not None]
+    extracting_actions --> analyzing_events : AUTO [extractedActions is not None]
+    analyzing_events --> inferring_entry : AUTO [extractedEvents is not None]
+    inferring_entry --> generating : AUTO [entryState is not None]
+    generating --> mapping : AUTO [blueprint is not None]
+    mapping --> complete : AUTO [sourceMapping is not None]
+    complete --> complete : EXPORT_BLUEPRINT [blueprint is not None]
+    complete --> complete : EXPORT_REPORT
+    complete --> idle : RESET
+    error --> idle : RESET
 ```
+> **Interactive View:** [Open zoomable diagram](results/legacy_extractor_diagram.html) for pan/zoom controls
+
 
 ## Features
 

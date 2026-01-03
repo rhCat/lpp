@@ -1,15 +1,22 @@
 flowchart TD
-    %% L++ Logic CAD Export
-    state_idle(["<b>idle</b><br/>Waiting for blueprint input"]):::entry
-    state_generating(["<b>generating</b><br/>Generating interactive diagram"])
-    state_done(["<b>done</b><br/>Diagram generation complete"]):::terminal
-    gate_t_0_0{{"has_blueprint?"}}
-    state_idle -- "start" --> gate_t_0_0
-    act_t_0_0[["set_html_path"]]
-    gate_t_0_0 -- True --> act_t_0_0
-    act_t_0_0 --> state_generating
-    act_t_1_0[["generate_diagram"]]
-    state_generating -- "generate" --> act_t_1_0
-    act_t_1_0 --> state_done
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
-    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px
+    %% L++ Logic CAD: Graph Visualizer
+        state_idle(["idle\nWaiting for blueprint input"]):::entry
+        state_generating(["generating\nGenerating interactive diagram"])
+        state_done[["done\nDiagram generation complete"]]:::terminal
+
+    %% Transitions
+    gate_t0s0{{"has_blueprint == True?"}}:::gate
+    state_idle -- "start" --> gate_t0s0
+    act_t0s0[["set_html_path"]]:::action
+    gate_t0s0 -- ✓ --> act_t0s0
+    act_t0s0 --> state_generating
+    act_t1s0[["generate_diagram"]]:::action
+    state_generating -- "generate" --> act_t1s0
+    act_t1s0 --> state_done
+
+    %% Styling
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px

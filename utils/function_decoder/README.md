@@ -122,32 +122,26 @@ Features:
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: Python Function Decoder
     [*] --> idle
-
-    idle: idle
-    parsing: parsing
-    extracting: extracting
-    tracing: tracing
-    computing: computing
-    complete: complete
-    error: error
-
-    idle --> parsing: DECODE
-    parsing --> error: AUTO
-    parsing --> extracting: AUTO
-    extracting --> error: AUTO
-    extracting --> tracing: AUTO
-    tracing --> error: AUTO
-    tracing --> computing: AUTO
-    computing --> error: AUTO
-    computing --> complete: AUTO
-    parsing --> idle: RESET
-    extracting --> idle: RESET
-    tracing --> idle: RESET
-    computing --> idle: RESET
-    complete --> idle: RESET
-    error --> idle: RESET
+    idle --> parsing : DECODE [filePath is not None and le...]
+    parsing --> error : AUTO [error is not None and len(e...]
+    parsing --> extracting : AUTO [ast is not None]
+    extracting --> error : AUTO [error is not None and len(e...]
+    extracting --> tracing : AUTO [exports is not None and imp...]
+    tracing --> error : AUTO [error is not None and len(e...]
+    tracing --> computing : AUTO [internalCalls is not None]
+    computing --> error : AUTO [error is not None and len(e...]
+    computing --> complete : AUTO
+    parsing --> idle : RESET
+    error --> idle : RESET
+    extracting --> idle : RESET
+    tracing --> idle : RESET
+    computing --> idle : RESET
+    complete --> idle : RESET
 ```
+> **Interactive View:** [Open zoomable diagram](results/function_decoder_diagram.html) for pan/zoom controls
+
 
 ## Files
 

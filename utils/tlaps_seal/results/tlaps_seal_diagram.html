@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>TLAPS Seal Certifier - State Diagram</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #1a1a2e; color: #eee; }
+.header { background: #16213e; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 18px; color: #00d4ff; }
+.controls { display: flex; gap: 8px; }
+.controls button { background: #4a4a8a; color: #fff; border: none; padding: 8px 16px; cursor: pointer; border-radius: 4px; font-size: 12px; }
+.controls button:hover { background: #5a5a9a; }
+.zoom-info { color: #888; font-size: 12px; margin-left: 15px; }
+.container { position: relative; width: 100%; height: calc(100vh - 60px); overflow: hidden; background: #0f0f23; }
+#diagram { position: absolute; transform-origin: 0 0; cursor: grab; }
+#diagram:active { cursor: grabbing; }
+#diagram svg { max-width: none !important; }
+.mermaid { background: transparent; }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>TLAPS Seal Certifier</h1>
+    <div class="controls">
+        <button onclick="zoomIn()">Zoom In (+)</button>
+        <button onclick="zoomOut()">Zoom Out (-)</button>
+        <button onclick="resetView()">Reset View</button>
+        <button onclick="fitToScreen()">Fit to Screen</button>
+        <span class="zoom-info" id="zoom-level">100%</span>
+    </div>
+</div>
+<div class="container" id="container">
+    <div id="diagram">
+        <pre class="mermaid">
+flowchart TD
+    %% L++ Logic CAD: TLAPS Seal Certifier
+        state_idle(["idle\nReady to receive blueprint for certifica"]):::entry
+        state_tlc_verifying(["tlc_verifying\nRunning TLC model checker (empirical)"])
+    subgraph Processing
+        state_loading(["loading\nLoading and parsing blueprint"])
+        state_auditing(["auditing\nAuditing Trinity and Flange structure"])
+        state_generating_tla(["generating_tla\nGenerating TLA+ specification"])
+        state_tlc_verified(["tlc_verified\nTLC verification passed"])
+        state_tlaps_proving(["tlaps_proving\nRunning TLAPS theorem prover (axiomatic)"])
+    end
+    subgraph Completion
+        state_rejected[["rejected\nBlueprint failed verification"]]:::terminal
+        state_certified[["certified\nTLAPS certification complete - Seal gran"]]:::terminal
+    end
+        state_error[["error\nError during certification process"]]:::errorState
+
+    %% Transitions
+    act_t0s0[["setPath"]]:::action
+    state_idle -- "CERTIFY" --> act_t0s0
+    act_t0s0 --> state_loading
+    gate_t1s0{{"error is None?"}}:::gate
+    state_loading -- "AUTO" --> gate_t1s0
+    act_t1s0[["loadBlueprint"]]:::action
+    gate_t1s0 -- ✓ --> act_t1s0
+    act_t1s0 --> state_auditing
+    gate_t2s0{{"blueprint is not None && error is None?"}}:::gate
+    state_auditing -- "AUTO" --> gate_t2s0
+    act_t2s0[["auditTrinity, auditFlange"]]:::action
+    gate_t2s0 -- ✓ --> act_t2s0
+    act_t2s0 --> state_generating_tla
+    gate_t3s0{{"trinityAudit is not None an... && flangeAudit is not None and... && error is None?"}}:::gate
+    state_generating_tla -- "AUTO" --> gate_t3s0
+    act_t3s0[["generateTla"]]:::action
+    gate_t3s0 -- ✓ --> act_t3s0
+    act_t3s0 --> state_tlc_verifying
+    gate_t4s0{{"tlaSpec is not None && error is None?"}}:::gate
+    state_tlc_verifying -- "AUTO" --> gate_t4s0
+    act_t4s0[["runTlc"]]:::action
+    gate_t4s0 -- ✓ --> act_t4s0
+    act_t4s0 --> state_tlc_verified
+    gate_t5s0{{"tlcResult is not None and t...?"}}:::gate
+    state_tlc_verified -- "PROVE" --> gate_t5s0
+    gate_t5s0 -- ✓ --> state_tlaps_proving
+    gate_t6s0{{"error is None?"}}:::gate
+    state_tlaps_proving -- "AUTO" --> gate_t6s0
+    act_t6s0[["runTlaps, generateCertificate"]]:::action
+    gate_t6s0 -- ✓ --> act_t6s0
+    act_t6s0 --> state_certified
+    gate_t7s0{{"tlcResult is not None and t...?"}}:::gate
+    state_tlc_verified -- "SEAL_TLC" --> gate_t7s0
+    act_t7s0[["generateCertificate"]]:::action
+    gate_t7s0 -- ✓ --> act_t7s0
+    act_t7s0 --> state_certified
+    gate_t8s0{{"error is not None?"}}:::gate
+    state_auditing -- "AUTO" --> gate_t8s0
+    act_t8s0[["setRejected"]]:::action
+    gate_t8s0 -- ✓ --> act_t8s0
+    act_t8s0 --> state_rejected
+    gate_t9s0{{"error is not None?"}}:::gate
+    state_tlc_verifying -- "AUTO" --> gate_t9s0
+    act_t9s0[["setRejected"]]:::action
+    gate_t9s0 -- ✓ --> act_t9s0
+    act_t9s0 --> state_rejected
+    gate_t10s0{{"error is not None?"}}:::gate
+    state_tlaps_proving -- "AUTO" --> gate_t10s0
+    act_t10s0[["setRejected"]]:::action
+    gate_t10s0 -- ✓ --> act_t10s0
+    act_t10s0 --> state_rejected
+    gate_t11s0{{"error is not None?"}}:::gate
+    state_idle -- "ERROR" --> gate_t11s0
+    act_t11s0[["log_error"]]:::action
+    gate_t11s0 -- ✓ --> act_t11s0
+    act_t11s0 --> state_error
+    gate_t11s1{{"error is not None?"}}:::gate
+    state_loading -- "ERROR" --> gate_t11s1
+    act_t11s1[["log_error"]]:::action
+    gate_t11s1 -- ✓ --> act_t11s1
+    act_t11s1 --> state_error
+    gate_t11s2{{"error is not None?"}}:::gate
+    state_auditing -- "ERROR" --> gate_t11s2
+    act_t11s2[["log_error"]]:::action
+    gate_t11s2 -- ✓ --> act_t11s2
+    act_t11s2 --> state_error
+    gate_t11s3{{"error is not None?"}}:::gate
+    state_generating_tla -- "ERROR" --> gate_t11s3
+    act_t11s3[["log_error"]]:::action
+    gate_t11s3 -- ✓ --> act_t11s3
+    act_t11s3 --> state_error
+    gate_t11s4{{"error is not None?"}}:::gate
+    state_tlc_verifying -- "ERROR" --> gate_t11s4
+    act_t11s4[["log_error"]]:::action
+    gate_t11s4 -- ✓ --> act_t11s4
+    act_t11s4 --> state_error
+    gate_t11s5{{"error is not None?"}}:::gate
+    state_tlc_verified -- "ERROR" --> gate_t11s5
+    act_t11s5[["log_error"]]:::action
+    gate_t11s5 -- ✓ --> act_t11s5
+    act_t11s5 --> state_error
+    gate_t11s6{{"error is not None?"}}:::gate
+    state_tlaps_proving -- "ERROR" --> gate_t11s6
+    act_t11s6[["log_error"]]:::action
+    gate_t11s6 -- ✓ --> act_t11s6
+    act_t11s6 --> state_error
+    act_t12s0[["resetContext"]]:::action
+    state_error -- "RESET" --> act_t12s0
+    act_t12s0 --> state_idle
+    act_t12s1[["resetContext"]]:::action
+    state_loading -- "RESET" --> act_t12s1
+    act_t12s1 --> state_idle
+    act_t12s2[["resetContext"]]:::action
+    state_auditing -- "RESET" --> act_t12s2
+    act_t12s2 --> state_idle
+    act_t12s3[["resetContext"]]:::action
+    state_generating_tla -- "RESET" --> act_t12s3
+    act_t12s3 --> state_idle
+    act_t12s4[["resetContext"]]:::action
+    state_tlc_verifying -- "RESET" --> act_t12s4
+    act_t12s4 --> state_idle
+    act_t12s5[["resetContext"]]:::action
+    state_tlc_verified -- "RESET" --> act_t12s5
+    act_t12s5 --> state_idle
+    act_t12s6[["resetContext"]]:::action
+    state_tlaps_proving -- "RESET" --> act_t12s6
+    act_t12s6 --> state_idle
+    gate_t13s0{{"tlapsResult is not None and...?"}}:::gate
+    state_certified -- "VIEW" --> gate_t13s0
+    gate_t13s0 -- ✓ --> state_certified
+
+    %% Styling
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+        </pre>
+    </div>
+</div>
+<script>
+mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel: 'loose' });
+
+let scale = 1;
+let translateX = 50;
+let translateY = 50;
+let isDragging = false;
+let startX, startY;
+
+const container = document.getElementById('container');
+const diagram = document.getElementById('diagram');
+
+function updateTransform() {
+    diagram.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    document.getElementById('zoom-level').textContent = Math.round(scale * 100) + '%';
+}
+
+function zoomIn() {
+    scale = Math.min(scale * 1.2, 5);
+    updateTransform();
+}
+
+function zoomOut() {
+    scale = Math.max(scale / 1.2, 0.1);
+    updateTransform();
+}
+
+function resetView() {
+    scale = 1;
+    translateX = 50;
+    translateY = 50;
+    updateTransform();
+}
+
+function fitToScreen() {
+    const svg = diagram.querySelector('svg');
+    if (!svg) return;
+    const svgRect = svg.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const scaleX = (containerRect.width - 100) / svgRect.width * scale;
+    const scaleY = (containerRect.height - 100) / svgRect.height * scale;
+    scale = Math.min(scaleX, scaleY, 1.5);
+    translateX = 50;
+    translateY = 50;
+    updateTransform();
+}
+
+// Mouse wheel zoom
+container.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const rect = container.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const prevScale = scale;
+    if (e.deltaY < 0) scale = Math.min(scale * 1.1, 5);
+    else scale = Math.max(scale / 1.1, 0.1);
+
+    // Zoom toward mouse position
+    translateX = mouseX - (mouseX - translateX) * (scale / prevScale);
+    translateY = mouseY - (mouseY - translateY) * (scale / prevScale);
+    updateTransform();
+});
+
+// Pan with mouse drag
+container.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startX = e.clientX - translateX;
+    startY = e.clientY - translateY;
+    diagram.style.cursor = 'grabbing';
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    translateX = e.clientX - startX;
+    translateY = e.clientY - startY;
+    updateTransform();
+});
+
+document.addEventListener('mouseup', () => {
+    isDragging = false;
+    diagram.style.cursor = 'grab';
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (e.key === '+' || e.key === '=') zoomIn();
+    else if (e.key === '-') zoomOut();
+    else if (e.key === '0') resetView();
+    else if (e.key === 'f') fitToScreen();
+});
+
+// Initial fit after render
+setTimeout(fitToScreen, 500);
+</script>
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>L++ Blueprint Registry - State Diagram</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #1a1a2e; color: #eee; }
+.header { background: #16213e; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 18px; color: #00d4ff; }
+.controls { display: flex; gap: 8px; }
+.controls button { background: #4a4a8a; color: #fff; border: none; padding: 8px 16px; cursor: pointer; border-radius: 4px; font-size: 12px; }
+.controls button:hover { background: #5a5a9a; }
+.zoom-info { color: #888; font-size: 12px; margin-left: 15px; }
+.container { position: relative; width: 100%; height: calc(100vh - 60px); overflow: hidden; background: #0f0f23; }
+#diagram { position: absolute; transform-origin: 0 0; cursor: grab; }
+#diagram:active { cursor: grabbing; }
+#diagram svg { max-width: none !important; }
+.mermaid { background: transparent; }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>L++ Blueprint Registry</h1>
+    <div class="controls">
+        <button onclick="zoomIn()">Zoom In (+)</button>
+        <button onclick="zoomOut()">Zoom Out (-)</button>
+        <button onclick="resetView()">Reset View</button>
+        <button onclick="fitToScreen()">Fit to Screen</button>
+        <span class="zoom-info" id="zoom-level">100%</span>
+    </div>
+</div>
+<div class="container" id="container">
+    <div id="diagram">
+        <pre class="mermaid">
+flowchart TD
+    %% L++ Logic CAD: L++ Blueprint Registry
+        state_idle(["idle\nNo registry loaded, waiting for initiali"]):::entry
+    subgraph Processing
+        state_ready(["ready\nRegistry loaded and ready for operations"])
+        state_searching(["searching\nDisplaying search results"])
+        state_viewing(["viewing\nViewing a specific blueprint"])
+        state_comparing(["comparing\nComparing two versions"])
+    end
+        state_error[["error\nError state"]]:::errorState
+
+    %% Transitions
+    act_t0s0[["init_registry, save_registry"]]:::action
+    state_idle -- "INIT" --> act_t0s0
+    act_t0s0 --> state_ready
+    act_t1s0[["load_registry"]]:::action
+    state_idle -- "LOAD" --> act_t1s0
+    act_t1s0 --> state_ready
+    act_t2s0[["load_registry"]]:::action
+    state_ready -- "LOAD" --> act_t2s0
+    act_t2s0 --> state_ready
+    gate_t3s0{{"index is not None?"}}:::gate
+    state_ready -- "REGISTER" --> gate_t3s0
+    act_t3s0[["register_blueprint, save_registry"]]:::action
+    gate_t3s0 -- ✓ --> act_t3s0
+    act_t3s0 --> state_ready
+    gate_t4s0{{"index is not None && True?"}}:::gate
+    state_ready -- "UPDATE" --> gate_t4s0
+    act_t4s0[["update_blueprint, save_registry, log_update"]]:::action
+    gate_t4s0 -- ✓ --> act_t4s0
+    act_t4s0 --> state_ready
+    gate_t5s0{{"current_blueprint is not None && True?"}}:::gate
+    state_viewing -- "UPDATE" --> gate_t5s0
+    act_t5s0[["update_blueprint, save_registry, log_update"]]:::action
+    gate_t5s0 -- ✓ --> act_t5s0
+    act_t5s0 --> state_viewing
+    gate_t6s0{{"index is not None?"}}:::gate
+    state_ready -- "GET" --> gate_t6s0
+    act_t6s0[["get_blueprint"]]:::action
+    gate_t6s0 -- ✓ --> act_t6s0
+    act_t6s0 --> state_viewing
+    act_t7s0[["get_blueprint"]]:::action
+    state_viewing -- "GET" --> act_t7s0
+    act_t7s0 --> state_viewing
+    gate_t8s0{{"index is not None?"}}:::gate
+    state_ready -- "LIST" --> gate_t8s0
+    act_t8s0[["list_blueprints"]]:::action
+    gate_t8s0 -- ✓ --> act_t8s0
+    act_t8s0 --> state_searching
+    gate_t9s0{{"index is not None?"}}:::gate
+    state_ready -- "SEARCH" --> gate_t9s0
+    act_t9s0[["search_blueprints"]]:::action
+    gate_t9s0 -- ✓ --> act_t9s0
+    act_t9s0 --> state_searching
+    act_t10s0[["search_blueprints"]]:::action
+    state_searching -- "SEARCH" --> act_t10s0
+    act_t10s0 --> state_searching
+    gate_t11s0{{"search_results is not None ...?"}}:::gate
+    state_searching -- "SELECT" --> gate_t11s0
+    act_t11s0[["get_blueprint"]]:::action
+    gate_t11s0 -- ✓ --> act_t11s0
+    act_t11s0 --> state_viewing
+    gate_t12s0{{"current_blueprint is not None?"}}:::gate
+    state_viewing -- "VERSIONS" --> gate_t12s0
+    act_t12s0[["get_versions"]]:::action
+    gate_t12s0 -- ✓ --> act_t12s0
+    act_t12s0 --> state_viewing
+    gate_t13s0{{"version_history is not None...?"}}:::gate
+    state_viewing -- "COMPARE" --> gate_t13s0
+    act_t13s0[["compare_versions"]]:::action
+    gate_t13s0 -- ✓ --> act_t13s0
+    act_t13s0 --> state_comparing
+    act_t14s0[["compare_versions"]]:::action
+    state_comparing -- "COMPARE" --> act_t14s0
+    act_t14s0 --> state_comparing
+    gate_t15s0{{"version_history is not None...?"}}:::gate
+    state_viewing -- "ROLLBACK" --> gate_t15s0
+    act_t15s0[["rollback_version, save_registry"]]:::action
+    gate_t15s0 -- ✓ --> act_t15s0
+    act_t15s0 --> state_viewing
+    gate_t16s0{{"current_blueprint is not None?"}}:::gate
+    state_viewing -- "DEPS" --> gate_t16s0
+    act_t16s0[["get_dependencies"]]:::action
+    gate_t16s0 -- ✓ --> act_t16s0
+    act_t16s0 --> state_viewing
+    gate_t17s0{{"current_blueprint is not None?"}}:::gate
+    state_viewing -- "CHECK_DEPS" --> gate_t17s0
+    act_t17s0[["check_circular_deps"]]:::action
+    gate_t17s0 -- ✓ --> act_t17s0
+    act_t17s0 --> state_viewing
+    gate_t18s0{{"current_blueprint is not None && current_blueprint is not No...?"}}:::gate
+    state_viewing -- "DEPRECATE" --> gate_t18s0
+    act_t18s0[["deprecate_blueprint, save_registry"]]:::action
+    gate_t18s0 -- ✓ --> act_t18s0
+    act_t18s0 --> state_viewing
+    gate_t19s0{{"current_blueprint is not None && True?"}}:::gate
+    state_viewing -- "DELETE" --> gate_t19s0
+    act_t19s0[["delete_blueprint, save_registry, clear_current +1"]]:::action
+    gate_t19s0 -- ✓ --> act_t19s0
+    act_t19s0 --> state_ready
+    gate_t20s0{{"index is not None && True?"}}:::gate
+    state_ready -- "DELETE" --> gate_t20s0
+    act_t20s0[["delete_blueprint, save_registry, log_delete"]]:::action
+    gate_t20s0 -- ✓ --> act_t20s0
+    act_t20s0 --> state_ready
+    gate_t21s0{{"index is not None?"}}:::gate
+    state_ready -- "EXPORT" --> gate_t21s0
+    act_t21s0[["export_registry"]]:::action
+    gate_t21s0 -- ✓ --> act_t21s0
+    act_t21s0 --> state_ready
+    act_t22s0[["export_registry"]]:::action
+    state_viewing -- "EXPORT" --> act_t22s0
+    act_t22s0 --> state_viewing
+    gate_t23s0{{"index is not None?"}}:::gate
+    state_ready -- "STATS" --> gate_t23s0
+    act_t23s0[["get_stats"]]:::action
+    gate_t23s0 -- ✓ --> act_t23s0
+    act_t23s0 --> state_ready
+    act_t24s0[["clear_current"]]:::action
+    state_viewing -- "BACK" --> act_t24s0
+    act_t24s0 --> state_ready
+    act_t25s0[["clear_search"]]:::action
+    state_searching -- "BACK" --> act_t25s0
+    act_t25s0 --> state_ready
+    act_t26s0[["clear_diff"]]:::action
+    state_comparing -- "BACK" --> act_t26s0
+    act_t26s0 --> state_viewing
+    act_t27s0[["clear_error"]]:::action
+    state_error -- "CLEAR" --> act_t27s0
+    act_t27s0 --> state_idle
+    act_t28s0[["set_error"]]:::action
+    state_idle -- "LOAD_FAILED" --> act_t28s0
+    act_t28s0 --> state_error
+    act_t28s1[["set_error"]]:::action
+    state_ready -- "LOAD_FAILED" --> act_t28s1
+    act_t28s1 --> state_error
+    act_t28s2[["set_error"]]:::action
+    state_searching -- "LOAD_FAILED" --> act_t28s2
+    act_t28s2 --> state_error
+    act_t28s3[["set_error"]]:::action
+    state_viewing -- "LOAD_FAILED" --> act_t28s3
+    act_t28s3 --> state_error
+    act_t28s4[["set_error"]]:::action
+    state_comparing -- "LOAD_FAILED" --> act_t28s4
+    act_t28s4 --> state_error
+
+    %% Styling
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+        </pre>
+    </div>
+</div>
+<script>
+mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel: 'loose' });
+
+let scale = 1;
+let translateX = 50;
+let translateY = 50;
+let isDragging = false;
+let startX, startY;
+
+const container = document.getElementById('container');
+const diagram = document.getElementById('diagram');
+
+function updateTransform() {
+    diagram.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    document.getElementById('zoom-level').textContent = Math.round(scale * 100) + '%';
+}
+
+function zoomIn() {
+    scale = Math.min(scale * 1.2, 5);
+    updateTransform();
+}
+
+function zoomOut() {
+    scale = Math.max(scale / 1.2, 0.1);
+    updateTransform();
+}
+
+function resetView() {
+    scale = 1;
+    translateX = 50;
+    translateY = 50;
+    updateTransform();
+}
+
+function fitToScreen() {
+    const svg = diagram.querySelector('svg');
+    if (!svg) return;
+    const svgRect = svg.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const scaleX = (containerRect.width - 100) / svgRect.width * scale;
+    const scaleY = (containerRect.height - 100) / svgRect.height * scale;
+    scale = Math.min(scaleX, scaleY, 1.5);
+    translateX = 50;
+    translateY = 50;
+    updateTransform();
+}
+
+// Mouse wheel zoom
+container.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const rect = container.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const prevScale = scale;
+    if (e.deltaY < 0) scale = Math.min(scale * 1.1, 5);
+    else scale = Math.max(scale / 1.1, 0.1);
+
+    // Zoom toward mouse position
+    translateX = mouseX - (mouseX - translateX) * (scale / prevScale);
+    translateY = mouseY - (mouseY - translateY) * (scale / prevScale);
+    updateTransform();
+});
+
+// Pan with mouse drag
+container.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startX = e.clientX - translateX;
+    startY = e.clientY - translateY;
+    diagram.style.cursor = 'grabbing';
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    translateX = e.clientX - startX;
+    translateY = e.clientY - startY;
+    updateTransform();
+});
+
+document.addEventListener('mouseup', () => {
+    isDragging = false;
+    diagram.style.cursor = 'grab';
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (e.key === '+' || e.key === '=') zoomIn();
+    else if (e.key === '-') zoomOut();
+    else if (e.key === '0') resetView();
+    else if (e.key === 'f') fitToScreen();
+});
+
+// Initial fit after render
+setTimeout(fitToScreen, 500);
+</script>
+</body>
+</html>

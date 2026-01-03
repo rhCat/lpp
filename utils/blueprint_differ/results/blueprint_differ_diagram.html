@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>L++ Blueprint Diff & Merge - State Diagram</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #1a1a2e; color: #eee; }
+.header { background: #16213e; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 18px; color: #00d4ff; }
+.controls { display: flex; gap: 8px; }
+.controls button { background: #4a4a8a; color: #fff; border: none; padding: 8px 16px; cursor: pointer; border-radius: 4px; font-size: 12px; }
+.controls button:hover { background: #5a5a9a; }
+.zoom-info { color: #888; font-size: 12px; margin-left: 15px; }
+.container { position: relative; width: 100%; height: calc(100vh - 60px); overflow: hidden; background: #0f0f23; }
+#diagram { position: absolute; transform-origin: 0 0; cursor: grab; }
+#diagram:active { cursor: grabbing; }
+#diagram svg { max-width: none !important; }
+.mermaid { background: transparent; }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>L++ Blueprint Diff & Merge</h1>
+    <div class="controls">
+        <button onclick="zoomIn()">Zoom In (+)</button>
+        <button onclick="zoomOut()">Zoom Out (-)</button>
+        <button onclick="resetView()">Reset View</button>
+        <button onclick="fitToScreen()">Fit to Screen</button>
+        <span class="zoom-info" id="zoom-level">100%</span>
+    </div>
+</div>
+<div class="container" id="container">
+    <div id="diagram">
+        <pre class="mermaid">
+flowchart TD
+    %% L++ Logic CAD: L++ Blueprint Diff & Merge
+        state_idle(["idle\nNo blueprints loaded, waiting for input"]):::entry
+    subgraph Processing
+        state_left_loaded(["left_loaded\nLeft blueprint loaded, waiting for right"])
+        state_ready(["ready\nBoth blueprints loaded, ready to diff/me"])
+        state_diffing(["diffing\nComputing semantic diff"])
+        state_merging(["merging\nPerforming merge operation"])
+        state_conflict(["conflict\nMerge conflicts detected, awaiting resol"])
+    end
+    subgraph Completion
+        state_diff_complete(["diff_complete\nDiff computed, results available"])
+        state_merge_complete(["merge_complete\nMerge complete, result available"])
+    end
+        state_error[["error\nError state"]]:::errorState
+
+    %% Transitions
+    act_t0s0[["load_left"]]:::action
+    state_idle -- "LOAD_LEFT" --> act_t0s0
+    act_t0s0 --> state_left_loaded
+    act_t1s0[["load_right"]]:::action
+    state_left_loaded -- "LOAD_RIGHT" --> act_t1s0
+    act_t1s0 --> state_ready
+    act_t2s0[["load_base"]]:::action
+    state_ready -- "LOAD_BASE" --> act_t2s0
+    act_t2s0 --> state_ready
+    act_t3s0[["load_left, clear_diff, clear_merge"]]:::action
+    state_ready -- "LOAD_LEFT" --> act_t3s0
+    act_t3s0 --> state_ready
+    act_t4s0[["load_right, clear_diff, clear_merge"]]:::action
+    state_ready -- "LOAD_RIGHT" --> act_t4s0
+    act_t4s0 --> state_ready
+    gate_t5s0{{"blueprint_left is not None ...?"}}:::gate
+    state_ready -- "DIFF" --> gate_t5s0
+    act_t5s0[["compute_diff"]]:::action
+    gate_t5s0 -- ✓ --> act_t5s0
+    act_t5s0 --> state_diffing
+    act_t6s0[["format_diff_unified"]]:::action
+    state_diffing -- "DIFF_DONE" --> act_t6s0
+    act_t6s0 --> state_diff_complete
+    gate_t7s0{{"blueprint_left is not None ...?"}}:::gate
+    state_ready -- "DIFF_ALL" --> gate_t7s0
+    act_t7s0[["compute_diff, format_diff_unified"]]:::action
+    gate_t7s0 -- ✓ --> act_t7s0
+    act_t7s0 --> state_diff_complete
+    gate_t8s0{{"diff_result is not None?"}}:::gate
+    state_diff_complete -- "SHOW_SUMMARY" --> gate_t8s0
+    act_t8s0[["format_diff_summary"]]:::action
+    gate_t8s0 -- ✓ --> act_t8s0
+    act_t8s0 --> state_diff_complete
+    gate_t9s0{{"diff_result is not None?"}}:::gate
+    state_diff_complete -- "SHOW_UNIFIED" --> gate_t9s0
+    act_t9s0[["format_diff_unified"]]:::action
+    gate_t9s0 -- ✓ --> act_t9s0
+    act_t9s0 --> state_diff_complete
+    gate_t10s0{{"diff_result is not None?"}}:::gate
+    state_diff_complete -- "SHOW_PATCH" --> gate_t10s0
+    act_t10s0[["generate_json_patch"]]:::action
+    gate_t10s0 -- ✓ --> act_t10s0
+    act_t10s0 --> state_diff_complete
+    gate_t11s0{{"diff_result is not None?"}}:::gate
+    state_diff_complete -- "MERGE" --> gate_t11s0
+    act_t11s0[["detect_conflicts"]]:::action
+    gate_t11s0 -- ✓ --> act_t11s0
+    act_t11s0 --> state_merging
+    gate_t12s0{{"conflicts is None or len(co...?"}}:::gate
+    state_merging -- "MERGE_AUTO" --> gate_t12s0
+    act_t12s0[["merge_auto"]]:::action
+    gate_t12s0 -- ✓ --> act_t12s0
+    act_t12s0 --> state_merge_complete
+    gate_t13s0{{"conflicts is not None and l...?"}}:::gate
+    state_merging -- "CONFLICT_DETECTED" --> gate_t13s0
+    act_t13s0[["set_strategy_manual"]]:::action
+    gate_t13s0 -- ✓ --> act_t13s0
+    act_t13s0 --> state_conflict
+    act_t14s0[["merge_take_left"]]:::action
+    state_conflict -- "TAKE_LEFT" --> act_t14s0
+    act_t14s0 --> state_merge_complete
+    act_t15s0[["merge_take_right"]]:::action
+    state_conflict -- "TAKE_RIGHT" --> act_t15s0
+    act_t15s0 --> state_merge_complete
+    gate_t16s0{{"diff_result is not None?"}}:::gate
+    state_diff_complete -- "MERGE_LEFT" --> gate_t16s0
+    act_t16s0[["detect_conflicts, merge_take_left"]]:::action
+    gate_t16s0 -- ✓ --> act_t16s0
+    act_t16s0 --> state_merge_complete
+    gate_t17s0{{"diff_result is not None?"}}:::gate
+    state_diff_complete -- "MERGE_RIGHT" --> gate_t17s0
+    act_t17s0[["detect_conflicts, merge_take_right"]]:::action
+    gate_t17s0 -- ✓ --> act_t17s0
+    act_t17s0 --> state_merge_complete
+    gate_t18s0{{"merged_blueprint is not None?"}}:::gate
+    state_merge_complete -- "EXPORT" --> gate_t18s0
+    act_t18s0[["export_merged"]]:::action
+    gate_t18s0 -- ✓ --> act_t18s0
+    act_t18s0 --> state_merge_complete
+    act_t19s0[["clear_merge"]]:::action
+    state_merge_complete -- "BACK" --> act_t19s0
+    act_t19s0 --> state_diff_complete
+    act_t20s0[["clear_merge"]]:::action
+    state_conflict -- "BACK" --> act_t20s0
+    act_t20s0 --> state_diff_complete
+    act_t21s0[["compute_diff, format_diff_unified"]]:::action
+    state_diff_complete -- "DIFF_ALL" --> act_t21s0
+    act_t21s0 --> state_diff_complete
+    act_t22s0[["clear_diff, clear_merge"]]:::action
+    state_diff_complete -- "RESET" --> act_t22s0
+    act_t22s0 --> state_ready
+    act_t23s0[["clear_all"]]:::action
+    state_ready -- "CLEAR" --> act_t23s0
+    act_t23s0 --> state_idle
+    act_t24s0[["clear_all"]]:::action
+    state_diff_complete -- "CLEAR" --> act_t24s0
+    act_t24s0 --> state_idle
+    act_t25s0[["clear_all"]]:::action
+    state_merge_complete -- "CLEAR" --> act_t25s0
+    act_t25s0 --> state_idle
+    act_t26s0[["clear_error, clear_all"]]:::action
+    state_error -- "CLEAR" --> act_t26s0
+    act_t26s0 --> state_idle
+    act_t27s0[["set_error"]]:::action
+    state_idle -- "LOAD_FAILED" --> act_t27s0
+    act_t27s0 --> state_error
+    act_t27s1[["set_error"]]:::action
+    state_left_loaded -- "LOAD_FAILED" --> act_t27s1
+    act_t27s1 --> state_error
+    act_t27s2[["set_error"]]:::action
+    state_ready -- "LOAD_FAILED" --> act_t27s2
+    act_t27s2 --> state_error
+    act_t27s3[["set_error"]]:::action
+    state_diff_complete -- "LOAD_FAILED" --> act_t27s3
+    act_t27s3 --> state_error
+    act_t27s4[["set_error"]]:::action
+    state_diffing -- "LOAD_FAILED" --> act_t27s4
+    act_t27s4 --> state_error
+    act_t27s5[["set_error"]]:::action
+    state_merge_complete -- "LOAD_FAILED" --> act_t27s5
+    act_t27s5 --> state_error
+    act_t27s6[["set_error"]]:::action
+    state_merging -- "LOAD_FAILED" --> act_t27s6
+    act_t27s6 --> state_error
+    act_t27s7[["set_error"]]:::action
+    state_conflict -- "LOAD_FAILED" --> act_t27s7
+    act_t27s7 --> state_error
+
+    %% Styling
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+        </pre>
+    </div>
+</div>
+<script>
+mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel: 'loose' });
+
+let scale = 1;
+let translateX = 50;
+let translateY = 50;
+let isDragging = false;
+let startX, startY;
+
+const container = document.getElementById('container');
+const diagram = document.getElementById('diagram');
+
+function updateTransform() {
+    diagram.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    document.getElementById('zoom-level').textContent = Math.round(scale * 100) + '%';
+}
+
+function zoomIn() {
+    scale = Math.min(scale * 1.2, 5);
+    updateTransform();
+}
+
+function zoomOut() {
+    scale = Math.max(scale / 1.2, 0.1);
+    updateTransform();
+}
+
+function resetView() {
+    scale = 1;
+    translateX = 50;
+    translateY = 50;
+    updateTransform();
+}
+
+function fitToScreen() {
+    const svg = diagram.querySelector('svg');
+    if (!svg) return;
+    const svgRect = svg.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const scaleX = (containerRect.width - 100) / svgRect.width * scale;
+    const scaleY = (containerRect.height - 100) / svgRect.height * scale;
+    scale = Math.min(scaleX, scaleY, 1.5);
+    translateX = 50;
+    translateY = 50;
+    updateTransform();
+}
+
+// Mouse wheel zoom
+container.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const rect = container.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const prevScale = scale;
+    if (e.deltaY < 0) scale = Math.min(scale * 1.1, 5);
+    else scale = Math.max(scale / 1.1, 0.1);
+
+    // Zoom toward mouse position
+    translateX = mouseX - (mouseX - translateX) * (scale / prevScale);
+    translateY = mouseY - (mouseY - translateY) * (scale / prevScale);
+    updateTransform();
+});
+
+// Pan with mouse drag
+container.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startX = e.clientX - translateX;
+    startY = e.clientY - translateY;
+    diagram.style.cursor = 'grabbing';
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    translateX = e.clientX - startX;
+    translateY = e.clientY - startY;
+    updateTransform();
+});
+
+document.addEventListener('mouseup', () => {
+    isDragging = false;
+    diagram.style.cursor = 'grab';
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (e.key === '+' || e.key === '=') zoomIn();
+    else if (e.key === '-') zoomOut();
+    else if (e.key === '0') resetView();
+    else if (e.key === 'f') fitToScreen();
+});
+
+// Initial fit after render
+setTimeout(fitToScreen, 500);
+</script>
+</body>
+</html>

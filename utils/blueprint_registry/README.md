@@ -192,48 +192,44 @@ The registry automatically checks for circular dependencies during validation.
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: L++ Blueprint Registry
     [*] --> idle
-
-    idle: idle
-    ready: ready
-    viewing: viewing
-    searching: searching
-    comparing: comparing
-    error: error
-
-    idle --> ready: INIT
-    idle --> ready: LOAD
-    ready --> ready: LOAD
-    ready --> ready: REGISTER
-    ready --> ready: UPDATE
-    ready --> viewing: GET
-    ready --> searching: LIST
-    ready --> searching: SEARCH
-    viewing --> viewing: GET
-    viewing --> viewing: UPDATE
-    viewing --> viewing: VERSIONS
-    viewing --> comparing: COMPARE
-    viewing --> viewing: ROLLBACK
-    viewing --> viewing: DEPS
-    viewing --> viewing: DEPRECATE
-    viewing --> ready: DELETE
-    viewing --> ready: BACK
-    searching --> searching: SEARCH
-    searching --> viewing: SELECT
-    searching --> ready: BACK
-    comparing --> comparing: COMPARE
-    comparing --> viewing: BACK
-    ready --> ready: EXPORT
-    ready --> ready: STATS
-    ready --> ready: DELETE
-    viewing --> viewing: EXPORT
-    error --> idle: CLEAR
-    idle --> error: LOAD_FAILED
-    ready --> error: LOAD_FAILED
-    viewing --> error: LOAD_FAILED
-    searching --> error: LOAD_FAILED
-    comparing --> error: LOAD_FAILED
+    idle --> ready : INIT
+    idle --> ready : LOAD
+    ready --> ready : LOAD
+    ready --> ready : REGISTER [index is not None]
+    ready --> ready : UPDATE [index is not None && True]
+    viewing --> viewing : UPDATE [current_blueprint is not None && True]
+    ready --> viewing : GET [index is not None]
+    viewing --> viewing : GET
+    ready --> searching : LIST [index is not None]
+    ready --> searching : SEARCH [index is not None]
+    searching --> searching : SEARCH
+    searching --> viewing : SELECT [search_results is not None ...]
+    viewing --> viewing : VERSIONS [current_blueprint is not None]
+    viewing --> comparing : COMPARE [version_history is not None...]
+    comparing --> comparing : COMPARE
+    viewing --> viewing : ROLLBACK [version_history is not None...]
+    viewing --> viewing : DEPS [current_blueprint is not None]
+    viewing --> viewing : CHECK_DEPS [current_blueprint is not None]
+    viewing --> viewing : DEPRECATE [current_blueprint is not None && current_blueprint is not No...]
+    viewing --> ready : DELETE [current_blueprint is not None && True]
+    ready --> ready : DELETE [index is not None && True]
+    ready --> ready : EXPORT [index is not None]
+    viewing --> viewing : EXPORT
+    ready --> ready : STATS [index is not None]
+    viewing --> ready : BACK
+    searching --> ready : BACK
+    comparing --> viewing : BACK
+    error --> idle : CLEAR
+    idle --> error : LOAD_FAILED
+    ready --> error : LOAD_FAILED
+    searching --> error : LOAD_FAILED
+    viewing --> error : LOAD_FAILED
+    comparing --> error : LOAD_FAILED
 ```
+> **Interactive View:** [Open zoomable diagram](results/blueprint_registry_diagram.html) for pan/zoom controls
+
 
 ## State Machine Visualization
 

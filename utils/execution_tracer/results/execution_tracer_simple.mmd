@@ -1,0 +1,37 @@
+stateDiagram-v2
+    %% L++ State Diagram: L++ Execution Tracer
+    [*] --> idle
+    idle --> configured : INIT
+    idle --> error : INIT_FAILED
+    configured --> configured : INIT
+    configured --> tracing : START_TRACE [config is not None]
+    idle --> tracing : START_TRACE
+    tracing --> tracing : RECORD_SPAN [trace_id is not None]
+    tracing --> tracing : START_SPAN [trace_id is not None]
+    tracing --> tracing : END_SPAN [trace_id is not None]
+    tracing --> tracing : STATE_CHANGE [trace_id is not None]
+    tracing --> tracing : GATE_EVAL [trace_id is not None]
+    tracing --> tracing : ACTION [trace_id is not None]
+    tracing --> tracing : EVENT [trace_id is not None]
+    tracing --> tracing : CONTEXT_CHANGE [trace_id is not None]
+    tracing --> paused : PAUSE
+    paused --> tracing : RESUME
+    tracing --> completed : END_TRACE [trace_id is not None]
+    paused --> completed : END_TRACE [trace_id is not None]
+    completed --> completed : FORMAT_OTLP [spans is not None and len(s...]
+    completed --> completed : FORMAT_JSONL [spans is not None and len(s...]
+    completed --> completed : FORMAT_HUMAN [spans is not None and len(s...]
+    completed --> completed : FORMAT_TIMELINE [spans is not None and len(s...]
+    completed --> completed : EXPORT
+    completed --> completed : ANALYZE [spans is not None and len(s...]
+    tracing --> tracing : STATUS
+    paused --> paused : STATUS
+    completed --> completed : STATUS
+    configured --> configured : SET_FORMAT
+    completed --> completed : SET_FORMAT
+    completed --> configured : CLEAR
+    completed --> tracing : START_TRACE [config is not None]
+    configured --> idle : RESET
+    tracing --> idle : RESET
+    completed --> idle : RESET
+    error --> idle : CLEAR

@@ -9,45 +9,52 @@ Tracks runtime coverage of blueprints during execution
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: L++ Coverage Analyzer
     [*] --> idle
-
-    idle: idle
-    loaded: loaded
-    tracking: tracking
-    analyzing: analyzing
-    reporting: reporting
-    error: error
-
-    idle --> loaded: LOAD
-    tracking --> loaded: LOAD
-    analyzing --> loaded: LOAD
-    reporting --> loaded: LOAD
-    loaded --> tracking: START
-    loaded --> tracking: IMPORT
-    tracking --> analyzing: ANALYZE
-    loaded --> analyzing: ANALYZE
-    analyzing --> reporting: SUMMARY
-    analyzing --> reporting: DETAILED
-    analyzing --> reporting: GAP
-    analyzing --> reporting: ALL_REPORTS
-    analyzing --> reporting: EXPORT_HTML
-    analyzing --> reporting: EXPORT_JSON
-    tracking --> loaded: RESET
-    analyzing --> loaded: RESET
-    reporting --> loaded: RESET
-    analyzing --> tracking: BACK
-    reporting --> analyzing: BACK
-    loaded --> idle: UNLOAD
-    tracking --> idle: UNLOAD
-    analyzing --> idle: UNLOAD
-    reporting --> idle: UNLOAD
-    idle --> error: ERROR
-    loaded --> error: ERROR
-    tracking --> error: ERROR
-    analyzing --> error: ERROR
-    reporting --> error: ERROR
-    error --> idle: CLEAR
+    idle --> loaded : LOAD [blueprint is None]
+    loaded --> loaded : LOAD
+    tracking --> loaded : LOAD
+    analyzing --> loaded : LOAD
+    reporting --> loaded : LOAD
+    loaded --> tracking : START [blueprint is not None]
+    tracking --> tracking : STATE
+    tracking --> tracking : TRANSITION
+    tracking --> tracking : GATE
+    tracking --> tracking : ACTION
+    tracking --> tracking : EVENT
+    loaded --> tracking : IMPORT [blueprint is not None && blueprint is not None]
+    tracking --> tracking : IMPORT [blueprint is not None]
+    tracking --> analyzing : ANALYZE [coverage_data is not None]
+    loaded --> analyzing : ANALYZE [blueprint is not None]
+    analyzing --> reporting : SUMMARY [metrics is not None]
+    analyzing --> reporting : DETAILED [metrics is not None]
+    analyzing --> reporting : GAP [metrics is not None]
+    analyzing --> reporting : ALL_REPORTS [metrics is not None]
+    reporting --> reporting : EXPORT_HTML [metrics is not None]
+    analyzing --> reporting : EXPORT_HTML [metrics is not None]
+    reporting --> reporting : EXPORT_JSON [metrics is not None]
+    analyzing --> reporting : EXPORT_JSON [metrics is not None]
+    reporting --> reporting : SUMMARY [metrics is not None]
+    reporting --> reporting : DETAILED [metrics is not None]
+    reporting --> reporting : GAP [metrics is not None]
+    tracking --> loaded : RESET
+    analyzing --> loaded : RESET
+    reporting --> loaded : RESET
+    analyzing --> tracking : BACK
+    reporting --> analyzing : BACK
+    loaded --> idle : UNLOAD
+    tracking --> idle : UNLOAD
+    analyzing --> idle : UNLOAD
+    reporting --> idle : UNLOAD
+    idle --> error : ERROR
+    loaded --> error : ERROR
+    analyzing --> error : ERROR
+    tracking --> error : ERROR
+    reporting --> error : ERROR
+    error --> idle : CLEAR
 ```
+> **Interactive View:** [Open zoomable diagram](results/coverage_analyzer_diagram.html) for pan/zoom controls
+
 
 ## States
 

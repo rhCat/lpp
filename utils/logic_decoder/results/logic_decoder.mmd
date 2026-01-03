@@ -1,41 +1,50 @@
 flowchart TD
-    %% L++ Logic CAD Export
-    state_idle(["<b>idle</b><br/>Awaiting file path or source code"]):::entry
-    state_parsing(["<b>parsing</b><br/>Parsing Python source into AST"])
-    state_analyzing(["<b>analyzing</b><br/>Analyzing imports, functions, and control flow"])
-    state_error(["<b>error</b><br/>Decoding failed"])
-    state_inferring(["<b>inferring</b><br/>Inferring states, transitions, gates from code patterns"])
-    state_generating(["<b>generating</b><br/>Assembling final L++ blueprint"])
-    state_complete(["<b>complete</b><br/>Blueprint generated successfully"])
-    act_t_0_0[["loadFile"]]
-    state_idle -- "DECODE" --> act_t_0_0
-    act_t_0_0 --> state_parsing
-    act_t_1_0[["parseAst"]]
-    state_parsing -- "AUTO" --> act_t_1_0
-    act_t_1_0 --> state_analyzing
-    act_t_2_0[["analyzeImports, analyzeFunctions, analyzeControlFlow"]]
-    state_analyzing -- "AUTO" --> act_t_2_0
-    act_t_2_0 --> state_inferring
-    act_t_3_0[["inferStates, inferTransitions, inferActions"]]
-    state_inferring -- "AUTO" --> act_t_3_0
-    act_t_3_0 --> state_generating
-    act_t_4_0[["generateBlueprint"]]
-    state_generating -- "AUTO" --> act_t_4_0
-    act_t_4_0 --> state_complete
-    act_t_5_0[["setError, log_error"]]
-    state_parsing -- "ERROR" --> act_t_5_0
-    act_t_5_0 --> state_error
-    act_t_6_0[["setError, log_error"]]
-    state_analyzing -- "ERROR" --> act_t_6_0
-    act_t_6_0 --> state_error
-    act_t_7_0[["setError, log_error"]]
-    state_inferring -- "ERROR" --> act_t_7_0
-    act_t_7_0 --> state_error
-    act_t_8_0[["clearState"]]
-    state_complete -- "RESET" --> act_t_8_0
-    act_t_8_0 --> state_idle
-    act_t_9_0[["clearError, clearState"]]
-    state_error -- "RESET" --> act_t_9_0
-    act_t_9_0 --> state_idle
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
-    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px
+    %% L++ Logic CAD: Python Logic Decoder
+        state_idle(["idle\nAwaiting file path or source code"]):::entry
+    subgraph Processing
+        state_parsing(["parsing\nParsing Python source into AST"])
+        state_analyzing(["analyzing\nAnalyzing imports, functions, and contro"])
+        state_inferring(["inferring\nInferring states, transitions, gates fro"])
+        state_generating(["generating\nAssembling final L++ blueprint"])
+    end
+        state_complete(["complete\nBlueprint generated successfully"])
+        state_error[["error\nDecoding failed"]]:::errorState
+
+    %% Transitions
+    act_t0s0[["loadFile"]]:::action
+    state_idle -- "DECODE" --> act_t0s0
+    act_t0s0 --> state_parsing
+    act_t1s0[["parseAst"]]:::action
+    state_parsing -- "AUTO" --> act_t1s0
+    act_t1s0 --> state_analyzing
+    act_t2s0[["analyzeImports, analyzeFunctions, analyzeControlFlow"]]:::action
+    state_analyzing -- "AUTO" --> act_t2s0
+    act_t2s0 --> state_inferring
+    act_t3s0[["inferStates, inferTransitions, inferActions"]]:::action
+    state_inferring -- "AUTO" --> act_t3s0
+    act_t3s0 --> state_generating
+    act_t4s0[["generateBlueprint"]]:::action
+    state_generating -- "AUTO" --> act_t4s0
+    act_t4s0 --> state_complete
+    act_t5s0[["setError, log_error"]]:::action
+    state_parsing -- "ERROR" --> act_t5s0
+    act_t5s0 --> state_error
+    act_t6s0[["setError, log_error"]]:::action
+    state_analyzing -- "ERROR" --> act_t6s0
+    act_t6s0 --> state_error
+    act_t7s0[["setError, log_error"]]:::action
+    state_inferring -- "ERROR" --> act_t7s0
+    act_t7s0 --> state_error
+    act_t8s0[["clearState"]]:::action
+    state_complete -- "RESET" --> act_t8s0
+    act_t8s0 --> state_idle
+    act_t9s0[["clearError, clearState"]]:::action
+    state_error -- "RESET" --> act_t9s0
+    act_t9s0 --> state_idle
+
+    %% Styling
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px

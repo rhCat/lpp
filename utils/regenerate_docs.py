@@ -8,14 +8,16 @@ Regenerates all documentation artifacts for L++ utility blueprints:
 - Function dependency graphs
 - Mermaid diagrams
 - Analysis report
+- README updates with embedded Mermaid diagrams
 
 Usage:
-    python utils/regenerate_docs.py [--graphs] [--logic] [--functions] [--mermaid] [--report] [--all]
+    python utils/regenerate_docs.py [--graphs] [--logic] [--functions] [--mermaid] [--readme] [--report] [--all]
 """
 
 import os
 import sys
 import json
+import re
 import argparse
 from datetime import datetime
 
@@ -100,8 +102,158 @@ def regenerate_graphs(blueprints, verbose=True):
     return generated, errors
 
 
+def _build_mermaid_html(title: str, mermaid_code: str) -> str:
+    """Build an interactive HTML viewer for Mermaid diagrams with pan/zoom."""
+    # Escape for embedding in JS
+    escaped_code = mermaid_code.replace('\\', '\\\\').replace('`', '\\`')
+
+    return f'''<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>{title} - State Diagram</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<style>
+* {{ margin: 0; padding: 0; box-sizing: border-box; }}
+body {{ font-family: system-ui, -apple-system, sans-serif; background: #1a1a2e; color: #eee; }}
+.header {{ background: #16213e; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }}
+.header h1 {{ font-size: 18px; color: #00d4ff; }}
+.controls {{ display: flex; gap: 8px; }}
+.controls button {{ background: #4a4a8a; color: #fff; border: none; padding: 8px 16px; cursor: pointer; border-radius: 4px; font-size: 12px; }}
+.controls button:hover {{ background: #5a5a9a; }}
+.zoom-info {{ color: #888; font-size: 12px; margin-left: 15px; }}
+.container {{ position: relative; width: 100%; height: calc(100vh - 60px); overflow: hidden; background: #0f0f23; }}
+#diagram {{ position: absolute; transform-origin: 0 0; cursor: grab; }}
+#diagram:active {{ cursor: grabbing; }}
+#diagram svg {{ max-width: none !important; }}
+.mermaid {{ background: transparent; }}
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>{title}</h1>
+    <div class="controls">
+        <button onclick="zoomIn()">Zoom In (+)</button>
+        <button onclick="zoomOut()">Zoom Out (-)</button>
+        <button onclick="resetView()">Reset View</button>
+        <button onclick="fitToScreen()">Fit to Screen</button>
+        <span class="zoom-info" id="zoom-level">100%</span>
+    </div>
+</div>
+<div class="container" id="container">
+    <div id="diagram">
+        <pre class="mermaid">
+{mermaid_code}
+        </pre>
+    </div>
+</div>
+<script>
+mermaid.initialize({{ startOnLoad: true, theme: 'dark', securityLevel: 'loose' }});
+
+let scale = 1;
+let translateX = 50;
+let translateY = 50;
+let isDragging = false;
+let startX, startY;
+
+const container = document.getElementById('container');
+const diagram = document.getElementById('diagram');
+
+function updateTransform() {{
+    diagram.style.transform = `translate(${{translateX}}px, ${{translateY}}px) scale(${{scale}})`;
+    document.getElementById('zoom-level').textContent = Math.round(scale * 100) + '%';
+}}
+
+function zoomIn() {{
+    scale = Math.min(scale * 1.2, 5);
+    updateTransform();
+}}
+
+function zoomOut() {{
+    scale = Math.max(scale / 1.2, 0.1);
+    updateTransform();
+}}
+
+function resetView() {{
+    scale = 1;
+    translateX = 50;
+    translateY = 50;
+    updateTransform();
+}}
+
+function fitToScreen() {{
+    const svg = diagram.querySelector('svg');
+    if (!svg) return;
+    const svgRect = svg.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const scaleX = (containerRect.width - 100) / svgRect.width * scale;
+    const scaleY = (containerRect.height - 100) / svgRect.height * scale;
+    scale = Math.min(scaleX, scaleY, 1.5);
+    translateX = 50;
+    translateY = 50;
+    updateTransform();
+}}
+
+// Mouse wheel zoom
+container.addEventListener('wheel', (e) => {{
+    e.preventDefault();
+    const rect = container.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const prevScale = scale;
+    if (e.deltaY < 0) scale = Math.min(scale * 1.1, 5);
+    else scale = Math.max(scale / 1.1, 0.1);
+
+    // Zoom toward mouse position
+    translateX = mouseX - (mouseX - translateX) * (scale / prevScale);
+    translateY = mouseY - (mouseY - translateY) * (scale / prevScale);
+    updateTransform();
+}});
+
+// Pan with mouse drag
+container.addEventListener('mousedown', (e) => {{
+    isDragging = true;
+    startX = e.clientX - translateX;
+    startY = e.clientY - translateY;
+    diagram.style.cursor = 'grabbing';
+}});
+
+document.addEventListener('mousemove', (e) => {{
+    if (!isDragging) return;
+    translateX = e.clientX - startX;
+    translateY = e.clientY - startY;
+    updateTransform();
+}});
+
+document.addEventListener('mouseup', () => {{
+    isDragging = false;
+    diagram.style.cursor = 'grab';
+}});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {{
+    if (e.key === '+' || e.key === '=') zoomIn();
+    else if (e.key === '-') zoomOut();
+    else if (e.key === '0') resetView();
+    else if (e.key === 'f') fitToScreen();
+}});
+
+// Initial fit after render
+setTimeout(fitToScreen, 500);
+</script>
+</body>
+</html>'''
+
+
 def regenerate_mermaid(blueprints, verbose=True):
-    """Regenerate Mermaid diagrams for all blueprints."""
+    """Regenerate Mermaid diagrams for all blueprints.
+
+    Generates three versions:
+    - <name>.mmd: Detailed flowchart with gates/actions
+    - <name>_simple.mmd: Simplified state diagram (for README)
+    - <name>_diagram.html: Interactive viewer with pan/zoom
+    """
     try:
         from visualizer import LppVisualizer
     except ImportError:
@@ -117,14 +269,30 @@ def regenerate_mermaid(blueprints, verbose=True):
                 bp = json.load(f)
 
             viz = LppVisualizer(bp)
-            mermaid = viz.as_mermaid_logic()
 
             results_dir = os.path.join(bp_info['dir'], 'results')
             os.makedirs(results_dir, exist_ok=True)
-            mermaid_path = os.path.join(results_dir, f"{bp_info['name']}.mmd")
 
-            with open(mermaid_path, 'w') as f:
-                f.write(mermaid)
+            # Generate detailed version
+            mermaid_detailed = viz.as_mermaid_logic()
+            detailed_path = os.path.join(results_dir, f"{bp_info['name']}.mmd")
+            with open(detailed_path, 'w') as f:
+                f.write(mermaid_detailed)
+
+            # Generate simplified version for README
+            mermaid_simple = viz.as_mermaid_simple()
+            simple_path = os.path.join(results_dir, f"{bp_info['name']}_simple.mmd")
+            with open(simple_path, 'w') as f:
+                f.write(mermaid_simple)
+
+            # Generate interactive HTML viewer with pan/zoom
+            html_content = _build_mermaid_html(
+                bp.get('name', bp_info['name']),
+                mermaid_detailed
+            )
+            html_path = os.path.join(results_dir, f"{bp_info['name']}_diagram.html")
+            with open(html_path, 'w') as f:
+                f.write(html_content)
 
             generated += 1
             if verbose:
@@ -390,6 +558,90 @@ def regenerate_report(verbose=True):
         return False
 
 
+def update_readmes(blueprints, verbose=True):
+    """Update README.md files with simplified Mermaid diagrams."""
+    updated = 0
+    errors = []
+
+    for bp_info in blueprints:
+        try:
+            readme_path = os.path.join(bp_info['dir'], 'README.md')
+            # Use simplified version for README (easier to read)
+            mermaid_path = os.path.join(
+                bp_info['dir'], 'results', f"{bp_info['name']}_simple.mmd"
+            )
+
+            if not os.path.exists(readme_path):
+                continue
+            if not os.path.exists(mermaid_path):
+                errors.append((bp_info['name'], 'No .mmd file found'))
+                continue
+
+            # Read the mermaid content
+            with open(mermaid_path, 'r') as f:
+                mermaid_content = f.read().strip()
+
+            # Read the README
+            with open(readme_path, 'r') as f:
+                readme_content = f.read()
+
+            # Pattern to match ```mermaid ... ``` blocks
+            # We look for the State Diagram section and replace its mermaid block
+            mermaid_pattern = re.compile(
+                r'(## State Diagram\s*\n+```mermaid\n)(.*?)(```)',
+                re.DOTALL
+            )
+
+            if mermaid_pattern.search(readme_content):
+                # Replace existing mermaid block
+                new_readme = mermaid_pattern.sub(
+                    r'\g<1>' + mermaid_content + r'\n\g<3>',
+                    readme_content
+                )
+            else:
+                # Try simpler pattern - any mermaid block after "State Diagram"
+                simple_pattern = re.compile(
+                    r'(```mermaid\n)(.*?)(```)',
+                    re.DOTALL
+                )
+                if simple_pattern.search(readme_content):
+                    # Replace the first mermaid block
+                    new_readme = simple_pattern.sub(
+                        r'\g<1>' + mermaid_content + r'\n\g<3>',
+                        readme_content,
+                        count=1
+                    )
+                else:
+                    # No mermaid block found, skip
+                    continue
+
+            # Add link to interactive viewer after the mermaid block
+            viewer_link = f"\n> **Interactive View:** [Open zoomable diagram](results/{bp_info['name']}_diagram.html) for pan/zoom controls\n"
+            # Check if link already exists
+            if '_diagram.html' not in new_readme:
+                # Add after the closing ``` of the mermaid block
+                new_readme = re.sub(
+                    r'(```mermaid\n.*?```)',
+                    r'\1' + viewer_link,
+                    new_readme,
+                    count=1,
+                    flags=re.DOTALL
+                )
+
+            # Only write if content changed
+            if new_readme != readme_content:
+                with open(readme_path, 'w') as f:
+                    f.write(new_readme)
+                updated += 1
+                if verbose:
+                    print(f"  [README] {bp_info['name']}")
+
+        except Exception as e:
+            errors.append((bp_info['name'], str(e)))
+
+    return updated, errors
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Regenerate L++ utils documentation'
@@ -402,6 +654,8 @@ def main():
                         help='Regenerate function dependency graphs')
     parser.add_argument('--mermaid', action='store_true',
                         help='Regenerate Mermaid diagrams')
+    parser.add_argument('--readme', action='store_true',
+                        help='Update README files with Mermaid diagrams')
     parser.add_argument('--report', action='store_true',
                         help='Regenerate analysis report')
     parser.add_argument('--all', action='store_true',
@@ -412,7 +666,7 @@ def main():
     args = parser.parse_args()
 
     # Default to --all if no specific flags
-    if not (args.graphs or args.logic or args.functions or args.mermaid or args.report):
+    if not (args.graphs or args.logic or args.functions or args.mermaid or args.readme or args.report):
         args.all = True
 
     verbose = not args.quiet
@@ -465,6 +719,14 @@ def main():
         total_errors.extend(errors)
         print(f"  Generated: {count} diagrams\n")
 
+    # Update READMEs with Mermaid diagrams
+    if args.all or args.readme:
+        print("Updating README files with Mermaid diagrams...")
+        count, errors = update_readmes(blueprints, verbose)
+        total_generated += count
+        total_errors.extend(errors)
+        print(f"  Updated: {count} READMEs\n")
+
     # Regenerate report
     if args.all or args.report:
         print("Generating Analysis Report...")
@@ -488,7 +750,10 @@ def main():
     print("  - Logic Graphs: utils/<tool>/results/<tool>_logic_graph.html")
     print("  - Func Graphs:  utils/<tool>/results/<tool>_functions.html")
     print("  - Combined:     utils/function_dependencies.html")
-    print("  - Mermaid:      utils/<tool>/results/<tool>.mmd")
+    print("  - Mermaid:      utils/<tool>/results/<tool>.mmd (detailed)")
+    print("  - Mermaid:      utils/<tool>/results/<tool>_simple.mmd")
+    print("  - Diagram:      utils/<tool>/results/<tool>_diagram.html (zoomable)")
+    print("  - READMEs:      utils/<tool>/README.md (uses simple diagram)")
     print("  - Report:       utils/analysis_report.md")
 
     return 0 if not total_errors else 1

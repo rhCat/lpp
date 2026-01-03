@@ -1,0 +1,14 @@
+stateDiagram-v2
+    %% L++ State Diagram: Skill Registry
+    [*] --> idle
+    idle --> scanned : SCAN
+    scanned --> scanned : SCAN
+    scanned --> viewing : SELECT
+    viewing --> scanned : BACK
+    viewing --> viewing : SELECT
+    scanned --> scanned : EXPORT
+    viewing --> viewing : EXPORT
+    scanned --> idle : RESET
+    error --> idle : RETRY
+    idle --> error : ERROR [error is not None]
+    scanned --> error : ERROR [error is not None]

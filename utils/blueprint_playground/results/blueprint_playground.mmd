@@ -1,93 +1,102 @@
 flowchart TD
-    %% L++ Logic CAD Export
-    state_idle(["<b>idle</b><br/>No blueprint loaded, waiting for input"]):::entry
-    state_editing(["<b>editing</b><br/>Blueprint loaded and being edited"])
-    state_error(["<b>error</b><br/>Error state"])
-    state_simulating(["<b>simulating</b><br/>Running interactive simulation"])
-    act_t_0_0[["load_blueprint, validate_blueprint, generate_diagram"]]
-    state_idle -- "LOAD" --> act_t_0_0
-    act_t_0_0 --> state_editing
-    act_t_1_0[["decode_share_url, validate_blueprint, generate_diagram"]]
-    state_idle -- "LOAD_FROM_URL" --> act_t_1_0
-    act_t_1_0 --> state_editing
-    act_t_2_0[["load_blueprint, validate_blueprint, generate_diagram"]]
-    state_editing -- "LOAD" --> act_t_2_0
-    act_t_2_0 --> state_editing
-    gate_t_3_0{{"has_permission?"}}
-    state_editing -- "UPDATE" --> gate_t_3_0
-    act_t_3_0[["update_blueprint, validate_json, log_update"]]
-    gate_t_3_0 -- True --> act_t_3_0
-    act_t_3_0 --> state_editing
-    gate_t_4_0{{"has_blueprint?"}}
-    state_editing -- "VALIDATE" --> gate_t_4_0
-    act_t_4_0[["validate_json, validate_blueprint"]]
-    gate_t_4_0 -- True --> act_t_4_0
-    act_t_4_0 --> state_editing
-    gate_t_5_0{{"has_blueprint, is_valid_json?"}}
-    state_editing -- "FORMAT" --> gate_t_5_0
-    act_t_5_0[["format_blueprint, validate_blueprint, generate_diagram"]]
-    gate_t_5_0 -- True --> act_t_5_0
-    act_t_5_0 --> state_editing
-    gate_t_6_0{{"has_blueprint, is_valid_blueprint?"}}
-    state_editing -- "REGENERATE_DIAGRAM" --> gate_t_6_0
-    act_t_6_0[["generate_diagram"]]
-    gate_t_6_0 -- True --> act_t_6_0
-    act_t_6_0 --> state_editing
-    gate_t_7_0{{"has_blueprint, is_valid_blueprint?"}}
-    state_editing -- "START_SIM" --> gate_t_7_0
-    act_t_7_0[["init_simulation"]]
-    gate_t_7_0 -- True --> act_t_7_0
-    act_t_7_0 --> state_simulating
-    gate_t_8_0{{"has_simulation?"}}
-    state_simulating -- "DISPATCH" --> gate_t_8_0
-    act_t_8_0[["dispatch_event, get_available_events"]]
-    gate_t_8_0 -- True --> act_t_8_0
-    act_t_8_0 --> state_simulating
-    act_t_9_0[["init_simulation"]]
-    state_simulating -- "RESET_SIM" --> act_t_9_0
-    act_t_9_0 --> state_simulating
-    act_t_10_0[["clear_simulation"]]
-    state_simulating -- "STOP_SIM" --> act_t_10_0
-    act_t_10_0 --> state_editing
-    gate_t_11_0{{"has_blueprint?"}}
-    state_editing -- "SHARE" --> gate_t_11_0
-    act_t_11_0[["encode_share_url"]]
-    gate_t_11_0 -- True --> act_t_11_0
-    act_t_11_0 --> state_editing
-    gate_t_12_0{{"has_blueprint?"}}
-    state_simulating -- "SHARE" --> gate_t_12_0
-    act_t_12_0[["encode_share_url"]]
-    gate_t_12_0 -- True --> act_t_12_0
-    act_t_12_0 --> state_simulating
-    gate_t_13_0{{"has_blueprint?"}}
-    state_editing -- "EXPORT" --> gate_t_13_0
-    act_t_13_0[["export_blueprint"]]
-    gate_t_13_0 -- True --> act_t_13_0
-    act_t_13_0 --> state_editing
-    gate_t_14_0{{"has_blueprint?"}}
-    state_simulating -- "EXPORT" --> gate_t_14_0
-    act_t_14_0[["export_blueprint"]]
-    gate_t_14_0 -- True --> act_t_14_0
-    act_t_14_0 --> state_simulating
-    act_t_15_0[["clear_blueprint, clear_simulation"]]
-    state_editing -- "UNLOAD" --> act_t_15_0
-    act_t_15_0 --> state_idle
-    act_t_16_0[["clear_blueprint, clear_simulation"]]
-    state_simulating -- "UNLOAD" --> act_t_16_0
-    act_t_16_0 --> state_idle
-    act_t_17_0[["set_error"]]
-    state_editing -- "ERROR" --> act_t_17_0
-    act_t_17_0 --> state_error
-    act_t_18_0[["set_error"]]
-    state_simulating -- "ERROR" --> act_t_18_0
-    act_t_18_0 --> state_error
-    act_t_19_0[["clear_error, clear_blueprint, clear_simulation"]]
-    state_error -- "CLEAR" --> act_t_19_0
-    act_t_19_0 --> state_idle
-    gate_t_20_0{{"has_blueprint?"}}
-    state_error -- "RETRY" --> gate_t_20_0
-    act_t_20_0[["clear_error"]]
-    gate_t_20_0 -- True --> act_t_20_0
-    act_t_20_0 --> state_editing
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
-    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px
+    %% L++ Logic CAD: L++ Blueprint Playground
+        state_idle(["idle\nNo blueprint loaded, waiting for input"]):::entry
+    subgraph Processing
+        state_editing(["editing\nBlueprint loaded and being edited"])
+        state_simulating(["simulating\nRunning interactive simulation"])
+    end
+        state_error[["error\nError state"]]:::errorState
+
+    %% Transitions
+    act_t0s0[["load_blueprint, validate_blueprint, generate_diagram"]]:::action
+    state_idle -- "LOAD" --> act_t0s0
+    act_t0s0 --> state_editing
+    act_t1s0[["decode_share_url, validate_blueprint, generate_diagram"]]:::action
+    state_idle -- "LOAD_FROM_URL" --> act_t1s0
+    act_t1s0 --> state_editing
+    act_t2s0[["load_blueprint, validate_blueprint, generate_diagram"]]:::action
+    state_editing -- "LOAD" --> act_t2s0
+    act_t2s0 --> state_editing
+    gate_t3s0{{"True?"}}:::gate
+    state_editing -- "UPDATE" --> gate_t3s0
+    act_t3s0[["update_blueprint, validate_json, log_update"]]:::action
+    gate_t3s0 -- ✓ --> act_t3s0
+    act_t3s0 --> state_editing
+    gate_t4s0{{"blueprint_json is not None ...?"}}:::gate
+    state_editing -- "VALIDATE" --> gate_t4s0
+    act_t4s0[["validate_json, validate_blueprint"]]:::action
+    gate_t4s0 -- ✓ --> act_t4s0
+    act_t4s0 --> state_editing
+    gate_t5s0{{"blueprint_json is not None ... && is_valid_json is not None a...?"}}:::gate
+    state_editing -- "FORMAT" --> gate_t5s0
+    act_t5s0[["format_blueprint, validate_blueprint, generate_diagram"]]:::action
+    gate_t5s0 -- ✓ --> act_t5s0
+    act_t5s0 --> state_editing
+    gate_t6s0{{"blueprint_json is not None ... && is_valid_blueprint is not N...?"}}:::gate
+    state_editing -- "REGENERATE_DIAGRAM" --> gate_t6s0
+    act_t6s0[["generate_diagram"]]:::action
+    gate_t6s0 -- ✓ --> act_t6s0
+    act_t6s0 --> state_editing
+    gate_t7s0{{"blueprint_json is not None ... && is_valid_blueprint is not N...?"}}:::gate
+    state_editing -- "START_SIM" --> gate_t7s0
+    act_t7s0[["init_simulation"]]:::action
+    gate_t7s0 -- ✓ --> act_t7s0
+    act_t7s0 --> state_simulating
+    gate_t8s0{{"sim_state is not None?"}}:::gate
+    state_simulating -- "DISPATCH" --> gate_t8s0
+    act_t8s0[["dispatch_event, get_available_events"]]:::action
+    gate_t8s0 -- ✓ --> act_t8s0
+    act_t8s0 --> state_simulating
+    act_t9s0[["init_simulation"]]:::action
+    state_simulating -- "RESET_SIM" --> act_t9s0
+    act_t9s0 --> state_simulating
+    act_t10s0[["clear_simulation"]]:::action
+    state_simulating -- "STOP_SIM" --> act_t10s0
+    act_t10s0 --> state_editing
+    gate_t11s0{{"blueprint_json is not None ...?"}}:::gate
+    state_editing -- "SHARE" --> gate_t11s0
+    act_t11s0[["encode_share_url"]]:::action
+    gate_t11s0 -- ✓ --> act_t11s0
+    act_t11s0 --> state_editing
+    gate_t12s0{{"blueprint_json is not None ...?"}}:::gate
+    state_simulating -- "SHARE" --> gate_t12s0
+    act_t12s0[["encode_share_url"]]:::action
+    gate_t12s0 -- ✓ --> act_t12s0
+    act_t12s0 --> state_simulating
+    gate_t13s0{{"blueprint_json is not None ...?"}}:::gate
+    state_editing -- "EXPORT" --> gate_t13s0
+    act_t13s0[["export_blueprint"]]:::action
+    gate_t13s0 -- ✓ --> act_t13s0
+    act_t13s0 --> state_editing
+    gate_t14s0{{"blueprint_json is not None ...?"}}:::gate
+    state_simulating -- "EXPORT" --> gate_t14s0
+    act_t14s0[["export_blueprint"]]:::action
+    gate_t14s0 -- ✓ --> act_t14s0
+    act_t14s0 --> state_simulating
+    act_t15s0[["clear_blueprint, clear_simulation"]]:::action
+    state_editing -- "UNLOAD" --> act_t15s0
+    act_t15s0 --> state_idle
+    act_t16s0[["clear_blueprint, clear_simulation"]]:::action
+    state_simulating -- "UNLOAD" --> act_t16s0
+    act_t16s0 --> state_idle
+    act_t17s0[["set_error"]]:::action
+    state_editing -- "ERROR" --> act_t17s0
+    act_t17s0 --> state_error
+    act_t18s0[["set_error"]]:::action
+    state_simulating -- "ERROR" --> act_t18s0
+    act_t18s0 --> state_error
+    act_t19s0[["clear_error, clear_blueprint, clear_simulation"]]:::action
+    state_error -- "CLEAR" --> act_t19s0
+    act_t19s0 --> state_idle
+    gate_t20s0{{"blueprint_json is not None ...?"}}:::gate
+    state_error -- "RETRY" --> gate_t20s0
+    act_t20s0[["clear_error"]]:::action
+    gate_t20s0 -- ✓ --> act_t20s0
+    act_t20s0 --> state_editing
+
+    %% Styling
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px

@@ -1,45 +1,54 @@
 flowchart TD
-    %% L++ Logic CAD Export
-    state_idle(["<b>idle</b><br/>Ready to scan"]):::entry
-    state_error(["<b>error</b><br/>Error occurred"])
-    state_scanned(["<b>scanned</b><br/>Skills discovered"])
-    state_viewing(["<b>viewing</b><br/>Viewing skill detail"])
-    act_t_0_0[["setBasePath, scanSkills"]]
-    state_idle -- "SCAN" --> act_t_0_0
-    act_t_0_0 --> state_scanned
-    act_t_1_0[["clearSelection, setBasePath, scanSkills"]]
-    state_scanned -- "SCAN" --> act_t_1_0
-    act_t_1_0 --> state_scanned
-    act_t_2_0[["loadSkillDetail"]]
-    state_scanned -- "SELECT" --> act_t_2_0
-    act_t_2_0 --> state_viewing
-    act_t_3_0[["clearSelection"]]
-    state_viewing -- "BACK" --> act_t_3_0
-    act_t_3_0 --> state_scanned
-    act_t_4_0[["loadSkillDetail"]]
-    state_viewing -- "SELECT" --> act_t_4_0
-    act_t_4_0 --> state_viewing
-    act_t_5_0[["exportRegistry"]]
-    state_scanned -- "EXPORT" --> act_t_5_0
-    act_t_5_0 --> state_scanned
-    act_t_6_0[["exportRegistry"]]
-    state_viewing -- "EXPORT" --> act_t_6_0
-    act_t_6_0 --> state_viewing
-    act_t_7_0[["clearSelection"]]
-    state_scanned -- "RESET" --> act_t_7_0
-    act_t_7_0 --> state_idle
-    act_t_8_0[["clearError"]]
-    state_error -- "RETRY" --> act_t_8_0
-    act_t_8_0 --> state_idle
-    gate_t_9_0{{"hasError?"}}
-    state_idle -- "ERROR" --> gate_t_9_0
-    act_t_9_0[["log_error"]]
-    gate_t_9_0 -- True --> act_t_9_0
-    act_t_9_0 --> state_error
-    gate_t_10_0{{"hasError?"}}
-    state_scanned -- "ERROR" --> gate_t_10_0
-    act_t_10_0[["log_error"]]
-    gate_t_10_0 -- True --> act_t_10_0
-    act_t_10_0 --> state_error
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
-    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px
+    %% L++ Logic CAD: Skill Registry
+        state_idle(["idle\nReady to scan"]):::entry
+    subgraph Processing
+        state_scanned(["scanned\nSkills discovered"])
+        state_viewing(["viewing\nViewing skill detail"])
+    end
+        state_error[["error\nError occurred"]]:::errorState
+
+    %% Transitions
+    act_t0s0[["setBasePath, scanSkills"]]:::action
+    state_idle -- "SCAN" --> act_t0s0
+    act_t0s0 --> state_scanned
+    act_t1s0[["clearSelection, setBasePath, scanSkills"]]:::action
+    state_scanned -- "SCAN" --> act_t1s0
+    act_t1s0 --> state_scanned
+    act_t2s0[["loadSkillDetail"]]:::action
+    state_scanned -- "SELECT" --> act_t2s0
+    act_t2s0 --> state_viewing
+    act_t3s0[["clearSelection"]]:::action
+    state_viewing -- "BACK" --> act_t3s0
+    act_t3s0 --> state_scanned
+    act_t4s0[["loadSkillDetail"]]:::action
+    state_viewing -- "SELECT" --> act_t4s0
+    act_t4s0 --> state_viewing
+    act_t5s0[["exportRegistry"]]:::action
+    state_scanned -- "EXPORT" --> act_t5s0
+    act_t5s0 --> state_scanned
+    act_t6s0[["exportRegistry"]]:::action
+    state_viewing -- "EXPORT" --> act_t6s0
+    act_t6s0 --> state_viewing
+    act_t7s0[["clearSelection"]]:::action
+    state_scanned -- "RESET" --> act_t7s0
+    act_t7s0 --> state_idle
+    act_t8s0[["clearError"]]:::action
+    state_error -- "RETRY" --> act_t8s0
+    act_t8s0 --> state_idle
+    gate_t9s0{{"error is not None?"}}:::gate
+    state_idle -- "ERROR" --> gate_t9s0
+    act_t9s0[["log_error"]]:::action
+    gate_t9s0 -- ✓ --> act_t9s0
+    act_t9s0 --> state_error
+    gate_t10s0{{"error is not None?"}}:::gate
+    state_scanned -- "ERROR" --> gate_t10s0
+    act_t10s0[["log_error"]]:::action
+    gate_t10s0 -- ✓ --> act_t10s0
+    act_t10s0 --> state_error
+
+    %% Styling
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px

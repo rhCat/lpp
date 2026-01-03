@@ -18,43 +18,38 @@ The Compliance Checker is itself an L++ blueprint that demonstrates the framewor
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: L++ Compliance Checker
     [*] --> idle
-
-    idle: idle
-    blueprint_loaded: blueprint_loaded
-    ready: ready
-    checking: checking
-    report_ready: report_ready
-    error: error
-
-    idle --> blueprint_loaded: LOAD_BLUEPRINT
-    idle --> error: LOAD_FAILED
-    blueprint_loaded --> blueprint_loaded: LOAD_BLUEPRINT
-    ready --> ready: LOAD_BLUEPRINT
-    report_ready --> ready: LOAD_BLUEPRINT
-    blueprint_loaded --> ready: LOAD_POLICIES
-    blueprint_loaded --> ready: LOAD_POLICY
-    ready --> ready: LOAD_POLICIES
-    report_ready --> ready: LOAD_POLICIES
-    ready --> ready: LOAD_POLICY
-    ready --> checking: CHECK
-    ready --> checking: CHECK_POLICY
-    checking --> report_ready: GENERATE_REPORT
-    checking --> report_ready: AUTO
-    report_ready --> report_ready: EXPORT
-    report_ready --> checking: CHECK
-    report_ready --> ready: BACK
-    ready --> blueprint_loaded: BACK
-    blueprint_loaded --> idle: UNLOAD
-    ready --> idle: UNLOAD
-    report_ready --> idle: UNLOAD
-    error --> idle: CLEAR
-    idle --> error: ERROR
-    blueprint_loaded --> error: ERROR
-    ready --> error: ERROR
-    checking --> error: ERROR
-    report_ready --> error: ERROR
+    idle --> blueprint_loaded : LOAD_BLUEPRINT [blueprint is None]
+    idle --> error : LOAD_FAILED
+    blueprint_loaded --> blueprint_loaded : LOAD_BLUEPRINT
+    ready --> ready : LOAD_BLUEPRINT
+    report_ready --> ready : LOAD_BLUEPRINT
+    blueprint_loaded --> ready : LOAD_POLICIES [blueprint is not None]
+    blueprint_loaded --> ready : LOAD_POLICY [blueprint is not None]
+    ready --> ready : LOAD_POLICIES
+    report_ready --> ready : LOAD_POLICIES
+    ready --> ready : LOAD_POLICY
+    ready --> checking : CHECK [blueprint is not None && policies is not None and le...]
+    ready --> checking : CHECK_POLICY [blueprint is not None]
+    checking --> report_ready : GENERATE_REPORT [findings is not None and le...]
+    checking --> report_ready : AUTO
+    report_ready --> report_ready : EXPORT [report is not None]
+    report_ready --> checking : CHECK [blueprint is not None && policies is not None and le...]
+    report_ready --> ready : BACK
+    ready --> blueprint_loaded : BACK
+    blueprint_loaded --> idle : UNLOAD
+    ready --> idle : UNLOAD
+    report_ready --> idle : UNLOAD
+    error --> idle : CLEAR
+    idle --> error : ERROR
+    blueprint_loaded --> error : ERROR
+    ready --> error : ERROR
+    checking --> error : ERROR
+    report_ready --> error : ERROR
 ```
+> **Interactive View:** [Open zoomable diagram](results/compliance_checker_diagram.html) for pan/zoom controls
+
 
 ## Usage
 

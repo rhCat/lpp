@@ -1,53 +1,61 @@
 flowchart TD
-    %% L++ Logic CAD Export
-    state_idle(["<b>idle</b><br/>Awaiting file path"]):::entry
-    state_parsing(["<b>parsing</b><br/>Parsing Python source into AST"])
-    state_error(["<b>error</b><br/>Analysis failed"])
-    state_extracting(["<b>extracting</b><br/>Extracting exports and imports"])
-    state_tracing(["<b>tracing</b><br/>Tracing function call graph"])
-    state_computing(["<b>computing</b><br/>Computing coupling metrics"])
-    state_complete(["<b>complete</b><br/>Module graph generated"])
-    gate_t_0_0{{"hasFilePath?"}}
-    state_idle -- "DECODE" --> gate_t_0_0
-    act_t_0_0[["loadFile, parseAst"]]
-    gate_t_0_0 -- True --> act_t_0_0
-    act_t_0_0 --> state_parsing
-    gate_t_1_0{{"hasError?"}}
-    state_parsing -- "AUTO" --> gate_t_1_0
-    gate_t_1_0 -- True --> state_error
-    gate_t_2_0{{"hasAst?"}}
-    state_parsing -- "AUTO" --> gate_t_2_0
-    act_t_2_0[["extractExports, extractImports"]]
-    gate_t_2_0 -- True --> act_t_2_0
-    act_t_2_0 --> state_extracting
-    gate_t_3_0{{"hasError?"}}
-    state_extracting -- "AUTO" --> gate_t_3_0
-    gate_t_3_0 -- True --> state_error
-    gate_t_4_0{{"hasExtracts?"}}
-    state_extracting -- "AUTO" --> gate_t_4_0
-    act_t_4_0[["traceInternalCalls, traceExternalCalls"]]
-    gate_t_4_0 -- True --> act_t_4_0
-    act_t_4_0 --> state_tracing
-    gate_t_5_0{{"hasError?"}}
-    state_tracing -- "AUTO" --> gate_t_5_0
-    gate_t_5_0 -- True --> state_error
-    gate_t_6_0{{"hasCalls?"}}
-    state_tracing -- "AUTO" --> gate_t_6_0
-    act_t_6_0[["computeCoupling"]]
-    gate_t_6_0 -- True --> act_t_6_0
-    act_t_6_0 --> state_computing
-    gate_t_7_0{{"hasError?"}}
-    state_computing -- "AUTO" --> gate_t_7_0
-    gate_t_7_0 -- True --> state_error
-    act_t_8_0[["generateModuleGraph"]]
-    state_computing -- "AUTO" --> act_t_8_0
-    act_t_8_0 --> state_complete
-    state_idle -- "RESET" --> state_idle
+    %% L++ Logic CAD: Python Function Decoder
+        state_idle(["idle\nAwaiting file path"]):::entry
+    subgraph Processing
+        state_parsing(["parsing\nParsing Python source into AST"])
+        state_extracting(["extracting\nExtracting exports and imports"])
+        state_tracing(["tracing\nTracing function call graph"])
+        state_computing(["computing\nComputing coupling metrics"])
+    end
+        state_complete(["complete\nModule graph generated"])
+        state_error[["error\nAnalysis failed"]]:::errorState
+
+    %% Transitions
+    gate_t0s0{{"filePath is not None and le...?"}}:::gate
+    state_idle -- "DECODE" --> gate_t0s0
+    act_t0s0[["loadFile, parseAst"]]:::action
+    gate_t0s0 -- ✓ --> act_t0s0
+    act_t0s0 --> state_parsing
+    gate_t1s0{{"error is not None and len(e...?"}}:::gate
+    state_parsing -- "AUTO" --> gate_t1s0
+    gate_t1s0 -- ✓ --> state_error
+    gate_t2s0{{"ast is not None?"}}:::gate
+    state_parsing -- "AUTO" --> gate_t2s0
+    act_t2s0[["extractExports, extractImports"]]:::action
+    gate_t2s0 -- ✓ --> act_t2s0
+    act_t2s0 --> state_extracting
+    gate_t3s0{{"error is not None and len(e...?"}}:::gate
+    state_extracting -- "AUTO" --> gate_t3s0
+    gate_t3s0 -- ✓ --> state_error
+    gate_t4s0{{"exports is not None and imp...?"}}:::gate
+    state_extracting -- "AUTO" --> gate_t4s0
+    act_t4s0[["traceInternalCalls, traceExternalCalls"]]:::action
+    gate_t4s0 -- ✓ --> act_t4s0
+    act_t4s0 --> state_tracing
+    gate_t5s0{{"error is not None and len(e...?"}}:::gate
+    state_tracing -- "AUTO" --> gate_t5s0
+    gate_t5s0 -- ✓ --> state_error
+    gate_t6s0{{"internalCalls is not None?"}}:::gate
+    state_tracing -- "AUTO" --> gate_t6s0
+    act_t6s0[["computeCoupling"]]:::action
+    gate_t6s0 -- ✓ --> act_t6s0
+    act_t6s0 --> state_computing
+    gate_t7s0{{"error is not None and len(e...?"}}:::gate
+    state_computing -- "AUTO" --> gate_t7s0
+    gate_t7s0 -- ✓ --> state_error
+    act_t8s0[["generateModuleGraph"]]:::action
+    state_computing -- "AUTO" --> act_t8s0
+    act_t8s0 --> state_complete
     state_parsing -- "RESET" --> state_idle
     state_error -- "RESET" --> state_idle
     state_extracting -- "RESET" --> state_idle
     state_tracing -- "RESET" --> state_idle
     state_computing -- "RESET" --> state_idle
     state_complete -- "RESET" --> state_idle
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:4px
-    classDef terminal fill:#eceff1,stroke:#263238,stroke-width:4px
+
+    %% Styling
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px

@@ -1,0 +1,24 @@
+stateDiagram-v2
+    %% L++ State Diagram: L++ Blueprint Playground
+    [*] --> idle
+    idle --> editing : LOAD
+    idle --> editing : LOAD_FROM_URL
+    editing --> editing : LOAD
+    editing --> editing : UPDATE [True]
+    editing --> editing : VALIDATE [blueprint_json is not None ...]
+    editing --> editing : FORMAT [blueprint_json is not None ... && is_valid_json is not None a...]
+    editing --> editing : REGENERATE_DIAGRAM [blueprint_json is not None ... && is_valid_blueprint is not N...]
+    editing --> simulating : START_SIM [blueprint_json is not None ... && is_valid_blueprint is not N...]
+    simulating --> simulating : DISPATCH [sim_state is not None]
+    simulating --> simulating : RESET_SIM
+    simulating --> editing : STOP_SIM
+    editing --> editing : SHARE [blueprint_json is not None ...]
+    simulating --> simulating : SHARE [blueprint_json is not None ...]
+    editing --> editing : EXPORT [blueprint_json is not None ...]
+    simulating --> simulating : EXPORT [blueprint_json is not None ...]
+    editing --> idle : UNLOAD
+    simulating --> idle : UNLOAD
+    editing --> error : ERROR
+    simulating --> error : ERROR
+    error --> idle : CLEAR
+    error --> editing : RETRY [blueprint_json is not None ...]

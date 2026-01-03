@@ -1,0 +1,6 @@
+stateDiagram-v2
+    %% L++ State Diagram: Graph Visualizer
+    [*] --> idle
+    idle --> generating : start [has_blueprint == True]
+    generating --> done : generate
+    done --> [*]

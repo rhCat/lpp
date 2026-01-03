@@ -1,0 +1,37 @@
+stateDiagram-v2
+    %% L++ State Diagram: L++ Blueprint Composer
+    [*] --> idle
+    idle --> parent_loaded : LOAD_PARENT
+    idle --> composed : LOAD_MANIFEST
+    parent_loaded --> child_loaded : LOAD_CHILD [parent_blueprint is not None]
+    parent_loaded --> parent_loaded : LOAD_PARENT
+    child_loaded --> child_loaded : LOAD_CHILD
+    child_loaded --> defining_embedding : DEFINE [parent_blueprint is not Non...]
+    defining_embedding --> defining_embedding : SET_INPUT [current_embedding is not None]
+    defining_embedding --> defining_embedding : SET_OUTPUT [current_embedding is not None]
+    defining_embedding --> defining_embedding : SET_EVENTS [current_embedding is not None]
+    defining_embedding --> embedding_ready : DONE [current_embedding is not None]
+    embedding_ready --> child_loaded : ADD_MORE
+    embedding_ready --> composed : COMPOSE [embeddings is not None and ...]
+    child_loaded --> composed : QUICK_COMPOSE [parent_blueprint is not Non...]
+    composed --> validated : VALIDATE [composed_blueprint is not None]
+    composed --> composed : FLATTEN [composed_blueprint is not None]
+    composed --> composed : EXPORT [composed_blueprint is not None]
+    validated --> validated : EXPORT [composed_blueprint is not None]
+    embedding_ready --> embedding_ready : SAVE_MANIFEST [embeddings is not None and ... && parent_blueprint is not Non...]
+    validated --> validated : VALIDATE [composed_blueprint is not None]
+    validated --> composed : BACK
+    composed --> embedding_ready : BACK
+    defining_embedding --> child_loaded : CANCEL
+    composed --> idle : RESET
+    validated --> idle : RESET
+    parent_loaded --> idle : CLEAR
+    child_loaded --> idle : CLEAR
+    error --> idle : CLEAR
+    idle --> error : LOAD_FAILED
+    composed --> error : LOAD_FAILED
+    parent_loaded --> error : LOAD_FAILED
+    embedding_ready --> error : LOAD_FAILED
+    validated --> error : LOAD_FAILED
+    child_loaded --> error : LOAD_FAILED
+    defining_embedding --> error : LOAD_FAILED

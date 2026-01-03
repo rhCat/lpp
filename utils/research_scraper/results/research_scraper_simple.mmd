@@ -1,0 +1,14 @@
+stateDiagram-v2
+    %% L++ State Diagram: Research Scraper
+    [*] --> idle
+    idle --> hasResults : SEARCH_ARXIV
+    idle --> hasResults : SEARCH_SCHOLAR
+    idle --> hasResults : SEARCH_WEB
+    hasResults --> hasResults : SELECT
+    hasResults --> hasResults : SEARCH_ARXIV
+    hasResults --> hasResults : SEARCH_SCHOLAR
+    hasResults --> hasResults : SEARCH_WEB
+    hasResults --> idle : CLEAR
+    error --> idle : RETRY
+    idle --> error : ERROR [error is not None]
+    hasResults --> error : ERROR [error is not None]

@@ -18,34 +18,37 @@ The Event Sequence Simulator allows you to load any L++ blueprint and interactiv
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: L++ Event Sequence Simulator
     [*] --> idle
-    idle --> ready: LOAD
-    idle --> error: LOAD_FAILED
-    ready --> ready: LOAD
-    ready --> simulating: START
-    ready --> idle: UNLOAD
-    simulating --> simulating: DISPATCH
-    simulating --> simulating: SET_CONTEXT
-    simulating --> simulating: REFRESH
-    simulating --> simulating: EVAL_GATES
-    simulating --> simulating: FORK
-    simulating --> simulating: SWITCH_FORK
-    simulating --> simulating: STEP_BACK
-    simulating --> simulating: SET_SEQUENCE
-    simulating --> simulating: RUN_SEQUENCE
-    simulating --> simulating: FUZZ
-    simulating --> simulating: FIND_PATH
-    simulating --> simulating: EXPLORE
-    simulating --> simulating: VIEW_TRACE
-    simulating --> simulating: VIEW_SPACE
-    simulating --> simulating: EXPORT
-    simulating --> simulating: IMPORT
-    simulating --> simulating: RESET
-    simulating --> ready: STOP
-    simulating --> ready: LOAD
-    simulating --> idle: UNLOAD
-    error --> idle: CLEAR
+    idle --> ready : LOAD [blueprint is None]
+    idle --> error : LOAD_FAILED
+    ready --> ready : LOAD
+    simulating --> ready : LOAD
+    ready --> simulating : START [blueprint is not None]
+    simulating --> simulating : DISPATCH
+    simulating --> simulating : SET_CONTEXT
+    simulating --> simulating : REFRESH
+    simulating --> simulating : EVAL_GATES
+    simulating --> simulating : FORK
+    simulating --> simulating : SWITCH_FORK [forks is not None and len(f...]
+    simulating --> simulating : STEP_BACK [trace is not None and len(t...]
+    simulating --> simulating : SET_SEQUENCE
+    simulating --> simulating : RUN_SEQUENCE [sequence is not None and le...]
+    simulating --> simulating : FUZZ
+    simulating --> simulating : FIND_PATH
+    simulating --> simulating : EXPLORE
+    simulating --> simulating : VIEW_TRACE
+    simulating --> simulating : VIEW_SPACE [state_space is not None]
+    simulating --> simulating : EXPORT [trace is not None and len(t...]
+    simulating --> simulating : IMPORT [blueprint is not None]
+    simulating --> simulating : RESET
+    simulating --> ready : STOP
+    ready --> idle : UNLOAD
+    simulating --> idle : UNLOAD
+    error --> idle : CLEAR
 ```
+> **Interactive View:** [Open zoomable diagram](results/event_simulator_diagram.html) for pan/zoom controls
+
 
 ## Installation
 

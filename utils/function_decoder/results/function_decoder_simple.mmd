@@ -1,0 +1,18 @@
+stateDiagram-v2
+    %% L++ State Diagram: Python Function Decoder
+    [*] --> idle
+    idle --> parsing : DECODE [filePath is not None and le...]
+    parsing --> error : AUTO [error is not None and len(e...]
+    parsing --> extracting : AUTO [ast is not None]
+    extracting --> error : AUTO [error is not None and len(e...]
+    extracting --> tracing : AUTO [exports is not None and imp...]
+    tracing --> error : AUTO [error is not None and len(e...]
+    tracing --> computing : AUTO [internalCalls is not None]
+    computing --> error : AUTO [error is not None and len(e...]
+    computing --> complete : AUTO
+    parsing --> idle : RESET
+    error --> idle : RESET
+    extracting --> idle : RESET
+    tracing --> idle : RESET
+    computing --> idle : RESET
+    complete --> idle : RESET

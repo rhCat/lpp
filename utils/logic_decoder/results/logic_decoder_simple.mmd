@@ -1,0 +1,13 @@
+stateDiagram-v2
+    %% L++ State Diagram: Python Logic Decoder
+    [*] --> idle
+    idle --> parsing : DECODE
+    parsing --> analyzing : AUTO
+    analyzing --> inferring : AUTO
+    inferring --> generating : AUTO
+    generating --> complete : AUTO
+    parsing --> error : ERROR
+    analyzing --> error : ERROR
+    inferring --> error : ERROR
+    complete --> idle : RESET
+    error --> idle : RESET

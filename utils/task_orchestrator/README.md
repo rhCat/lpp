@@ -23,22 +23,49 @@ Task → Feature Tree → Leaf Queue → Atomic Execution
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: Hierarchical Task Orchestrator
     [*] --> idle
-    idle --> analyzing: SUBMIT
-    analyzing --> expanding: has_tree
-    analyzing --> planning: is_atomic
-    expanding --> planning: all_expanded
-    planning --> building: needs_tools
-    planning --> executing: no_tools
-    building --> executing: tools_done
-    executing --> traversing: has_more
-    executing --> reflecting: all_done
-    traversing --> executing: next_leaf
-    reflecting --> evaluating: DONE
-    evaluating --> complete: is_complete
-    evaluating --> expanding: iterate
+    idle --> idle : START
+    idle --> analyzing : SUBMIT [True]
+    analyzing --> expanding : DONE [feature_tree is not None && depth < max_depth and is_le... && error is None]
+    analyzing --> planning : DONE [feature_tree is not None && is_leaf == True or depth >=... && error is None]
+    analyzing --> error : DONE [error is not None]
+    expanding --> expanding : DONE [depth < max_depth and is_le... && error is None]
+    expanding --> planning : DONE [is_leaf == True or depth >=... && error is None]
+    expanding --> error : DONE [error is not None]
+    planning --> building : DONE [tools_pending is not None a... && error is None]
+    planning --> executing : DONE [tools_pending is None or to... && error is None]
+    planning --> error : DONE [error is not None]
+    building --> building : DONE [tools_pending is not None a... && error is None]
+    building --> executing : DONE [tools_pending is None or to... && error is None]
+    building --> error : DONE [error is not None]
+    executing --> traversing : DONE [exec_count < leaf_count && error is None]
+    executing --> reflecting : DONE [exec_count >= leaf_count && error is None]
+    executing --> error : DONE [error is not None]
+    traversing --> building : DONE [tools_pending is not None a... && error is None]
+    traversing --> executing : DONE [tools_pending is None or to... && error is None]
+    traversing --> error : DONE [error is not None]
+    reflecting --> evaluating : DONE [error is None]
+    reflecting --> error : DONE [error is not None]
+    evaluating --> complete : DONE [is_complete == True && error is None]
+    evaluating --> expanding : DONE [is_complete is None or is_c... && iteration < max_iterations && error is None]
+    evaluating --> complete : DONE [iteration >= max_iterations]
+    evaluating --> error : DONE [error is not None]
+    error --> idle : RETRY
+    analyzing --> idle : RESET
+    error --> idle : RESET
+    expanding --> idle : RESET
+    planning --> idle : RESET
+    building --> idle : RESET
+    executing --> idle : RESET
+    reflecting --> idle : RESET
+    traversing --> idle : RESET
+    evaluating --> idle : RESET
+    complete --> idle : RESET
     complete --> [*]
 ```
+> **Interactive View:** [Open zoomable diagram](results/task_orchestrator_diagram.html) for pan/zoom controls
+
 
 ## Atomic Compute Units
 

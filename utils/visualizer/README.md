@@ -101,21 +101,37 @@ visualizer/
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: L++ Blueprint Visualizer
     [*] --> idle
-    idle --> loaded: LOAD
-    idle --> error: LOAD_FAILED
-    loaded --> viewing: VIEW
-    loaded --> loaded: LOAD (reload)
-    loaded --> loaded: EXPORT_README
-    loaded --> idle: UNLOAD
-    viewing --> viewing: VIEW_GRAPH/TABLE/MERMAID
-    viewing --> viewing: ZOOM_IN/OUT
-    viewing --> viewing: TOGGLE_GATES/ACTIONS
-    viewing --> viewing: EXPORT_README
-    viewing --> loaded: BACK
-    viewing --> idle: UNLOAD
-    error --> idle: CLEAR
+    idle --> loaded : LOAD
+    idle --> error : LOAD_FAILED
+    loaded --> loaded : LOAD
+    viewing --> loaded : LOAD
+    loaded --> viewing : VIEW
+    viewing --> viewing : VIEW_GRAPH
+    viewing --> viewing : VIEW_TABLE
+    viewing --> viewing : VIEW_MERMAID
+    viewing --> viewing : SELECT
+    viewing --> viewing : DESELECT
+    viewing --> viewing : ZOOM_IN
+    viewing --> viewing : ZOOM_OUT
+    viewing --> viewing : TOGGLE_GATES
+    viewing --> viewing : TOGGLE_ACTIONS
+    viewing --> loaded : BACK
+    loaded --> idle : UNLOAD
+    viewing --> idle : UNLOAD
+    loaded --> loaded : EXPORT_README
+    viewing --> viewing : EXPORT_README
+    error --> idle : CLEAR
+    idle --> loaded : LOAD_TREE
+    loaded --> loaded : SET_TREE
+    loaded --> viewing : VIEW_TREE [tree is not None]
+    viewing --> viewing : VIEW_TREE [tree is not None]
+    viewing --> viewing : VIEW_TREE_MERMAID [tree is not None]
+    viewing --> loaded : UNLOAD_TREE
 ```
+> **Interactive View:** [Open zoomable diagram](results/visualizer_diagram.html) for pan/zoom controls
+
 
 ## Files
 

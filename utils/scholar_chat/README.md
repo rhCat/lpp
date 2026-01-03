@@ -6,27 +6,24 @@ LLM-powered research assistant with deep search capabilities. Stacks `research_s
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: Scholar Chatbot
     [*] --> idle
-
-    idle: idle
-    searching: searching
-    reviewing: reviewing
-    analyzing: analyzing
-    chatting: chatting
-    error: error
-
-    idle --> searching: SEARCH
-    searching --> reviewing: DONE
-    searching --> error: DONE
-    reviewing --> searching: SEARCH
-    reviewing --> analyzing: SELECT
-    analyzing --> chatting: DONE
-    analyzing --> error: DONE
-    chatting --> searching: SEARCH
-    chatting --> reviewing: BACK
-    reviewing --> idle: RESET
-    error --> idle: RETRY
+    idle --> idle : INIT
+    idle --> searching : SEARCH
+    searching --> reviewing : DONE [error is None]
+    searching --> error : DONE [error is not None]
+    reviewing --> searching : SEARCH
+    reviewing --> analyzing : SELECT
+    analyzing --> chatting : DONE [error is None]
+    analyzing --> error : DONE [error is not None]
+    chatting --> chatting : ASK
+    chatting --> searching : SEARCH
+    chatting --> reviewing : BACK
+    reviewing --> idle : RESET
+    error --> idle : RETRY
 ```
+> **Interactive View:** [Open zoomable diagram](results/scholar_chat_diagram.html) for pan/zoom controls
+
 
 ## Workflow
 

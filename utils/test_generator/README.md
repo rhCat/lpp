@@ -88,32 +88,30 @@ export_tests({'content': pytest_out['output'], 'path': 'test_bp.py', 'format': '
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: L++ Test Case Generator
     [*] --> idle
-
-    idle --> loaded : LOAD
-    idle --> error : ERROR
-
-    loaded --> loaded : LOAD (reload)
-    loaded --> analyzing : ANALYZE
-    loaded --> generating : GENERATE_ALL
-
-    analyzing --> generating : GENERATE
-    analyzing --> loaded : BACK
-    analyzing --> error : ERROR
-
-    generating --> complete : AUTO/COMBINE
-    generating --> error : ERROR
-
-    complete --> complete : FORMAT_JSON
-    complete --> complete : FORMAT_PYTEST
-    complete --> complete : EXPORT
-    complete --> complete : COVERAGE
-    complete --> loaded : BACK
-    complete --> idle : RESET
+    idle --> loaded : LOAD [blueprint is None]
+    loaded --> loaded : LOAD
     complete --> loaded : LOAD
-
+    loaded --> analyzing : ANALYZE [blueprint is not None]
+    analyzing --> generating : GENERATE [paths is not None and len(p...]
+    loaded --> generating : GENERATE_ALL [blueprint is not None]
+    generating --> complete : COMBINE [path_tests is not None]
+    generating --> complete : AUTO [path_tests is not None]
+    complete --> complete : FORMAT_JSON [all_tests is not None and l...]
+    complete --> complete : FORMAT_PYTEST [all_tests is not None and l...]
+    complete --> complete : EXPORT [formatted_output is not None]
+    complete --> complete : COVERAGE [all_tests is not None and l...]
+    complete --> idle : RESET
     error --> idle : RESET
+    idle --> error : ERROR
+    analyzing --> error : ERROR
+    generating --> error : ERROR
+    analyzing --> loaded : BACK
+    complete --> loaded : BACK
 ```
+> **Interactive View:** [Open zoomable diagram](results/test_generator_diagram.html) for pan/zoom controls
+
 
 ## Context Schema
 

@@ -18,27 +18,21 @@ import semantics, and control flow analysis to generate L++ blueprints.
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: Python Logic Decoder
     [*] --> idle
-
-    idle: Awaiting file path
-    parsing: Parsing Python source
-    analyzing: Analyzing imports, functions, control flow
-    inferring: Inferring states, transitions, actions
-    generating: Assembling blueprint
-    complete: Blueprint ready
-    error: Decoding failed
-
-    idle --> parsing: DECODE
-    parsing --> analyzing: AUTO
-    analyzing --> inferring: AUTO
-    inferring --> generating: AUTO
-    generating --> complete: AUTO
-    parsing --> error: ERROR
-    analyzing --> error: ERROR
-    inferring --> error: ERROR
-    complete --> idle: RESET
-    error --> idle: RESET
+    idle --> parsing : DECODE
+    parsing --> analyzing : AUTO
+    analyzing --> inferring : AUTO
+    inferring --> generating : AUTO
+    generating --> complete : AUTO
+    parsing --> error : ERROR
+    analyzing --> error : ERROR
+    inferring --> error : ERROR
+    complete --> idle : RESET
+    error --> idle : RESET
 ```
+> **Interactive View:** [Open zoomable diagram](results/logic_decoder_diagram.html) for pan/zoom controls
+
 
 ## Usage
 

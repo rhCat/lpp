@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Hierarchical Task Orchestrator - State Diagram</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #1a1a2e; color: #eee; }
+.header { background: #16213e; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 18px; color: #00d4ff; }
+.controls { display: flex; gap: 8px; }
+.controls button { background: #4a4a8a; color: #fff; border: none; padding: 8px 16px; cursor: pointer; border-radius: 4px; font-size: 12px; }
+.controls button:hover { background: #5a5a9a; }
+.zoom-info { color: #888; font-size: 12px; margin-left: 15px; }
+.container { position: relative; width: 100%; height: calc(100vh - 60px); overflow: hidden; background: #0f0f23; }
+#diagram { position: absolute; transform-origin: 0 0; cursor: grab; }
+#diagram:active { cursor: grabbing; }
+#diagram svg { max-width: none !important; }
+.mermaid { background: transparent; }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>Hierarchical Task Orchestrator</h1>
+    <div class="controls">
+        <button onclick="zoomIn()">Zoom In (+)</button>
+        <button onclick="zoomOut()">Zoom Out (-)</button>
+        <button onclick="resetView()">Reset View</button>
+        <button onclick="fitToScreen()">Fit to Screen</button>
+        <span class="zoom-info" id="zoom-level">100%</span>
+    </div>
+</div>
+<div class="container" id="container">
+    <div id="diagram">
+        <pre class="mermaid">
+flowchart TD
+    %% L++ Logic CAD: Hierarchical Task Orchestrator
+        state_idle(["idle\nAwaiting task"]):::entry
+    subgraph Processing
+        state_analyzing(["analyzing\nRoot analysis"])
+        state_expanding(["expanding\nExpand sub-features"])
+        state_planning(["planning\nPlan leaf execution"])
+        state_building(["building\nBuild tools"])
+        state_executing(["executing\nExecute leaf"])
+        state_reflecting(["reflecting\nReflect on progress"])
+        state_traversing(["traversing\nNext leaf"])
+        state_evaluating(["evaluating\nEvaluate completion"])
+    end
+        state_complete[["complete\nDone"]]:::terminal
+        state_error[["error\nError"]]:::errorState
+
+    %% Transitions
+    act_t0s0[["init"]]:::action
+    state_idle -- "START" --> act_t0s0
+    act_t0s0 --> state_idle
+    gate_t1s0{{"True?"}}:::gate
+    state_idle -- "SUBMIT" --> gate_t1s0
+    act_t1s0[["set_task, analyze_root"]]:::action
+    gate_t1s0 -- ✓ --> act_t1s0
+    act_t1s0 --> state_analyzing
+    gate_t2s0{{"feature_tree is not None && depth < max_depth and is_le... && error is None?"}}:::gate
+    state_analyzing -- "DONE" --> gate_t2s0
+    act_t2s0[["expand"]]:::action
+    gate_t2s0 -- ✓ --> act_t2s0
+    act_t2s0 --> state_expanding
+    gate_t3s0{{"feature_tree is not None && is_leaf == True or depth >=... && error is None?"}}:::gate
+    state_analyzing -- "DONE" --> gate_t3s0
+    act_t3s0[["collect, plan_leaf"]]:::action
+    gate_t3s0 -- ✓ --> act_t3s0
+    act_t3s0 --> state_planning
+    gate_t4s0{{"error is not None?"}}:::gate
+    state_analyzing -- "DONE" --> gate_t4s0
+    gate_t4s0 -- ✓ --> state_error
+    gate_t5s0{{"depth < max_depth and is_le... && error is None?"}}:::gate
+    state_expanding -- "DONE" --> gate_t5s0
+    act_t5s0[["expand"]]:::action
+    gate_t5s0 -- ✓ --> act_t5s0
+    act_t5s0 --> state_expanding
+    gate_t6s0{{"is_leaf == True or depth >=... && error is None?"}}:::gate
+    state_expanding -- "DONE" --> gate_t6s0
+    act_t6s0[["collect, plan_leaf"]]:::action
+    gate_t6s0 -- ✓ --> act_t6s0
+    act_t6s0 --> state_planning
+    gate_t7s0{{"error is not None?"}}:::gate
+    state_expanding -- "DONE" --> gate_t7s0
+    gate_t7s0 -- ✓ --> state_error
+    gate_t8s0{{"tools_pending is not None a... && error is None?"}}:::gate
+    state_planning -- "DONE" --> gate_t8s0
+    act_t8s0[["build"]]:::action
+    gate_t8s0 -- ✓ --> act_t8s0
+    act_t8s0 --> state_building
+    gate_t9s0{{"tools_pending is None or to... && error is None?"}}:::gate
+    state_planning -- "DONE" --> gate_t9s0
+    act_t9s0[["exec_leaf"]]:::action
+    gate_t9s0 -- ✓ --> act_t9s0
+    act_t9s0 --> state_executing
+    gate_t10s0{{"error is not None?"}}:::gate
+    state_planning -- "DONE" --> gate_t10s0
+    gate_t10s0 -- ✓ --> state_error
+    gate_t11s0{{"tools_pending is not None a... && error is None?"}}:::gate
+    state_building -- "DONE" --> gate_t11s0
+    act_t11s0[["build"]]:::action
+    gate_t11s0 -- ✓ --> act_t11s0
+    act_t11s0 --> state_building
+    gate_t12s0{{"tools_pending is None or to... && error is None?"}}:::gate
+    state_building -- "DONE" --> gate_t12s0
+    act_t12s0[["exec_leaf"]]:::action
+    gate_t12s0 -- ✓ --> act_t12s0
+    act_t12s0 --> state_executing
+    gate_t13s0{{"error is not None?"}}:::gate
+    state_building -- "DONE" --> gate_t13s0
+    gate_t13s0 -- ✓ --> state_error
+    gate_t14s0{{"exec_count < leaf_count && error is None?"}}:::gate
+    state_executing -- "DONE" --> gate_t14s0
+    act_t14s0[["next_leaf"]]:::action
+    gate_t14s0 -- ✓ --> act_t14s0
+    act_t14s0 --> state_traversing
+    gate_t15s0{{"exec_count >= leaf_count && error is None?"}}:::gate
+    state_executing -- "DONE" --> gate_t15s0
+    act_t15s0[["reflect"]]:::action
+    gate_t15s0 -- ✓ --> act_t15s0
+    act_t15s0 --> state_reflecting
+    gate_t16s0{{"error is not None?"}}:::gate
+    state_executing -- "DONE" --> gate_t16s0
+    gate_t16s0 -- ✓ --> state_error
+    gate_t17s0{{"tools_pending is not None a... && error is None?"}}:::gate
+    state_traversing -- "DONE" --> gate_t17s0
+    act_t17s0[["build"]]:::action
+    gate_t17s0 -- ✓ --> act_t17s0
+    act_t17s0 --> state_building
+    gate_t18s0{{"tools_pending is None or to... && error is None?"}}:::gate
+    state_traversing -- "DONE" --> gate_t18s0
+    act_t18s0[["exec_leaf"]]:::action
+    gate_t18s0 -- ✓ --> act_t18s0
+    act_t18s0 --> state_executing
+    gate_t19s0{{"error is not None?"}}:::gate
+    state_traversing -- "DONE" --> gate_t19s0
+    gate_t19s0 -- ✓ --> state_error
+    gate_t20s0{{"error is None?"}}:::gate
+    state_reflecting -- "DONE" --> gate_t20s0
+    act_t20s0[["evaluate, incr"]]:::action
+    gate_t20s0 -- ✓ --> act_t20s0
+    act_t20s0 --> state_evaluating
+    gate_t21s0{{"error is not None?"}}:::gate
+    state_reflecting -- "DONE" --> gate_t21s0
+    gate_t21s0 -- ✓ --> state_error
+    gate_t22s0{{"is_complete == True && error is None?"}}:::gate
+    state_evaluating -- "DONE" --> gate_t22s0
+    gate_t22s0 -- ✓ --> state_complete
+    gate_t23s0{{"is_complete is None or is_c... && iteration < max_iterations && error is None?"}}:::gate
+    state_evaluating -- "DONE" --> gate_t23s0
+    act_t23s0[["reset_exec, expand"]]:::action
+    gate_t23s0 -- ✓ --> act_t23s0
+    act_t23s0 --> state_expanding
+    gate_t25s0{{"error is not None?"}}:::gate
+    state_evaluating -- "DONE" --> gate_t25s0
+    gate_t25s0 -- ✓ --> state_error
+    act_t26s0[["clear_err"]]:::action
+    state_error -- "RETRY" --> act_t26s0
+    act_t26s0 --> state_idle
+    state_analyzing -- "RESET" --> state_idle
+    state_error -- "RESET" --> state_idle
+    state_expanding -- "RESET" --> state_idle
+    state_planning -- "RESET" --> state_idle
+    state_building -- "RESET" --> state_idle
+    state_executing -- "RESET" --> state_idle
+    state_reflecting -- "RESET" --> state_idle
+    state_traversing -- "RESET" --> state_idle
+    state_evaluating -- "RESET" --> state_idle
+
+    %% Styling
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+        </pre>
+    </div>
+</div>
+<script>
+mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel: 'loose' });
+
+let scale = 1;
+let translateX = 50;
+let translateY = 50;
+let isDragging = false;
+let startX, startY;
+
+const container = document.getElementById('container');
+const diagram = document.getElementById('diagram');
+
+function updateTransform() {
+    diagram.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    document.getElementById('zoom-level').textContent = Math.round(scale * 100) + '%';
+}
+
+function zoomIn() {
+    scale = Math.min(scale * 1.2, 5);
+    updateTransform();
+}
+
+function zoomOut() {
+    scale = Math.max(scale / 1.2, 0.1);
+    updateTransform();
+}
+
+function resetView() {
+    scale = 1;
+    translateX = 50;
+    translateY = 50;
+    updateTransform();
+}
+
+function fitToScreen() {
+    const svg = diagram.querySelector('svg');
+    if (!svg) return;
+    const svgRect = svg.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const scaleX = (containerRect.width - 100) / svgRect.width * scale;
+    const scaleY = (containerRect.height - 100) / svgRect.height * scale;
+    scale = Math.min(scaleX, scaleY, 1.5);
+    translateX = 50;
+    translateY = 50;
+    updateTransform();
+}
+
+// Mouse wheel zoom
+container.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const rect = container.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const prevScale = scale;
+    if (e.deltaY < 0) scale = Math.min(scale * 1.1, 5);
+    else scale = Math.max(scale / 1.1, 0.1);
+
+    // Zoom toward mouse position
+    translateX = mouseX - (mouseX - translateX) * (scale / prevScale);
+    translateY = mouseY - (mouseY - translateY) * (scale / prevScale);
+    updateTransform();
+});
+
+// Pan with mouse drag
+container.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startX = e.clientX - translateX;
+    startY = e.clientY - translateY;
+    diagram.style.cursor = 'grabbing';
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    translateX = e.clientX - startX;
+    translateY = e.clientY - startY;
+    updateTransform();
+});
+
+document.addEventListener('mouseup', () => {
+    isDragging = false;
+    diagram.style.cursor = 'grab';
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (e.key === '+' || e.key === '=') zoomIn();
+    else if (e.key === '-') zoomOut();
+    else if (e.key === '0') resetView();
+    else if (e.key === 'f') fitToScreen();
+});
+
+// Initial fit after render
+setTimeout(fitToScreen, 500);
+</script>
+</body>
+</html>

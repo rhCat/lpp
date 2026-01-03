@@ -43,52 +43,82 @@ The `frame_py.operational_validator.sanitize_python_code()` function automatical
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: Skill Contractor
     [*] --> idle
-
-    idle: idle
-    planning: planning
-    executing: executing
-    parsing: parsing
-    stepping: stepping
-    validating: validating
-    evaluating: evaluating
-    refining: refining
-    reviewing: reviewing
-    complete: complete
-    error: error
-
-    idle --> planning: SUBMIT
-    planning --> executing: DONE [has_plan]
-    planning --> error: DONE [has_error]
-    
-    executing --> parsing: DONE [has_raw_output]
-    executing --> error: DONE [has_error]
-    
-    parsing --> stepping: DONE [output_valid, has_more_steps]
-    parsing --> validating: DONE [output_valid, all_steps_done, in_blueprint_phase]
-    parsing --> validating: DONE [output_valid, all_steps_done, in_implementation_phase]
-    parsing --> executing: DONE [output_invalid, can_repair]
-    parsing --> error: DONE [output_invalid, max_repairs]
-    
-    stepping --> executing: DONE [has_more_steps]
-    stepping --> validating: DONE [all_steps_done]
-    
-    validating --> planning: DONE [blueprint_validated, in_blueprint_phase] → advance_phase
-    validating --> evaluating: DONE [lpp_valid, in_implementation_phase]
-    validating --> refining: DONE [validation_failed, within_iterations]
-    
-    evaluating --> complete: DONE [is_satisfied, lpp_ok]
-    evaluating --> refining: DONE [not_satisfied, within_iterations]
-    evaluating --> complete: DONE [max_iterations_reached]
-    
-    refining --> planning: DONE
-    error --> executing: DONE [step_can_retry]
-    error --> reviewing: DONE [step_max_errors]
-    reviewing --> stepping: DONE [review_skip]
-    reviewing --> refining: DONE [review_replan]
-    
+    idle --> idle : START
+    idle --> planning : SUBMIT [target is not None and len(...]
+    planning --> executing : DONE [plan is not None && error is None]
+    planning --> error : DONE [error is not None]
+    executing --> parsing : DONE [raw_output is not None and ... && error is None]
+    executing --> error : DONE [error is not None]
+    parsing --> correcting : DONE [parsed_output is not None a... && corrections is not None and... && step_index + 1 < step_count]
+    parsing --> stepping : DONE [parsed_output is not None a... && corrections is None or len(... && step_index + 1 < step_count]
+    parsing --> correcting : DONE [parsed_output is not None a... && corrections is not None and... && step_index + 1 >= step_count && is_lpp_target == True && phase == "blueprint"]
+    parsing --> validating : DONE [parsed_output is not None a... && corrections is None or len(... && step_index + 1 >= step_count && is_lpp_target == True && phase == "blueprint"]
+    parsing --> correcting : DONE [parsed_output is not None a... && corrections is not None and... && step_index + 1 >= step_count && is_lpp_target == True && phase == "implementation"]
+    parsing --> validating : DONE [parsed_output is not None a... && corrections is None or len(... && step_index + 1 >= step_count && is_lpp_target == True && phase == "implementation"]
+    parsing --> correcting : DONE [parsed_output is not None a... && corrections is not None and... && step_index + 1 >= step_count && is_lpp_target != True]
+    parsing --> evaluating : DONE [parsed_output is not None a... && corrections is None or len(... && step_index + 1 >= step_count && is_lpp_target != True]
+    correcting --> stepping : DONE [corrections_approved == True && step_index + 1 < step_count]
+    correcting --> validating : DONE [corrections_approved == True && step_index + 1 >= step_count && is_lpp_target == True && phase == "blueprint"]
+    correcting --> validating : DONE [corrections_approved == True && step_index + 1 >= step_count && is_lpp_target == True && phase == "implementation"]
+    correcting --> evaluating : DONE [corrections_approved == True && step_index + 1 >= step_count && is_lpp_target != True]
+    parsing --> executing : DONE [parse_error is not None && (repair_attempts is None or...]
+    parsing --> error : DONE [parse_error is not None && (repair_attempts is not Non...]
+    stepping --> executing : DONE [step_index + 1 < step_count && error is None]
+    stepping --> validating : DONE [step_index + 1 >= step_count && error is None && is_lpp_target == True && phase == "blueprint"]
+    stepping --> validating : DONE [step_index + 1 >= step_count && error is None && is_lpp_target == True && phase == "implementation"]
+    stepping --> evaluating : DONE [step_index + 1 >= step_count && error is None && is_lpp_target != True]
+    stepping --> error : DONE [error is not None]
+    validating --> planning : DONE [blueprint_validated is not ... && error is None && phase == "blueprint"]
+    validating --> eval_interactive : DONE [lpp_validated is not None a... && error is None && phase == "implementation"]
+    eval_interactive --> evaluating : DONE [interactive_valid is not No... && error is None]
+    eval_interactive --> refining : DONE [interactive_valid is None o... && iteration < max_iterations]
+    eval_interactive --> evaluating : DONE [interactive_valid is None o... && iteration >= max_iterations]
+    eval_interactive --> error : DONE [error is not None]
+    validating --> refining : DONE [blueprint_validated is None... && iteration < max_iterations && phase == "blueprint"]
+    validating --> refining : DONE [is_lpp_target == True and (... && iteration < max_iterations && phase == "implementation"]
+    validating --> evaluating : DONE [is_lpp_target == True and (... && iteration >= max_iterations]
+    validating --> error : DONE [error is not None]
+    evaluating --> complete : DONE [is_satisfied == True && is_lpp_target != True or lp... && error is None]
+    evaluating --> refining : DONE [is_satisfied == True && is_lpp_target == True and (... && iteration < max_iterations && error is None]
+    evaluating --> refining : DONE [is_satisfied == False or is... && iteration < max_iterations && error is None]
+    evaluating --> complete : DONE [iteration >= max_iterations && is_lpp_target != True or lp...]
+    evaluating --> error : DONE [iteration >= max_iterations && is_lpp_target == True and (...]
+    evaluating --> error : DONE [error is not None]
+    refining --> planning : DONE [error is None]
+    refining --> error : DONE [error is not None]
+    error --> executing : DONE [(step_error_count is None o... && plan is not None]
+    error --> refining : DONE [plan is None or step_count ... && iteration < max_iterations]
+    error --> complete : DONE [plan is None or step_count ... && iteration >= max_iterations]
+    error --> reviewing : DONE [(step_error_count is not No...]
+    error --> complete : DONE [iteration >= max_iterations && plan is not None]
+    reviewing --> evaluating : DONE [failed_steps is not None an...]
+    reviewing --> stepping : DONE [review_decision == "skip" && step_index + 1 < step_count]
+    reviewing --> evaluating : DONE [review_decision == "skip" && step_index + 1 >= step_count]
+    reviewing --> refining : DONE [review_decision == "replan" && iteration < max_iterations]
+    reviewing --> evaluating : DONE [review_decision == "replan" && iteration >= max_iterations]
+    reviewing --> stepping : DONE [review_decision is None or ... && step_index + 1 < step_count]
+    reviewing --> evaluating : DONE [review_decision is None or ... && step_index + 1 >= step_count]
+    reviewing --> refining : DONE [plan is None or step_count ... && iteration < max_iterations]
+    reviewing --> complete : DONE [plan is None or step_count ... && iteration >= max_iterations]
+    error --> idle : RETRY
+    planning --> idle : RESET
+    error --> idle : RESET
+    executing --> idle : RESET
+    complete --> idle : RESET
+    refining --> idle : RESET
+    reviewing --> idle : RESET
+    parsing --> idle : RESET
+    evaluating --> idle : RESET
+    stepping --> idle : RESET
+    correcting --> idle : RESET
+    validating --> idle : RESET
+    eval_interactive --> idle : RESET
     complete --> [*]
 ```
+> **Interactive View:** [Open zoomable diagram](results/skill_contractor_diagram.html) for pan/zoom controls
+
 
 ## Context Schema (Flange)
 

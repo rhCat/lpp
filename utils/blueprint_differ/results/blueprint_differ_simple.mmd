@@ -1,0 +1,38 @@
+stateDiagram-v2
+    %% L++ State Diagram: L++ Blueprint Diff & Merge
+    [*] --> idle
+    idle --> left_loaded : LOAD_LEFT
+    left_loaded --> ready : LOAD_RIGHT
+    ready --> ready : LOAD_BASE
+    ready --> ready : LOAD_LEFT
+    ready --> ready : LOAD_RIGHT
+    ready --> diffing : DIFF [blueprint_left is not None ...]
+    diffing --> diff_complete : DIFF_DONE
+    ready --> diff_complete : DIFF_ALL [blueprint_left is not None ...]
+    diff_complete --> diff_complete : SHOW_SUMMARY [diff_result is not None]
+    diff_complete --> diff_complete : SHOW_UNIFIED [diff_result is not None]
+    diff_complete --> diff_complete : SHOW_PATCH [diff_result is not None]
+    diff_complete --> merging : MERGE [diff_result is not None]
+    merging --> merge_complete : MERGE_AUTO [conflicts is None or len(co...]
+    merging --> conflict : CONFLICT_DETECTED [conflicts is not None and l...]
+    conflict --> merge_complete : TAKE_LEFT
+    conflict --> merge_complete : TAKE_RIGHT
+    diff_complete --> merge_complete : MERGE_LEFT [diff_result is not None]
+    diff_complete --> merge_complete : MERGE_RIGHT [diff_result is not None]
+    merge_complete --> merge_complete : EXPORT [merged_blueprint is not None]
+    merge_complete --> diff_complete : BACK
+    conflict --> diff_complete : BACK
+    diff_complete --> diff_complete : DIFF_ALL
+    diff_complete --> ready : RESET
+    ready --> idle : CLEAR
+    diff_complete --> idle : CLEAR
+    merge_complete --> idle : CLEAR
+    error --> idle : CLEAR
+    idle --> error : LOAD_FAILED
+    left_loaded --> error : LOAD_FAILED
+    ready --> error : LOAD_FAILED
+    diff_complete --> error : LOAD_FAILED
+    diffing --> error : LOAD_FAILED
+    merge_complete --> error : LOAD_FAILED
+    merging --> error : LOAD_FAILED
+    conflict --> error : LOAD_FAILED

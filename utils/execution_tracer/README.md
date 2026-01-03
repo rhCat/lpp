@@ -15,47 +15,45 @@ The Execution Tracer provides comprehensive tracing capabilities for L++ bluepri
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: L++ Execution Tracer
     [*] --> idle
     idle --> configured : INIT
-    idle --> tracing : START_TRACE
     idle --> error : INIT_FAILED
-
     configured --> configured : INIT
-    configured --> tracing : START_TRACE
-    configured --> idle : RESET
-    configured --> configured : SET_FORMAT
-
-    tracing --> tracing : RECORD_SPAN
-    tracing --> tracing : START_SPAN
-    tracing --> tracing : END_SPAN
-    tracing --> tracing : STATE_CHANGE
-    tracing --> tracing : GATE_EVAL
-    tracing --> tracing : ACTION
-    tracing --> tracing : EVENT
-    tracing --> tracing : CONTEXT_CHANGE
-    tracing --> tracing : STATUS
+    configured --> tracing : START_TRACE [config is not None]
+    idle --> tracing : START_TRACE
+    tracing --> tracing : RECORD_SPAN [trace_id is not None]
+    tracing --> tracing : START_SPAN [trace_id is not None]
+    tracing --> tracing : END_SPAN [trace_id is not None]
+    tracing --> tracing : STATE_CHANGE [trace_id is not None]
+    tracing --> tracing : GATE_EVAL [trace_id is not None]
+    tracing --> tracing : ACTION [trace_id is not None]
+    tracing --> tracing : EVENT [trace_id is not None]
+    tracing --> tracing : CONTEXT_CHANGE [trace_id is not None]
     tracing --> paused : PAUSE
-    tracing --> completed : END_TRACE
-    tracing --> idle : RESET
-
     paused --> tracing : RESUME
-    paused --> completed : END_TRACE
-    paused --> paused : STATUS
-
-    completed --> completed : FORMAT_OTLP
-    completed --> completed : FORMAT_JSONL
-    completed --> completed : FORMAT_HUMAN
-    completed --> completed : FORMAT_TIMELINE
+    tracing --> completed : END_TRACE [trace_id is not None]
+    paused --> completed : END_TRACE [trace_id is not None]
+    completed --> completed : FORMAT_OTLP [spans is not None and len(s...]
+    completed --> completed : FORMAT_JSONL [spans is not None and len(s...]
+    completed --> completed : FORMAT_HUMAN [spans is not None and len(s...]
+    completed --> completed : FORMAT_TIMELINE [spans is not None and len(s...]
     completed --> completed : EXPORT
-    completed --> completed : ANALYZE
+    completed --> completed : ANALYZE [spans is not None and len(s...]
+    tracing --> tracing : STATUS
+    paused --> paused : STATUS
     completed --> completed : STATUS
+    configured --> configured : SET_FORMAT
     completed --> completed : SET_FORMAT
     completed --> configured : CLEAR
-    completed --> tracing : START_TRACE
+    completed --> tracing : START_TRACE [config is not None]
+    configured --> idle : RESET
+    tracing --> idle : RESET
     completed --> idle : RESET
-
     error --> idle : CLEAR
 ```
+> **Interactive View:** [Open zoomable diagram](results/execution_tracer_diagram.html) for pan/zoom controls
+
 
 ## Usage
 

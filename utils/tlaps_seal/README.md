@@ -30,35 +30,43 @@ Provides a certification baseline that governs future logic evolution.
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: TLAPS Seal Certifier
     [*] --> idle
-
-    idle: Ready to certify
-    loading: Loading blueprint
-    auditing: Auditing Trinity & Flange
-    generating_tla: Generating TLA+ spec
-    tlc_verifying: Running TLC (empirical)
-    tlc_verified: TLC passed
-    tlaps_proving: Running TLAPS (axiomatic)
-    certified: Seal Granted
-    rejected: Certification Failed
-    error: Error state
-
-    idle --> loading: CERTIFY
-    loading --> auditing: AUTO
-    auditing --> generating_tla: AUTO
-    generating_tla --> tlc_verifying: AUTO
-    tlc_verifying --> tlc_verified: AUTO
-    tlc_verified --> tlaps_proving: PROVE
-    tlaps_proving --> certified: AUTO
-    tlc_verified --> certified: SEAL_TLC
-    auditing --> rejected: AUTO (invalid)
-    tlc_verifying --> rejected: AUTO (violations)
-    tlaps_proving --> rejected: AUTO (unproved)
-    idle --> error: ERROR
-    * --> idle: RESET
+    idle --> loading : CERTIFY
+    loading --> auditing : AUTO [error is None]
+    auditing --> generating_tla : AUTO [blueprint is not None && error is None]
+    generating_tla --> tlc_verifying : AUTO [trinityAudit is not None an... && flangeAudit is not None and... && error is None]
+    tlc_verifying --> tlc_verified : AUTO [tlaSpec is not None && error is None]
+    tlc_verified --> tlaps_proving : PROVE [tlcResult is not None and t...]
+    tlaps_proving --> certified : AUTO [error is None]
+    tlc_verified --> certified : SEAL_TLC [tlcResult is not None and t...]
+    auditing --> rejected : AUTO [error is not None]
+    tlc_verifying --> rejected : AUTO [error is not None]
+    tlaps_proving --> rejected : AUTO [error is not None]
+    idle --> error : ERROR [error is not None]
+    loading --> error : ERROR [error is not None]
+    auditing --> error : ERROR [error is not None]
+    generating_tla --> error : ERROR [error is not None]
+    rejected --> error : ERROR [error is not None]
+    tlc_verifying --> error : ERROR [error is not None]
+    tlc_verified --> error : ERROR [error is not None]
+    certified --> error : ERROR [error is not None]
+    tlaps_proving --> error : ERROR [error is not None]
+    error --> idle : RESET
+    loading --> idle : RESET
+    auditing --> idle : RESET
+    generating_tla --> idle : RESET
+    rejected --> idle : RESET
+    tlc_verifying --> idle : RESET
+    tlc_verified --> idle : RESET
+    certified --> idle : RESET
+    tlaps_proving --> idle : RESET
+    certified --> certified : VIEW [tlapsResult is not None and...]
     certified --> [*]
     rejected --> [*]
 ```
+> **Interactive View:** [Open zoomable diagram](results/tlaps_seal_diagram.html) for pan/zoom controls
+
 
 ## Usage
 

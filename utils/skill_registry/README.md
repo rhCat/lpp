@@ -14,19 +14,22 @@ Provides structured metadata about available L++ skills to help agents:
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: Skill Registry
     [*] --> idle
-
-    idle: idle
-    scanned: scanned
-    viewing: viewing
-    error: error
-
-    idle --> scanned: SCAN
-    scanned --> viewing: SELECT
-    viewing --> scanned: BACK
-    scanned --> idle: RESET
-    error --> idle: RETRY
+    idle --> scanned : SCAN
+    scanned --> scanned : SCAN
+    scanned --> viewing : SELECT
+    viewing --> scanned : BACK
+    viewing --> viewing : SELECT
+    scanned --> scanned : EXPORT
+    viewing --> viewing : EXPORT
+    scanned --> idle : RESET
+    error --> idle : RETRY
+    idle --> error : ERROR [error is not None]
+    scanned --> error : ERROR [error is not None]
 ```
+> **Interactive View:** [Open zoomable diagram](results/skill_registry_diagram.html) for pan/zoom controls
+
 
 ## Usage
 

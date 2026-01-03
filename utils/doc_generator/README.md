@@ -47,31 +47,35 @@ The Documentation Generator is an L++ tool that produces comprehensive documenta
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: L++ Documentation Generator
     [*] --> idle
-
-    idle: idle
-    loaded: loaded
-    generating: generating
-    assembling: assembling
-    exporting: exporting
-    done: done
-    error: error
-
-    idle --> loaded: LOAD
-    idle --> error: LOAD_FAILED
-    done --> loaded: LOAD
-    loaded --> generating: GENERATE
-    generating --> assembling: ASSEMBLE
-    assembling --> exporting: EXPORT
-    exporting --> done: DONE
-    loaded --> done: GENERATE_FULL
-    generating --> loaded: BACK
-    assembling --> loaded: BACK
-    done --> loaded: BACK
-    loaded --> idle: UNLOAD
-    done --> idle: UNLOAD
-    error --> idle: CLEAR
+    idle --> loaded : LOAD [blueprint is None]
+    idle --> error : LOAD_FAILED
+    loaded --> loaded : LOAD
+    done --> loaded : LOAD
+    loaded --> loaded : FORMAT_MARKDOWN
+    loaded --> loaded : FORMAT_HTML
+    loaded --> loaded : FORMAT_JSON
+    loaded --> loaded : TOGGLE_MERMAID
+    loaded --> loaded : TOGGLE_TABLES
+    loaded --> loaded : TOGGLE_QUICKSTART
+    loaded --> loaded : TOGGLE_CONTEXT
+    loaded --> generating : GENERATE [blueprint is not None]
+    generating --> assembling : ASSEMBLE [output_format == 'markdown']
+    generating --> assembling : ASSEMBLE [output_format == 'html']
+    generating --> assembling : ASSEMBLE [output_format == 'json']
+    assembling --> exporting : EXPORT [assembled_doc is not None]
+    exporting --> done : DONE
+    loaded --> done : GENERATE_FULL [blueprint is not None]
+    generating --> loaded : BACK
+    assembling --> loaded : BACK
+    done --> loaded : BACK
+    loaded --> idle : UNLOAD
+    done --> idle : UNLOAD
+    error --> idle : CLEAR
 ```
+> **Interactive View:** [Open zoomable diagram](results/doc_generator_diagram.html) for pan/zoom controls
+
 
 ## Usage
 
