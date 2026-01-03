@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Function Graph: legacy_extractor</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #0f0f23; color: #eee; }
+h1 { color: #00d4ff; margin-bottom: 5px; font-size: 24px; }
+.subtitle { color: #888; margin-bottom: 15px; font-size: 14px; }
+#container { display: flex; gap: 20px; height: calc(100vh - 120px); }
+#graph { flex: 1; position: relative; }
+#sidebar { width: 350px; background: #1a1a2e; padding: 15px; border-radius: 8px; overflow-y: auto; }
+svg { background: #16213e; border-radius: 8px; width: 100%; height: 100%; }
+
+/* Node styles */
+.node { cursor: pointer; }
+.node-module { fill: #2a2a4a; stroke-width: 3; }
+.node-function { fill: #3a3a5a; stroke-width: 2; }
+.node-dependency { fill: #1a1a3a; stroke: #666; stroke-width: 1; stroke-dasharray: 4; }
+.node-label { font-size: 11px; fill: #fff; pointer-events: none; font-weight: 500; }
+.node-sublabel { font-size: 9px; fill: #888; pointer-events: none; }
+
+/* Edge styles */
+.edge { fill: none; stroke-opacity: 0.6; }
+.edge-internal { stroke: #4ecdc4; stroke-width: 2; }
+.edge-external { stroke: #f39c12; stroke-width: 1.5; stroke-dasharray: 4; }
+.edge-local { stroke: #9b59b6; stroke-width: 2; }
+.edge-label { font-size: 8px; fill: #666; pointer-events: none; }
+
+/* Highlight styles */
+.highlight { stroke-width: 3 !important; stroke-opacity: 1 !important; }
+.dim { opacity: 0.2; }
+
+/* Controls */
+.controls { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.controls button { background: #3a3a5a; color: #fff; border: 1px solid #555; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.controls button:hover { background: #4a4a6a; }
+.controls button.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
+
+/* Module legend */
+.module-legend { margin-top: 15px; }
+.module-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer; }
+.module-item:hover { background: #2a2a4a; }
+.module-dot { width: 12px; height: 12px; border-radius: 3px; }
+.module-name { font-size: 12px; }
+
+/* Info panel */
+h3 { color: #00d4ff; margin: 15px 0 8px 0; font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+.info-section { font-size: 12px; line-height: 1.6; }
+.info-label { color: #888; }
+.info-value { color: #fff; }
+
+/* Source code panel */
+.source-panel { margin-top: 10px; }
+.source-code { background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 10px; font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; line-height: 1.4; overflow-x: auto; max-height: 300px; overflow-y: auto; white-space: pre; color: #b8b8b8; }
+.source-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.source-toggle { background: #3a3a5a; color: #fff; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; }
+.source-toggle:hover { background: #4a4a6a; }
+.docstring { color: #6a9955; font-style: italic; }
+.metric { display: flex; justify-content: space-between; padding: 3px 0; }
+.metric-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 2px; }
+.metric-fill { height: 100%; border-radius: 2px; }
+
+/* Edge list */
+.edge-list { max-height: 200px; overflow-y: auto; }
+.edge-item { padding: 4px 0; border-bottom: 1px solid #333; font-size: 11px; }
+.edge-item .from { color: #4ecdc4; }
+.edge-item .to { color: #f39c12; }
+.edge-item .type { color: #666; font-size: 10px; }
+
+/* Tooltip */
+#tooltip { position: absolute; background: #1a1a2e; border: 1px solid #00d4ff; padding: 10px; border-radius: 4px; pointer-events: none; display: none; max-width: 300px; z-index: 100; font-size: 11px; }
+</style>
+</head>
+<body>
+<h1>Function Graph: legacy_extractor</h1>
+<div class="subtitle">Stackable function dependency visualization • Drag nodes to rearrange • Click to inspect</div>
+
+<div class="controls">
+  <button onclick="resetView()">Reset View</button>
+  <button onclick="fitToView()">Fit</button>
+  <button onclick="toggleLayout('force')" id="btn-force" class="active">Force</button>
+  <button onclick="toggleLayout('horizontal')" id="btn-horizontal">Horizontal</button>
+  <button onclick="toggleLayout('vertical')" id="btn-vertical">Vertical</button>
+  <span style="margin-left: 10px; color: #666">|</span>
+  <button onclick="toggleEdgeType('internal')" id="btn-internal" class="active">Internal</button>
+  <button onclick="toggleEdgeType('external')" id="btn-external" class="active">External</button>
+  <button onclick="toggleEdgeType('local')" id="btn-local" class="active">Local</button>
+</div>
+
+<div id="container">
+  <div id="graph"><svg></svg></div>
+  <div id="sidebar">
+    <h3>Modules</h3>
+    <div class="module-legend" id="module-legend"></div>
+
+    <h3>Selected Node</h3>
+    <div class="info-section" id="node-info">Click a node to see details</div>
+
+    <h3>Source Code</h3>
+    <div class="source-panel" id="source-panel">
+      <div id="source-content" style="color:#666;font-size:11px">Click a function to view source</div>
+    </div>
+
+    <h3>Connections</h3>
+    <div class="edge-list" id="edge-list"></div>
+  </div>
+</div>
+<div id="tooltip"></div>
+
+<script>
+const nodes = [{"id": "extractor_compute", "type": "module", "label": "extractor_compute", "metrics": {"fanIn": 23, "fanOut": 5, "instability": 0.179, "internalEdges": 31, "externalCallCount": 7, "localCallCount": 0, "callsByCategory": {"stdlib": 7}, "localDependencies": []}, "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.loadSource", "type": "function", "label": "loadSource", "direction": "inbound", "parent": "extractor_compute", "line": 37, "endLine": 48, "signature": "(params) -> dict", "docstring": "Load Python source file from disk.", "source": "def loadSource(params: dict) -> dict:\n    \"\"\"Load Python source file from disk.\"\"\"\n    filePath = params.get(\"filePath\")\n    if not filePath:\n        return {\"sourceCode\": None, \"error\": \"No file path provided\"}\n    try:\n        with open(filePath, \"r\", encoding=\"utf-8\") as f:\n            return {\"sourceCode\": f.read(), \"error\": None}\n    except FileNotFoundError:\n        return {\"sourceCode\": None, \"error\": f\"File not found: {filePath}\"}\n    except Exception as e:\n        return {\"sourceCode\": None, \"error\": str(e)}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.parseAst", "type": "function", "label": "parseAst", "direction": "inbound", "parent": "extractor_compute", "line": 51, "endLine": 61, "signature": "(params) -> dict", "docstring": "Parse Python source into AST.", "source": "def parseAst(params: dict) -> dict:\n    \"\"\"Parse Python source into AST.\"\"\"\n    source = params.get(\"sourceCode\")\n    if not source:\n        return {\"ast\": None, \"error\": \"No source code\"}\n    try:\n        tree = ast.parse(source)\n        astDict = _astToDict(tree)\n        return {\"ast\": astDict, \"error\": None}\n    except SyntaxError as e:\n        return {\"ast\": None, \"error\": f\"Syntax error: {e}\"}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.findStatePatterns", "type": "function", "label": "findStatePatterns", "direction": "inbound", "parent": "extractor_compute", "line": 81, "endLine": 270, "signature": "(params) -> dict", "docstring": "Detect state machine patterns in code.", "source": "def findStatePatterns(params: dict) -> dict:\n    \"\"\"Detect state machine patterns in code.\"\"\"\n    astDict = params.get(\"ast\", {})\n    mode = params.get(\"analysisMode\", \"heuristic\")\n\n    patterns = {\n        \"mode\": mode,\n        \"stateClasses\": [],\n        \"stateVariables\": [],\n        \"ifChains\": [],\n        \"matchStatements\": [],\n        \"eventHandlers\": [],\n        \"enumDefinitions\": [],\n        \"constantDefinitions\": [],\n        \"annotations\": []\n    }\n\n    def walk(node, parent=None, className=None):\n        if not isinstance(node, dict):\n            return\n\n        ntype = node.get(\"_type\")\n\n        # Pattern 1: Class with state attribute OR Enum\n        if ntype == \"ClassDef\":\n            clsName = node.get(\"name\", \"\")\n            bases = [_getName(b) for b in node.get(\"bases\", [])]\n\n            # Check if this is an Enum class (Pattern 6)\n            isEnum = any(\"Enum\" in b for b in bases)\n            if isEnum:\n                members = []\n                for item in node.get(\"body\", []):\n                    if isinstance(item, dict) and item.get(\"_type\") == \"Assign\":\n                        for t in item.get(\"targets\", []):\n                            members.append({\n                                \"name\": _getName(t),\n                                \"line\": item.get(\"lineno\")\n                            })\n                patterns[\"enumDefinitions\"].append({\n                    \"name\": clsName,\n                    \"members\": members,\n                    \"line\": node.get(\"lineno\")\n                })\n                # Don't process enum as state class\n                for item in node.get(\"body\", []):\n                    walk(item, node, clsName)\n                return\n\n            # Regular class - check for state attribute\n            hasStateAttr = False\n            stateAttrName = None\n            methods = []\n\n            for item in node.get(\"body\", []):\n                if isinstance(item, dict):\n                    # Check for state attribute assignments at class level\n                    if item.get(\"_type\") == \"Assign\":\n                        for target in item.get(\"targets\", []):\n                            tname = _getName(target).lower()\n                            if any(kw in tname for kw in STATE_KEYWORDS):\n                                hasStateAttr = True\n                                stateAttrName = _getName(target)\n                    # Collect methods and check __init__ for self.state\n                    if item.get(\"_type\") in (\"FunctionDef\", \"AsyncFunctionDef\"):\n                        methodName = item.get(\"name\")\n                        methods.append({\n                            \"name\": methodName,\n                            \"line\": item.get(\"lineno\"),\n                            \"isAsync\": item.get(\"_type\") == \"AsyncFunctionDef\"\n                        })\n                        # Check __init__ for self.state assignments\n                        if methodName == \"__init__\":\n                            for stmt in item.get(\"body\", []):\n                                if stmt.get(\"_type\") == \"Assign\":\n                                    for t in stmt.get(\"targets\", []):\n                                        if t.get(\"_type\") == \"Attribute\":\n                                            attr = t.get(\"attr\", \"\").lower()\n                                            if any(kw in attr for kw in\n                                                   STATE_KEYWORDS):\n                                                hasStateAttr = True\n                                                stateAttrName = f\"self.{t.get('attr')}\"\n\n            if hasStateAttr:\n                patterns[\"stateClasses\"].append({\n                    \"name\": clsName,\n                    \"stateAttr\": stateAttrName,\n                    \"methods\": methods,\n                    \"line\": node.get(\"lineno\")\n                })\n\n            for item in node.get(\"body\", []):\n                walk(item, node, clsName)\n            return\n\n        # Pattern 2: Module-level state variables\n        if ntype == \"Assign\" and parent and parent.get(\"_type\") == \"Module\":\n            for target in node.get(\"targets\", []):\n                tname = _getName(target).lower()\n                if any(kw in tname for kw in STATE_KEYWORDS):\n                    val = node.get(\"value\", {})\n                    patterns[\"stateVariables\"].append({\n                        \"name\": _getName(target),\n                        \"value\": _getValue(val),\n                        \"line\": node.get(\"lineno\")\n                    })\n\n        # Pattern 3: If-elif chains checking state\n        if ntype == \"If\":\n            chain = _extractIfChain(node)\n            if chain and len(chain) >= 2:\n                stateVar = _findStateVarInChain(chain)\n                if stateVar:\n                    patterns[\"ifChains\"].append({\n                        \"stateVar\": stateVar,\n                        \"branches\": chain,\n                        \"line\": node.get(\"lineno\"),\n                        \"className\": className\n                    })\n\n        # Pattern 4: Match/case statements\n        if ntype == \"Match\":\n            subject = _getName(node.get(\"subject\", {}))\n            if any(kw in subject.lower() for kw in STATE_KEYWORDS):\n                cases = []\n                for case in node.get(\"cases\", []):\n                    pattern = case.get(\"pattern\", {})\n                    cases.append({\n                        \"pattern\": _getPatternValue(pattern),\n                        \"line\": case.get(\"lineno\") if hasattr(case, \"lineno\") else \\\n                            node.get(\"lineno\")\n                    })\n                patterns[\"matchStatements\"].append({\n                    \"subject\": subject,\n                    \"cases\": cases,\n                    \"line\": node.get(\"lineno\"),\n                    \"className\": className\n                })\n\n        # Pattern 5: Event handlers\n        if ntype in (\"FunctionDef\", \"AsyncFunctionDef\"):\n            fname = node.get(\"name\", \"\")\n            if any(fname.startswith(p) for p in EVENT_PREFIXES):\n                eventName = fname\n                for p in EVENT_PREFIXES:\n                    if fname.startswith(p):\n                        eventName = fname[len(p):]\n                        break\n                patterns[\"eventHandlers\"].append({\n                    \"name\": fname,\n                    \"event\": eventName.upper(),\n                    \"line\": node.get(\"lineno\"),\n                    \"className\": className,\n                    \"args\": [a.get(\"arg\") for a in node.get(\"args\", {}).get(\n                        \"args\", [])]\n                })\n\n        # Pattern 6: Enum definitions - handled in Pattern 1 above\n\n        # Pattern 7: Constants (uppercase) that might be states\n        if ntype == \"Assign\" and parent and parent.get(\"_type\") == \"Module\":\n            for target in node.get(\"targets\", []):\n                tname = _getName(target)\n                if tname.isupper() and isinstance(node.get(\"value\"), dict):\n                    val = node.get(\"value\")\n                    if val.get(\"_type\") == \"Constant\" and isinstance(\n                            val.get(\"value\"), str):\n                        patterns[\"constantDefinitions\"].append({\n                            \"name\": tname,\n                            \"value\": val.get(\"value\"),\n                            \"line\": node.get(\"lineno\")\n                        })\n\n        # Walk children\n        for key, value in node.items():\n            if isinstance(value, dict):\n                walk(value, node, className)\n            elif isinstance(value, list):\n                for item in value:\n                    if isinstance(item, dict):\n                        walk(item, node, className)\n\n    walk(astDict)\n\n    # In annotated mode, also scan for comment markers\n    if mode in (\"annotated\", \"hybrid\"):\n        patterns[\"annotations\"] = _findAnnotations(\n            params.get(\"sourceCode\", \"\"))\n\n    return {\"patterns\": patterns}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.extractStates", "type": "function", "label": "extractStates", "direction": "inbound", "parent": "extractor_compute", "line": 344, "endLine": 454, "signature": "(params) -> dict", "docstring": "Extract state definitions from code.", "source": "def extractStates(params: dict) -> dict:\n    \"\"\"Extract state definitions from code.\"\"\"\n    astDict = params.get(\"ast\", {})\n    patterns = params.get(\"patterns\", {})\n\n    states = []\n    uncertainties = []\n    seenStates: Set[str] = set()\n\n    def addState(stateId: str, name: str, desc: str, source: str, line: int,\n                 confidence: float = 1.0):\n        if stateId in seenStates:\n            return\n        seenStates.add(stateId)\n\n        state = {\n            \"id\": stateId,\n            \"name\": name,\n            \"description\": desc,\n            \"source\": source,\n            \"line\": line,\n            \"confidence\": confidence\n        }\n        states.append(state)\n\n        if confidence < 0.8:\n            uncertainties.append({\n                \"type\": \"state\",\n                \"element\": state,\n                \"reason\": f\"Low confidence ({confidence:.0%}) - needs review\"\n            })\n\n    # Extract from enum definitions (highest confidence)\n    for enum in patterns.get(\"enumDefinitions\", []):\n        enumName = enum.get(\"name\", \"\")\n        if any(kw in enumName.lower() for kw in STATE_KEYWORDS):\n            for member in enum.get(\"members\", []):\n                mname = member.get(\"name\", \"\")\n                stateId = mname.lower()\n                stateName = _toTitleCase(mname)\n                addState(stateId, stateName, f\"From enum {enumName}.{mname}\",\n                         f\"enum:{enumName}\", member.get(\"line\"), 1.0)\n\n    # Extract from state class assignments\n    for cls in patterns.get(\"stateClasses\", []):\n        clsName = cls.get(\"name\", \"\")\n        stateAttr = cls.get(\"stateAttr\", \"\")\n\n        # Find initial state value\n        for body in _getClassBody(astDict, clsName):\n            if body.get(\"_type\") == \"Assign\":\n                for target in body.get(\"targets\", []):\n                    if _getName(target) == stateAttr:\n                        val = _getValue(body.get(\"value\", {}))\n                        if val:\n                            stateId = str(val).lower().replace(\"'\", \"\").replace(\n                                '\"', '')\n                            addState(stateId, _toTitleCase(stateId),\n                                     f\"Initial state of {clsName}\",\n                                     f\"class:{clsName}\", body.get(\"lineno\"), 0.95)\n\n    # Extract from if-chain comparisons\n    for chain in patterns.get(\"ifChains\", []):\n        for branch in chain.get(\"branches\", []):\n            test = branch.get(\"testNode\")\n            if test and test.get(\"_type\") == \"Compare\":\n                comparators = test.get(\"comparators\", [])\n                for comp in comparators:\n                    val = _getValue(comp)\n                    if val and isinstance(val, str):\n                        stateId = val.lower()\n                        addState(stateId, _toTitleCase(val),\n                                 f\"From condition check\",\n                                 \"if-chain\", branch.get(\"line\"), 0.85)\n\n    # Extract from match/case\n    for match in patterns.get(\"matchStatements\", []):\n        for case in match.get(\"cases\", []):\n            patternVal = case.get(\"pattern\")\n            if patternVal and isinstance(patternVal, str):\n                stateId = patternVal.lower()\n                addState(stateId, _toTitleCase(patternVal),\n                         \"From match/case pattern\",\n                         \"match\", case.get(\"line\"), 0.9)\n\n    # Extract from constant definitions\n    for const in patterns.get(\"constantDefinitions\", []):\n        constName = const.get(\"name\", \"\")\n        constVal = const.get(\"value\", \"\")\n\n        # Check if constant name or value matches state keywords\n        for category, keywords in STATE_VALUE_KEYWORDS.items():\n            if any(kw in constName.lower() or kw in constVal.lower()\n                   for kw in keywords):\n                stateId = constVal.lower() if constVal else constName.lower()\n                addState(stateId, _toTitleCase(stateId),\n                         f\"From constant {constName}\",\n                         f\"const:{constName}\", const.get(\"line\"), 0.7)\n                break\n\n    # Extract from annotations (if present)\n    for ann in patterns.get(\"annotations\", []):\n        if ann.get(\"type\") == \"state\":\n            val = ann.get(\"value\", \"\")\n            if val:\n                stateId = val.lower().replace(\" \", \"_\")\n                addState(stateId, _toTitleCase(val),\n                         \"From annotation\",\n                         \"annotation\", ann.get(\"line\"), 1.0)\n\n    return {\"states\": states, \"uncertainties\": uncertainties}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.extractTransitions", "type": "function", "label": "extractTransitions", "direction": "inbound", "parent": "extractor_compute", "line": 457, "endLine": 559, "signature": "(params) -> dict", "docstring": "Extract state transitions from methods.", "source": "def extractTransitions(params: dict) -> dict:\n    \"\"\"Extract state transitions from methods.\"\"\"\n    astDict = params.get(\"ast\", {})\n    patterns = params.get(\"patterns\", {})\n    existingStates = params.get(\"extractedStates\", [])\n\n    transitions = []\n    uncertainties = params.get(\"uncertainties\", [])\n    stateIds = {s[\"id\"] for s in existingStates}\n    tId = 0\n\n    def addTransition(fromState: str, toState: str, event: str, source: str,\n                      line: int, confidence: float = 1.0):\n        nonlocal tId\n        trans = {\n            \"id\": f\"t_{tId}\",\n            \"from\": fromState,\n            \"to\": toState,\n            \"on_event\": event,\n            \"source\": source,\n            \"line\": line,\n            \"confidence\": confidence,\n            \"gates\": [],\n            \"actions\": []\n        }\n        transitions.append(trans)\n        tId += 1\n\n        if confidence < 0.8:\n            uncertainties.append({\n                \"type\": \"transition\",\n                \"element\": trans,\n                \"reason\": f\"Low confidence ({confidence:.0%}) - needs review\"\n            })\n\n    # Extract from state class methods\n    for cls in patterns.get(\"stateClasses\", []):\n        clsName = cls.get(\"name\", \"\")\n        stateAttr = cls.get(\"stateAttr\", \"\")\n\n        for method in cls.get(\"methods\", []):\n            methodName = method.get(\"name\", \"\")\n            if methodName.startswith(\"_\"):\n                continue\n\n            # Find state changes in method body\n            methodBody = _getMethodBody(astDict, clsName, methodName)\n            stateChanges = _findStateChanges(methodBody, stateAttr)\n\n            for change in stateChanges:\n                fromState = change.get(\"from\", \"*\")\n                toState = change.get(\"to\")\n\n                if toState:\n                    event = methodName.upper()\n                    addTransition(fromState, toState, event,\n                                  f\"method:{clsName}.{methodName}\",\n                                  change.get(\"line\", method.get(\"line\")), 0.9)\n\n    # Extract from if-chains\n    for chain in patterns.get(\"ifChains\", []):\n        stateVar = chain.get(\"stateVar\", \"\")\n        clsName = chain.get(\"className\")\n\n        for branch in chain.get(\"branches\", []):\n            fromState = _extractStateFromCondition(branch.get(\"testNode\"))\n            toState = _findStateAssignment(branch.get(\"body\", []), stateVar)\n\n            if fromState and toState:\n                event = \"AUTO\" if not clsName else \"PROCESS\"\n                addTransition(fromState, toState, event,\n                              \"if-chain\", branch.get(\"line\"), 0.85)\n\n    # Extract from event handlers\n    for handler in patterns.get(\"eventHandlers\", []):\n        eventName = handler.get(\"event\", \"\")\n        clsName = handler.get(\"className\")\n\n        # Find state changes in handler body\n        handlerBody = _getMethodBody(astDict, clsName,\n                                     handler.get(\"name\")) if clsName else []\n\n        stateChanges = _findStateChangesGeneric(handlerBody)\n\n        for change in stateChanges:\n            addTransition(change.get(\"from\", \"*\"), change.get(\"to\"),\n                          eventName, f\"handler:{handler.get('name')}\",\n                          handler.get(\"line\"), 0.8)\n\n    # Extract from annotations\n    for ann in patterns.get(\"annotations\", []):\n        if ann.get(\"type\") == \"transition\":\n            val = ann.get(\"value\", \"\")\n            # Parse \"from -> to ON event\" format\n            match = re.match(r\"(\\w+)\\s*->\\s*(\\w+)(?:\\s+ON\\s+(\\w+))?\", val)\n            if match:\n                fromState = match.group(1).lower()\n                toState = match.group(2).lower()\n                event = match.group(3).upper() if match.group(3) else \"AUTO\"\n                addTransition(fromState, toState, event,\n                              \"annotation\", ann.get(\"line\"), 1.0)\n\n    return {\"transitions\": transitions, \"uncertainties\": uncertainties}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.extractGates", "type": "function", "label": "extractGates", "direction": "inbound", "parent": "extractor_compute", "line": 672, "endLine": 729, "signature": "(params) -> dict", "docstring": "Extract gate conditions from if statements.", "source": "def extractGates(params: dict) -> dict:\n    \"\"\"Extract gate conditions from if statements.\"\"\"\n    astDict = params.get(\"ast\", {})\n    patterns = params.get(\"patterns\", {})\n    transitions = params.get(\"extractedTransitions\", [])\n\n    gates = []\n    uncertainties = params.get(\"uncertainties\", [])\n    gId = 0\n\n    # Extract from if-chains\n    for chain in patterns.get(\"ifChains\", []):\n        for branch in chain.get(\"branches\", []):\n            condition = branch.get(\"condition\", \"\")\n            if condition and condition != \"else\":\n                gate = {\n                    \"id\": f\"g_{gId}\",\n                    \"type\": \"expression\",\n                    \"expression\": condition,\n                    \"source\": \"if-chain\",\n                    \"line\": branch.get(\"line\"),\n                    \"confidence\": 0.85\n                }\n                gates.append(gate)\n                gId += 1\n\n    # Extract from match cases\n    for match in patterns.get(\"matchStatements\", []):\n        subject = match.get(\"subject\", \"\")\n        for case in match.get(\"cases\", []):\n            patternVal = case.get(\"pattern\")\n            if patternVal:\n                gate = {\n                    \"id\": f\"g_{gId}\",\n                    \"type\": \"expression\",\n                    \"expression\": f\"{subject} == '{patternVal}'\",\n                    \"source\": \"match\",\n                    \"line\": case.get(\"line\"),\n                    \"confidence\": 0.9\n                }\n                gates.append(gate)\n                gId += 1\n\n    # Extract from annotations\n    for ann in patterns.get(\"annotations\", []):\n        if ann.get(\"type\") == \"gate\":\n            gate = {\n                \"id\": f\"g_{gId}\",\n                \"type\": \"expression\",\n                \"expression\": ann.get(\"value\", \"\"),\n                \"source\": \"annotation\",\n                \"line\": ann.get(\"line\"),\n                \"confidence\": 1.0\n            }\n            gates.append(gate)\n            gId += 1\n\n    return {\"gates\": gates, \"uncertainties\": uncertainties}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.extractActions", "type": "function", "label": "extractActions", "direction": "inbound", "parent": "extractor_compute", "line": 732, "endLine": 823, "signature": "(params) -> dict", "docstring": "Extract actions from side effects.", "source": "def extractActions(params: dict) -> dict:\n    \"\"\"Extract actions from side effects.\"\"\"\n    astDict = params.get(\"ast\", {})\n    patterns = params.get(\"patterns\", {})\n    transitions = params.get(\"extractedTransitions\", [])\n\n    actions = []\n    uncertainties = params.get(\"uncertainties\", [])\n    aId = 0\n    seenActions: Set[str] = set()\n\n    def addAction(name: str, actionType: str, target: str, value: str,\n                  source: str, line: int, confidence: float = 1.0):\n        nonlocal aId\n        if name in seenActions:\n            return\n        seenActions.add(name)\n\n        action = {\n            \"id\": f\"a_{aId}\",\n            \"name\": name,\n            \"type\": actionType,\n            \"target\": target,\n            \"value\": value,\n            \"source\": source,\n            \"line\": line,\n            \"confidence\": confidence\n        }\n        actions.append(action)\n        aId += 1\n\n        if confidence < 0.8:\n            uncertainties.append({\n                \"type\": \"action\",\n                \"element\": action,\n                \"reason\": f\"Low confidence ({confidence:.0%}) - needs review\"\n            })\n\n    # Extract from state class methods\n    for cls in patterns.get(\"stateClasses\", []):\n        clsName = cls.get(\"name\", \"\")\n        stateAttr = cls.get(\"stateAttr\", \"\")\n\n        for method in cls.get(\"methods\", []):\n            methodName = method.get(\"name\", \"\")\n            if methodName.startswith(\"_\"):\n                continue\n\n            methodBody = _getMethodBody(astDict, clsName, methodName)\n            sideEffects = _findSideEffects(methodBody, stateAttr)\n\n            for effect in sideEffects:\n                actionName = f\"{methodName}_{effect['type']}\"\n                addAction(actionName, effect[\"type\"], effect.get(\"target\", \"\"),\n                          effect.get(\"value\", \"\"),\n                          f\"method:{clsName}.{methodName}\",\n                          effect.get(\"line\", method.get(\"line\")), 0.85)\n\n    # Extract from event handlers\n    for handler in patterns.get(\"eventHandlers\", []):\n        clsName = handler.get(\"className\")\n        handlerName = handler.get(\"name\", \"\")\n\n        handlerBody = _getMethodBody(astDict, clsName, handlerName) if \\\n            clsName else []\n        sideEffects = _findSideEffects(handlerBody)\n\n        for effect in sideEffects:\n            actionName = f\"{handlerName}_{effect['type']}\"\n            addAction(actionName, effect[\"type\"], effect.get(\"target\", \"\"),\n                      effect.get(\"value\", \"\"),\n                      f\"handler:{handlerName}\",\n                      effect.get(\"line\", handler.get(\"line\")), 0.8)\n\n    # Extract from annotations\n    for ann in patterns.get(\"annotations\", []):\n        if ann.get(\"type\") == \"action\":\n            val = ann.get(\"value\", \"\")\n            # Parse \"SET target = value\" or \"COMPUTE unit\" format\n            if val.startswith(\"SET \"):\n                match = re.match(r\"SET\\s+(\\w+)\\s*=\\s*(.+)\", val)\n                if match:\n                    addAction(f\"set_{match.group(1)}\", \"set\",\n                              match.group(1), match.group(2),\n                              \"annotation\", ann.get(\"line\"), 1.0)\n            elif val.startswith(\"COMPUTE \"):\n                unit = val[8:].strip()\n                addAction(f\"compute_{unit}\", \"compute\",\n                          \"\", unit,\n                          \"annotation\", ann.get(\"line\"), 1.0)\n\n    return {\"actions\": actions, \"uncertainties\": uncertainties}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.analyzeEventHandlers", "type": "function", "label": "analyzeEventHandlers", "direction": "inbound", "parent": "extractor_compute", "line": 875, "endLine": 923, "signature": "(params) -> dict", "docstring": "Analyze event handler patterns.", "source": "def analyzeEventHandlers(params: dict) -> dict:\n    \"\"\"Analyze event handler patterns.\"\"\"\n    astDict = params.get(\"ast\", {})\n    patterns = params.get(\"patterns\", {})\n    states = params.get(\"extractedStates\", [])\n\n    events = []\n    uncertainties = params.get(\"uncertainties\", [])\n    stateIds = {s[\"id\"] for s in states}\n\n    for handler in patterns.get(\"eventHandlers\", []):\n        eventName = handler.get(\"event\", \"\")\n        clsName = handler.get(\"className\")\n\n        event = {\n            \"name\": eventName,\n            \"handler\": handler.get(\"name\"),\n            \"args\": handler.get(\"args\", []),\n            \"source\": f\"handler:{handler.get('name')}\",\n            \"line\": handler.get(\"line\"),\n            \"triggersTransitions\": []\n        }\n\n        # Find which transitions this event triggers\n        handlerBody = _getMethodBody(astDict, clsName, handler.get(\"name\")) \\\n            if clsName else []\n        stateChanges = _findStateChangesGeneric(handlerBody)\n\n        for change in stateChanges:\n            event[\"triggersTransitions\"].append({\n                \"from\": change.get(\"from\"),\n                \"to\": change.get(\"to\")\n            })\n\n        events.append(event)\n\n    # Also extract from annotations\n    for ann in patterns.get(\"annotations\", []):\n        if ann.get(\"type\") == \"event\":\n            events.append({\n                \"name\": ann.get(\"value\", \"\").upper(),\n                \"handler\": None,\n                \"args\": [],\n                \"source\": \"annotation\",\n                \"line\": ann.get(\"line\"),\n                \"triggersTransitions\": []\n            })\n\n    return {\"events\": events, \"uncertainties\": uncertainties}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.inferEntryState", "type": "function", "label": "inferEntryState", "direction": "inbound", "parent": "extractor_compute", "line": 926, "endLine": 974, "signature": "(params) -> dict", "docstring": "Infer entry and terminal states.", "source": "def inferEntryState(params: dict) -> dict:\n    \"\"\"Infer entry and terminal states.\"\"\"\n    astDict = params.get(\"ast\", {})\n    patterns = params.get(\"patterns\", {})\n    states = params.get(\"extractedStates\", [])\n    transitions = params.get(\"extractedTransitions\", [])\n\n    stateIds = [s[\"id\"] for s in states]\n    entryState = None\n    terminalStates = []\n\n    # Rule 1: State with \"init\", \"start\", \"idle\" in name\n    for state in states:\n        sid = state[\"id\"].lower()\n        if any(kw in sid for kw in STATE_VALUE_KEYWORDS[\"initial\"]):\n            entryState = state[\"id\"]\n            break\n\n    # Rule 2: First state defined\n    if not entryState and states:\n        entryState = states[0][\"id\"]\n\n    # Rule 3: State never reached by any transition\n    if not entryState and stateIds:\n        targetStates = {t[\"to\"] for t in transitions}\n        unreachable = [s for s in stateIds if s not in targetStates]\n        if unreachable:\n            entryState = unreachable[0]\n\n    # Terminal states: states with no outgoing transitions\n    sourceStates = {t[\"from\"] for t in transitions if t[\"from\"] != \"*\"}\n    for state in states:\n        sid = state[\"id\"]\n        # Has no outgoing transitions\n        if sid not in sourceStates:\n            terminalStates.append(sid)\n        # Or has terminal keywords\n        elif any(kw in sid.lower() for kw in STATE_VALUE_KEYWORDS[\"terminal\"]):\n            if sid not in terminalStates:\n                terminalStates.append(sid)\n        elif any(kw in sid.lower() for kw in STATE_VALUE_KEYWORDS[\"error\"]):\n            if sid not in terminalStates:\n                terminalStates.append(sid)\n\n    # Ensure entry state is set\n    if not entryState:\n        entryState = \"idle\"\n\n    return {\"entryState\": entryState, \"terminalStates\": terminalStates}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.generateBlueprint", "type": "function", "label": "generateBlueprint", "direction": "inbound", "parent": "extractor_compute", "line": 977, "endLine": 1070, "signature": "(params) -> dict", "docstring": "Generate L++ blueprint from extracted elements.", "source": "def generateBlueprint(params: dict) -> dict:\n    \"\"\"Generate L++ blueprint from extracted elements.\"\"\"\n    filePath = params.get(\"filePath\", \"extracted\")\n    states = params.get(\"extractedStates\", [])\n    transitions = params.get(\"extractedTransitions\", [])\n    gates = params.get(\"extractedGates\", [])\n    actions = params.get(\"extractedActions\", [])\n    events = params.get(\"extractedEvents\", [])\n    entryState = params.get(\"entryState\", \"idle\")\n    terminalStates = params.get(\"terminalStates\", [])\n\n    baseName = os.path.basename(filePath).replace(\".py\", \"\") if filePath else \\\n        \"extracted\"\n\n    # Build states dict\n    statesDict = {}\n    for s in states:\n        statesDict[s[\"id\"]] = {\n            \"description\": s.get(\"description\", f\"Extracted from {s['source']}\")\n        }\n\n    # Ensure entry state exists\n    if entryState not in statesDict:\n        statesDict[entryState] = {\"description\": \"Entry state (inferred)\"}\n\n    # Build gates dict\n    gatesDict = {}\n    for g in gates:\n        gatesDict[g[\"id\"]] = {\n            \"type\": g.get(\"type\", \"expression\"),\n            \"expression\": g.get(\"expression\", \"true\")\n        }\n\n    # Build actions dict\n    actionsDict = {}\n    for a in actions:\n        if a[\"type\"] == \"set\":\n            actionsDict[a[\"id\"]] = {\n                \"type\": \"set\",\n                \"target\": a.get(\"target\", \"\"),\n                \"value_from\": a.get(\"value\", \"\")\n            }\n        elif a[\"type\"] == \"compute\":\n            actionsDict[a[\"id\"]] = {\n                \"type\": \"compute\",\n                \"compute_unit\": f\"impl:{a.get('target', a['name'])}\",\n                \"input_map\": {},\n                \"output_map\": {}\n            }\n\n    # Build transitions array\n    transArr = []\n    for t in transitions:\n        trans = {\n            \"id\": t[\"id\"],\n            \"from\": t[\"from\"],\n            \"to\": t[\"to\"],\n            \"on_event\": t[\"on_event\"]\n        }\n        if t.get(\"gates\"):\n            trans[\"gates\"] = t[\"gates\"]\n        if t.get(\"actions\"):\n            trans[\"actions\"] = t[\"actions\"]\n        transArr.append(trans)\n\n    # Build context schema from states and actions\n    contextProps = {}\n    for s in states:\n        contextProps[\"currentState\"] = {\"type\": \"string\"}\n    for a in actions:\n        if a[\"type\"] == \"set\":\n            contextProps[a.get(\"target\", \"data\")] = {\"type\": \"object\"}\n    contextProps[\"error\"] = {\"type\": \"string\"}\n\n    blueprint = {\n        \"$schema\": \"lpp/v0.1.2\",\n        \"id\": f\"extracted_{baseName}\",\n        \"name\": f\"Extracted: {_toTitleCase(baseName)}\",\n        \"version\": \"1.0.0\",\n        \"description\": f\"State machine extracted from {filePath}\",\n        \"context_schema\": {\"properties\": contextProps},\n        \"states\": statesDict,\n        \"transitions\": transArr,\n        \"gates\": gatesDict,\n        \"actions\": actionsDict,\n        \"entry_state\": entryState,\n        \"terminal_states\": terminalStates,\n        \"display\": {\"rules\": []}\n    }\n\n    return {\n        \"blueprint\": blueprint,\n        \"blueprintJson\": json.dumps(blueprint, indent=2)\n    }", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.generateMapping", "type": "function", "label": "generateMapping", "direction": "inbound", "parent": "extractor_compute", "line": 1073, "endLine": 1154, "signature": "(params) -> dict", "docstring": "Generate source-to-blueprint mapping.", "source": "def generateMapping(params: dict) -> dict:\n    \"\"\"Generate source-to-blueprint mapping.\"\"\"\n    filePath = params.get(\"filePath\", \"\")\n    states = params.get(\"extractedStates\", [])\n    transitions = params.get(\"extractedTransitions\", [])\n    gates = params.get(\"extractedGates\", [])\n    actions = params.get(\"extractedActions\", [])\n    blueprint = params.get(\"blueprint\", {})\n\n    mapping = {\n        \"source\": filePath,\n        \"blueprint_id\": blueprint.get(\"id\", \"\"),\n        \"elements\": []\n    }\n\n    # Map states\n    for s in states:\n        mapping[\"elements\"].append({\n            \"type\": \"state\",\n            \"source_location\": f\"{filePath}:{s.get('line', '?')}\",\n            \"blueprint_element\": f\"states.{s['id']}\",\n            \"confidence\": s.get(\"confidence\", 1.0),\n            \"source_type\": s.get(\"source\", \"unknown\")\n        })\n\n    # Map transitions\n    for t in transitions:\n        mapping[\"elements\"].append({\n            \"type\": \"transition\",\n            \"source_location\": f\"{filePath}:{t.get('line', '?')}\",\n            \"blueprint_element\": f\"transitions.{t['id']}\",\n            \"confidence\": t.get(\"confidence\", 1.0),\n            \"source_type\": t.get(\"source\", \"unknown\")\n        })\n\n    # Map gates\n    for g in gates:\n        mapping[\"elements\"].append({\n            \"type\": \"gate\",\n            \"source_location\": f\"{filePath}:{g.get('line', '?')}\",\n            \"blueprint_element\": f\"gates.{g['id']}\",\n            \"confidence\": g.get(\"confidence\", 1.0),\n            \"source_type\": g.get(\"source\", \"unknown\")\n        })\n\n    # Map actions\n    for a in actions:\n        mapping[\"elements\"].append({\n            \"type\": \"action\",\n            \"source_location\": f\"{filePath}:{a.get('line', '?')}\",\n            \"blueprint_element\": f\"actions.{a['id']}\",\n            \"confidence\": a.get(\"confidence\", 1.0),\n            \"source_type\": a.get(\"source\", \"unknown\")\n        })\n\n    # Generate report\n    report = {\n        \"source_file\": filePath,\n        \"blueprint_id\": blueprint.get(\"id\", \"\"),\n        \"extraction_summary\": {\n            \"states_extracted\": len(states),\n            \"transitions_extracted\": len(transitions),\n            \"gates_extracted\": len(gates),\n            \"actions_extracted\": len(actions)\n        },\n        \"confidence_summary\": {\n            \"high_confidence\": len([e for e in mapping[\"elements\"]\n                                    if e.get(\"confidence\", 0) >= 0.9]),\n            \"medium_confidence\": len([e for e in mapping[\"elements\"]\n                                      if 0.7 <= e.get(\"confidence\", 0) < 0.9]),\n            \"low_confidence\": len([e for e in mapping[\"elements\"]\n                                   if e.get(\"confidence\", 0) < 0.7])\n        },\n        \"source_coverage\": {\n            \"classes_analyzed\": 0,\n            \"functions_analyzed\": 0,\n            \"lines_mapped\": len(set(e.get(\"source_location\", \"\").split(\":\")[-1]\n                                    for e in mapping[\"elements\"]))\n        }\n    }\n\n    return {\"sourceMapping\": mapping, \"report\": report}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.exportBlueprint", "type": "function", "label": "exportBlueprint", "direction": "inbound", "parent": "extractor_compute", "line": 1157, "endLine": 1170, "signature": "(params) -> dict", "docstring": "Export blueprint to file.", "source": "def exportBlueprint(params: dict) -> dict:\n    \"\"\"Export blueprint to file.\"\"\"\n    blueprintJson = params.get(\"blueprintJson\", \"\")\n    outputPath = params.get(\"outputPath\")\n\n    if not outputPath:\n        return {\"error\": \"No output path specified\"}\n\n    try:\n        with open(outputPath, \"w\", encoding=\"utf-8\") as f:\n            f.write(blueprintJson)\n        return {\"error\": None}\n    except Exception as e:\n        return {\"error\": f\"Failed to export: {e}\"}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.exportReport", "type": "function", "label": "exportReport", "direction": "inbound", "parent": "extractor_compute", "line": 1173, "endLine": 1195, "signature": "(params) -> dict", "docstring": "Export extraction report.", "source": "def exportReport(params: dict) -> dict:\n    \"\"\"Export extraction report.\"\"\"\n    report = params.get(\"extractionReport\", {})\n    mapping = params.get(\"sourceMapping\", {})\n    uncertainties = params.get(\"uncertainties\", [])\n    outputPath = params.get(\"outputPath\")\n\n    if not outputPath:\n        return {\"error\": \"No output path specified\"}\n\n    fullReport = {\n        \"summary\": report,\n        \"mapping\": mapping,\n        \"uncertainties\": uncertainties,\n        \"requires_review\": len(uncertainties)\n    }\n\n    try:\n        with open(outputPath, \"w\", encoding=\"utf-8\") as f:\n            json.dump(fullReport, f, indent=2)\n        return {\"error\": None}\n    except Exception as e:\n        return {\"error\": f\"Failed to export report: {e}\"}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.clearState", "type": "function", "label": "clearState", "direction": "inbound", "parent": "extractor_compute", "line": 1198, "endLine": 1217, "signature": "(params) -> dict", "docstring": "Reset all extraction state.", "source": "def clearState(params: dict) -> dict:\n    \"\"\"Reset all extraction state.\"\"\"\n    return {\n        \"sourceCode\": None,\n        \"ast\": None,\n        \"patterns\": None,\n        \"extractedStates\": None,\n        \"extractedTransitions\": None,\n        \"extractedGates\": None,\n        \"extractedActions\": None,\n        \"extractedEvents\": None,\n        \"entryState\": None,\n        \"terminalStates\": None,\n        \"blueprint\": None,\n        \"blueprintJson\": None,\n        \"sourceMapping\": None,\n        \"uncertainties\": None,\n        \"extractionReport\": None,\n        \"error\": None\n    }", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.walk", "type": "function", "label": "walk", "direction": "inbound", "parent": "extractor_compute", "line": 98, "endLine": 261, "signature": "(node, parent, className)", "docstring": null, "source": "    def walk(node, parent=None, className=None):\n        if not isinstance(node, dict):\n            return\n\n        ntype = node.get(\"_type\")\n\n        # Pattern 1: Class with state attribute OR Enum\n        if ntype == \"ClassDef\":\n            clsName = node.get(\"name\", \"\")\n            bases = [_getName(b) for b in node.get(\"bases\", [])]\n\n            # Check if this is an Enum class (Pattern 6)\n            isEnum = any(\"Enum\" in b for b in bases)\n            if isEnum:\n                members = []\n                for item in node.get(\"body\", []):\n                    if isinstance(item, dict) and item.get(\"_type\") == \"Assign\":\n                        for t in item.get(\"targets\", []):\n                            members.append({\n                                \"name\": _getName(t),\n                                \"line\": item.get(\"lineno\")\n                            })\n                patterns[\"enumDefinitions\"].append({\n                    \"name\": clsName,\n                    \"members\": members,\n                    \"line\": node.get(\"lineno\")\n                })\n                # Don't process enum as state class\n                for item in node.get(\"body\", []):\n                    walk(item, node, clsName)\n                return\n\n            # Regular class - check for state attribute\n            hasStateAttr = False\n            stateAttrName = None\n            methods = []\n\n            for item in node.get(\"body\", []):\n                if isinstance(item, dict):\n                    # Check for state attribute assignments at class level\n                    if item.get(\"_type\") == \"Assign\":\n                        for target in item.get(\"targets\", []):\n                            tname = _getName(target).lower()\n                            if any(kw in tname for kw in STATE_KEYWORDS):\n                                hasStateAttr = True\n                                stateAttrName = _getName(target)\n                    # Collect methods and check __init__ for self.state\n                    if item.get(\"_type\") in (\"FunctionDef\", \"AsyncFunctionDef\"):\n                        methodName = item.get(\"name\")\n                        methods.append({\n                            \"name\": methodName,\n                            \"line\": item.get(\"lineno\"),\n                            \"isAsync\": item.get(\"_type\") == \"AsyncFunctionDef\"\n                        })\n                        # Check __init__ for self.state assignments\n                        if methodName == \"__init__\":\n                            for stmt in item.get(\"body\", []):\n                                if stmt.get(\"_type\") == \"Assign\":\n                                    for t in stmt.get(\"targets\", []):\n                                        if t.get(\"_type\") == \"Attribute\":\n                                            attr = t.get(\"attr\", \"\").lower()\n                                            if any(kw in attr for kw in\n                                                   STATE_KEYWORDS):\n                                                hasStateAttr = True\n                                                stateAttrName = f\"self.{t.get('attr')}\"\n\n            if hasStateAttr:\n                patterns[\"stateClasses\"].append({\n                    \"name\": clsName,\n                    \"stateAttr\": stateAttrName,\n                    \"methods\": methods,\n                    \"line\": node.get(\"lineno\")\n                })\n\n            for item in node.get(\"body\", []):\n                walk(item, node, clsName)\n            return\n\n        # Pattern 2: Module-level state variables\n        if ntype == \"Assign\" and parent and parent.get(\"_type\") == \"Module\":\n            for target in node.get(\"targets\", []):\n                tname = _getName(target).lower()\n                if any(kw in tname for kw in STATE_KEYWORDS):\n                    val = node.get(\"value\", {})\n                    patterns[\"stateVariables\"].append({\n                        \"name\": _getName(target),\n                        \"value\": _getValue(val),\n                        \"line\": node.get(\"lineno\")\n                    })\n\n        # Pattern 3: If-elif chains checking state\n        if ntype == \"If\":\n            chain = _extractIfChain(node)\n            if chain and len(chain) >= 2:\n                stateVar = _findStateVarInChain(chain)\n                if stateVar:\n                    patterns[\"ifChains\"].append({\n                        \"stateVar\": stateVar,\n                        \"branches\": chain,\n                        \"line\": node.get(\"lineno\"),\n                        \"className\": className\n                    })\n\n        # Pattern 4: Match/case statements\n        if ntype == \"Match\":\n            subject = _getName(node.get(\"subject\", {}))\n            if any(kw in subject.lower() for kw in STATE_KEYWORDS):\n                cases = []\n                for case in node.get(\"cases\", []):\n                    pattern = case.get(\"pattern\", {})\n                    cases.append({\n                        \"pattern\": _getPatternValue(pattern),\n                        \"line\": case.get(\"lineno\") if hasattr(case, \"lineno\") else \\\n                            node.get(\"lineno\")\n                    })\n                patterns[\"matchStatements\"].append({\n                    \"subject\": subject,\n                    \"cases\": cases,\n                    \"line\": node.get(\"lineno\"),\n                    \"className\": className\n                })\n\n        # Pattern 5: Event handlers\n        if ntype in (\"FunctionDef\", \"AsyncFunctionDef\"):\n            fname = node.get(\"name\", \"\")\n            if any(fname.startswith(p) for p in EVENT_PREFIXES):\n                eventName = fname\n                for p in EVENT_PREFIXES:\n                    if fname.startswith(p):\n                        eventName = fname[len(p):]\n                        break\n                patterns[\"eventHandlers\"].append({\n                    \"name\": fname,\n                    \"event\": eventName.upper(),\n                    \"line\": node.get(\"lineno\"),\n                    \"className\": className,\n                    \"args\": [a.get(\"arg\") for a in node.get(\"args\", {}).get(\n                        \"args\", [])]\n                })\n\n        # Pattern 6: Enum definitions - handled in Pattern 1 above\n\n        # Pattern 7: Constants (uppercase) that might be states\n        if ntype == \"Assign\" and parent and parent.get(\"_type\") == \"Module\":\n            for target in node.get(\"targets\", []):\n                tname = _getName(target)\n                if tname.isupper() and isinstance(node.get(\"value\"), dict):\n                    val = node.get(\"value\")\n                    if val.get(\"_type\") == \"Constant\" and isinstance(\n                            val.get(\"value\"), str):\n                        patterns[\"constantDefinitions\"].append({\n                            \"name\": tname,\n                            \"value\": val.get(\"value\"),\n                            \"line\": node.get(\"lineno\")\n                        })\n\n        # Walk children\n        for key, value in node.items():\n            if isinstance(value, dict):\n                walk(value, node, className)\n            elif isinstance(value, list):\n                for item in value:\n                    if isinstance(item, dict):\n                        walk(item, node, className)", "args": ["node", "parent", "className"], "returns": null, "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.addState", "type": "function", "label": "addState", "direction": "inbound", "parent": "extractor_compute", "line": 353, "endLine": 374, "signature": "(stateId, name, desc, source, line, confidence)", "docstring": null, "source": "    def addState(stateId: str, name: str, desc: str, source: str, line: int,\n                 confidence: float = 1.0):\n        if stateId in seenStates:\n            return\n        seenStates.add(stateId)\n\n        state = {\n            \"id\": stateId,\n            \"name\": name,\n            \"description\": desc,\n            \"source\": source,\n            \"line\": line,\n            \"confidence\": confidence\n        }\n        states.append(state)\n\n        if confidence < 0.8:\n            uncertainties.append({\n                \"type\": \"state\",\n                \"element\": state,\n                \"reason\": f\"Low confidence ({confidence:.0%}) - needs review\"\n            })", "args": ["stateId", "name", "desc", "source", "line", "confidence"], "returns": null, "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.addTransition", "type": "function", "label": "addTransition", "direction": "inbound", "parent": "extractor_compute", "line": 468, "endLine": 490, "signature": "(fromState, toState, event, source, line, confidence)", "docstring": null, "source": "    def addTransition(fromState: str, toState: str, event: str, source: str,\n                      line: int, confidence: float = 1.0):\n        nonlocal tId\n        trans = {\n            \"id\": f\"t_{tId}\",\n            \"from\": fromState,\n            \"to\": toState,\n            \"on_event\": event,\n            \"source\": source,\n            \"line\": line,\n            \"confidence\": confidence,\n            \"gates\": [],\n            \"actions\": []\n        }\n        transitions.append(trans)\n        tId += 1\n\n        if confidence < 0.8:\n            uncertainties.append({\n                \"type\": \"transition\",\n                \"element\": trans,\n                \"reason\": f\"Low confidence ({confidence:.0%}) - needs review\"\n            })", "args": ["fromState", "toState", "event", "source", "line", "confidence"], "returns": null, "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.walk", "type": "function", "label": "walk", "direction": "inbound", "parent": "extractor_compute", "line": 566, "endLine": 601, "signature": "(nodes, currentFrom)", "docstring": null, "source": "    def walk(nodes, currentFrom=None):\n        for node in nodes:\n            if not isinstance(node, dict):\n                continue\n\n            ntype = node.get(\"_type\")\n\n            # Check for if statements checking current state\n            if ntype == \"If\":\n                test = node.get(\"test\", {})\n                fromState = _extractStateFromCondition(test)\n\n                # Process if body\n                toState = _findStateAssignment(node.get(\"body\", []), stateAttr)\n                if toState:\n                    changes.append({\n                        \"from\": fromState or \"*\",\n                        \"to\": toState,\n                        \"line\": node.get(\"lineno\")\n                    })\n\n                # Process elif/else\n                walk(node.get(\"orelse\", []), currentFrom)\n\n            # Direct state assignment\n            elif ntype == \"Assign\":\n                for target in node.get(\"targets\", []):\n                    targetName = _getName(target)\n                    if stateAttr in targetName or \"state\" in targetName.lower():\n                        toState = _getValue(node.get(\"value\", {}))\n                        if toState:\n                            changes.append({\n                                \"from\": currentFrom or \"*\",\n                                \"to\": str(toState).lower().strip(\"'\\\"\"),\n                                \"line\": node.get(\"lineno\")\n                            })", "args": ["nodes", "currentFrom"], "returns": null, "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.walk", "type": "function", "label": "walk", "direction": "inbound", "parent": "extractor_compute", "line": 611, "endLine": 633, "signature": "(nodes)", "docstring": null, "source": "    def walk(nodes):\n        for node in nodes:\n            if not isinstance(node, dict):\n                continue\n\n            ntype = node.get(\"_type\")\n\n            if ntype == \"Assign\":\n                for target in node.get(\"targets\", []):\n                    targetName = _getName(target).lower()\n                    if any(kw in targetName for kw in STATE_KEYWORDS):\n                        toState = _getValue(node.get(\"value\", {}))\n                        if toState:\n                            changes.append({\n                                \"from\": \"*\",\n                                \"to\": str(toState).lower().strip(\"'\\\"\"),\n                                \"line\": node.get(\"lineno\")\n                            })\n\n            # Recurse into body elements\n            for key in [\"body\", \"orelse\", \"finalbody\"]:\n                if key in node and isinstance(node[key], list):\n                    walk(node[key])", "args": ["nodes"], "returns": null, "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.addAction", "type": "function", "label": "addAction", "direction": "inbound", "parent": "extractor_compute", "line": 743, "endLine": 768, "signature": "(name, actionType, target, value, source, line, confidence)", "docstring": null, "source": "    def addAction(name: str, actionType: str, target: str, value: str,\n                  source: str, line: int, confidence: float = 1.0):\n        nonlocal aId\n        if name in seenActions:\n            return\n        seenActions.add(name)\n\n        action = {\n            \"id\": f\"a_{aId}\",\n            \"name\": name,\n            \"type\": actionType,\n            \"target\": target,\n            \"value\": value,\n            \"source\": source,\n            \"line\": line,\n            \"confidence\": confidence\n        }\n        actions.append(action)\n        aId += 1\n\n        if confidence < 0.8:\n            uncertainties.append({\n                \"type\": \"action\",\n                \"element\": action,\n                \"reason\": f\"Low confidence ({confidence:.0%}) - needs review\"\n            })", "args": ["name", "actionType", "target", "value", "source", "line", "confidence"], "returns": null, "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.walk", "type": "function", "label": "walk", "direction": "inbound", "parent": "extractor_compute", "line": 830, "endLine": 869, "signature": "(nodes)", "docstring": null, "source": "    def walk(nodes):\n        for node in nodes:\n            if not isinstance(node, dict):\n                continue\n\n            ntype = node.get(\"_type\")\n\n            # Assignments (excluding state)\n            if ntype == \"Assign\":\n                for target in node.get(\"targets\", []):\n                    targetName = _getName(target)\n                    if stateAttr and stateAttr in targetName:\n                        continue\n                    if any(kw in targetName.lower() for kw in STATE_KEYWORDS):\n                        continue\n\n                    effects.append({\n                        \"type\": \"set\",\n                        \"target\": targetName,\n                        \"value\": _exprToStr(node.get(\"value\", {})),\n                        \"line\": node.get(\"lineno\")\n                    })\n\n            # Method calls (potential compute actions)\n            elif ntype == \"Expr\":\n                val = node.get(\"value\", {})\n                if val.get(\"_type\") == \"Call\":\n                    funcName = _getName(val.get(\"func\", {}))\n                    if funcName and not funcName.startswith(\"print\"):\n                        effects.append({\n                            \"type\": \"compute\",\n                            \"target\": funcName,\n                            \"value\": \"\",\n                            \"line\": node.get(\"lineno\")\n                        })\n\n            # Recurse\n            for key in [\"body\", \"orelse\", \"finalbody\"]:\n                if key in node and isinstance(node[key], list):\n                    walk(node[key])", "args": ["nodes"], "returns": null, "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.find", "type": "function", "label": "find", "direction": "inbound", "parent": "extractor_compute", "line": 1311, "endLine": 1324, "signature": "(node)", "docstring": null, "source": "    def find(node):\n        if isinstance(node, dict):\n            if node.get(\"_type\") == \"ClassDef\" and node.get(\"name\") == className:\n                return node.get(\"body\", [])\n            for v in node.values():\n                result = find(v)\n                if result:\n                    return result\n        elif isinstance(node, list):\n            for item in node:\n                result = find(item)\n                if result:\n                    return result\n        return None", "args": ["node"], "returns": null, "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "extractor_compute.find", "type": "function", "label": "find", "direction": "inbound", "parent": "extractor_compute", "line": 1341, "endLine": 1355, "signature": "(node)", "docstring": null, "source": "        def find(node):\n            if isinstance(node, dict):\n                if (node.get(\"_type\") in (\"FunctionDef\", \"AsyncFunctionDef\") and\n                        node.get(\"name\") == methodName):\n                    return node.get(\"body\", [])\n                for v in node.values():\n                    result = find(v)\n                    if result:\n                        return result\n            elif isinstance(node, list):\n                for item in node:\n                    result = find(item)\n                    if result:\n                        return result\n            return None", "args": ["node"], "returns": null, "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "ast", "type": "dependency", "label": "ast", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "json", "type": "dependency", "label": "json", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "os", "type": "dependency", "label": "os", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "re", "type": "dependency", "label": "re", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}, {"id": "typing", "type": "dependency", "label": "typing", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "extractor_compute"}];
+const edges = [{"from": "extractor_compute.walk", "to": "extractor_compute.walk", "type": "internal", "line": 127}, {"from": "extractor_compute.walk", "to": "extractor_compute.walk", "type": "internal", "line": 173}, {"from": "extractor_compute.walk", "to": "extractor_compute.walk", "type": "internal", "line": 257}, {"from": "extractor_compute.walk", "to": "extractor_compute.walk", "type": "internal", "line": 261}, {"from": "extractor_compute.findStatePatterns", "to": "extractor_compute.walk", "type": "internal", "line": 263}, {"from": "extractor_compute.extractStates", "to": "extractor_compute.addState", "type": "internal", "line": 384}, {"from": "extractor_compute.extractStates", "to": "extractor_compute.addState", "type": "internal", "line": 401}, {"from": "extractor_compute.extractStates", "to": "extractor_compute.addState", "type": "internal", "line": 415}, {"from": "extractor_compute.extractStates", "to": "extractor_compute.addState", "type": "internal", "line": 425}, {"from": "extractor_compute.extractStates", "to": "extractor_compute.addState", "type": "internal", "line": 439}, {"from": "extractor_compute.extractStates", "to": "extractor_compute.addState", "type": "internal", "line": 450}, {"from": "extractor_compute.extractTransitions", "to": "extractor_compute.addTransition", "type": "internal", "line": 512}, {"from": "extractor_compute.extractTransitions", "to": "extractor_compute.addTransition", "type": "internal", "line": 527}, {"from": "extractor_compute.extractTransitions", "to": "extractor_compute.addTransition", "type": "internal", "line": 542}, {"from": "extractor_compute.extractTransitions", "to": "extractor_compute.addTransition", "type": "internal", "line": 556}, {"from": "extractor_compute.walk", "to": "extractor_compute.walk", "type": "internal", "line": 588}, {"from": "extractor_compute._findStateChanges", "to": "extractor_compute.walk", "type": "internal", "line": 603}, {"from": "extractor_compute.walk", "to": "extractor_compute.walk", "type": "internal", "line": 633}, {"from": "extractor_compute._findStateChangesGeneric", "to": "extractor_compute.walk", "type": "internal", "line": 635}, {"from": "extractor_compute.extractActions", "to": "extractor_compute.addAction", "type": "internal", "line": 785}, {"from": "extractor_compute.extractActions", "to": "extractor_compute.addAction", "type": "internal", "line": 801}, {"from": "extractor_compute.extractActions", "to": "extractor_compute.addAction", "type": "internal", "line": 814}, {"from": "extractor_compute.extractActions", "to": "extractor_compute.addAction", "type": "internal", "line": 819}, {"from": "extractor_compute.walk", "to": "extractor_compute.walk", "type": "internal", "line": 869}, {"from": "extractor_compute._findSideEffects", "to": "extractor_compute.walk", "type": "internal", "line": 871}, {"from": "extractor_compute.find", "to": "extractor_compute.find", "type": "internal", "line": 1316}, {"from": "extractor_compute.find", "to": "extractor_compute.find", "type": "internal", "line": 1321}, {"from": "extractor_compute._getClassBody", "to": "extractor_compute.find", "type": "internal", "line": 1326}, {"from": "extractor_compute.find", "to": "extractor_compute.find", "type": "internal", "line": 1347}, {"from": "extractor_compute.find", "to": "extractor_compute.find", "type": "internal", "line": 1352}, {"from": "extractor_compute._getMethodBody", "to": "extractor_compute.find", "type": "internal", "line": 1357}, {"from": "extractor_compute.parseAst", "to": "ast", "type": "external", "category": "stdlib", "line": 57}, {"from": "extractor_compute._astToDict", "to": "ast", "type": "external", "category": "stdlib", "line": 68}, {"from": "extractor_compute.extractTransitions", "to": "re", "type": "external", "category": "stdlib", "line": 551}, {"from": "extractor_compute.extractActions", "to": "re", "type": "external", "category": "stdlib", "line": 812}, {"from": "extractor_compute.generateBlueprint", "to": "os", "type": "external", "category": "stdlib", "line": 988}, {"from": "extractor_compute.generateBlueprint", "to": "json", "type": "external", "category": "stdlib", "line": 1069}, {"from": "extractor_compute.exportReport", "to": "json", "type": "external", "category": "stdlib", "line": 1192}];
+const moduleColors = {"extractor_compute": "#00d4ff"};
+
+// Edge type visibility
+const edgeVisibility = { internal: true, external: true, local: true };
+let currentLayout = 'force';
+
+// Create node lookup
+const nodeById = {};
+nodes.forEach(n => nodeById[n.id] = n);
+
+// Setup SVG
+const container = document.getElementById('graph');
+const width = container.clientWidth;
+const height = container.clientHeight || 600;
+
+const svg = d3.select("svg").attr("viewBox", [0, 0, width, height]);
+const g = svg.append("g");
+
+// Zoom behavior
+const zoom = d3.zoom()
+    .scaleExtent([0.1, 4])
+    .filter(e => !e.target.closest('.node'))
+    .on("zoom", e => g.attr("transform", e.transform));
+svg.call(zoom);
+
+// Arrow markers
+const defs = svg.append("defs");
+["internal", "external", "local"].forEach(type => {
+    const color = type === "internal" ? "#4ecdc4" : type === "external" ? "#f39c12" : "#9b59b6";
+    defs.append("marker")
+        .attr("id", `arrow-${type}`)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 20)
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-4L10,0L0,4")
+        .attr("fill", color);
+});
+
+// Build module legend
+const legendDiv = document.getElementById('module-legend');
+Object.entries(moduleColors).forEach(([mod, color]) => {
+    const item = document.createElement('div');
+    item.className = 'module-item';
+    item.innerHTML = `<div class="module-dot" style="background:${color}"></div><span class="module-name">${mod}</span>`;
+    item.onclick = () => highlightModule(mod);
+    legendDiv.appendChild(item);
+});
+
+// Process edges - resolve node references
+const processedEdges = edges.map(e => ({
+    ...e,
+    source: nodeById[e.from] || { id: e.from, x: 0, y: 0 },
+    target: nodeById[e.to] || { id: e.to, x: 0, y: 0 }
+})).filter(e => e.source && e.target);
+
+// Force simulation
+const simulation = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(processedEdges).id(d => d.id).distance(80).strength(0.5))
+    .force("charge", d3.forceManyBody().strength(-300))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force("collision", d3.forceCollide().radius(40));
+
+// Draw edges
+const edge = g.append("g").selectAll("path")
+    .data(processedEdges)
+    .join("path")
+    .attr("class", d => `edge edge-${d.type || 'internal'}`)
+    .attr("marker-end", d => `url(#arrow-${d.type || 'internal'})`);
+
+// Node size based on type
+function nodeSize(d) {
+    if (d.type === 'module') return { w: 120, h: 40 };
+    if (d.type === 'function' || d.type === 'async_function') return { w: 100, h: 30 };
+    if (d.type === 'class') return { w: 110, h: 35 };
+    return { w: 80, h: 25 };  // dependency
+}
+
+// Draw nodes
+const node = g.append("g").selectAll("g")
+    .data(nodes)
+    .join("g")
+    .attr("class", "node")
+    .call(d3.drag()
+        .on("start", dragStart)
+        .on("drag", dragging)
+        .on("end", dragEnd));
+
+node.append("rect")
+    .attr("class", d => `node-${d.type === 'dependency' ? 'dependency' : d.type === 'module' ? 'module' : 'function'}`)
+    .attr("width", d => nodeSize(d).w)
+    .attr("height", d => nodeSize(d).h)
+    .attr("x", d => -nodeSize(d).w / 2)
+    .attr("y", d => -nodeSize(d).h / 2)
+    .attr("rx", 6)
+    .attr("stroke", d => d.moduleColor || "#666");
+
+node.append("text")
+    .attr("class", "node-label")
+    .attr("text-anchor", "middle")
+    .attr("dy", d => d.signature ? -3 : 4)
+    .text(d => d.label || d.id);
+
+node.filter(d => d.signature).append("text")
+    .attr("class", "node-sublabel")
+    .attr("text-anchor", "middle")
+    .attr("dy", 10)
+    .text(d => d.signature.length > 20 ? d.signature.slice(0, 18) + ".." : d.signature);
+
+// Tooltip
+const tooltip = d3.select("#tooltip");
+node.on("mouseover", (e, d) => {
+    let html = `<b>${d.label || d.id}</b>`;
+    if (d.type) html += `<br><span style="color:#888">${d.type}</span>`;
+    if (d.signature) html += `<br><code>${d.signature}</code>`;
+    if (d.direction) html += `<br>Direction: ${d.direction}`;
+    tooltip.style("display", "block").html(html);
+})
+.on("mousemove", e => {
+    tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 10) + "px");
+})
+.on("mouseout", () => tooltip.style("display", "none"));
+
+// Click to select
+node.on("click", (e, d) => {
+    e.stopPropagation();
+    selectNode(d);
+});
+
+svg.on("click", () => clearSelection());
+
+// Update positions
+simulation.on("tick", () => {
+    edge.attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
+});
+
+// Drag functions
+function dragStart(e, d) {
+    if (!e.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+}
+function dragging(e, d) {
+    d.fx = e.x;
+    d.fy = e.y;
+}
+function dragEnd(e, d) {
+    if (!e.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+}
+
+// Selection functions
+let selectedNode = null;
+
+function selectNode(d) {
+    selectedNode = d;
+    
+    // Highlight node
+    node.classed("dim", n => n.id !== d.id && !isConnected(d, n));
+    node.select("rect").attr("stroke-width", n => n.id === d.id ? 4 : 2);
+    
+    // Highlight edges
+    edge.classed("dim", e => e.source.id !== d.id && e.target.id !== d.id);
+    edge.classed("highlight", e => e.source.id === d.id || e.target.id === d.id);
+    
+    // Update info panel
+    updateNodeInfo(d);
+    updateEdgeList(d);
+}
+
+function clearSelection() {
+    selectedNode = null;
+    node.classed("dim", false);
+    node.select("rect").attr("stroke-width", 2);
+    edge.classed("dim", false).classed("highlight", false);
+    document.getElementById('node-info').innerHTML = 'Click a node to see details';
+    document.getElementById('edge-list').innerHTML = '';
+}
+
+function isConnected(a, b) {
+    return processedEdges.some(e => 
+        (e.source.id === a.id && e.target.id === b.id) ||
+        (e.source.id === b.id && e.target.id === a.id)
+    );
+}
+
+function updateNodeInfo(d) {
+    let html = `<div class="metric"><span class="info-label">ID:</span><span class="info-value">${d.id}</span></div>`;
+    html += `<div class="metric"><span class="info-label">Type:</span><span class="info-value">${d.type}</span></div>`;
+    if (d.moduleName) html += `<div class="metric"><span class="info-label">Module:</span><span class="info-value">${d.moduleName}</span></div>`;
+    if (d.line) html += `<div class="metric"><span class="info-label">Line:</span><span class="info-value">${d.line}${d.endLine ? '-' + d.endLine : ''}</span></div>`;
+    if (d.signature) html += `<div class="metric"><span class="info-label">Signature:</span><span class="info-value" style="font-family:monospace">${d.signature}</span></div>`;
+    if (d.direction) html += `<div class="metric"><span class="info-label">Direction:</span><span class="info-value">${d.direction}</span></div>`;
+    if (d.category) html += `<div class="metric"><span class="info-label">Category:</span><span class="info-value">${d.category}</span></div>`;
+
+    if (d.metrics) {
+        html += `<div style="margin-top:10px"><b>Coupling Metrics</b></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-In:</span><span class="info-value">${d.metrics.fanIn}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-Out:</span><span class="info-value">${d.metrics.fanOut}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Instability:</span><span class="info-value">${(d.metrics.instability * 100).toFixed(1)}%</span></div>`;
+        html += `<div class="metric-bar"><div class="metric-fill" style="width:${d.metrics.instability * 100}%;background:${d.metrics.instability > 0.5 ? '#ff6b6b' : '#4ecdc4'}"></div></div>`;
+        html += `<div class="metric"><span class="info-label">Internal Edges:</span><span class="info-value">${d.metrics.internalEdges}</span></div>`;
+    }
+
+    document.getElementById('node-info').innerHTML = html;
+
+    // Update source code panel
+    updateSourcePanel(d);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function updateSourcePanel(d) {
+    const panel = document.getElementById('source-content');
+
+    if (d.source) {
+        let sourceHtml = '';
+        if (d.docstring) {
+            sourceHtml += `<div class="docstring" style="margin-bottom:8px;padding:5px;background:#1a1a2a;border-radius:3px">${escapeHtml(d.docstring)}</div>`;
+        }
+        sourceHtml += `<div class="source-code">${escapeHtml(d.source)}</div>`;
+        panel.innerHTML = sourceHtml;
+    } else if (d.type === 'module') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">Module: ${d.label}<br>Click a function to view its source code.</div>`;
+    } else if (d.type === 'dependency') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">External dependency: ${d.label}<br>Category: ${d.category || 'unknown'}</div>`;
+    } else {
+        panel.innerHTML = `<div style="color:#666;font-size:11px">No source available for this node</div>`;
+    }
+}
+
+function updateEdgeList(d) {
+    const outgoing = processedEdges.filter(e => e.source.id === d.id);
+    const incoming = processedEdges.filter(e => e.target.id === d.id);
+    
+    let html = '';
+    if (outgoing.length) {
+        html += '<div style="color:#4ecdc4;font-weight:bold;margin-bottom:5px">Outgoing →</div>';
+        outgoing.forEach(e => {
+            html += `<div class="edge-item">→ <span class="to">${e.target.id || e.to}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (incoming.length) {
+        html += '<div style="color:#f39c12;font-weight:bold;margin:10px 0 5px 0">← Incoming</div>';
+        incoming.forEach(e => {
+            html += `<div class="edge-item">← <span class="from">${e.source.id || e.from}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (!outgoing.length && !incoming.length) {
+        html = '<div style="color:#666">No connections</div>';
+    }
+    
+    document.getElementById('edge-list').innerHTML = html;
+}
+
+function highlightModule(modName) {
+    node.classed("dim", n => n.moduleName !== modName && n.type !== 'dependency');
+    edge.classed("dim", e => {
+        const srcMod = nodeById[e.source.id]?.moduleName;
+        const tgtMod = nodeById[e.target.id]?.moduleName;
+        return srcMod !== modName && tgtMod !== modName;
+    });
+}
+
+// Layout functions
+function toggleLayout(layout) {
+    currentLayout = layout;
+    document.querySelectorAll('.controls button').forEach(b => {
+        if (b.id.startsWith('btn-') && ['force', 'horizontal', 'vertical'].includes(b.id.replace('btn-', ''))) {
+            b.classList.toggle('active', b.id === `btn-${layout}`);
+        }
+    });
+    
+    if (layout === 'force') {
+        simulation.alpha(1).restart();
+    } else {
+        simulation.stop();
+        layoutNodes(layout);
+    }
+}
+
+function layoutNodes(layout) {
+    const modules = [...new Set(nodes.filter(n => n.type === 'module').map(n => n.id))];
+    const padding = 50;
+    
+    if (layout === 'horizontal') {
+        // Group by module, spread horizontally
+        modules.forEach((mod, mi) => {
+            const modNodes = nodes.filter(n => n.moduleName === mod || n.id === mod);
+            const x = padding + mi * (width - padding * 2) / Math.max(modules.length - 1, 1);
+            modNodes.forEach((n, ni) => {
+                n.x = x;
+                n.y = padding + ni * 50;
+            });
+        });
+        // Dependencies on the right
+        const deps = nodes.filter(n => n.type === 'dependency');
+        deps.forEach((n, i) => {
+            n.x = width - padding;
+            n.y = padding + i * 40;
+        });
+    } else if (layout === 'vertical') {
+        // Modules at top, functions below, dependencies at bottom
+        const modNodes = nodes.filter(n => n.type === 'module');
+        const funcNodes = nodes.filter(n => n.type === 'function' || n.type === 'async_function' || n.type === 'class');
+        const depNodes = nodes.filter(n => n.type === 'dependency');
+        
+        modNodes.forEach((n, i) => {
+            n.x = padding + i * 150;
+            n.y = padding;
+        });
+        funcNodes.forEach((n, i) => {
+            n.x = padding + (i % 6) * 130;
+            n.y = 120 + Math.floor(i / 6) * 60;
+        });
+        depNodes.forEach((n, i) => {
+            n.x = padding + (i % 8) * 100;
+            n.y = height - padding - 50;
+        });
+    }
+    
+    // Update positions
+    node.transition().duration(500).attr("transform", d => `translate(${d.x},${d.y})`);
+    edge.transition().duration(500).attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+}
+
+// Edge type toggle
+function toggleEdgeType(type) {
+    edgeVisibility[type] = !edgeVisibility[type];
+    document.getElementById(`btn-${type}`).classList.toggle('active', edgeVisibility[type]);
+    edge.style("display", d => edgeVisibility[d.type || 'internal'] ? null : "none");
+}
+
+// View controls
+function resetView() {
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+}
+
+function fitToView() {
+    const bounds = g.node().getBBox();
+    const scale = Math.min(width / bounds.width, height / bounds.height) * 0.9;
+    const tx = (width - bounds.width * scale) / 2 - bounds.x * scale;
+    const ty = (height - bounds.height * scale) / 2 - bounds.y * scale;
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
+// Initial fit
+setTimeout(fitToView, 1000);
+</script>
+</body>
+</html>

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Function Graph: blueprint_registry</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #0f0f23; color: #eee; }
+h1 { color: #00d4ff; margin-bottom: 5px; font-size: 24px; }
+.subtitle { color: #888; margin-bottom: 15px; font-size: 14px; }
+#container { display: flex; gap: 20px; height: calc(100vh - 120px); }
+#graph { flex: 1; position: relative; }
+#sidebar { width: 350px; background: #1a1a2e; padding: 15px; border-radius: 8px; overflow-y: auto; }
+svg { background: #16213e; border-radius: 8px; width: 100%; height: 100%; }
+
+/* Node styles */
+.node { cursor: pointer; }
+.node-module { fill: #2a2a4a; stroke-width: 3; }
+.node-function { fill: #3a3a5a; stroke-width: 2; }
+.node-dependency { fill: #1a1a3a; stroke: #666; stroke-width: 1; stroke-dasharray: 4; }
+.node-label { font-size: 11px; fill: #fff; pointer-events: none; font-weight: 500; }
+.node-sublabel { font-size: 9px; fill: #888; pointer-events: none; }
+
+/* Edge styles */
+.edge { fill: none; stroke-opacity: 0.6; }
+.edge-internal { stroke: #4ecdc4; stroke-width: 2; }
+.edge-external { stroke: #f39c12; stroke-width: 1.5; stroke-dasharray: 4; }
+.edge-local { stroke: #9b59b6; stroke-width: 2; }
+.edge-label { font-size: 8px; fill: #666; pointer-events: none; }
+
+/* Highlight styles */
+.highlight { stroke-width: 3 !important; stroke-opacity: 1 !important; }
+.dim { opacity: 0.2; }
+
+/* Controls */
+.controls { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.controls button { background: #3a3a5a; color: #fff; border: 1px solid #555; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.controls button:hover { background: #4a4a6a; }
+.controls button.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
+
+/* Module legend */
+.module-legend { margin-top: 15px; }
+.module-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer; }
+.module-item:hover { background: #2a2a4a; }
+.module-dot { width: 12px; height: 12px; border-radius: 3px; }
+.module-name { font-size: 12px; }
+
+/* Info panel */
+h3 { color: #00d4ff; margin: 15px 0 8px 0; font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+.info-section { font-size: 12px; line-height: 1.6; }
+.info-label { color: #888; }
+.info-value { color: #fff; }
+
+/* Source code panel */
+.source-panel { margin-top: 10px; }
+.source-code { background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 10px; font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; line-height: 1.4; overflow-x: auto; max-height: 300px; overflow-y: auto; white-space: pre; color: #b8b8b8; }
+.source-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.source-toggle { background: #3a3a5a; color: #fff; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; }
+.source-toggle:hover { background: #4a4a6a; }
+.docstring { color: #6a9955; font-style: italic; }
+.metric { display: flex; justify-content: space-between; padding: 3px 0; }
+.metric-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 2px; }
+.metric-fill { height: 100%; border-radius: 2px; }
+
+/* Edge list */
+.edge-list { max-height: 200px; overflow-y: auto; }
+.edge-item { padding: 4px 0; border-bottom: 1px solid #333; font-size: 11px; }
+.edge-item .from { color: #4ecdc4; }
+.edge-item .to { color: #f39c12; }
+.edge-item .type { color: #666; font-size: 10px; }
+
+/* Tooltip */
+#tooltip { position: absolute; background: #1a1a2e; border: 1px solid #00d4ff; padding: 10px; border-radius: 4px; pointer-events: none; display: none; max-width: 300px; z-index: 100; font-size: 11px; }
+</style>
+</head>
+<body>
+<h1>Function Graph: blueprint_registry</h1>
+<div class="subtitle">Stackable function dependency visualization • Drag nodes to rearrange • Click to inspect</div>
+
+<div class="controls">
+  <button onclick="resetView()">Reset View</button>
+  <button onclick="fitToView()">Fit</button>
+  <button onclick="toggleLayout('force')" id="btn-force" class="active">Force</button>
+  <button onclick="toggleLayout('horizontal')" id="btn-horizontal">Horizontal</button>
+  <button onclick="toggleLayout('vertical')" id="btn-vertical">Vertical</button>
+  <span style="margin-left: 10px; color: #666">|</span>
+  <button onclick="toggleEdgeType('internal')" id="btn-internal" class="active">Internal</button>
+  <button onclick="toggleEdgeType('external')" id="btn-external" class="active">External</button>
+  <button onclick="toggleEdgeType('local')" id="btn-local" class="active">Local</button>
+</div>
+
+<div id="container">
+  <div id="graph"><svg></svg></div>
+  <div id="sidebar">
+    <h3>Modules</h3>
+    <div class="module-legend" id="module-legend"></div>
+
+    <h3>Selected Node</h3>
+    <div class="info-section" id="node-info">Click a node to see details</div>
+
+    <h3>Source Code</h3>
+    <div class="source-panel" id="source-panel">
+      <div id="source-content" style="color:#666;font-size:11px">Click a function to view source</div>
+    </div>
+
+    <h3>Connections</h3>
+    <div class="edge-list" id="edge-list"></div>
+  </div>
+</div>
+<div id="tooltip"></div>
+
+<script>
+const nodes = [{"id": "registry_compute", "type": "module", "label": "registry_compute", "metrics": {"fanIn": 18, "fanOut": 5, "instability": 0.217, "internalEdges": 2, "externalCallCount": 33, "localCallCount": 0, "callsByCategory": {"stdlib": 33}, "localDependencies": []}, "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.init_registry", "type": "function", "label": "init_registry", "direction": "inbound", "parent": "registry_compute", "line": 19, "endLine": 51, "signature": "(params) -> Dict[]", "docstring": "Initialize a new empty registry at the specified path.", "source": "def init_registry(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Initialize a new empty registry at the specified path.\"\"\"\n    registry_path = params.get(\"registry_path\")\n    if not registry_path:\n        return {\"error\": \"No registry path provided\"}\n\n    try:\n        path = Path(registry_path)\n        path.mkdir(parents=True, exist_ok=True)\n\n        index = {\n            \"version\": \"1.0.0\",\n            \"created_at\": datetime.utcnow().isoformat() + \"Z\",\n            \"updated_at\": datetime.utcnow().isoformat() + \"Z\",\n            \"blueprints\": {}\n        }\n\n        index_path = path / \"index.json\"\n        with open(index_path, \"w\") as f:\n            json.dump(index, f, indent=2)\n\n        # Create versions directory\n        (path / \"versions\").mkdir(exist_ok=True)\n\n        return {\n            \"path\": str(path),\n            \"index\": index,\n            \"blueprints\": {},\n            \"message\": f\"Registry initialized at {path}\",\n            \"error\": None\n        }\n    except Exception as e:\n        return {\"error\": str(e)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.load_registry", "type": "function", "label": "load_registry", "direction": "inbound", "parent": "registry_compute", "line": 54, "endLine": 81, "signature": "(params) -> Dict[]", "docstring": "Load an existing registry from disk.", "source": "def load_registry(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Load an existing registry from disk.\"\"\"\n    registry_path = params.get(\"registry_path\")\n    if not registry_path:\n        return {\"error\": \"No registry path provided\"}\n\n    try:\n        path = Path(registry_path)\n        index_path = path / \"index.json\"\n\n        if not index_path.exists():\n            return {\"error\": f\"Registry not found at {path}\"}\n\n        with open(index_path) as f:\n            index = json.load(f)\n\n        blueprints = index.get(\"blueprints\", {})\n        stats = _compute_stats(blueprints)\n\n        return {\n            \"path\": str(path),\n            \"index\": index,\n            \"blueprints\": blueprints,\n            \"stats\": stats,\n            \"error\": None\n        }\n    except Exception as e:\n        return {\"error\": str(e)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.save_registry", "type": "function", "label": "save_registry", "direction": "inbound", "parent": "registry_compute", "line": 84, "endLine": 102, "signature": "(params) -> Dict[]", "docstring": "Save registry index to disk.", "source": "def save_registry(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Save registry index to disk.\"\"\"\n    registry_path = params.get(\"registry_path\")\n    index = params.get(\"index\")\n\n    if not registry_path or not index:\n        return {\"error\": \"Missing registry path or index\"}\n\n    try:\n        path = Path(registry_path)\n        index[\"updated_at\"] = datetime.utcnow().isoformat() + \"Z\"\n\n        index_path = path / \"index.json\"\n        with open(index_path, \"w\") as f:\n            json.dump(index, f, indent=2)\n\n        return {\"message\": \"Registry saved\", \"error\": None}\n    except Exception as e:\n        return {\"error\": str(e)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.register_blueprint", "type": "function", "label": "register_blueprint", "direction": "inbound", "parent": "registry_compute", "line": 109, "endLine": 174, "signature": "(params) -> Dict[]", "docstring": "Register a new blueprint in the registry.", "source": "def register_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Register a new blueprint in the registry.\"\"\"\n    registry_path = params.get(\"registry_path\")\n    index = params.get(\"index\")\n    blueprint_path = params.get(\"blueprint_path\")\n    tags = params.get(\"tags\", [])\n    owner = params.get(\"owner\", \"unknown\")\n\n    if not blueprint_path:\n        return {\"error\": \"No blueprint path provided\"}\n\n    try:\n        bp_path = Path(blueprint_path)\n        if not bp_path.exists():\n            return {\"error\": f\"Blueprint not found: {blueprint_path}\"}\n\n        with open(bp_path) as f:\n            blueprint = json.load(f)\n\n        bp_id = blueprint.get(\"id\")\n        if not bp_id:\n            return {\"error\": \"Blueprint has no 'id' field\"}\n\n        blueprints = index.get(\"blueprints\", {})\n        if bp_id in blueprints:\n            return {\"error\": f\"Blueprint '{bp_id}' already registered. Use UPDATE.\"}\n\n        version = blueprint.get(\"version\", \"1.0.0\")\n        now = datetime.utcnow().isoformat() + \"Z\"\n\n        # Extract dependencies from actions\n        deps = _extract_dependencies(blueprint)\n\n        # Create metadata entry\n        entry = {\n            \"current_version\": version,\n            \"versions\": [version],\n            \"description\": blueprint.get(\"description\", \"\"),\n            \"name\": blueprint.get(\"name\", bp_id),\n            \"tags\": tags if isinstance(tags, list) else [tags] if tags else [],\n            \"dependencies\": deps,\n            \"deprecated\": False,\n            \"deprecated_reason\": None,\n            \"created_at\": now,\n            \"updated_at\": now,\n            \"owner\": owner,\n            \"source_path\": str(bp_path.absolute())\n        }\n\n        blueprints[bp_id] = entry\n        index[\"blueprints\"] = blueprints\n\n        # Copy blueprint to versions directory\n        reg_path = Path(registry_path)\n        version_dir = reg_path / \"versions\" / bp_id\n        version_dir.mkdir(parents=True, exist_ok=True)\n        shutil.copy(bp_path, version_dir / f\"{version}.json\")\n\n        return {\n            \"index\": index,\n            \"blueprints\": blueprints,\n            \"message\": f\"Registered {bp_id} v{version}\",\n            \"error\": None\n        }\n    except Exception as e:\n        return {\"error\": str(e)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.update_blueprint", "type": "function", "label": "update_blueprint", "direction": "inbound", "parent": "registry_compute", "line": 177, "endLine": 235, "signature": "(params) -> Dict[]", "docstring": "Update an existing blueprint with version bump.", "source": "def update_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Update an existing blueprint with version bump.\"\"\"\n    registry_path = params.get(\"registry_path\")\n    index = params.get(\"index\")\n    blueprint_id = params.get(\"blueprint_id\")\n    blueprint_path = params.get(\"blueprint_path\")\n    bump = params.get(\"bump\", \"patch\")  # major, minor, patch\n\n    blueprints = index.get(\"blueprints\", {})\n\n    if blueprint_id and blueprint_id not in blueprints:\n        return {\"error\": f\"Blueprint '{blueprint_id}' not found in registry\"}\n\n    try:\n        bp_path = Path(blueprint_path)\n        if not bp_path.exists():\n            return {\"error\": f\"Blueprint file not found: {blueprint_path}\"}\n\n        with open(bp_path) as f:\n            blueprint = json.load(f)\n\n        bp_id = blueprint_id or blueprint.get(\"id\")\n        if not bp_id:\n            return {\"error\": \"No blueprint ID provided or found in file\"}\n\n        if bp_id not in blueprints:\n            return {\"error\": f\"Blueprint '{bp_id}' not registered. Use REGISTER.\"}\n\n        entry = blueprints[bp_id]\n        old_version = entry[\"current_version\"]\n        new_version = _bump_version(old_version, bump)\n\n        # Update entry\n        entry[\"current_version\"] = new_version\n        entry[\"versions\"].append(new_version)\n        entry[\"updated_at\"] = datetime.utcnow().isoformat() + \"Z\"\n        entry[\"description\"] = blueprint.get(\"description\", entry[\"description\"])\n        entry[\"name\"] = blueprint.get(\"name\", entry[\"name\"])\n        entry[\"dependencies\"] = _extract_dependencies(blueprint)\n        entry[\"source_path\"] = str(bp_path.absolute())\n\n        blueprints[bp_id] = entry\n        index[\"blueprints\"] = blueprints\n\n        # Copy to versions directory\n        reg_path = Path(registry_path)\n        version_dir = reg_path / \"versions\" / bp_id\n        version_dir.mkdir(parents=True, exist_ok=True)\n        shutil.copy(bp_path, version_dir / f\"{new_version}.json\")\n\n        return {\n            \"index\": index,\n            \"blueprints\": blueprints,\n            \"updated\": entry,\n            \"message\": f\"Updated {bp_id}: {old_version} -> {new_version}\",\n            \"error\": None\n        }\n    except Exception as e:\n        return {\"error\": str(e)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.get_blueprint", "type": "function", "label": "get_blueprint", "direction": "inbound", "parent": "registry_compute", "line": 242, "endLine": 293, "signature": "(params) -> Dict[]", "docstring": "Get a blueprint by ID and optionally version.", "source": "def get_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Get a blueprint by ID and optionally version.\"\"\"\n    registry_path = params.get(\"registry_path\")\n    index = params.get(\"index\")\n    blueprint_id = params.get(\"blueprint_id\")\n    version = params.get(\"version\")\n\n    if not blueprint_id:\n        return {\"error\": \"No blueprint ID provided\"}\n\n    blueprints = index.get(\"blueprints\", {})\n    if blueprint_id not in blueprints:\n        return {\"error\": f\"Blueprint '{blueprint_id}' not found\"}\n\n    entry = blueprints[blueprint_id]\n    target_version = version or entry[\"current_version\"]\n\n    if target_version not in entry[\"versions\"]:\n        return {\"error\": f\"Version {target_version} not found for {blueprint_id}\"}\n\n    try:\n        reg_path = Path(registry_path)\n        bp_file = reg_path / \"versions\" / blueprint_id / f\"{target_version}.json\"\n\n        if bp_file.exists():\n            with open(bp_file) as f:\n                blueprint_data = json.load(f)\n        else:\n            # Fall back to source path for current version\n            if target_version == entry[\"current_version\"]:\n                source = entry.get(\"source_path\")\n                if source and Path(source).exists():\n                    with open(source) as f:\n                        blueprint_data = json.load(f)\n                else:\n                    blueprint_data = None\n            else:\n                blueprint_data = None\n\n        result = {\n            \"metadata\": entry,\n            \"data\": blueprint_data\n        }\n\n        return {\n            \"blueprint\": result,\n            \"blueprint_id\": blueprint_id,\n            \"version\": target_version,\n            \"error\": None\n        }\n    except Exception as e:\n        return {\"error\": str(e)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.list_blueprints", "type": "function", "label": "list_blueprints", "direction": "inbound", "parent": "registry_compute", "line": 296, "endLine": 331, "signature": "(params) -> Dict[]", "docstring": "List all blueprints with optional filtering.", "source": "def list_blueprints(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"List all blueprints with optional filtering.\"\"\"\n    index = params.get(\"index\")\n    filter_tag = params.get(\"filter_tag\")\n    show_deprecated = params.get(\"filter_deprecated\", False)\n\n    if not index:\n        return {\"results\": [], \"stats\": {}}\n\n    blueprints = index.get(\"blueprints\", {})\n    results = []\n\n    for bp_id, entry in blueprints.items():\n        # Filter deprecated\n        if not show_deprecated and entry.get(\"deprecated\", False):\n            continue\n\n        # Filter by tag\n        if filter_tag and filter_tag not in entry.get(\"tags\", []):\n            continue\n\n        results.append({\n            \"id\": bp_id,\n            \"name\": entry.get(\"name\", bp_id),\n            \"version\": entry[\"current_version\"],\n            \"description\": entry.get(\"description\", \"\")[:80],\n            \"tags\": entry.get(\"tags\", []),\n            \"deprecated\": entry.get(\"deprecated\", False),\n            \"updated_at\": entry.get(\"updated_at\", \"\")\n        })\n\n    # Sort by name\n    results.sort(key=lambda x: x[\"name\"].lower())\n    stats = _compute_stats(blueprints)\n\n    return {\"results\": results, \"stats\": stats}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.search_blueprints", "type": "function", "label": "search_blueprints", "direction": "inbound", "parent": "registry_compute", "line": 334, "endLine": 382, "signature": "(params) -> Dict[]", "docstring": "Search blueprints by query string.", "source": "def search_blueprints(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Search blueprints by query string.\"\"\"\n    index = params.get(\"index\")\n    query = params.get(\"query\", \"\").lower()\n    search_tags = params.get(\"search_tags\", True)\n    search_description = params.get(\"search_description\", True)\n\n    if not index or not query:\n        return {\"results\": [], \"query\": query}\n\n    blueprints = index.get(\"blueprints\", {})\n    results = []\n\n    for bp_id, entry in blueprints.items():\n        score = 0\n\n        # Match ID\n        if query in bp_id.lower():\n            score += 10\n\n        # Match name\n        if query in entry.get(\"name\", \"\").lower():\n            score += 8\n\n        # Match description\n        if search_description and query in entry.get(\"description\", \"\").lower():\n            score += 5\n\n        # Match tags\n        if search_tags:\n            for tag in entry.get(\"tags\", []):\n                if query in tag.lower():\n                    score += 3\n\n        if score > 0:\n            results.append({\n                \"id\": bp_id,\n                \"name\": entry.get(\"name\", bp_id),\n                \"version\": entry[\"current_version\"],\n                \"description\": entry.get(\"description\", \"\")[:80],\n                \"tags\": entry.get(\"tags\", []),\n                \"score\": score,\n                \"deprecated\": entry.get(\"deprecated\", False)\n            })\n\n    # Sort by score descending\n    results.sort(key=lambda x: -x[\"score\"])\n\n    return {\"results\": results, \"query\": query}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.get_versions", "type": "function", "label": "get_versions", "direction": "inbound", "parent": "registry_compute", "line": 389, "endLine": 417, "signature": "(params) -> Dict[]", "docstring": "Get version history for a blueprint.", "source": "def get_versions(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Get version history for a blueprint.\"\"\"\n    index = params.get(\"index\")\n    blueprint_id = params.get(\"blueprint_id\")\n\n    if not blueprint_id:\n        return {\"error\": \"No blueprint ID provided\"}\n\n    blueprints = index.get(\"blueprints\", {})\n    if blueprint_id not in blueprints:\n        return {\"error\": f\"Blueprint '{blueprint_id}' not found\"}\n\n    entry = blueprints[blueprint_id]\n    versions = entry.get(\"versions\", [])\n\n    # Build version info\n    version_info = []\n    for v in reversed(versions):  # Most recent first\n        info = {\n            \"version\": v,\n            \"is_current\": v == entry[\"current_version\"]\n        }\n        version_info.append(info)\n\n    return {\n        \"versions\": version_info,\n        \"blueprint_id\": blueprint_id,\n        \"error\": None\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.compare_versions", "type": "function", "label": "compare_versions", "direction": "inbound", "parent": "registry_compute", "line": 420, "endLine": 449, "signature": "(params) -> Dict[]", "docstring": "Compare two versions of a blueprint.", "source": "def compare_versions(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Compare two versions of a blueprint.\"\"\"\n    registry_path = params.get(\"registry_path\")\n    blueprint_id = params.get(\"blueprint_id\")\n    version_a = params.get(\"version_a\")\n    version_b = params.get(\"version_b\")\n\n    if not all([blueprint_id, version_a, version_b]):\n        return {\"error\": \"Missing blueprint_id, version_a, or version_b\"}\n\n    try:\n        reg_path = Path(registry_path)\n        file_a = reg_path / \"versions\" / blueprint_id / f\"{version_a}.json\"\n        file_b = reg_path / \"versions\" / blueprint_id / f\"{version_b}.json\"\n\n        if not file_a.exists():\n            return {\"error\": f\"Version {version_a} not found\"}\n        if not file_b.exists():\n            return {\"error\": f\"Version {version_b} not found\"}\n\n        with open(file_a) as f:\n            bp_a = json.load(f)\n        with open(file_b) as f:\n            bp_b = json.load(f)\n\n        diff = _diff_blueprints(bp_a, bp_b, version_a, version_b)\n\n        return {\"diff\": diff, \"error\": None}\n    except Exception as e:\n        return {\"error\": str(e)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.rollback_version", "type": "function", "label": "rollback_version", "direction": "inbound", "parent": "registry_compute", "line": 452, "endLine": 497, "signature": "(params) -> Dict[]", "docstring": "Rollback to a previous version.", "source": "def rollback_version(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Rollback to a previous version.\"\"\"\n    registry_path = params.get(\"registry_path\")\n    index = params.get(\"index\")\n    blueprint_id = params.get(\"blueprint_id\")\n    target_version = params.get(\"target_version\")\n\n    if not all([blueprint_id, target_version]):\n        return {\"error\": \"Missing blueprint_id or target_version\"}\n\n    blueprints = index.get(\"blueprints\", {})\n    if blueprint_id not in blueprints:\n        return {\"error\": f\"Blueprint '{blueprint_id}' not found\"}\n\n    entry = blueprints[blueprint_id]\n    if target_version not in entry[\"versions\"]:\n        return {\"error\": f\"Version {target_version} not found\"}\n\n    # Create a new version entry that points to the rollback\n    old_current = entry[\"current_version\"]\n    new_version = _bump_version(old_current, \"patch\")\n\n    try:\n        reg_path = Path(registry_path)\n        source_file = reg_path / \"versions\" / blueprint_id / f\"{target_version}.json\"\n        target_file = reg_path / \"versions\" / blueprint_id / f\"{new_version}.json\"\n\n        if source_file.exists():\n            shutil.copy(source_file, target_file)\n\n        entry[\"current_version\"] = new_version\n        entry[\"versions\"].append(new_version)\n        entry[\"updated_at\"] = datetime.utcnow().isoformat() + \"Z\"\n\n        blueprints[blueprint_id] = entry\n        index[\"blueprints\"] = blueprints\n\n        return {\n            \"index\": index,\n            \"blueprints\": blueprints,\n            \"blueprint\": entry,\n            \"message\": f\"Rolled back {blueprint_id} to {target_version} as {new_version}\",\n            \"error\": None\n        }\n    except Exception as e:\n        return {\"error\": str(e)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.get_dependencies", "type": "function", "label": "get_dependencies", "direction": "inbound", "parent": "registry_compute", "line": 504, "endLine": 539, "signature": "(params) -> Dict[]", "docstring": "Get dependency graph for a blueprint.", "source": "def get_dependencies(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Get dependency graph for a blueprint.\"\"\"\n    registry_path = params.get(\"registry_path\")\n    index = params.get(\"index\")\n    blueprint_id = params.get(\"blueprint_id\")\n\n    if not blueprint_id:\n        return {\"error\": \"No blueprint ID provided\"}\n\n    blueprints = index.get(\"blueprints\", {})\n    if blueprint_id not in blueprints:\n        return {\"error\": f\"Blueprint '{blueprint_id}' not found\"}\n\n    entry = blueprints[blueprint_id]\n    direct_deps = entry.get(\"dependencies\", [])\n\n    # Build dependency tree\n    graph = {\n        \"root\": blueprint_id,\n        \"nodes\": {},\n        \"edges\": []\n    }\n\n    visited = set()\n    _build_dep_tree(blueprint_id, blueprints, graph, visited)\n\n    # Also find reverse dependencies (who depends on this)\n    dependents = []\n    for bp_id, bp_entry in blueprints.items():\n        if bp_id != blueprint_id:\n            if blueprint_id in bp_entry.get(\"dependencies\", []):\n                dependents.append(bp_id)\n\n    graph[\"dependents\"] = dependents\n\n    return {\"graph\": graph, \"error\": None}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.check_circular_deps", "type": "function", "label": "check_circular_deps", "direction": "inbound", "parent": "registry_compute", "line": 542, "endLine": 591, "signature": "(params) -> Dict[]", "docstring": "Check for circular dependencies.", "source": "def check_circular_deps(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Check for circular dependencies.\"\"\"\n    index = params.get(\"index\")\n    blueprint_id = params.get(\"blueprint_id\")\n\n    blueprints = index.get(\"blueprints\", {})\n\n    if blueprint_id:\n        # Check specific blueprint\n        cycle = _detect_cycle(blueprint_id, blueprints)\n        if cycle:\n            return {\n                \"result\": {\n                    \"has_cycle\": True,\n                    \"cycle\": cycle,\n                    \"message\": f\"Circular dependency detected: {' -> '.join(cycle)}\"\n                },\n                \"error\": None\n            }\n        return {\n            \"result\": {\n                \"has_cycle\": False,\n                \"message\": f\"No circular dependencies for {blueprint_id}\"\n            },\n            \"error\": None\n        }\n    else:\n        # Check all blueprints\n        all_cycles = []\n        for bp_id in blueprints:\n            cycle = _detect_cycle(bp_id, blueprints)\n            if cycle and cycle not in all_cycles:\n                all_cycles.append(cycle)\n\n        if all_cycles:\n            return {\n                \"result\": {\n                    \"has_cycles\": True,\n                    \"cycles\": all_cycles,\n                    \"message\": f\"Found {len(all_cycles)} circular dependencies\"\n                },\n                \"error\": None\n            }\n        return {\n            \"result\": {\n                \"has_cycles\": False,\n                \"message\": \"No circular dependencies found\"\n            },\n            \"error\": None\n        }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.deprecate_blueprint", "type": "function", "label": "deprecate_blueprint", "direction": "inbound", "parent": "registry_compute", "line": 598, "endLine": 624, "signature": "(params) -> Dict[]", "docstring": "Mark a blueprint as deprecated.", "source": "def deprecate_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Mark a blueprint as deprecated.\"\"\"\n    index = params.get(\"index\")\n    blueprint_id = params.get(\"blueprint_id\")\n    reason = params.get(\"reason\", \"No reason provided\")\n\n    if not blueprint_id:\n        return {\"error\": \"No blueprint ID provided\"}\n\n    blueprints = index.get(\"blueprints\", {})\n    if blueprint_id not in blueprints:\n        return {\"error\": f\"Blueprint '{blueprint_id}' not found\"}\n\n    entry = blueprints[blueprint_id]\n    entry[\"deprecated\"] = True\n    entry[\"deprecated_reason\"] = reason\n    entry[\"updated_at\"] = datetime.utcnow().isoformat() + \"Z\"\n\n    blueprints[blueprint_id] = entry\n    index[\"blueprints\"] = blueprints\n\n    return {\n        \"index\": index,\n        \"blueprints\": blueprints,\n        \"message\": f\"Deprecated {blueprint_id}: {reason}\",\n        \"error\": None\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.delete_blueprint", "type": "function", "label": "delete_blueprint", "direction": "inbound", "parent": "registry_compute", "line": 627, "endLine": 671, "signature": "(params) -> Dict[]", "docstring": "Delete a blueprint from the registry.", "source": "def delete_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Delete a blueprint from the registry.\"\"\"\n    registry_path = params.get(\"registry_path\")\n    index = params.get(\"index\")\n    blueprint_id = params.get(\"blueprint_id\")\n    delete_files = params.get(\"delete_files\", False)\n\n    if not blueprint_id:\n        return {\"error\": \"No blueprint ID provided\"}\n\n    blueprints = index.get(\"blueprints\", {})\n    if blueprint_id not in blueprints:\n        return {\"error\": f\"Blueprint '{blueprint_id}' not found\"}\n\n    # Check for dependents\n    dependents = []\n    for bp_id, entry in blueprints.items():\n        if bp_id != blueprint_id:\n            if blueprint_id in entry.get(\"dependencies\", []):\n                dependents.append(bp_id)\n\n    if dependents:\n        return {\n            \"error\": f\"Cannot delete: {blueprint_id} is depended on by: \"\n                     f\"{', '.join(dependents)}\"\n        }\n\n    del blueprints[blueprint_id]\n    index[\"blueprints\"] = blueprints\n\n    # Optionally delete version files\n    if delete_files and registry_path:\n        try:\n            version_dir = Path(registry_path) / \"versions\" / blueprint_id\n            if version_dir.exists():\n                shutil.rmtree(version_dir)\n        except Exception:\n            pass  # Non-critical\n\n    return {\n        \"index\": index,\n        \"blueprints\": blueprints,\n        \"message\": f\"Deleted {blueprint_id}\",\n        \"error\": None\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.export_registry", "type": "function", "label": "export_registry", "direction": "inbound", "parent": "registry_compute", "line": 678, "endLine": 720, "signature": "(params) -> Dict[]", "docstring": "Export registry metadata.", "source": "def export_registry(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Export registry metadata.\"\"\"\n    index = params.get(\"index\")\n    fmt = params.get(\"format\", \"json\")\n\n    if not index:\n        return {\"error\": \"No index loaded\"}\n\n    blueprints = index.get(\"blueprints\", {})\n    stats = _compute_stats(blueprints)\n\n    export_data = {\n        \"registry_version\": index.get(\"version\", \"1.0.0\"),\n        \"exported_at\": datetime.utcnow().isoformat() + \"Z\",\n        \"statistics\": stats,\n        \"blueprints\": {}\n    }\n\n    for bp_id, entry in blueprints.items():\n        export_data[\"blueprints\"][bp_id] = {\n            \"name\": entry.get(\"name\", bp_id),\n            \"current_version\": entry[\"current_version\"],\n            \"description\": entry.get(\"description\", \"\"),\n            \"tags\": entry.get(\"tags\", []),\n            \"dependencies\": entry.get(\"dependencies\", []),\n            \"deprecated\": entry.get(\"deprecated\", False),\n            \"owner\": entry.get(\"owner\", \"unknown\")\n        }\n\n    if fmt == \"markdown\":\n        md_lines = [\"# L++ Blueprint Registry Export\", \"\"]\n        md_lines.append(f\"Exported: {export_data['exported_at']}\")\n        md_lines.append(f\"Total: {stats['total']} blueprints\")\n        md_lines.append(\"\")\n        md_lines.append(\"| ID | Name | Version | Tags |\")\n        md_lines.append(\"|---|---|---|---|\")\n        for bp_id, bp in export_data[\"blueprints\"].items():\n            tags = \", \".join(bp[\"tags\"][:3])\n            md_lines.append(f\"| {bp_id} | {bp['name']} | {bp['current_version']} | {tags} |\")\n\n        return {\"data\": {\"format\": \"markdown\", \"content\": \"\\n\".join(md_lines)}, \"error\": None}\n\n    return {\"data\": export_data, \"error\": None}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.get_stats", "type": "function", "label": "get_stats", "direction": "inbound", "parent": "registry_compute", "line": 723, "endLine": 730, "signature": "(params) -> Dict[]", "docstring": "Get registry statistics.", "source": "def get_stats(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Get registry statistics.\"\"\"\n    index = params.get(\"index\")\n    if not index:\n        return {\"stats\": {}}\n\n    blueprints = index.get(\"blueprints\", {})\n    return {\"stats\": _compute_stats(blueprints)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.dfs", "type": "function", "label": "dfs", "direction": "inbound", "parent": "registry_compute", "line": 913, "endLine": 932, "signature": "(node)", "docstring": null, "source": "    def dfs(node):\n        if node in path:\n            cycle_start = path.index(node)\n            return path[cycle_start:] + [node]\n\n        if node in visited:\n            return None\n\n        visited.add(node)\n        path.append(node)\n\n        entry = blueprints.get(node)\n        if entry:\n            for dep in entry.get(\"dependencies\", []):\n                cycle = dfs(dep)\n                if cycle:\n                    return cycle\n\n        path.pop()\n        return None", "args": ["node"], "returns": null, "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "json", "type": "dependency", "label": "json", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "shutil", "type": "dependency", "label": "shutil", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "datetime", "type": "dependency", "label": "datetime", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "pathlib", "type": "dependency", "label": "pathlib", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "typing", "type": "dependency", "label": "typing", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}];
+const edges = [{"from": "registry_compute.dfs", "to": "registry_compute.dfs", "type": "internal", "line": 927}, {"from": "registry_compute._detect_cycle", "to": "registry_compute.dfs", "type": "internal", "line": 934}, {"from": "registry_compute.init_registry", "to": "pathlib", "type": "external", "category": "stdlib", "line": 26}, {"from": "registry_compute.init_registry", "to": "datetime", "type": "external", "category": "stdlib", "line": 31}, {"from": "registry_compute.init_registry", "to": "datetime", "type": "external", "category": "stdlib", "line": 32}, {"from": "registry_compute.init_registry", "to": "json", "type": "external", "category": "stdlib", "line": 38}, {"from": "registry_compute.load_registry", "to": "pathlib", "type": "external", "category": "stdlib", "line": 61}, {"from": "registry_compute.load_registry", "to": "json", "type": "external", "category": "stdlib", "line": 68}, {"from": "registry_compute.save_registry", "to": "pathlib", "type": "external", "category": "stdlib", "line": 93}, {"from": "registry_compute.save_registry", "to": "datetime", "type": "external", "category": "stdlib", "line": 94}, {"from": "registry_compute.save_registry", "to": "json", "type": "external", "category": "stdlib", "line": 98}, {"from": "registry_compute.register_blueprint", "to": "pathlib", "type": "external", "category": "stdlib", "line": 121}, {"from": "registry_compute.register_blueprint", "to": "json", "type": "external", "category": "stdlib", "line": 126}, {"from": "registry_compute.register_blueprint", "to": "datetime", "type": "external", "category": "stdlib", "line": 137}, {"from": "registry_compute.register_blueprint", "to": "pathlib", "type": "external", "category": "stdlib", "line": 162}, {"from": "registry_compute.register_blueprint", "to": "shutil", "type": "external", "category": "stdlib", "line": 165}, {"from": "registry_compute.update_blueprint", "to": "pathlib", "type": "external", "category": "stdlib", "line": 191}, {"from": "registry_compute.update_blueprint", "to": "json", "type": "external", "category": "stdlib", "line": 196}, {"from": "registry_compute.update_blueprint", "to": "datetime", "type": "external", "category": "stdlib", "line": 212}, {"from": "registry_compute.update_blueprint", "to": "pathlib", "type": "external", "category": "stdlib", "line": 222}, {"from": "registry_compute.update_blueprint", "to": "shutil", "type": "external", "category": "stdlib", "line": 225}, {"from": "registry_compute.get_blueprint", "to": "pathlib", "type": "external", "category": "stdlib", "line": 263}, {"from": "registry_compute.get_blueprint", "to": "json", "type": "external", "category": "stdlib", "line": 268}, {"from": "registry_compute.get_blueprint", "to": "pathlib", "type": "external", "category": "stdlib", "line": 273}, {"from": "registry_compute.get_blueprint", "to": "json", "type": "external", "category": "stdlib", "line": 275}, {"from": "registry_compute.compare_versions", "to": "pathlib", "type": "external", "category": "stdlib", "line": 431}, {"from": "registry_compute.compare_versions", "to": "json", "type": "external", "category": "stdlib", "line": 441}, {"from": "registry_compute.compare_versions", "to": "json", "type": "external", "category": "stdlib", "line": 443}, {"from": "registry_compute.rollback_version", "to": "pathlib", "type": "external", "category": "stdlib", "line": 475}, {"from": "registry_compute.rollback_version", "to": "shutil", "type": "external", "category": "stdlib", "line": 480}, {"from": "registry_compute.rollback_version", "to": "datetime", "type": "external", "category": "stdlib", "line": 484}, {"from": "registry_compute.deprecate_blueprint", "to": "datetime", "type": "external", "category": "stdlib", "line": 614}, {"from": "registry_compute.delete_blueprint", "to": "pathlib", "type": "external", "category": "stdlib", "line": 660}, {"from": "registry_compute.delete_blueprint", "to": "shutil", "type": "external", "category": "stdlib", "line": 662}, {"from": "registry_compute.export_registry", "to": "datetime", "type": "external", "category": "stdlib", "line": 691}];
+const moduleColors = {"registry_compute": "#00d4ff"};
+
+// Edge type visibility
+const edgeVisibility = { internal: true, external: true, local: true };
+let currentLayout = 'force';
+
+// Create node lookup
+const nodeById = {};
+nodes.forEach(n => nodeById[n.id] = n);
+
+// Setup SVG
+const container = document.getElementById('graph');
+const width = container.clientWidth;
+const height = container.clientHeight || 600;
+
+const svg = d3.select("svg").attr("viewBox", [0, 0, width, height]);
+const g = svg.append("g");
+
+// Zoom behavior
+const zoom = d3.zoom()
+    .scaleExtent([0.1, 4])
+    .filter(e => !e.target.closest('.node'))
+    .on("zoom", e => g.attr("transform", e.transform));
+svg.call(zoom);
+
+// Arrow markers
+const defs = svg.append("defs");
+["internal", "external", "local"].forEach(type => {
+    const color = type === "internal" ? "#4ecdc4" : type === "external" ? "#f39c12" : "#9b59b6";
+    defs.append("marker")
+        .attr("id", `arrow-${type}`)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 20)
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-4L10,0L0,4")
+        .attr("fill", color);
+});
+
+// Build module legend
+const legendDiv = document.getElementById('module-legend');
+Object.entries(moduleColors).forEach(([mod, color]) => {
+    const item = document.createElement('div');
+    item.className = 'module-item';
+    item.innerHTML = `<div class="module-dot" style="background:${color}"></div><span class="module-name">${mod}</span>`;
+    item.onclick = () => highlightModule(mod);
+    legendDiv.appendChild(item);
+});
+
+// Process edges - resolve node references
+const processedEdges = edges.map(e => ({
+    ...e,
+    source: nodeById[e.from] || { id: e.from, x: 0, y: 0 },
+    target: nodeById[e.to] || { id: e.to, x: 0, y: 0 }
+})).filter(e => e.source && e.target);
+
+// Force simulation
+const simulation = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(processedEdges).id(d => d.id).distance(80).strength(0.5))
+    .force("charge", d3.forceManyBody().strength(-300))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force("collision", d3.forceCollide().radius(40));
+
+// Draw edges
+const edge = g.append("g").selectAll("path")
+    .data(processedEdges)
+    .join("path")
+    .attr("class", d => `edge edge-${d.type || 'internal'}`)
+    .attr("marker-end", d => `url(#arrow-${d.type || 'internal'})`);
+
+// Node size based on type
+function nodeSize(d) {
+    if (d.type === 'module') return { w: 120, h: 40 };
+    if (d.type === 'function' || d.type === 'async_function') return { w: 100, h: 30 };
+    if (d.type === 'class') return { w: 110, h: 35 };
+    return { w: 80, h: 25 };  // dependency
+}
+
+// Draw nodes
+const node = g.append("g").selectAll("g")
+    .data(nodes)
+    .join("g")
+    .attr("class", "node")
+    .call(d3.drag()
+        .on("start", dragStart)
+        .on("drag", dragging)
+        .on("end", dragEnd));
+
+node.append("rect")
+    .attr("class", d => `node-${d.type === 'dependency' ? 'dependency' : d.type === 'module' ? 'module' : 'function'}`)
+    .attr("width", d => nodeSize(d).w)
+    .attr("height", d => nodeSize(d).h)
+    .attr("x", d => -nodeSize(d).w / 2)
+    .attr("y", d => -nodeSize(d).h / 2)
+    .attr("rx", 6)
+    .attr("stroke", d => d.moduleColor || "#666");
+
+node.append("text")
+    .attr("class", "node-label")
+    .attr("text-anchor", "middle")
+    .attr("dy", d => d.signature ? -3 : 4)
+    .text(d => d.label || d.id);
+
+node.filter(d => d.signature).append("text")
+    .attr("class", "node-sublabel")
+    .attr("text-anchor", "middle")
+    .attr("dy", 10)
+    .text(d => d.signature.length > 20 ? d.signature.slice(0, 18) + ".." : d.signature);
+
+// Tooltip
+const tooltip = d3.select("#tooltip");
+node.on("mouseover", (e, d) => {
+    let html = `<b>${d.label || d.id}</b>`;
+    if (d.type) html += `<br><span style="color:#888">${d.type}</span>`;
+    if (d.signature) html += `<br><code>${d.signature}</code>`;
+    if (d.direction) html += `<br>Direction: ${d.direction}`;
+    tooltip.style("display", "block").html(html);
+})
+.on("mousemove", e => {
+    tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 10) + "px");
+})
+.on("mouseout", () => tooltip.style("display", "none"));
+
+// Click to select
+node.on("click", (e, d) => {
+    e.stopPropagation();
+    selectNode(d);
+});
+
+svg.on("click", () => clearSelection());
+
+// Update positions
+simulation.on("tick", () => {
+    edge.attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
+});
+
+// Drag functions
+function dragStart(e, d) {
+    if (!e.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+}
+function dragging(e, d) {
+    d.fx = e.x;
+    d.fy = e.y;
+}
+function dragEnd(e, d) {
+    if (!e.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+}
+
+// Selection functions
+let selectedNode = null;
+
+function selectNode(d) {
+    selectedNode = d;
+    
+    // Highlight node
+    node.classed("dim", n => n.id !== d.id && !isConnected(d, n));
+    node.select("rect").attr("stroke-width", n => n.id === d.id ? 4 : 2);
+    
+    // Highlight edges
+    edge.classed("dim", e => e.source.id !== d.id && e.target.id !== d.id);
+    edge.classed("highlight", e => e.source.id === d.id || e.target.id === d.id);
+    
+    // Update info panel
+    updateNodeInfo(d);
+    updateEdgeList(d);
+}
+
+function clearSelection() {
+    selectedNode = null;
+    node.classed("dim", false);
+    node.select("rect").attr("stroke-width", 2);
+    edge.classed("dim", false).classed("highlight", false);
+    document.getElementById('node-info').innerHTML = 'Click a node to see details';
+    document.getElementById('edge-list').innerHTML = '';
+}
+
+function isConnected(a, b) {
+    return processedEdges.some(e => 
+        (e.source.id === a.id && e.target.id === b.id) ||
+        (e.source.id === b.id && e.target.id === a.id)
+    );
+}
+
+function updateNodeInfo(d) {
+    let html = `<div class="metric"><span class="info-label">ID:</span><span class="info-value">${d.id}</span></div>`;
+    html += `<div class="metric"><span class="info-label">Type:</span><span class="info-value">${d.type}</span></div>`;
+    if (d.moduleName) html += `<div class="metric"><span class="info-label">Module:</span><span class="info-value">${d.moduleName}</span></div>`;
+    if (d.line) html += `<div class="metric"><span class="info-label">Line:</span><span class="info-value">${d.line}${d.endLine ? '-' + d.endLine : ''}</span></div>`;
+    if (d.signature) html += `<div class="metric"><span class="info-label">Signature:</span><span class="info-value" style="font-family:monospace">${d.signature}</span></div>`;
+    if (d.direction) html += `<div class="metric"><span class="info-label">Direction:</span><span class="info-value">${d.direction}</span></div>`;
+    if (d.category) html += `<div class="metric"><span class="info-label">Category:</span><span class="info-value">${d.category}</span></div>`;
+
+    if (d.metrics) {
+        html += `<div style="margin-top:10px"><b>Coupling Metrics</b></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-In:</span><span class="info-value">${d.metrics.fanIn}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-Out:</span><span class="info-value">${d.metrics.fanOut}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Instability:</span><span class="info-value">${(d.metrics.instability * 100).toFixed(1)}%</span></div>`;
+        html += `<div class="metric-bar"><div class="metric-fill" style="width:${d.metrics.instability * 100}%;background:${d.metrics.instability > 0.5 ? '#ff6b6b' : '#4ecdc4'}"></div></div>`;
+        html += `<div class="metric"><span class="info-label">Internal Edges:</span><span class="info-value">${d.metrics.internalEdges}</span></div>`;
+    }
+
+    document.getElementById('node-info').innerHTML = html;
+
+    // Update source code panel
+    updateSourcePanel(d);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function updateSourcePanel(d) {
+    const panel = document.getElementById('source-content');
+
+    if (d.source) {
+        let sourceHtml = '';
+        if (d.docstring) {
+            sourceHtml += `<div class="docstring" style="margin-bottom:8px;padding:5px;background:#1a1a2a;border-radius:3px">${escapeHtml(d.docstring)}</div>`;
+        }
+        sourceHtml += `<div class="source-code">${escapeHtml(d.source)}</div>`;
+        panel.innerHTML = sourceHtml;
+    } else if (d.type === 'module') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">Module: ${d.label}<br>Click a function to view its source code.</div>`;
+    } else if (d.type === 'dependency') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">External dependency: ${d.label}<br>Category: ${d.category || 'unknown'}</div>`;
+    } else {
+        panel.innerHTML = `<div style="color:#666;font-size:11px">No source available for this node</div>`;
+    }
+}
+
+function updateEdgeList(d) {
+    const outgoing = processedEdges.filter(e => e.source.id === d.id);
+    const incoming = processedEdges.filter(e => e.target.id === d.id);
+    
+    let html = '';
+    if (outgoing.length) {
+        html += '<div style="color:#4ecdc4;font-weight:bold;margin-bottom:5px">Outgoing →</div>';
+        outgoing.forEach(e => {
+            html += `<div class="edge-item">→ <span class="to">${e.target.id || e.to}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (incoming.length) {
+        html += '<div style="color:#f39c12;font-weight:bold;margin:10px 0 5px 0">← Incoming</div>';
+        incoming.forEach(e => {
+            html += `<div class="edge-item">← <span class="from">${e.source.id || e.from}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (!outgoing.length && !incoming.length) {
+        html = '<div style="color:#666">No connections</div>';
+    }
+    
+    document.getElementById('edge-list').innerHTML = html;
+}
+
+function highlightModule(modName) {
+    node.classed("dim", n => n.moduleName !== modName && n.type !== 'dependency');
+    edge.classed("dim", e => {
+        const srcMod = nodeById[e.source.id]?.moduleName;
+        const tgtMod = nodeById[e.target.id]?.moduleName;
+        return srcMod !== modName && tgtMod !== modName;
+    });
+}
+
+// Layout functions
+function toggleLayout(layout) {
+    currentLayout = layout;
+    document.querySelectorAll('.controls button').forEach(b => {
+        if (b.id.startsWith('btn-') && ['force', 'horizontal', 'vertical'].includes(b.id.replace('btn-', ''))) {
+            b.classList.toggle('active', b.id === `btn-${layout}`);
+        }
+    });
+    
+    if (layout === 'force') {
+        simulation.alpha(1).restart();
+    } else {
+        simulation.stop();
+        layoutNodes(layout);
+    }
+}
+
+function layoutNodes(layout) {
+    const modules = [...new Set(nodes.filter(n => n.type === 'module').map(n => n.id))];
+    const padding = 50;
+    
+    if (layout === 'horizontal') {
+        // Group by module, spread horizontally
+        modules.forEach((mod, mi) => {
+            const modNodes = nodes.filter(n => n.moduleName === mod || n.id === mod);
+            const x = padding + mi * (width - padding * 2) / Math.max(modules.length - 1, 1);
+            modNodes.forEach((n, ni) => {
+                n.x = x;
+                n.y = padding + ni * 50;
+            });
+        });
+        // Dependencies on the right
+        const deps = nodes.filter(n => n.type === 'dependency');
+        deps.forEach((n, i) => {
+            n.x = width - padding;
+            n.y = padding + i * 40;
+        });
+    } else if (layout === 'vertical') {
+        // Modules at top, functions below, dependencies at bottom
+        const modNodes = nodes.filter(n => n.type === 'module');
+        const funcNodes = nodes.filter(n => n.type === 'function' || n.type === 'async_function' || n.type === 'class');
+        const depNodes = nodes.filter(n => n.type === 'dependency');
+        
+        modNodes.forEach((n, i) => {
+            n.x = padding + i * 150;
+            n.y = padding;
+        });
+        funcNodes.forEach((n, i) => {
+            n.x = padding + (i % 6) * 130;
+            n.y = 120 + Math.floor(i / 6) * 60;
+        });
+        depNodes.forEach((n, i) => {
+            n.x = padding + (i % 8) * 100;
+            n.y = height - padding - 50;
+        });
+    }
+    
+    // Update positions
+    node.transition().duration(500).attr("transform", d => `translate(${d.x},${d.y})`);
+    edge.transition().duration(500).attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+}
+
+// Edge type toggle
+function toggleEdgeType(type) {
+    edgeVisibility[type] = !edgeVisibility[type];
+    document.getElementById(`btn-${type}`).classList.toggle('active', edgeVisibility[type]);
+    edge.style("display", d => edgeVisibility[d.type || 'internal'] ? null : "none");
+}
+
+// View controls
+function resetView() {
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+}
+
+function fitToView() {
+    const bounds = g.node().getBBox();
+    const scale = Math.min(width / bounds.width, height / bounds.height) * 0.9;
+    const tx = (width - bounds.width * scale) / 2 - bounds.x * scale;
+    const ty = (height - bounds.height * scale) / 2 - bounds.y * scale;
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
+// Initial fit
+setTimeout(fitToView, 1000);
+</script>
+</body>
+</html>

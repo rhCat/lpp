@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Function Graph: tlaps_seal</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #0f0f23; color: #eee; }
+h1 { color: #00d4ff; margin-bottom: 5px; font-size: 24px; }
+.subtitle { color: #888; margin-bottom: 15px; font-size: 14px; }
+#container { display: flex; gap: 20px; height: calc(100vh - 120px); }
+#graph { flex: 1; position: relative; }
+#sidebar { width: 350px; background: #1a1a2e; padding: 15px; border-radius: 8px; overflow-y: auto; }
+svg { background: #16213e; border-radius: 8px; width: 100%; height: 100%; }
+
+/* Node styles */
+.node { cursor: pointer; }
+.node-module { fill: #2a2a4a; stroke-width: 3; }
+.node-function { fill: #3a3a5a; stroke-width: 2; }
+.node-dependency { fill: #1a1a3a; stroke: #666; stroke-width: 1; stroke-dasharray: 4; }
+.node-label { font-size: 11px; fill: #fff; pointer-events: none; font-weight: 500; }
+.node-sublabel { font-size: 9px; fill: #888; pointer-events: none; }
+
+/* Edge styles */
+.edge { fill: none; stroke-opacity: 0.6; }
+.edge-internal { stroke: #4ecdc4; stroke-width: 2; }
+.edge-external { stroke: #f39c12; stroke-width: 1.5; stroke-dasharray: 4; }
+.edge-local { stroke: #9b59b6; stroke-width: 2; }
+.edge-label { font-size: 8px; fill: #666; pointer-events: none; }
+
+/* Highlight styles */
+.highlight { stroke-width: 3 !important; stroke-opacity: 1 !important; }
+.dim { opacity: 0.2; }
+
+/* Controls */
+.controls { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.controls button { background: #3a3a5a; color: #fff; border: 1px solid #555; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.controls button:hover { background: #4a4a6a; }
+.controls button.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
+
+/* Module legend */
+.module-legend { margin-top: 15px; }
+.module-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer; }
+.module-item:hover { background: #2a2a4a; }
+.module-dot { width: 12px; height: 12px; border-radius: 3px; }
+.module-name { font-size: 12px; }
+
+/* Info panel */
+h3 { color: #00d4ff; margin: 15px 0 8px 0; font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+.info-section { font-size: 12px; line-height: 1.6; }
+.info-label { color: #888; }
+.info-value { color: #fff; }
+
+/* Source code panel */
+.source-panel { margin-top: 10px; }
+.source-code { background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 10px; font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; line-height: 1.4; overflow-x: auto; max-height: 300px; overflow-y: auto; white-space: pre; color: #b8b8b8; }
+.source-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.source-toggle { background: #3a3a5a; color: #fff; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; }
+.source-toggle:hover { background: #4a4a6a; }
+.docstring { color: #6a9955; font-style: italic; }
+.metric { display: flex; justify-content: space-between; padding: 3px 0; }
+.metric-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 2px; }
+.metric-fill { height: 100%; border-radius: 2px; }
+
+/* Edge list */
+.edge-list { max-height: 200px; overflow-y: auto; }
+.edge-item { padding: 4px 0; border-bottom: 1px solid #333; font-size: 11px; }
+.edge-item .from { color: #4ecdc4; }
+.edge-item .to { color: #f39c12; }
+.edge-item .type { color: #666; font-size: 10px; }
+
+/* Tooltip */
+#tooltip { position: absolute; background: #1a1a2e; border: 1px solid #00d4ff; padding: 10px; border-radius: 4px; pointer-events: none; display: none; max-width: 300px; z-index: 100; font-size: 11px; }
+</style>
+</head>
+<body>
+<h1>Function Graph: tlaps_seal</h1>
+<div class="subtitle">Stackable function dependency visualization • Drag nodes to rearrange • Click to inspect</div>
+
+<div class="controls">
+  <button onclick="resetView()">Reset View</button>
+  <button onclick="fitToView()">Fit</button>
+  <button onclick="toggleLayout('force')" id="btn-force" class="active">Force</button>
+  <button onclick="toggleLayout('horizontal')" id="btn-horizontal">Horizontal</button>
+  <button onclick="toggleLayout('vertical')" id="btn-vertical">Vertical</button>
+  <span style="margin-left: 10px; color: #666">|</span>
+  <button onclick="toggleEdgeType('internal')" id="btn-internal" class="active">Internal</button>
+  <button onclick="toggleEdgeType('external')" id="btn-external" class="active">External</button>
+  <button onclick="toggleEdgeType('local')" id="btn-local" class="active">Local</button>
+</div>
+
+<div id="container">
+  <div id="graph"><svg></svg></div>
+  <div id="sidebar">
+    <h3>Modules</h3>
+    <div class="module-legend" id="module-legend"></div>
+
+    <h3>Selected Node</h3>
+    <div class="info-section" id="node-info">Click a node to see details</div>
+
+    <h3>Source Code</h3>
+    <div class="source-panel" id="source-panel">
+      <div id="source-content" style="color:#666;font-size:11px">Click a function to view source</div>
+    </div>
+
+    <h3>Connections</h3>
+    <div class="edge-list" id="edge-list"></div>
+  </div>
+</div>
+<div id="tooltip"></div>
+
+<script>
+const nodes = [{"id": "seal_compute", "type": "module", "label": "seal_compute", "metrics": {"fanIn": 13, "fanOut": 7, "instability": 0.35, "internalEdges": 3, "externalCallCount": 9, "localCallCount": 0, "callsByCategory": {"stdlib": 9}, "localDependencies": []}, "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "seal_compute.loadBlueprint", "type": "function", "label": "loadBlueprint", "direction": "inbound", "parent": "seal_compute", "line": 14, "endLine": 28, "signature": "(params) -> dict", "docstring": "Load and parse L++ blueprint JSON file.", "source": "def loadBlueprint(params: dict) -> dict:\n    \"\"\"Load and parse L++ blueprint JSON file.\"\"\"\n    path = params.get(\"blueprintPath\")\n    if not path:\n        return {\"blueprint\": None, \"error\": \"No blueprint path provided\"}\n    try:\n        with open(path, \"r\", encoding=\"utf-8\") as f:\n            bp = json.load(f)\n        return {\"blueprint\": bp, \"error\": None}\n    except FileNotFoundError:\n        return {\"blueprint\": None, \"error\": f\"File not found: {path}\"}\n    except json.JSONDecodeError as e:\n        return {\"blueprint\": None, \"error\": f\"Invalid JSON: {e}\"}\n    except Exception as e:\n        return {\"blueprint\": None, \"error\": str(e)}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "seal_compute.auditTrinity", "type": "function", "label": "auditTrinity", "direction": "inbound", "parent": "seal_compute", "line": 31, "endLine": 134, "signature": "(params) -> dict", "docstring": "Audit the Trinity: Transitions, Gates, Actions.", "source": "def auditTrinity(params: dict) -> dict:\n    \"\"\"Audit the Trinity: Transitions, Gates, Actions.\"\"\"\n    bp = params.get(\"blueprint\")\n    if not bp:\n        return {\"trinityAudit\": None, \"error\": \"No blueprint loaded\"}\n\n    audit = {\n        \"valid\": True,\n        \"transitions\": {\"count\": 0, \"issues\": []},\n        \"gates\": {\"count\": 0, \"issues\": []},\n        \"actions\": {\"count\": 0, \"issues\": []},\n        \"coverage\": {}\n    }\n\n    # Audit Transitions\n    transitions = bp.get(\"transitions\", [])\n    audit[\"transitions\"][\"count\"] = len(transitions)\n    states = set(bp.get(\"states\", {}).keys())\n    entry = bp.get(\"entry_state\")\n    terminals = set(bp.get(\"terminal_states\", []))\n\n    usedTids = set()\n    for t in transitions:\n        tid = t.get(\"id\")\n        if not tid:\n            audit[\"transitions\"][\"issues\"].append(\"Missing transition ID\")\n            audit[\"valid\"] = False\n        elif tid in usedTids:\n            audit[\"transitions\"][\"issues\"].append(f\"Duplicate ID: {tid}\")\n            audit[\"valid\"] = False\n        usedTids.add(tid)\n\n        fromState = t.get(\"from\")\n        toState = t.get(\"to\")\n        if fromState != \"*\" and fromState not in states:\n            audit[\"transitions\"][\"issues\"].append(\n                f\"{tid}: unknown from state '{fromState}'\")\n            audit[\"valid\"] = False\n        if toState not in states:\n            audit[\"transitions\"][\"issues\"].append(\n                f\"{tid}: unknown to state '{toState}'\")\n            audit[\"valid\"] = False\n\n    # Check reachability\n    reachable = {entry}\n    changed = True\n    while changed:\n        changed = False\n        for t in transitions:\n            if t.get(\"from\") in reachable or t.get(\"from\") == \"*\":\n                if t.get(\"to\") not in reachable:\n                    reachable.add(t.get(\"to\"))\n                    changed = True\n\n    unreachable = states - reachable\n    if unreachable:\n        audit[\"transitions\"][\"issues\"].append(\n            f\"Unreachable states: {unreachable}\")\n\n    # Audit Gates\n    gates = bp.get(\"gates\", {})\n    audit[\"gates\"][\"count\"] = len(gates)\n    usedGates = set()\n    for t in transitions:\n        for g in t.get(\"gates\", []):\n            usedGates.add(g)\n\n    for gid in usedGates:\n        if gid not in gates:\n            audit[\"gates\"][\"issues\"].append(f\"Undefined gate: {gid}\")\n            audit[\"valid\"] = False\n\n    unusedGates = set(gates.keys()) - usedGates\n    if unusedGates:\n        audit[\"gates\"][\"issues\"].append(f\"Unused gates: {unusedGates}\")\n\n    # Audit Actions\n    actions = bp.get(\"actions\", {})\n    audit[\"actions\"][\"count\"] = len(actions)\n    usedActions = set()\n    for t in transitions:\n        for a in t.get(\"actions\", []):\n            usedActions.add(a)\n\n    for aid in usedActions:\n        if aid not in actions:\n            audit[\"actions\"][\"issues\"].append(f\"Undefined action: {aid}\")\n            audit[\"valid\"] = False\n\n    unusedActions = set(actions.keys()) - usedActions\n    if unusedActions:\n        audit[\"actions\"][\"issues\"].append(f\"Unused actions: {unusedActions}\")\n\n    # Coverage metrics\n    audit[\"coverage\"] = {\n        \"statesReachable\": len(reachable),\n        \"statesTotal\": len(states),\n        \"gatesUsed\": len(usedGates),\n        \"gatesTotal\": len(gates),\n        \"actionsUsed\": len(usedActions),\n        \"actionsTotal\": len(actions)\n    }\n\n    return {\"trinityAudit\": audit, \"error\": None}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "seal_compute.auditFlange", "type": "function", "label": "auditFlange", "direction": "inbound", "parent": "seal_compute", "line": 137, "endLine": 188, "signature": "(params) -> dict", "docstring": "Audit the Flange (context_schema) for hermeticity.", "source": "def auditFlange(params: dict) -> dict:\n    \"\"\"Audit the Flange (context_schema) for hermeticity.\"\"\"\n    bp = params.get(\"blueprint\")\n    if not bp:\n        return {\"flangeAudit\": None, \"error\": \"No blueprint loaded\"}\n\n    schema = bp.get(\"context_schema\", {})\n    props = schema.get(\"properties\", {})\n\n    audit = {\n        \"valid\": True,\n        \"properties\": {\"count\": len(props), \"issues\": []},\n        \"hermeticity\": {\"score\": 0, \"issues\": []},\n        \"boundaries\": []\n    }\n\n    # Check property definitions\n    for name, spec in props.items():\n        if \"type\" not in spec:\n            audit[\"properties\"][\"issues\"].append(f\"{name}: missing type\")\n            audit[\"valid\"] = False\n        audit[\"boundaries\"].append({\n            \"name\": name,\n            \"type\": spec.get(\"type\", \"unknown\"),\n            \"enum\": spec.get(\"enum\"),\n            \"bounded\": \"enum\" in spec or \"minimum\" in spec or \"maximum\" in spec\n        })\n\n    # Check action mutations reference valid context\n    actions = bp.get(\"actions\", {})\n    for aid, aspec in actions.items():\n        if aspec.get(\"type\") == \"set\":\n            target = aspec.get(\"target\")\n            if target and target not in props:\n                audit[\"properties\"][\"issues\"].append(\n                    f\"Action {aid} targets undefined property: {target}\")\n\n        if aspec.get(\"type\") == \"compute\":\n            for outKey in aspec.get(\"output_map\", {}).keys():\n                if outKey not in props:\n                    audit[\"properties\"][\"issues\"].append(\n                        f\"Action {aid} outputs to undefined: {outKey}\")\n\n    # Hermeticity score\n    boundedCount = sum(1 for b in audit[\"boundaries\"] if b[\"bounded\"])\n    total = len(audit[\"boundaries\"])\n    audit[\"hermeticity\"][\"score\"] = boundedCount / total if total else 1.0\n    if audit[\"hermeticity\"][\"score\"] < 0.5:\n        audit[\"hermeticity\"][\"issues\"].append(\n            \"Low hermeticity: consider adding type constraints\")\n\n    return {\"flangeAudit\": audit, \"error\": None}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "seal_compute.generateTla", "type": "function", "label": "generateTla", "direction": "inbound", "parent": "seal_compute", "line": 191, "endLine": 373, "signature": "(params) -> dict", "docstring": "Generate TLA+ specification from blueprint.", "source": "def generateTla(params: dict) -> dict:\n    \"\"\"Generate TLA+ specification from blueprint.\"\"\"\n    bp = params.get(\"blueprint\")\n    bpPath = params.get(\"blueprintPath\")\n    if not bp:\n        return {\"tlaSpec\": None, \"tlaPath\": None, \"error\": \"No blueprint\"}\n\n    bpId = bp.get(\"id\", \"spec\")\n    states = list(bp.get(\"states\", {}).keys())\n    transitions = bp.get(\"transitions\", [])\n    gates = bp.get(\"gates\", {})\n    props = bp.get(\"context_schema\", {}).get(\"properties\", {})\n    entry = bp.get(\"entry_state\", states[0] if states else \"idle\")\n    terminals = bp.get(\"terminal_states\", [])\n\n    # Collect events\n    events = set()\n    for t in transitions:\n        events.add(t.get(\"on_event\", \"AUTO\"))\n\n    # Generate TLA+ spec\n    def tlaStr(s):\n        return f'\"{s}\"'\n\n    lines = [\n        f\"---------------------------- MODULE {bpId} ----------------------------\",\n        f\"\\\\* L++ Blueprint: {bp.get('name', bpId)}\",\n        f\"\\\\* Version: {bp.get('version', '1.0.0')}\",\n        f\"\\\\* TLAPS Seal Specification\",\n        \"\",\n        \"EXTENDS Integers, Sequences, TLC\",\n        \"\",\n        \"\\\\* Bounds for model checking\",\n        \"MAX_HISTORY == 3\",\n        \"CONSTANT NULL\",\n        \"\",\n        f\"States == {{{', '.join(tlaStr(s) for s in states)}}}\",\n        f\"Events == {{{', '.join(tlaStr(e) for e in sorted(events))}}}\",\n        f\"TerminalStates == {{{', '.join(tlaStr(t) for t in terminals)}}}\",\n        \"\",\n        \"VARIABLES\",\n        \"    state,\",\n    ]\n\n    # Context variables\n    propNames = list(props.keys())\n    for i, p in enumerate(propNames):\n        comma = \",\" if i < len(propNames) - 1 else \"\"\n        lines.append(f\"    {p}{comma}\")\n    lines.append(\"\")\n\n    # vars tuple\n    varsStr = \", \".join([\"state\"] + propNames)\n    lines.append(f\"vars == <<{varsStr}>>\")\n    lines.append(\"\")\n\n    # Type invariant\n    lines.append(\"\\\\* Type Invariant - Structural Correctness\")\n    lines.append(\"TypeInvariant ==\")\n    lines.append(\"    /\\\\ state \\\\in States\")\n    for p in propNames:\n        lines.append(f\"    /\\\\ TRUE  \\\\* {p}\")\n    lines.append(\"\")\n\n    # Init\n    lines.append(\"\\\\* Initial State\")\n    lines.append(\"Init ==\")\n    lines.append(f\"    /\\\\ state = \\\"{entry}\\\"\")\n    for p in propNames:\n        lines.append(f\"    /\\\\ {p} = NULL\")\n    lines.append(\"\")\n\n    # Transitions\n    lines.append(\"\\\\* Transitions\")\n    for t in transitions:\n        tid = t.get(\"id\", \"t_unknown\")\n        fromS = t.get(\"from\")\n        toS = t.get(\"to\")\n        event = t.get(\"on_event\", \"AUTO\")\n        tGates = t.get(\"gates\", [])\n\n        lines.append(f\"\\\\* {tid}: {fromS} --({event})--> {toS}\")\n        lines.append(f\"{tid} ==\")\n        if fromS == \"*\":\n            lines.append(f\"    /\\\\ TRUE  \\\\* Global transition\")\n        else:\n            lines.append(f\"    /\\\\ state = \\\"{fromS}\\\"\")\n        lines.append(f\"    /\\\\ state' = \\\"{toS}\\\"\")\n\n        # Gate conditions (simplified)\n        for g in tGates:\n            gspec = gates.get(g, {})\n            if gspec.get(\"type\") == \"expression\":\n                expr = gspec.get(\"expression\", \"TRUE\")\n                # Simple translation\n                tlaExpr = expr.replace(\" is not None\", \" # NULL\")\n                tlaExpr = tlaExpr.replace(\" is None\", \" = NULL\")\n                tlaExpr = tlaExpr.replace(\" and \", \" /\\\\ \")\n                tlaExpr = tlaExpr.replace(\" or \", \" \\\\/ \")\n                tlaExpr = tlaExpr.replace(\"not \", \"~\")\n                tlaExpr = tlaExpr.replace(\".get(\", \"[\")\n                tlaExpr = tlaExpr.replace(\", False)\", \"]\")\n                tlaExpr = tlaExpr.replace(\")\", \"\")\n                tlaExpr = tlaExpr.replace(\"'\", \"\\\"\")\n                lines.append(f\"    /\\\\ {tlaExpr}  \\\\* Gate: {g}\")\n\n        # Unchanged vars\n        lines.append(f\"    /\\\\ UNCHANGED <<{', '.join(propNames)}>>\")\n        lines.append(\"\")\n\n    # Next\n    lines.append(\"\\\\* Next State Relation\")\n    lines.append(\"Next ==\")\n    tids = [t.get(\"id\", f\"t{i}\") for i, t in enumerate(transitions)]\n    lines.append(\"    \\\\/ \" + \"\\n    \\\\/ \".join(tids))\n    lines.append(\"\")\n\n    # Safety Invariant (no deadlock except terminals) - after Next is defined\n    lines.append(\"\\\\* Safety Invariant - Convergence Guarantee\")\n    lines.append(\"SafetyInvariant ==\")\n    lines.append(\"    state \\\\in TerminalStates \\\\/\")\n    lines.append(\"    \\\\E e \\\\in Events : ENABLED(Next)\")\n    lines.append(\"\")\n\n    # Spec\n    lines.append(\"\\\\* Temporal Specification\")\n    lines.append(\"Spec == Init /\\\\ [][Next]_vars /\\\\ WF_vars(Next)\")\n    lines.append(\"\")\n\n    # TLAPS Theorems\n    lines.append(\n        \"\\\\* =========================================================\")\n    lines.append(\"\\\\* TLAPS THEOREMS - Axiomatic Certification\")\n    lines.append(\n        \"\\\\* =========================================================\")\n    lines.append(\"\")\n    lines.append(\"\\\\* Theorem 1: Type Safety\")\n    lines.append(\"THEOREM TypeSafety == Spec => []TypeInvariant\")\n    lines.append(\"PROOF OMITTED  \\\\* To be proven by TLAPS\")\n    lines.append(\"\")\n    lines.append(\"\\\\* Theorem 2: Convergence (No unhandled deadlock)\")\n    lines.append(\"THEOREM Convergence == Spec => []SafetyInvariant\")\n    lines.append(\"PROOF OMITTED  \\\\* To be proven by TLAPS\")\n    lines.append(\"\")\n    lines.append(\"\\\\* Theorem 3: Terminal Reachability\")\n    tReach = \"TRUE\" if not terminals else \" \\\\/ \".join(\n        f\"state = \\\"{t}\\\"\" for t in terminals)\n    lines.append(f\"THEOREM TerminalReachable == Spec => <>({tReach})\")\n    lines.append(\"PROOF OMITTED  \\\\* To be proven by TLAPS\")\n    lines.append(\"\")\n    lines.append(\"=\" * 76)\n\n    spec = \"\\n\".join(lines)\n\n    # Write TLA+ file\n    if bpPath:\n        tlaDir = Path(bpPath).parent / \"tla\"\n        tlaDir.mkdir(exist_ok=True)\n        tlaPath = str(tlaDir / f\"{bpId}.tla\")\n        with open(tlaPath, \"w\") as f:\n            f.write(spec)\n\n        # Generate CFG file\n        cfgLines = [\n            f\"\\\\* TLC Configuration for {bpId}\",\n            \"\",\n            \"SPECIFICATION Spec\",\n            \"\",\n            \"CONSTANTS\",\n            \"    NULL = NULL\",\n            \"\",\n            \"INVARIANTS\",\n            \"    TypeInvariant\",\n            \"\",\n            \"PROPERTIES\",\n        ]\n        cfgPath = str(tlaDir / f\"{bpId}.cfg\")\n        with open(cfgPath, \"w\") as f:\n            f.write(\"\\n\".join(cfgLines))\n    else:\n        tlaPath = None\n\n    return {\"tlaSpec\": spec, \"tlaPath\": tlaPath, \"error\": None}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "seal_compute.runTlc", "type": "function", "label": "runTlc", "direction": "inbound", "parent": "seal_compute", "line": 376, "endLine": 445, "signature": "(params) -> dict", "docstring": "Run TLC model checker on TLA+ specification.", "source": "def runTlc(params: dict) -> dict:\n    \"\"\"Run TLC model checker on TLA+ specification.\"\"\"\n    tlaPath = params.get(\"tlaPath\")\n    if not tlaPath:\n        return {\"tlcResult\": None, \"sealStatus\": None,\n                \"error\": \"No TLA+ path\"}\n\n    result = {\n        \"passed\": False,\n        \"statesExplored\": 0,\n        \"distinctStates\": 0,\n        \"errors\": [],\n        \"warnings\": [],\n        \"duration\": 0\n    }\n\n    try:\n        tlaDir = Path(tlaPath).parent\n        tlaFile = Path(tlaPath).name\n\n        proc = subprocess.run(\n            [\"tlc\", \"-workers\", \"auto\", tlaFile],\n            cwd=str(tlaDir),\n            capture_output=True,\n            text=True,\n            timeout=120\n        )\n\n        output = proc.stdout + proc.stderr\n\n        # Parse TLC output\n        if \"Model checking completed\" in output:\n            result[\"passed\"] = True\n        if \"Error:\" in output or \"Invariant\" in output and \"violated\" in output:\n            result[\"passed\"] = False\n            result[\"errors\"].append(\"TLC found violations\")\n\n        # Extract stats\n        for line in output.split(\"\\n\"):\n            if \"states generated\" in line.lower():\n                try:\n                    result[\"statesExplored\"] = int(\n                        line.split()[0].replace(\",\", \"\"))\n                except (ValueError, IndexError):\n                    pass\n            if \"distinct states\" in line.lower():\n                try:\n                    result[\"distinctStates\"] = int(\n                        line.split()[0].replace(\",\", \"\"))\n                except (ValueError, IndexError):\n                    pass\n\n        result[\"rawOutput\"] = output[:2000]\n        status = \"tlc_verified\" if result[\"passed\"] else \"rejected\"\n        return {\"tlcResult\": result, \"sealStatus\": status, \"error\": None}\n\n    except subprocess.TimeoutExpired:\n        result[\"errors\"].append(\"TLC timeout (120s)\")\n        return {\"tlcResult\": result, \"sealStatus\": \"rejected\",\n                \"error\": \"TLC timeout\"}\n    except FileNotFoundError:\n        result[\"errors\"].append(\"TLC not installed\")\n        # Fallback: mark as verified for demo\n        result[\"passed\"] = True\n        result[\"warnings\"].append(\"TLC not found - verification simulated\")\n        return {\"tlcResult\": result, \"sealStatus\": \"tlc_verified\",\n                \"error\": None}\n    except Exception as e:\n        return {\"tlcResult\": result, \"sealStatus\": \"rejected\",\n                \"error\": str(e)}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "seal_compute.runTlaps", "type": "function", "label": "runTlaps", "direction": "inbound", "parent": "seal_compute", "line": 448, "endLine": 506, "signature": "(params) -> dict", "docstring": "Run TLAPS theorem prover (or simulate if not installed).", "source": "def runTlaps(params: dict) -> dict:\n    \"\"\"Run TLAPS theorem prover (or simulate if not installed).\"\"\"\n    tlaPath = params.get(\"tlaPath\")\n    if not tlaPath:\n        return {\"tlapsResult\": None, \"sealStatus\": None,\n                \"error\": \"No TLA+ path\"}\n\n    result = {\n        \"passed\": False,\n        \"theorems\": {\n            \"TypeSafety\": \"pending\",\n            \"Convergence\": \"pending\",\n            \"TerminalReachable\": \"pending\"\n        },\n        \"proofObligations\": 0,\n        \"provedObligations\": 0\n    }\n\n    try:\n        proc = subprocess.run(\n            [\"tlapm\", \"--threads\", \"4\", tlaPath],\n            capture_output=True,\n            text=True,\n            timeout=300\n        )\n\n        output = proc.stdout + proc.stderr\n\n        # Parse TLAPS output\n        if \"All obligations proved\" in output:\n            result[\"passed\"] = True\n            for t in result[\"theorems\"]:\n                result[\"theorems\"][t] = \"proved\"\n\n        result[\"rawOutput\"] = output[:2000]\n        status = \"tlaps_certified\" if result[\"passed\"] else \"rejected\"\n        return {\"tlapsResult\": result, \"sealStatus\": status, \"error\": None}\n\n    except FileNotFoundError:\n        # TLAPS not installed - provide advisory\n        result[\"passed\"] = True\n        result[\"theorems\"] = {\n            \"TypeSafety\": \"assumed\",\n            \"Convergence\": \"assumed\",\n            \"TerminalReachable\": \"assumed\"\n        }\n        result[\"advisory\"] = (\n            \"TLAPS not installed. Theorems assumed based on TLC verification. \"\n            \"For production certification, install TLAPS and run full proofs.\"\n        )\n        return {\"tlapsResult\": result, \"sealStatus\": \"tlaps_certified\",\n                \"error\": None}\n    except subprocess.TimeoutExpired:\n        result[\"theorems\"][\"status\"] = \"timeout\"\n        return {\"tlapsResult\": result, \"sealStatus\": \"rejected\",\n                \"error\": \"TLAPS timeout\"}\n    except Exception as e:\n        return {\"tlapsResult\": result, \"sealStatus\": \"rejected\",\n                \"error\": str(e)}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "seal_compute.generateCertificate", "type": "function", "label": "generateCertificate", "direction": "inbound", "parent": "seal_compute", "line": 509, "endLine": 573, "signature": "(params) -> dict", "docstring": "Generate the TLAPS Seal certificate.", "source": "def generateCertificate(params: dict) -> dict:\n    \"\"\"Generate the TLAPS Seal certificate.\"\"\"\n    bp = params.get(\"blueprint\", {})\n    trinity = params.get(\"trinityAudit\", {})\n    flange = params.get(\"flangeAudit\", {})\n    tlc = params.get(\"tlcResult\", {})\n    tlaps = params.get(\"tlapsResult\", {})\n\n    # Generate content hash\n    content = json.dumps(bp, sort_keys=True)\n    contentHash = hashlib.sha256(content.encode()).hexdigest()[:16]\n\n    # Determine seal level\n    if tlaps and tlaps.get(\"passed\"):\n        level = \"TLAPS_CERTIFIED\"\n        seal = \"AXIOMATIC\"\n    elif tlc and tlc.get(\"passed\"):\n        level = \"TLC_VERIFIED\"\n        seal = \"EMPIRICAL\"\n    else:\n        level = \"REJECTED\"\n        seal = None\n\n    cert = {\n        \"seal\": seal,\n        \"level\": level,\n        \"timestamp\": datetime.utcnow().isoformat() + \"Z\",\n        \"blueprint\": {\n            \"id\": bp.get(\"id\") if bp else None,\n            \"name\": bp.get(\"name\") if bp else None,\n            \"version\": bp.get(\"version\") if bp else None,\n            \"hash\": contentHash\n        },\n        \"verification\": {\n            \"trinity\": {\n                \"transitions\": trinity.get(\"transitions\", {}).get(\"count\", 0) if trinity else 0,\n                \"gates\": trinity.get(\"gates\", {}).get(\"count\", 0) if trinity else 0,\n                \"actions\": trinity.get(\"actions\", {}).get(\"count\", 0) if trinity else 0,\n                \"valid\": trinity.get(\"valid\", False) if trinity else False\n            },\n            \"flange\": {\n                \"properties\": flange.get(\"properties\", {}).get(\"count\", 0) if flange else 0,\n                \"hermeticity\": flange.get(\"hermeticity\", {}).get(\"score\", 0) if flange else 0,\n                \"valid\": flange.get(\"valid\", False) if flange else False\n            },\n            \"tlc\": {\n                \"passed\": tlc.get(\"passed\", False) if tlc else False,\n                \"statesExplored\": tlc.get(\"statesExplored\", 0) if tlc else 0\n            },\n            \"tlaps\": {\n                \"passed\": tlaps.get(\"passed\", False) if tlaps else False,\n                \"theorems\": tlaps.get(\"theorems\", {}) if tlaps else {}\n            }\n        },\n        \"oath\": [\n            \"The Logic is Converged: No path leads to unhandled deadlock.\",\n            \"The Context is Hermetic: No data violates schema boundaries.\",\n            \"The Flesh is Governed: Volatile compute is bound by bone.\"\n        ]\n    }\n\n    status = \"tlaps_certified\" if seal == \"AXIOMATIC\" else (\n        \"tlc_verified\" if seal == \"EMPIRICAL\" else \"rejected\")\n\n    return {\"sealCertificate\": cert, \"sealStatus\": status}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "seal_compute.resetContext", "type": "function", "label": "resetContext", "direction": "inbound", "parent": "seal_compute", "line": 576, "endLine": 588, "signature": "(params) -> dict", "docstring": "Reset all context to initial state.", "source": "def resetContext(params: dict) -> dict:\n    \"\"\"Reset all context to initial state.\"\"\"\n    return {\n        \"blueprint\": None,\n        \"tlaSpec\": None,\n        \"tlcResult\": None,\n        \"tlapsResult\": None,\n        \"trinityAudit\": None,\n        \"flangeAudit\": None,\n        \"sealCertificate\": None,\n        \"sealStatus\": \"pending\",\n        \"error\": None\n    }", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "seal_compute.checkTrinityValid", "type": "function", "label": "checkTrinityValid", "direction": "inbound", "parent": "seal_compute", "line": 591, "endLine": 594, "signature": "(params) -> dict", "docstring": "Gate: check if trinity audit passed.", "source": "def checkTrinityValid(params: dict) -> dict:\n    \"\"\"Gate: check if trinity audit passed.\"\"\"\n    audit = params.get(\"trinityAudit\")\n    return {\"result\": audit is not None and audit.get(\"valid\", False)}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "seal_compute.checkFlangeValid", "type": "function", "label": "checkFlangeValid", "direction": "inbound", "parent": "seal_compute", "line": 597, "endLine": 600, "signature": "(params) -> dict", "docstring": "Gate: check if flange audit passed.", "source": "def checkFlangeValid(params: dict) -> dict:\n    \"\"\"Gate: check if flange audit passed.\"\"\"\n    audit = params.get(\"flangeAudit\")\n    return {\"result\": audit is not None and audit.get(\"valid\", False)}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "seal_compute.checkTlcPassed", "type": "function", "label": "checkTlcPassed", "direction": "inbound", "parent": "seal_compute", "line": 603, "endLine": 606, "signature": "(params) -> dict", "docstring": "Gate: check if TLC verification passed.", "source": "def checkTlcPassed(params: dict) -> dict:\n    \"\"\"Gate: check if TLC verification passed.\"\"\"\n    result = params.get(\"tlcResult\")\n    return {\"result\": result is not None and result.get(\"passed\", False)}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "seal_compute.checkTlapsPassed", "type": "function", "label": "checkTlapsPassed", "direction": "inbound", "parent": "seal_compute", "line": 609, "endLine": 612, "signature": "(params) -> dict", "docstring": "Gate: check if TLAPS proof passed.", "source": "def checkTlapsPassed(params: dict) -> dict:\n    \"\"\"Gate: check if TLAPS proof passed.\"\"\"\n    result = params.get(\"tlapsResult\")\n    return {\"result\": result is not None and result.get(\"passed\", False)}", "args": ["params"], "returns": "dict", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "seal_compute.tlaStr", "type": "function", "label": "tlaStr", "direction": "inbound", "parent": "seal_compute", "line": 212, "endLine": 213, "signature": "(s)", "docstring": null, "source": "    def tlaStr(s):\n        return f'\"{s}\"'", "args": ["s"], "returns": null, "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "json", "type": "dependency", "label": "json", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "os", "type": "dependency", "label": "os", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "subprocess", "type": "dependency", "label": "subprocess", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "hashlib", "type": "dependency", "label": "hashlib", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "datetime", "type": "dependency", "label": "datetime", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "pathlib", "type": "dependency", "label": "pathlib", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}, {"id": "typing", "type": "dependency", "label": "typing", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "seal_compute"}];
+const edges = [{"from": "seal_compute.generateTla", "to": "seal_compute.tlaStr", "type": "internal", "line": 227}, {"from": "seal_compute.generateTla", "to": "seal_compute.tlaStr", "type": "internal", "line": 228}, {"from": "seal_compute.generateTla", "to": "seal_compute.tlaStr", "type": "internal", "line": 229}, {"from": "seal_compute.loadBlueprint", "to": "json", "type": "external", "category": "stdlib", "line": 21}, {"from": "seal_compute.generateTla", "to": "pathlib", "type": "external", "category": "stdlib", "line": 347}, {"from": "seal_compute.runTlc", "to": "pathlib", "type": "external", "category": "stdlib", "line": 393}, {"from": "seal_compute.runTlc", "to": "pathlib", "type": "external", "category": "stdlib", "line": 394}, {"from": "seal_compute.runTlc", "to": "subprocess", "type": "external", "category": "stdlib", "line": 396}, {"from": "seal_compute.runTlaps", "to": "subprocess", "type": "external", "category": "stdlib", "line": 467}, {"from": "seal_compute.generateCertificate", "to": "json", "type": "external", "category": "stdlib", "line": 518}, {"from": "seal_compute.generateCertificate", "to": "hashlib", "type": "external", "category": "stdlib", "line": 519}, {"from": "seal_compute.generateCertificate", "to": "datetime", "type": "external", "category": "stdlib", "line": 535}];
+const moduleColors = {"seal_compute": "#00d4ff"};
+
+// Edge type visibility
+const edgeVisibility = { internal: true, external: true, local: true };
+let currentLayout = 'force';
+
+// Create node lookup
+const nodeById = {};
+nodes.forEach(n => nodeById[n.id] = n);
+
+// Setup SVG
+const container = document.getElementById('graph');
+const width = container.clientWidth;
+const height = container.clientHeight || 600;
+
+const svg = d3.select("svg").attr("viewBox", [0, 0, width, height]);
+const g = svg.append("g");
+
+// Zoom behavior
+const zoom = d3.zoom()
+    .scaleExtent([0.1, 4])
+    .filter(e => !e.target.closest('.node'))
+    .on("zoom", e => g.attr("transform", e.transform));
+svg.call(zoom);
+
+// Arrow markers
+const defs = svg.append("defs");
+["internal", "external", "local"].forEach(type => {
+    const color = type === "internal" ? "#4ecdc4" : type === "external" ? "#f39c12" : "#9b59b6";
+    defs.append("marker")
+        .attr("id", `arrow-${type}`)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 20)
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-4L10,0L0,4")
+        .attr("fill", color);
+});
+
+// Build module legend
+const legendDiv = document.getElementById('module-legend');
+Object.entries(moduleColors).forEach(([mod, color]) => {
+    const item = document.createElement('div');
+    item.className = 'module-item';
+    item.innerHTML = `<div class="module-dot" style="background:${color}"></div><span class="module-name">${mod}</span>`;
+    item.onclick = () => highlightModule(mod);
+    legendDiv.appendChild(item);
+});
+
+// Process edges - resolve node references
+const processedEdges = edges.map(e => ({
+    ...e,
+    source: nodeById[e.from] || { id: e.from, x: 0, y: 0 },
+    target: nodeById[e.to] || { id: e.to, x: 0, y: 0 }
+})).filter(e => e.source && e.target);
+
+// Force simulation
+const simulation = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(processedEdges).id(d => d.id).distance(80).strength(0.5))
+    .force("charge", d3.forceManyBody().strength(-300))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force("collision", d3.forceCollide().radius(40));
+
+// Draw edges
+const edge = g.append("g").selectAll("path")
+    .data(processedEdges)
+    .join("path")
+    .attr("class", d => `edge edge-${d.type || 'internal'}`)
+    .attr("marker-end", d => `url(#arrow-${d.type || 'internal'})`);
+
+// Node size based on type
+function nodeSize(d) {
+    if (d.type === 'module') return { w: 120, h: 40 };
+    if (d.type === 'function' || d.type === 'async_function') return { w: 100, h: 30 };
+    if (d.type === 'class') return { w: 110, h: 35 };
+    return { w: 80, h: 25 };  // dependency
+}
+
+// Draw nodes
+const node = g.append("g").selectAll("g")
+    .data(nodes)
+    .join("g")
+    .attr("class", "node")
+    .call(d3.drag()
+        .on("start", dragStart)
+        .on("drag", dragging)
+        .on("end", dragEnd));
+
+node.append("rect")
+    .attr("class", d => `node-${d.type === 'dependency' ? 'dependency' : d.type === 'module' ? 'module' : 'function'}`)
+    .attr("width", d => nodeSize(d).w)
+    .attr("height", d => nodeSize(d).h)
+    .attr("x", d => -nodeSize(d).w / 2)
+    .attr("y", d => -nodeSize(d).h / 2)
+    .attr("rx", 6)
+    .attr("stroke", d => d.moduleColor || "#666");
+
+node.append("text")
+    .attr("class", "node-label")
+    .attr("text-anchor", "middle")
+    .attr("dy", d => d.signature ? -3 : 4)
+    .text(d => d.label || d.id);
+
+node.filter(d => d.signature).append("text")
+    .attr("class", "node-sublabel")
+    .attr("text-anchor", "middle")
+    .attr("dy", 10)
+    .text(d => d.signature.length > 20 ? d.signature.slice(0, 18) + ".." : d.signature);
+
+// Tooltip
+const tooltip = d3.select("#tooltip");
+node.on("mouseover", (e, d) => {
+    let html = `<b>${d.label || d.id}</b>`;
+    if (d.type) html += `<br><span style="color:#888">${d.type}</span>`;
+    if (d.signature) html += `<br><code>${d.signature}</code>`;
+    if (d.direction) html += `<br>Direction: ${d.direction}`;
+    tooltip.style("display", "block").html(html);
+})
+.on("mousemove", e => {
+    tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 10) + "px");
+})
+.on("mouseout", () => tooltip.style("display", "none"));
+
+// Click to select
+node.on("click", (e, d) => {
+    e.stopPropagation();
+    selectNode(d);
+});
+
+svg.on("click", () => clearSelection());
+
+// Update positions
+simulation.on("tick", () => {
+    edge.attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
+});
+
+// Drag functions
+function dragStart(e, d) {
+    if (!e.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+}
+function dragging(e, d) {
+    d.fx = e.x;
+    d.fy = e.y;
+}
+function dragEnd(e, d) {
+    if (!e.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+}
+
+// Selection functions
+let selectedNode = null;
+
+function selectNode(d) {
+    selectedNode = d;
+    
+    // Highlight node
+    node.classed("dim", n => n.id !== d.id && !isConnected(d, n));
+    node.select("rect").attr("stroke-width", n => n.id === d.id ? 4 : 2);
+    
+    // Highlight edges
+    edge.classed("dim", e => e.source.id !== d.id && e.target.id !== d.id);
+    edge.classed("highlight", e => e.source.id === d.id || e.target.id === d.id);
+    
+    // Update info panel
+    updateNodeInfo(d);
+    updateEdgeList(d);
+}
+
+function clearSelection() {
+    selectedNode = null;
+    node.classed("dim", false);
+    node.select("rect").attr("stroke-width", 2);
+    edge.classed("dim", false).classed("highlight", false);
+    document.getElementById('node-info').innerHTML = 'Click a node to see details';
+    document.getElementById('edge-list').innerHTML = '';
+}
+
+function isConnected(a, b) {
+    return processedEdges.some(e => 
+        (e.source.id === a.id && e.target.id === b.id) ||
+        (e.source.id === b.id && e.target.id === a.id)
+    );
+}
+
+function updateNodeInfo(d) {
+    let html = `<div class="metric"><span class="info-label">ID:</span><span class="info-value">${d.id}</span></div>`;
+    html += `<div class="metric"><span class="info-label">Type:</span><span class="info-value">${d.type}</span></div>`;
+    if (d.moduleName) html += `<div class="metric"><span class="info-label">Module:</span><span class="info-value">${d.moduleName}</span></div>`;
+    if (d.line) html += `<div class="metric"><span class="info-label">Line:</span><span class="info-value">${d.line}${d.endLine ? '-' + d.endLine : ''}</span></div>`;
+    if (d.signature) html += `<div class="metric"><span class="info-label">Signature:</span><span class="info-value" style="font-family:monospace">${d.signature}</span></div>`;
+    if (d.direction) html += `<div class="metric"><span class="info-label">Direction:</span><span class="info-value">${d.direction}</span></div>`;
+    if (d.category) html += `<div class="metric"><span class="info-label">Category:</span><span class="info-value">${d.category}</span></div>`;
+
+    if (d.metrics) {
+        html += `<div style="margin-top:10px"><b>Coupling Metrics</b></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-In:</span><span class="info-value">${d.metrics.fanIn}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-Out:</span><span class="info-value">${d.metrics.fanOut}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Instability:</span><span class="info-value">${(d.metrics.instability * 100).toFixed(1)}%</span></div>`;
+        html += `<div class="metric-bar"><div class="metric-fill" style="width:${d.metrics.instability * 100}%;background:${d.metrics.instability > 0.5 ? '#ff6b6b' : '#4ecdc4'}"></div></div>`;
+        html += `<div class="metric"><span class="info-label">Internal Edges:</span><span class="info-value">${d.metrics.internalEdges}</span></div>`;
+    }
+
+    document.getElementById('node-info').innerHTML = html;
+
+    // Update source code panel
+    updateSourcePanel(d);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function updateSourcePanel(d) {
+    const panel = document.getElementById('source-content');
+
+    if (d.source) {
+        let sourceHtml = '';
+        if (d.docstring) {
+            sourceHtml += `<div class="docstring" style="margin-bottom:8px;padding:5px;background:#1a1a2a;border-radius:3px">${escapeHtml(d.docstring)}</div>`;
+        }
+        sourceHtml += `<div class="source-code">${escapeHtml(d.source)}</div>`;
+        panel.innerHTML = sourceHtml;
+    } else if (d.type === 'module') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">Module: ${d.label}<br>Click a function to view its source code.</div>`;
+    } else if (d.type === 'dependency') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">External dependency: ${d.label}<br>Category: ${d.category || 'unknown'}</div>`;
+    } else {
+        panel.innerHTML = `<div style="color:#666;font-size:11px">No source available for this node</div>`;
+    }
+}
+
+function updateEdgeList(d) {
+    const outgoing = processedEdges.filter(e => e.source.id === d.id);
+    const incoming = processedEdges.filter(e => e.target.id === d.id);
+    
+    let html = '';
+    if (outgoing.length) {
+        html += '<div style="color:#4ecdc4;font-weight:bold;margin-bottom:5px">Outgoing →</div>';
+        outgoing.forEach(e => {
+            html += `<div class="edge-item">→ <span class="to">${e.target.id || e.to}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (incoming.length) {
+        html += '<div style="color:#f39c12;font-weight:bold;margin:10px 0 5px 0">← Incoming</div>';
+        incoming.forEach(e => {
+            html += `<div class="edge-item">← <span class="from">${e.source.id || e.from}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (!outgoing.length && !incoming.length) {
+        html = '<div style="color:#666">No connections</div>';
+    }
+    
+    document.getElementById('edge-list').innerHTML = html;
+}
+
+function highlightModule(modName) {
+    node.classed("dim", n => n.moduleName !== modName && n.type !== 'dependency');
+    edge.classed("dim", e => {
+        const srcMod = nodeById[e.source.id]?.moduleName;
+        const tgtMod = nodeById[e.target.id]?.moduleName;
+        return srcMod !== modName && tgtMod !== modName;
+    });
+}
+
+// Layout functions
+function toggleLayout(layout) {
+    currentLayout = layout;
+    document.querySelectorAll('.controls button').forEach(b => {
+        if (b.id.startsWith('btn-') && ['force', 'horizontal', 'vertical'].includes(b.id.replace('btn-', ''))) {
+            b.classList.toggle('active', b.id === `btn-${layout}`);
+        }
+    });
+    
+    if (layout === 'force') {
+        simulation.alpha(1).restart();
+    } else {
+        simulation.stop();
+        layoutNodes(layout);
+    }
+}
+
+function layoutNodes(layout) {
+    const modules = [...new Set(nodes.filter(n => n.type === 'module').map(n => n.id))];
+    const padding = 50;
+    
+    if (layout === 'horizontal') {
+        // Group by module, spread horizontally
+        modules.forEach((mod, mi) => {
+            const modNodes = nodes.filter(n => n.moduleName === mod || n.id === mod);
+            const x = padding + mi * (width - padding * 2) / Math.max(modules.length - 1, 1);
+            modNodes.forEach((n, ni) => {
+                n.x = x;
+                n.y = padding + ni * 50;
+            });
+        });
+        // Dependencies on the right
+        const deps = nodes.filter(n => n.type === 'dependency');
+        deps.forEach((n, i) => {
+            n.x = width - padding;
+            n.y = padding + i * 40;
+        });
+    } else if (layout === 'vertical') {
+        // Modules at top, functions below, dependencies at bottom
+        const modNodes = nodes.filter(n => n.type === 'module');
+        const funcNodes = nodes.filter(n => n.type === 'function' || n.type === 'async_function' || n.type === 'class');
+        const depNodes = nodes.filter(n => n.type === 'dependency');
+        
+        modNodes.forEach((n, i) => {
+            n.x = padding + i * 150;
+            n.y = padding;
+        });
+        funcNodes.forEach((n, i) => {
+            n.x = padding + (i % 6) * 130;
+            n.y = 120 + Math.floor(i / 6) * 60;
+        });
+        depNodes.forEach((n, i) => {
+            n.x = padding + (i % 8) * 100;
+            n.y = height - padding - 50;
+        });
+    }
+    
+    // Update positions
+    node.transition().duration(500).attr("transform", d => `translate(${d.x},${d.y})`);
+    edge.transition().duration(500).attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+}
+
+// Edge type toggle
+function toggleEdgeType(type) {
+    edgeVisibility[type] = !edgeVisibility[type];
+    document.getElementById(`btn-${type}`).classList.toggle('active', edgeVisibility[type]);
+    edge.style("display", d => edgeVisibility[d.type || 'internal'] ? null : "none");
+}
+
+// View controls
+function resetView() {
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+}
+
+function fitToView() {
+    const bounds = g.node().getBBox();
+    const scale = Math.min(width / bounds.width, height / bounds.height) * 0.9;
+    const tx = (width - bounds.width * scale) / 2 - bounds.x * scale;
+    const ty = (height - bounds.height * scale) / 2 - bounds.y * scale;
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
+// Initial fit
+setTimeout(fitToView, 1000);
+</script>
+</body>
+</html>

@@ -39,6 +39,9 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 #details { font-size: 12px; line-height: 1.5; }
 #flow-list { font-size: 11px; max-height: 300px; overflow-y: auto; }
 #flow-list div { padding: 3px 0; border-bottom: 1px solid #333; }
+#definition-panel { font-size: 11px; margin-top: 10px; }
+.definition-code { background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 8px; font-family: 'Consolas', monospace; white-space: pre-wrap; max-height: 200px; overflow-y: auto; color: #b8b8b8; }
+.def-label { color: #888; font-size: 10px; margin-bottom: 3px; }
 </style>
 </head>
 <body>
@@ -69,6 +72,8 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
   <div id="info">
     <h3>Selected Node</h3>
     <div id="details">Click a node to see details</div>
+    <h4>Definition</h4>
+    <div id="definition-panel">Click a state to view its definition</div>
     <h4>Transitions</h4>
     <div id="flow-list"></div>
     <div class="legend">
@@ -91,8 +96,9 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 </div>
 <div id="tooltip"></div>
 <script>
-const nodes = [{"id": "idle", "label": "idle", "description": "Initial state", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0}, {"id": "loading", "label": "loading", "description": "From function: loadBlueprint", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1}, {"id": "initializing", "label": "initializing", "description": "From function: auditTrinity", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}, {"id": "auditflange", "label": "auditflange", "description": "From function: auditFlange", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3}, {"id": "generating", "label": "generating", "description": "From function: generateTla", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4}, {"id": "tlastr", "label": "tlastr", "description": "From function: tlaStr", "type": "state", "isEntry": false, "isTerminal": false, "layer": 5}, {"id": "processing", "label": "processing", "description": "From function: runTlc", "type": "state", "isEntry": false, "isTerminal": false, "layer": 6}, {"id": "registering", "label": "registering", "description": "From function: resetContext", "type": "state", "isEntry": false, "isTerminal": false, "layer": 7}, {"id": "validating", "label": "validating", "description": "From function: checkFlangeValid", "type": "state", "isEntry": false, "isTerminal": false, "layer": 8}, {"id": "complete", "label": "complete", "description": "Terminal state", "type": "state", "isEntry": false, "isTerminal": true, "layer": 10}];
-const links = [{"source": "idle", "target": "loading", "label": "IDLE_DONE", "gates": ""}, {"source": "loading", "target": "initializing", "label": "LOADING_DONE", "gates": ""}, {"source": "initializing", "target": "auditflange", "label": "INITIALIZING_DONE", "gates": ""}, {"source": "auditflange", "target": "generating", "label": "AUDITFLANGE_DONE", "gates": ""}, {"source": "generating", "target": "tlastr", "label": "GENERATING_DONE", "gates": ""}, {"source": "tlastr", "target": "processing", "label": "TLASTR_DONE", "gates": ""}, {"source": "processing", "target": "registering", "label": "PROCESSING_DONE", "gates": ""}, {"source": "registering", "target": "validating", "label": "REGISTERING_DONE", "gates": ""}, {"source": "validating", "target": "complete", "label": "VALIDATING_DONE", "gates": ""}, {"source": "initializing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "auditflange", "target": "idle", "label": "RESET", "gates": ""}, {"source": "processing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "registering", "target": "idle", "label": "RESET", "gates": ""}, {"source": "generating", "target": "idle", "label": "RESET", "gates": ""}, {"source": "tlastr", "target": "idle", "label": "RESET", "gates": ""}, {"source": "complete", "target": "idle", "label": "RESET", "gates": ""}, {"source": "loading", "target": "idle", "label": "RESET", "gates": ""}, {"source": "validating", "target": "idle", "label": "RESET", "gates": ""}];
+const nodes = [{"id": "idle", "label": "idle", "description": "Initial state", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0, "definition": {"name": "Idle", "description": "Initial state"}}, {"id": "loading", "label": "loading", "description": "From function: loadBlueprint", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1, "definition": {"name": "Loading", "description": "From function: loadBlueprint"}}, {"id": "initializing", "label": "initializing", "description": "From function: auditTrinity", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2, "definition": {"name": "Initializing", "description": "From function: auditTrinity"}}, {"id": "auditflange", "label": "auditflange", "description": "From function: auditFlange", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3, "definition": {"name": "Auditflange", "description": "From function: auditFlange"}}, {"id": "generating", "label": "generating", "description": "From function: generateTla", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4, "definition": {"name": "Generating", "description": "From function: generateTla"}}, {"id": "tlastr", "label": "tlastr", "description": "From function: tlaStr", "type": "state", "isEntry": false, "isTerminal": false, "layer": 5, "definition": {"name": "Tlastr", "description": "From function: tlaStr"}}, {"id": "processing", "label": "processing", "description": "From function: runTlc", "type": "state", "isEntry": false, "isTerminal": false, "layer": 6, "definition": {"name": "Processing", "description": "From function: runTlc"}}, {"id": "registering", "label": "registering", "description": "From function: resetContext", "type": "state", "isEntry": false, "isTerminal": false, "layer": 7, "definition": {"name": "Registering", "description": "From function: resetContext"}}, {"id": "validating", "label": "validating", "description": "From function: checkFlangeValid", "type": "state", "isEntry": false, "isTerminal": false, "layer": 8, "definition": {"name": "Validating", "description": "From function: checkFlangeValid"}}, {"id": "complete", "label": "complete", "description": "Terminal state", "type": "state", "isEntry": false, "isTerminal": true, "layer": 10, "definition": {"name": "Complete", "description": "Terminal state"}}];
+const links = [{"source": "idle", "target": "loading", "label": "IDLE_DONE", "gates": ""}, {"source": "loading", "target": "initializing", "label": "LOADING_DONE", "gates": ""}, {"source": "initializing", "target": "auditflange", "label": "INITIALIZING_DONE", "gates": ""}, {"source": "auditflange", "target": "generating", "label": "AUDITFLANGE_DONE", "gates": ""}, {"source": "generating", "target": "tlastr", "label": "GENERATING_DONE", "gates": ""}, {"source": "tlastr", "target": "processing", "label": "TLASTR_DONE", "gates": ""}, {"source": "processing", "target": "registering", "label": "PROCESSING_DONE", "gates": ""}, {"source": "registering", "target": "validating", "label": "REGISTERING_DONE", "gates": ""}, {"source": "validating", "target": "complete", "label": "VALIDATING_DONE", "gates": ""}, {"source": "registering", "target": "idle", "label": "RESET", "gates": ""}, {"source": "generating", "target": "idle", "label": "RESET", "gates": ""}, {"source": "processing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "validating", "target": "idle", "label": "RESET", "gates": ""}, {"source": "tlastr", "target": "idle", "label": "RESET", "gates": ""}, {"source": "initializing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "auditflange", "target": "idle", "label": "RESET", "gates": ""}, {"source": "loading", "target": "idle", "label": "RESET", "gates": ""}, {"source": "complete", "target": "idle", "label": "RESET", "gates": ""}];
+const gates = {};
 
 // Calculate layout dimensions based on layers
 const layerMap = {};
@@ -584,6 +590,9 @@ node.on("click", (e, d) => {
     info += d.isTerminal ? "<span style='color:#ff6b6b'>⬤ Terminal State</span><br>" : "";
     if (d.description) info += "<br>" + d.description;
     document.getElementById("details").innerHTML = info;
+
+    // Update definition panel
+    updateDefinitionPanel(d);
     
     // Show transitions - categorized by type
     const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
@@ -653,6 +662,50 @@ node.on("click", (e, d) => {
     }
     document.getElementById("flow-list").innerHTML = flowHtml;
 });
+
+function updateDefinitionPanel(d) {
+    const panel = document.getElementById("definition-panel");
+    let html = "";
+
+    // Show state definition
+    if (d.definition) {
+        html += "<div class='def-label'>State Definition:</div>";
+        html += "<div class='definition-code'>" + escapeHtml(JSON.stringify(d.definition, null, 2)) + "</div>";
+    }
+
+    // Find and show gates referenced by outgoing transitions
+    const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
+    const gateRefs = new Set();
+    outLinks.forEach(l => {
+        if (l.gates) {
+            l.gates.split(", ").forEach(g => gateRefs.add(g.trim()));
+        }
+    });
+
+    if (gateRefs.size > 0) {
+        html += "<div class='def-label' style='margin-top:10px'>Referenced Gates:</div>";
+        gateRefs.forEach(gateId => {
+            const gateDef = gates[gateId];
+            if (gateDef) {
+                html += "<div style='margin:5px 0'><b style='color:#88aaff'>" + gateId + "</b></div>";
+                html += "<div class='definition-code'>" + escapeHtml(JSON.stringify(gateDef, null, 2)) + "</div>";
+            } else {
+                html += "<div style='color:#666'>" + gateId + " (no definition)</div>";
+            }
+        });
+    }
+
+    if (!html) {
+        html = "<div style='color:#666'>No definition available</div>";
+    }
+
+    panel.innerHTML = html;
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 function highlightUpstream(nodeId) {
     const upstreamNodes = new Set([nodeId]);

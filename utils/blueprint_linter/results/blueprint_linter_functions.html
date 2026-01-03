@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Function Graph: blueprint_linter</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #0f0f23; color: #eee; }
+h1 { color: #00d4ff; margin-bottom: 5px; font-size: 24px; }
+.subtitle { color: #888; margin-bottom: 15px; font-size: 14px; }
+#container { display: flex; gap: 20px; height: calc(100vh - 120px); }
+#graph { flex: 1; position: relative; }
+#sidebar { width: 350px; background: #1a1a2e; padding: 15px; border-radius: 8px; overflow-y: auto; }
+svg { background: #16213e; border-radius: 8px; width: 100%; height: 100%; }
+
+/* Node styles */
+.node { cursor: pointer; }
+.node-module { fill: #2a2a4a; stroke-width: 3; }
+.node-function { fill: #3a3a5a; stroke-width: 2; }
+.node-dependency { fill: #1a1a3a; stroke: #666; stroke-width: 1; stroke-dasharray: 4; }
+.node-label { font-size: 11px; fill: #fff; pointer-events: none; font-weight: 500; }
+.node-sublabel { font-size: 9px; fill: #888; pointer-events: none; }
+
+/* Edge styles */
+.edge { fill: none; stroke-opacity: 0.6; }
+.edge-internal { stroke: #4ecdc4; stroke-width: 2; }
+.edge-external { stroke: #f39c12; stroke-width: 1.5; stroke-dasharray: 4; }
+.edge-local { stroke: #9b59b6; stroke-width: 2; }
+.edge-label { font-size: 8px; fill: #666; pointer-events: none; }
+
+/* Highlight styles */
+.highlight { stroke-width: 3 !important; stroke-opacity: 1 !important; }
+.dim { opacity: 0.2; }
+
+/* Controls */
+.controls { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.controls button { background: #3a3a5a; color: #fff; border: 1px solid #555; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.controls button:hover { background: #4a4a6a; }
+.controls button.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
+
+/* Module legend */
+.module-legend { margin-top: 15px; }
+.module-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer; }
+.module-item:hover { background: #2a2a4a; }
+.module-dot { width: 12px; height: 12px; border-radius: 3px; }
+.module-name { font-size: 12px; }
+
+/* Info panel */
+h3 { color: #00d4ff; margin: 15px 0 8px 0; font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+.info-section { font-size: 12px; line-height: 1.6; }
+.info-label { color: #888; }
+.info-value { color: #fff; }
+
+/* Source code panel */
+.source-panel { margin-top: 10px; }
+.source-code { background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 10px; font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; line-height: 1.4; overflow-x: auto; max-height: 300px; overflow-y: auto; white-space: pre; color: #b8b8b8; }
+.source-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.source-toggle { background: #3a3a5a; color: #fff; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; }
+.source-toggle:hover { background: #4a4a6a; }
+.docstring { color: #6a9955; font-style: italic; }
+.metric { display: flex; justify-content: space-between; padding: 3px 0; }
+.metric-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 2px; }
+.metric-fill { height: 100%; border-radius: 2px; }
+
+/* Edge list */
+.edge-list { max-height: 200px; overflow-y: auto; }
+.edge-item { padding: 4px 0; border-bottom: 1px solid #333; font-size: 11px; }
+.edge-item .from { color: #4ecdc4; }
+.edge-item .to { color: #f39c12; }
+.edge-item .type { color: #666; font-size: 10px; }
+
+/* Tooltip */
+#tooltip { position: absolute; background: #1a1a2e; border: 1px solid #00d4ff; padding: 10px; border-radius: 4px; pointer-events: none; display: none; max-width: 300px; z-index: 100; font-size: 11px; }
+</style>
+</head>
+<body>
+<h1>Function Graph: blueprint_linter</h1>
+<div class="subtitle">Stackable function dependency visualization • Drag nodes to rearrange • Click to inspect</div>
+
+<div class="controls">
+  <button onclick="resetView()">Reset View</button>
+  <button onclick="fitToView()">Fit</button>
+  <button onclick="toggleLayout('force')" id="btn-force" class="active">Force</button>
+  <button onclick="toggleLayout('horizontal')" id="btn-horizontal">Horizontal</button>
+  <button onclick="toggleLayout('vertical')" id="btn-vertical">Vertical</button>
+  <span style="margin-left: 10px; color: #666">|</span>
+  <button onclick="toggleEdgeType('internal')" id="btn-internal" class="active">Internal</button>
+  <button onclick="toggleEdgeType('external')" id="btn-external" class="active">External</button>
+  <button onclick="toggleEdgeType('local')" id="btn-local" class="active">Local</button>
+</div>
+
+<div id="container">
+  <div id="graph"><svg></svg></div>
+  <div id="sidebar">
+    <h3>Modules</h3>
+    <div class="module-legend" id="module-legend"></div>
+
+    <h3>Selected Node</h3>
+    <div class="info-section" id="node-info">Click a node to see details</div>
+
+    <h3>Source Code</h3>
+    <div class="source-panel" id="source-panel">
+      <div id="source-content" style="color:#666;font-size:11px">Click a function to view source</div>
+    </div>
+
+    <h3>Connections</h3>
+    <div class="edge-list" id="edge-list"></div>
+  </div>
+</div>
+<div id="tooltip"></div>
+
+<script>
+const nodes = [{"id": "linter_compute", "type": "module", "label": "linter_compute", "metrics": {"fanIn": 18, "fanOut": 4, "instability": 0.182, "internalEdges": 16, "externalCallCount": 4, "localCallCount": 0, "callsByCategory": {"stdlib": 4}, "localDependencies": []}, "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.Severity", "type": "class", "label": "Severity", "direction": "inbound", "parent": "linter_compute", "line": 18, "endLine": 21, "signature": null, "docstring": null, "source": "class Severity:\n    ERROR = \"error\"\n    WARNING = \"warning\"\n    INFO = \"info\"", "args": null, "returns": null, "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.RuleCode", "type": "class", "label": "RuleCode", "direction": "inbound", "parent": "linter_compute", "line": 24, "endLine": 34, "signature": null, "docstring": null, "source": "class RuleCode:\n    UNREACHABLE_STATE = \"L001\"\n    DEAD_END_STATE = \"L002\"\n    UNUSED_GATE = \"L003\"\n    UNUSED_ACTION = \"L004\"\n    UNUSED_CONTEXT = \"L005\"\n    ORPHANED_TRANSITION = \"L006\"\n    MISSING_GATE_REF = \"L007\"\n    MISSING_ACTION_REF = \"L008\"\n    DUPLICATE_TRANSITION_ID = \"L009\"\n    NAMING_CONVENTION = \"L010\"", "args": null, "returns": null, "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.make_finding", "type": "function", "label": "make_finding", "direction": "inbound", "parent": "linter_compute", "line": 37, "endLine": 54, "signature": "(code, severity, message, location, suggestion) -> Dict[]", "docstring": "Create a standardized finding dict.", "source": "def make_finding(\n    code: str,\n    severity: str,\n    message: str,\n    location: str = None,\n    suggestion: str = None\n) -> Dict[str, Any]:\n    \"\"\"Create a standardized finding dict.\"\"\"\n    finding = {\n        \"code\": code,\n        \"severity\": severity,\n        \"message\": message\n    }\n    if location:\n        finding[\"location\"] = location\n    if suggestion:\n        finding[\"suggestion\"] = suggestion\n    return finding", "args": ["code", "severity", "message", "location", "suggestion"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.load_blueprint", "type": "function", "label": "load_blueprint", "direction": "inbound", "parent": "linter_compute", "line": 61, "endLine": 97, "signature": "(params) -> Dict[]", "docstring": "Load an L++ blueprint from a JSON file for linting.", "source": "def load_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Load an L++ blueprint from a JSON file for linting.\"\"\"\n    path = params.get(\"path\")\n    if not path:\n        return {\"blueprint\": None, \"path\": None, \"error\": \"No path provided\"}\n\n    try:\n        path = Path(path)\n        if not path.exists():\n            return {\"blueprint\": None, \"path\": None,\n                    \"error\": f\"File not found: {path}\"}\n\n        with open(path) as f:\n            raw = json.load(f)\n\n        # Store raw dict for linting (we need access to all fields)\n        bp = {\n            \"id\": raw.get(\"id\", \"unknown\"),\n            \"name\": raw.get(\"name\", \"Unknown\"),\n            \"version\": raw.get(\"version\", \"0.0.0\"),\n            \"description\": raw.get(\"description\", \"\"),\n            \"states\": raw.get(\"states\", {}),\n            \"transitions\": raw.get(\"transitions\", []),\n            \"gates\": raw.get(\"gates\", {}),\n            \"actions\": raw.get(\"actions\", {}),\n            \"context_schema\": raw.get(\"context_schema\", {}),\n            \"entry_state\": raw.get(\"entry_state\"),\n            \"terminal_states\": raw.get(\"terminal_states\", []),\n            \"display\": raw.get(\"display\", {})\n        }\n\n        return {\"blueprint\": bp, \"path\": str(path), \"error\": None}\n    except json.JSONDecodeError as e:\n        return {\"blueprint\": None, \"path\": None,\n                \"error\": f\"Invalid JSON: {e}\"}\n    except Exception as e:\n        return {\"blueprint\": None, \"path\": None, \"error\": str(e)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.init_lint", "type": "function", "label": "init_lint", "direction": "inbound", "parent": "linter_compute", "line": 100, "endLine": 106, "signature": "(params) -> Dict[]", "docstring": "Initialize linting state with empty findings.", "source": "def init_lint(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Initialize linting state with empty findings.\"\"\"\n    return {\n        \"findings\": [],\n        \"summary\": {\"error\": 0, \"warning\": 0, \"info\": 0},\n        \"metrics\": {}\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.check_unreachable_states", "type": "function", "label": "check_unreachable_states", "direction": "inbound", "parent": "linter_compute", "line": 113, "endLine": 147, "signature": "(params) -> Dict[]", "docstring": "Rule L001: Detect states that have no incoming transitions.\nEntry state is exempt from this check.", "source": "def check_unreachable_states(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"\n    Rule L001: Detect states that have no incoming transitions.\n    Entry state is exempt from this check.\n    \"\"\"\n    bp = params.get(\"blueprint\", {})\n    findings = list(params.get(\"findings\", []))\n\n    states = set(bp.get(\"states\", {}).keys())\n    entryState = bp.get(\"entry_state\")\n    transitions = bp.get(\"transitions\", [])\n\n    # Collect all states that are targets of transitions\n    reachable = set()\n    for t in transitions:\n        toState = t.get(\"to\")\n        if toState and toState != \"*\":\n            reachable.add(toState)\n\n    # Entry state is always reachable (it's the start)\n    if entryState:\n        reachable.add(entryState)\n\n    # Find unreachable states\n    unreachable = states - reachable\n    for state in sorted(unreachable):\n        findings.append(make_finding(\n            code=RuleCode.UNREACHABLE_STATE,\n            severity=Severity.WARNING,\n            message=f\"State '{state}' has no incoming transitions\",\n            location=f\"states.{state}\",\n            suggestion=f\"Add a transition to '{state}' or remove it\"\n        ))\n\n    return {\"findings\": findings}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.check_dead_end_states", "type": "function", "label": "check_dead_end_states", "direction": "inbound", "parent": "linter_compute", "line": 150, "endLine": 190, "signature": "(params) -> Dict[]", "docstring": "Rule L002: Detect non-terminal states with no outgoing transitions.\nTerminal states and wildcard transitions are handled specially.", "source": "def check_dead_end_states(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"\n    Rule L002: Detect non-terminal states with no outgoing transitions.\n    Terminal states and wildcard transitions are handled specially.\n    \"\"\"\n    bp = params.get(\"blueprint\", {})\n    findings = list(params.get(\"findings\", []))\n\n    states = set(bp.get(\"states\", {}).keys())\n    terminalStates = set(bp.get(\"terminal_states\", []))\n    transitions = bp.get(\"transitions\", [])\n\n    # Collect states with outgoing transitions\n    hasOutgoing = set()\n    hasWildcard = False\n    for t in transitions:\n        fromState = t.get(\"from\")\n        if fromState == \"*\":\n            hasWildcard = True\n        elif fromState:\n            hasOutgoing.add(fromState)\n\n    # If there's a wildcard, all states have \"outgoing\" via wildcard\n    if hasWildcard:\n        hasOutgoing = states\n\n    # Non-terminal states without outgoing are dead-ends\n    nonTerminal = states - terminalStates\n    deadEnds = nonTerminal - hasOutgoing\n\n    for state in sorted(deadEnds):\n        findings.append(make_finding(\n            code=RuleCode.DEAD_END_STATE,\n            severity=Severity.WARNING,\n            message=f\"Non-terminal state '{state}' has no outgoing transitions\",\n            location=f\"states.{state}\",\n            suggestion=(f\"Add transitions from '{state}', mark as terminal, \"\n                        \"or use wildcard transition\")\n        ))\n\n    return {\"findings\": findings}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.check_unused_gates", "type": "function", "label": "check_unused_gates", "direction": "inbound", "parent": "linter_compute", "line": 193, "endLine": 231, "signature": "(params) -> Dict[]", "docstring": "Rule L003: Detect gates defined but never referenced in transitions.", "source": "def check_unused_gates(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"\n    Rule L003: Detect gates defined but never referenced in transitions.\n    \"\"\"\n    bp = params.get(\"blueprint\", {})\n    findings = list(params.get(\"findings\", []))\n\n    definedGates = set(bp.get(\"gates\", {}).keys())\n    transitions = bp.get(\"transitions\", [])\n\n    # Collect all gate references from transitions\n    usedGates = set()\n    for t in transitions:\n        # Handle both 'gate' (singular) and 'gates' (array) fields\n        gate = t.get(\"gate\")\n        if gate:\n            usedGates.add(gate)\n        gates = t.get(\"gates\", [])\n        for g in gates:\n            usedGates.add(g)\n\n    # Also check display rules for gate usage\n    display = bp.get(\"display\", {})\n    for rule in display.get(\"rules\", []):\n        gate = rule.get(\"gate\")\n        if gate:\n            usedGates.add(gate)\n\n    unused = definedGates - usedGates\n    for gate in sorted(unused):\n        findings.append(make_finding(\n            code=RuleCode.UNUSED_GATE,\n            severity=Severity.INFO,\n            message=f\"Gate '{gate}' is defined but never used\",\n            location=f\"gates.{gate}\",\n            suggestion=f\"Use gate '{gate}' in a transition or remove it\"\n        ))\n\n    return {\"findings\": findings}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.check_unused_actions", "type": "function", "label": "check_unused_actions", "direction": "inbound", "parent": "linter_compute", "line": 234, "endLine": 261, "signature": "(params) -> Dict[]", "docstring": "Rule L004: Detect actions defined but never referenced in transitions.", "source": "def check_unused_actions(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"\n    Rule L004: Detect actions defined but never referenced in transitions.\n    \"\"\"\n    bp = params.get(\"blueprint\", {})\n    findings = list(params.get(\"findings\", []))\n\n    definedActions = set(bp.get(\"actions\", {}).keys())\n    transitions = bp.get(\"transitions\", [])\n\n    # Collect all action references from transitions\n    usedActions = set()\n    for t in transitions:\n        actions = t.get(\"actions\", [])\n        for a in actions:\n            usedActions.add(a)\n\n    unused = definedActions - usedActions\n    for action in sorted(unused):\n        findings.append(make_finding(\n            code=RuleCode.UNUSED_ACTION,\n            severity=Severity.INFO,\n            message=f\"Action '{action}' is defined but never used\",\n            location=f\"actions.{action}\",\n            suggestion=f\"Use action '{action}' in a transition or remove it\"\n        ))\n\n    return {\"findings\": findings}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.check_unused_context", "type": "function", "label": "check_unused_context", "direction": "inbound", "parent": "linter_compute", "line": 264, "endLine": 332, "signature": "(params) -> Dict[]", "docstring": "Rule L005: Detect context properties never used in gates/actions.", "source": "def check_unused_context(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"\n    Rule L005: Detect context properties never used in gates/actions.\n    \"\"\"\n    bp = params.get(\"blueprint\", {})\n    findings = list(params.get(\"findings\", []))\n\n    ctxSchema = bp.get(\"context_schema\", {})\n    props = set(ctxSchema.get(\"properties\", {}).keys())\n\n    if not props:\n        return {\"findings\": findings}\n\n    # Collect all property references from gates and actions\n    usedProps = set()\n\n    # Check gate expressions\n    for gateId, gate in bp.get(\"gates\", {}).items():\n        expr = gate.get(\"expression\", \"\")\n        for prop in props:\n            if prop in expr:\n                usedProps.add(prop)\n\n    # Check action input_map, output_map, target, value_from\n    for actId, action in bp.get(\"actions\", {}).items():\n        # Check target\n        target = action.get(\"target\")\n        if target in props:\n            usedProps.add(target)\n\n        # Check value_from\n        valueFrom = action.get(\"value_from\", \"\")\n        for prop in props:\n            if prop in valueFrom:\n                usedProps.add(prop)\n\n        # Check input_map values\n        inputMap = action.get(\"input_map\", {})\n        for v in inputMap.values():\n            if isinstance(v, str):\n                for prop in props:\n                    if prop in v:\n                        usedProps.add(prop)\n\n        # Check output_map keys\n        outputMap = action.get(\"output_map\", {})\n        for k in outputMap.keys():\n            if k in props:\n                usedProps.add(k)\n\n    # Check display rules\n    display = bp.get(\"display\", {})\n    for rule in display.get(\"rules\", []):\n        template = rule.get(\"template\", \"\")\n        for prop in props:\n            if \"{\" + prop + \"}\" in template or \"{\" + prop + \".\" in template:\n                usedProps.add(prop)\n\n    unused = props - usedProps\n    for prop in sorted(unused):\n        findings.append(make_finding(\n            code=RuleCode.UNUSED_CONTEXT,\n            severity=Severity.INFO,\n            message=f\"Context property '{prop}' is defined but never used\",\n            location=f\"context_schema.properties.{prop}\",\n            suggestion=f\"Use property '{prop}' in gates/actions or remove it\"\n        ))\n\n    return {\"findings\": findings}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.check_orphaned_transitions", "type": "function", "label": "check_orphaned_transitions", "direction": "inbound", "parent": "linter_compute", "line": 335, "endLine": 372, "signature": "(params) -> Dict[]", "docstring": "Rule L006: Detect transitions referencing non-existent states.", "source": "def check_orphaned_transitions(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"\n    Rule L006: Detect transitions referencing non-existent states.\n    \"\"\"\n    bp = params.get(\"blueprint\", {})\n    findings = list(params.get(\"findings\", []))\n\n    states = set(bp.get(\"states\", {}).keys())\n    transitions = bp.get(\"transitions\", [])\n\n    for i, t in enumerate(transitions):\n        tid = t.get(\"id\", f\"transitions[{i}]\")\n        fromState = t.get(\"from\")\n        toState = t.get(\"to\")\n\n        # Check from state (skip wildcard)\n        if fromState and fromState != \"*\" and fromState not in states:\n            findings.append(make_finding(\n                code=RuleCode.ORPHANED_TRANSITION,\n                severity=Severity.ERROR,\n                message=f\"Transition '{tid}' references non-existent \"\n                        f\"from state '{fromState}'\",\n                location=f\"transitions.{tid}.from\",\n                suggestion=f\"Create state '{fromState}' or fix the reference\"\n            ))\n\n        # Check to state (skip wildcard)\n        if toState and toState != \"*\" and toState not in states:\n            findings.append(make_finding(\n                code=RuleCode.ORPHANED_TRANSITION,\n                severity=Severity.ERROR,\n                message=f\"Transition '{tid}' references non-existent \"\n                        f\"to state '{toState}'\",\n                location=f\"transitions.{tid}.to\",\n                suggestion=f\"Create state '{toState}' or fix the reference\"\n            ))\n\n    return {\"findings\": findings}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.check_missing_gate_refs", "type": "function", "label": "check_missing_gate_refs", "direction": "inbound", "parent": "linter_compute", "line": 375, "endLine": 412, "signature": "(params) -> Dict[]", "docstring": "Rule L007: Detect transitions referencing non-existent gates.", "source": "def check_missing_gate_refs(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"\n    Rule L007: Detect transitions referencing non-existent gates.\n    \"\"\"\n    bp = params.get(\"blueprint\", {})\n    findings = list(params.get(\"findings\", []))\n\n    definedGates = set(bp.get(\"gates\", {}).keys())\n    transitions = bp.get(\"transitions\", [])\n\n    for i, t in enumerate(transitions):\n        tid = t.get(\"id\", f\"transitions[{i}]\")\n\n        # Handle both 'gate' and 'gates'\n        gate = t.get(\"gate\")\n        if gate and gate not in definedGates:\n            findings.append(make_finding(\n                code=RuleCode.MISSING_GATE_REF,\n                severity=Severity.ERROR,\n                message=f\"Transition '{tid}' references non-existent \"\n                        f\"gate '{gate}'\",\n                location=f\"transitions.{tid}.gate\",\n                suggestion=f\"Create gate '{gate}' or fix the reference\"\n            ))\n\n        gates = t.get(\"gates\", [])\n        for g in gates:\n            if g not in definedGates:\n                findings.append(make_finding(\n                    code=RuleCode.MISSING_GATE_REF,\n                    severity=Severity.ERROR,\n                    message=f\"Transition '{tid}' references non-existent \"\n                            f\"gate '{g}'\",\n                    location=f\"transitions.{tid}.gates\",\n                    suggestion=f\"Create gate '{g}' or fix the reference\"\n                ))\n\n    return {\"findings\": findings}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.check_missing_action_refs", "type": "function", "label": "check_missing_action_refs", "direction": "inbound", "parent": "linter_compute", "line": 415, "endLine": 440, "signature": "(params) -> Dict[]", "docstring": "Rule L008: Detect transitions referencing non-existent actions.", "source": "def check_missing_action_refs(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"\n    Rule L008: Detect transitions referencing non-existent actions.\n    \"\"\"\n    bp = params.get(\"blueprint\", {})\n    findings = list(params.get(\"findings\", []))\n\n    definedActions = set(bp.get(\"actions\", {}).keys())\n    transitions = bp.get(\"transitions\", [])\n\n    for i, t in enumerate(transitions):\n        tid = t.get(\"id\", f\"transitions[{i}]\")\n        actions = t.get(\"actions\", [])\n\n        for a in actions:\n            if a not in definedActions:\n                findings.append(make_finding(\n                    code=RuleCode.MISSING_ACTION_REF,\n                    severity=Severity.ERROR,\n                    message=f\"Transition '{tid}' references non-existent \"\n                            f\"action '{a}'\",\n                    location=f\"transitions.{tid}.actions\",\n                    suggestion=f\"Create action '{a}' or fix the reference\"\n                ))\n\n    return {\"findings\": findings}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.check_duplicate_ids", "type": "function", "label": "check_duplicate_ids", "direction": "inbound", "parent": "linter_compute", "line": 443, "endLine": 468, "signature": "(params) -> Dict[]", "docstring": "Rule L009: Detect duplicate transition IDs.", "source": "def check_duplicate_ids(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"\n    Rule L009: Detect duplicate transition IDs.\n    \"\"\"\n    bp = params.get(\"blueprint\", {})\n    findings = list(params.get(\"findings\", []))\n\n    transitions = bp.get(\"transitions\", [])\n    seenIds: Dict[str, int] = {}\n\n    for i, t in enumerate(transitions):\n        tid = t.get(\"id\")\n        if tid:\n            if tid in seenIds:\n                findings.append(make_finding(\n                    code=RuleCode.DUPLICATE_TRANSITION_ID,\n                    severity=Severity.ERROR,\n                    message=f\"Duplicate transition ID '{tid}' \"\n                            f\"(first at index {seenIds[tid]}, again at {i})\",\n                    location=f\"transitions[{i}]\",\n                    suggestion=f\"Rename one of the transitions with ID '{tid}'\"\n                ))\n            else:\n                seenIds[tid] = i\n\n    return {\"findings\": findings}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.check_naming_conventions", "type": "function", "label": "check_naming_conventions", "direction": "inbound", "parent": "linter_compute", "line": 471, "endLine": 543, "signature": "(params) -> Dict[]", "docstring": "Rule L010: Check naming conventions.\n- IDs should be snake_case\n- Events should be UPPER_CASE", "source": "def check_naming_conventions(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"\n    Rule L010: Check naming conventions.\n    - IDs should be snake_case\n    - Events should be UPPER_CASE\n    \"\"\"\n    bp = params.get(\"blueprint\", {})\n    findings = list(params.get(\"findings\", []))\n\n    snakeCasePattern = re.compile(r'^[a-z][a-z0-9_]*$')\n    upperCasePattern = re.compile(r'^[A-Z][A-Z0-9_]*$')\n\n    # Check state IDs\n    for stateId in bp.get(\"states\", {}).keys():\n        if not snakeCasePattern.match(stateId):\n            findings.append(make_finding(\n                code=RuleCode.NAMING_CONVENTION,\n                severity=Severity.INFO,\n                message=f\"State ID '{stateId}' should be snake_case\",\n                location=f\"states.{stateId}\",\n                suggestion=f\"Rename to '{stateId.lower().replace('-', '_')}'\"\n            ))\n\n    # Check gate IDs\n    for gateId in bp.get(\"gates\", {}).keys():\n        if not snakeCasePattern.match(gateId):\n            findings.append(make_finding(\n                code=RuleCode.NAMING_CONVENTION,\n                severity=Severity.INFO,\n                message=f\"Gate ID '{gateId}' should be snake_case\",\n                location=f\"gates.{gateId}\",\n                suggestion=f\"Rename to '{gateId.lower().replace('-', '_')}'\"\n            ))\n\n    # Check action IDs\n    for actionId in bp.get(\"actions\", {}).keys():\n        if not snakeCasePattern.match(actionId):\n            findings.append(make_finding(\n                code=RuleCode.NAMING_CONVENTION,\n                severity=Severity.INFO,\n                message=f\"Action ID '{actionId}' should be snake_case\",\n                location=f\"actions.{actionId}\",\n                suggestion=f\"Rename to '{actionId.lower().replace('-', '_')}'\"\n            ))\n\n    # Check transition IDs\n    for i, t in enumerate(bp.get(\"transitions\", [])):\n        tid = t.get(\"id\")\n        if tid and not snakeCasePattern.match(tid):\n            findings.append(make_finding(\n                code=RuleCode.NAMING_CONVENTION,\n                severity=Severity.INFO,\n                message=f\"Transition ID '{tid}' should be snake_case\",\n                location=f\"transitions.{tid}\",\n                suggestion=f\"Rename to '{tid.lower().replace('-', '_')}'\"\n            ))\n\n    # Check event names\n    seenEvents = set()\n    for t in bp.get(\"transitions\", []):\n        event = t.get(\"on_event\")\n        if event and event not in seenEvents:\n            seenEvents.add(event)\n            if not upperCasePattern.match(event):\n                findings.append(make_finding(\n                    code=RuleCode.NAMING_CONVENTION,\n                    severity=Severity.INFO,\n                    message=f\"Event '{event}' should be UPPER_CASE\",\n                    location=f\"on_event: {event}\",\n                    suggestion=f\"Rename to '{event.upper().replace('-', '_')}'\"\n                ))\n\n    return {\"findings\": findings}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.compute_metrics", "type": "function", "label": "compute_metrics", "direction": "inbound", "parent": "linter_compute", "line": 550, "endLine": 584, "signature": "(params) -> Dict[]", "docstring": "Compute complexity metrics for the blueprint.", "source": "def compute_metrics(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Compute complexity metrics for the blueprint.\"\"\"\n    bp = params.get(\"blueprint\", {})\n\n    states = bp.get(\"states\", {})\n    transitions = bp.get(\"transitions\", [])\n    gates = bp.get(\"gates\", {})\n    actions = bp.get(\"actions\", {})\n    ctxSchema = bp.get(\"context_schema\", {})\n    props = ctxSchema.get(\"properties\", {})\n\n    # Count unique events\n    events = set()\n    for t in transitions:\n        event = t.get(\"on_event\")\n        if event:\n            events.add(event)\n\n    # Cyclomatic complexity: E - N + 2P\n    # E = edges (transitions), N = nodes (states), P = connected components (1)\n    numStates = len(states)\n    numTransitions = len(transitions)\n    cyclomaticComplexity = numTransitions - numStates + 2\n\n    metrics = {\n        \"state_count\": numStates,\n        \"transition_count\": numTransitions,\n        \"gate_count\": len(gates),\n        \"action_count\": len(actions),\n        \"event_count\": len(events),\n        \"context_property_count\": len(props),\n        \"cyclomatic_complexity\": max(1, cyclomaticComplexity)\n    }\n\n    return {\"metrics\": metrics}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.compute_summary", "type": "function", "label": "compute_summary", "direction": "inbound", "parent": "linter_compute", "line": 587, "endLine": 597, "signature": "(params) -> Dict[]", "docstring": "Compute summary counts by severity.", "source": "def compute_summary(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Compute summary counts by severity.\"\"\"\n    findings = params.get(\"findings\", [])\n\n    summary = {\"error\": 0, \"warning\": 0, \"info\": 0}\n    for f in findings:\n        sev = f.get(\"severity\", \"info\")\n        if sev in summary:\n            summary[sev] += 1\n\n    return {\"summary\": summary}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "linter_compute.generate_report", "type": "function", "label": "generate_report", "direction": "inbound", "parent": "linter_compute", "line": 604, "endLine": 680, "signature": "(params) -> Dict[]", "docstring": "Generate a formatted lint report.", "source": "def generate_report(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Generate a formatted lint report.\"\"\"\n    bp = params.get(\"blueprint\", {})\n    bpPath = params.get(\"blueprint_path\", \"unknown\")\n    findings = params.get(\"findings\", [])\n    summary = params.get(\"summary\", {})\n    metrics = params.get(\"metrics\", {})\n\n    lines = []\n    lines.append(\"=\" * 70)\n    lines.append(f\"  L++ Blueprint Linter Report\")\n    lines.append(\"=\" * 70)\n    lines.append(\"\")\n    lines.append(f\"  Blueprint: {bp.get('name', 'Unknown')} (v{bp.get('version', '?')})\")\n    lines.append(f\"  ID: {bp.get('id', 'unknown')}\")\n    lines.append(f\"  Path: {bpPath}\")\n    lines.append(\"\")\n\n    # Summary\n    lines.append(\"-\" * 70)\n    lines.append(\"  SUMMARY\")\n    lines.append(\"-\" * 70)\n    errCount = summary.get(\"error\", 0)\n    warnCount = summary.get(\"warning\", 0)\n    infoCount = summary.get(\"info\", 0)\n    total = errCount + warnCount + infoCount\n\n    if total == 0:\n        lines.append(\"  No issues found. Blueprint is clean!\")\n    else:\n        lines.append(f\"  Errors:   {errCount}\")\n        lines.append(f\"  Warnings: {warnCount}\")\n        lines.append(f\"  Info:     {infoCount}\")\n        lines.append(f\"  Total:    {total}\")\n    lines.append(\"\")\n\n    # Metrics\n    lines.append(\"-\" * 70)\n    lines.append(\"  METRICS\")\n    lines.append(\"-\" * 70)\n    lines.append(f\"  States:      {metrics.get('state_count', 0)}\")\n    lines.append(f\"  Transitions: {metrics.get('transition_count', 0)}\")\n    lines.append(f\"  Gates:       {metrics.get('gate_count', 0)}\")\n    lines.append(f\"  Actions:     {metrics.get('action_count', 0)}\")\n    lines.append(f\"  Events:      {metrics.get('event_count', 0)}\")\n    lines.append(f\"  Context Props: {metrics.get('context_property_count', 0)}\")\n    lines.append(f\"  Cyclomatic Complexity: {metrics.get('cyclomatic_complexity', 1)}\")\n    lines.append(\"\")\n\n    # Findings\n    if findings:\n        lines.append(\"-\" * 70)\n        lines.append(\"  FINDINGS\")\n        lines.append(\"-\" * 70)\n\n        # Group by severity\n        for severity in [Severity.ERROR, Severity.WARNING, Severity.INFO]:\n            sevFindings = [f for f in findings if f.get(\"severity\") == severity]\n            if sevFindings:\n                icon = {\"error\": \"[E]\", \"warning\": \"[W]\", \"info\": \"[I]\"}\n                lines.append(\"\")\n                lines.append(f\"  {severity.upper()}S ({len(sevFindings)})\")\n                for f in sevFindings:\n                    code = f.get(\"code\", \"?\")\n                    msg = f.get(\"message\", \"\")\n                    loc = f.get(\"location\", \"\")\n                    sug = f.get(\"suggestion\", \"\")\n                    lines.append(f\"    {icon[severity]} {code}: {msg}\")\n                    if loc:\n                        lines.append(f\"       Location: {loc}\")\n                    if sug:\n                        lines.append(f\"       Suggestion: {sug}\")\n                    lines.append(\"\")\n\n    lines.append(\"=\" * 70)\n\n    return {\"report\": \"\\n\".join(lines)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "json", "type": "dependency", "label": "json", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "re", "type": "dependency", "label": "re", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "pathlib", "type": "dependency", "label": "pathlib", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}, {"id": "typing", "type": "dependency", "label": "typing", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "linter_compute"}];
+const edges = [{"from": "linter_compute.check_unreachable_states", "to": "linter_compute.make_finding", "type": "internal", "line": 139}, {"from": "linter_compute.check_dead_end_states", "to": "linter_compute.make_finding", "type": "internal", "line": 181}, {"from": "linter_compute.check_unused_gates", "to": "linter_compute.make_finding", "type": "internal", "line": 223}, {"from": "linter_compute.check_unused_actions", "to": "linter_compute.make_finding", "type": "internal", "line": 253}, {"from": "linter_compute.check_unused_context", "to": "linter_compute.make_finding", "type": "internal", "line": 324}, {"from": "linter_compute.check_orphaned_transitions", "to": "linter_compute.make_finding", "type": "internal", "line": 352}, {"from": "linter_compute.check_orphaned_transitions", "to": "linter_compute.make_finding", "type": "internal", "line": 363}, {"from": "linter_compute.check_missing_gate_refs", "to": "linter_compute.make_finding", "type": "internal", "line": 391}, {"from": "linter_compute.check_missing_gate_refs", "to": "linter_compute.make_finding", "type": "internal", "line": 403}, {"from": "linter_compute.check_missing_action_refs", "to": "linter_compute.make_finding", "type": "internal", "line": 431}, {"from": "linter_compute.check_duplicate_ids", "to": "linter_compute.make_finding", "type": "internal", "line": 457}, {"from": "linter_compute.check_naming_conventions", "to": "linter_compute.make_finding", "type": "internal", "line": 486}, {"from": "linter_compute.check_naming_conventions", "to": "linter_compute.make_finding", "type": "internal", "line": 497}, {"from": "linter_compute.check_naming_conventions", "to": "linter_compute.make_finding", "type": "internal", "line": 508}, {"from": "linter_compute.check_naming_conventions", "to": "linter_compute.make_finding", "type": "internal", "line": 520}, {"from": "linter_compute.check_naming_conventions", "to": "linter_compute.make_finding", "type": "internal", "line": 535}, {"from": "linter_compute.load_blueprint", "to": "pathlib", "type": "external", "category": "stdlib", "line": 68}, {"from": "linter_compute.load_blueprint", "to": "json", "type": "external", "category": "stdlib", "line": 74}, {"from": "linter_compute.check_naming_conventions", "to": "re", "type": "external", "category": "stdlib", "line": 480}, {"from": "linter_compute.check_naming_conventions", "to": "re", "type": "external", "category": "stdlib", "line": 481}];
+const moduleColors = {"linter_compute": "#00d4ff"};
+
+// Edge type visibility
+const edgeVisibility = { internal: true, external: true, local: true };
+let currentLayout = 'force';
+
+// Create node lookup
+const nodeById = {};
+nodes.forEach(n => nodeById[n.id] = n);
+
+// Setup SVG
+const container = document.getElementById('graph');
+const width = container.clientWidth;
+const height = container.clientHeight || 600;
+
+const svg = d3.select("svg").attr("viewBox", [0, 0, width, height]);
+const g = svg.append("g");
+
+// Zoom behavior
+const zoom = d3.zoom()
+    .scaleExtent([0.1, 4])
+    .filter(e => !e.target.closest('.node'))
+    .on("zoom", e => g.attr("transform", e.transform));
+svg.call(zoom);
+
+// Arrow markers
+const defs = svg.append("defs");
+["internal", "external", "local"].forEach(type => {
+    const color = type === "internal" ? "#4ecdc4" : type === "external" ? "#f39c12" : "#9b59b6";
+    defs.append("marker")
+        .attr("id", `arrow-${type}`)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 20)
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-4L10,0L0,4")
+        .attr("fill", color);
+});
+
+// Build module legend
+const legendDiv = document.getElementById('module-legend');
+Object.entries(moduleColors).forEach(([mod, color]) => {
+    const item = document.createElement('div');
+    item.className = 'module-item';
+    item.innerHTML = `<div class="module-dot" style="background:${color}"></div><span class="module-name">${mod}</span>`;
+    item.onclick = () => highlightModule(mod);
+    legendDiv.appendChild(item);
+});
+
+// Process edges - resolve node references
+const processedEdges = edges.map(e => ({
+    ...e,
+    source: nodeById[e.from] || { id: e.from, x: 0, y: 0 },
+    target: nodeById[e.to] || { id: e.to, x: 0, y: 0 }
+})).filter(e => e.source && e.target);
+
+// Force simulation
+const simulation = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(processedEdges).id(d => d.id).distance(80).strength(0.5))
+    .force("charge", d3.forceManyBody().strength(-300))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force("collision", d3.forceCollide().radius(40));
+
+// Draw edges
+const edge = g.append("g").selectAll("path")
+    .data(processedEdges)
+    .join("path")
+    .attr("class", d => `edge edge-${d.type || 'internal'}`)
+    .attr("marker-end", d => `url(#arrow-${d.type || 'internal'})`);
+
+// Node size based on type
+function nodeSize(d) {
+    if (d.type === 'module') return { w: 120, h: 40 };
+    if (d.type === 'function' || d.type === 'async_function') return { w: 100, h: 30 };
+    if (d.type === 'class') return { w: 110, h: 35 };
+    return { w: 80, h: 25 };  // dependency
+}
+
+// Draw nodes
+const node = g.append("g").selectAll("g")
+    .data(nodes)
+    .join("g")
+    .attr("class", "node")
+    .call(d3.drag()
+        .on("start", dragStart)
+        .on("drag", dragging)
+        .on("end", dragEnd));
+
+node.append("rect")
+    .attr("class", d => `node-${d.type === 'dependency' ? 'dependency' : d.type === 'module' ? 'module' : 'function'}`)
+    .attr("width", d => nodeSize(d).w)
+    .attr("height", d => nodeSize(d).h)
+    .attr("x", d => -nodeSize(d).w / 2)
+    .attr("y", d => -nodeSize(d).h / 2)
+    .attr("rx", 6)
+    .attr("stroke", d => d.moduleColor || "#666");
+
+node.append("text")
+    .attr("class", "node-label")
+    .attr("text-anchor", "middle")
+    .attr("dy", d => d.signature ? -3 : 4)
+    .text(d => d.label || d.id);
+
+node.filter(d => d.signature).append("text")
+    .attr("class", "node-sublabel")
+    .attr("text-anchor", "middle")
+    .attr("dy", 10)
+    .text(d => d.signature.length > 20 ? d.signature.slice(0, 18) + ".." : d.signature);
+
+// Tooltip
+const tooltip = d3.select("#tooltip");
+node.on("mouseover", (e, d) => {
+    let html = `<b>${d.label || d.id}</b>`;
+    if (d.type) html += `<br><span style="color:#888">${d.type}</span>`;
+    if (d.signature) html += `<br><code>${d.signature}</code>`;
+    if (d.direction) html += `<br>Direction: ${d.direction}`;
+    tooltip.style("display", "block").html(html);
+})
+.on("mousemove", e => {
+    tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 10) + "px");
+})
+.on("mouseout", () => tooltip.style("display", "none"));
+
+// Click to select
+node.on("click", (e, d) => {
+    e.stopPropagation();
+    selectNode(d);
+});
+
+svg.on("click", () => clearSelection());
+
+// Update positions
+simulation.on("tick", () => {
+    edge.attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
+});
+
+// Drag functions
+function dragStart(e, d) {
+    if (!e.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+}
+function dragging(e, d) {
+    d.fx = e.x;
+    d.fy = e.y;
+}
+function dragEnd(e, d) {
+    if (!e.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+}
+
+// Selection functions
+let selectedNode = null;
+
+function selectNode(d) {
+    selectedNode = d;
+    
+    // Highlight node
+    node.classed("dim", n => n.id !== d.id && !isConnected(d, n));
+    node.select("rect").attr("stroke-width", n => n.id === d.id ? 4 : 2);
+    
+    // Highlight edges
+    edge.classed("dim", e => e.source.id !== d.id && e.target.id !== d.id);
+    edge.classed("highlight", e => e.source.id === d.id || e.target.id === d.id);
+    
+    // Update info panel
+    updateNodeInfo(d);
+    updateEdgeList(d);
+}
+
+function clearSelection() {
+    selectedNode = null;
+    node.classed("dim", false);
+    node.select("rect").attr("stroke-width", 2);
+    edge.classed("dim", false).classed("highlight", false);
+    document.getElementById('node-info').innerHTML = 'Click a node to see details';
+    document.getElementById('edge-list').innerHTML = '';
+}
+
+function isConnected(a, b) {
+    return processedEdges.some(e => 
+        (e.source.id === a.id && e.target.id === b.id) ||
+        (e.source.id === b.id && e.target.id === a.id)
+    );
+}
+
+function updateNodeInfo(d) {
+    let html = `<div class="metric"><span class="info-label">ID:</span><span class="info-value">${d.id}</span></div>`;
+    html += `<div class="metric"><span class="info-label">Type:</span><span class="info-value">${d.type}</span></div>`;
+    if (d.moduleName) html += `<div class="metric"><span class="info-label">Module:</span><span class="info-value">${d.moduleName}</span></div>`;
+    if (d.line) html += `<div class="metric"><span class="info-label">Line:</span><span class="info-value">${d.line}${d.endLine ? '-' + d.endLine : ''}</span></div>`;
+    if (d.signature) html += `<div class="metric"><span class="info-label">Signature:</span><span class="info-value" style="font-family:monospace">${d.signature}</span></div>`;
+    if (d.direction) html += `<div class="metric"><span class="info-label">Direction:</span><span class="info-value">${d.direction}</span></div>`;
+    if (d.category) html += `<div class="metric"><span class="info-label">Category:</span><span class="info-value">${d.category}</span></div>`;
+
+    if (d.metrics) {
+        html += `<div style="margin-top:10px"><b>Coupling Metrics</b></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-In:</span><span class="info-value">${d.metrics.fanIn}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-Out:</span><span class="info-value">${d.metrics.fanOut}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Instability:</span><span class="info-value">${(d.metrics.instability * 100).toFixed(1)}%</span></div>`;
+        html += `<div class="metric-bar"><div class="metric-fill" style="width:${d.metrics.instability * 100}%;background:${d.metrics.instability > 0.5 ? '#ff6b6b' : '#4ecdc4'}"></div></div>`;
+        html += `<div class="metric"><span class="info-label">Internal Edges:</span><span class="info-value">${d.metrics.internalEdges}</span></div>`;
+    }
+
+    document.getElementById('node-info').innerHTML = html;
+
+    // Update source code panel
+    updateSourcePanel(d);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function updateSourcePanel(d) {
+    const panel = document.getElementById('source-content');
+
+    if (d.source) {
+        let sourceHtml = '';
+        if (d.docstring) {
+            sourceHtml += `<div class="docstring" style="margin-bottom:8px;padding:5px;background:#1a1a2a;border-radius:3px">${escapeHtml(d.docstring)}</div>`;
+        }
+        sourceHtml += `<div class="source-code">${escapeHtml(d.source)}</div>`;
+        panel.innerHTML = sourceHtml;
+    } else if (d.type === 'module') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">Module: ${d.label}<br>Click a function to view its source code.</div>`;
+    } else if (d.type === 'dependency') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">External dependency: ${d.label}<br>Category: ${d.category || 'unknown'}</div>`;
+    } else {
+        panel.innerHTML = `<div style="color:#666;font-size:11px">No source available for this node</div>`;
+    }
+}
+
+function updateEdgeList(d) {
+    const outgoing = processedEdges.filter(e => e.source.id === d.id);
+    const incoming = processedEdges.filter(e => e.target.id === d.id);
+    
+    let html = '';
+    if (outgoing.length) {
+        html += '<div style="color:#4ecdc4;font-weight:bold;margin-bottom:5px">Outgoing →</div>';
+        outgoing.forEach(e => {
+            html += `<div class="edge-item">→ <span class="to">${e.target.id || e.to}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (incoming.length) {
+        html += '<div style="color:#f39c12;font-weight:bold;margin:10px 0 5px 0">← Incoming</div>';
+        incoming.forEach(e => {
+            html += `<div class="edge-item">← <span class="from">${e.source.id || e.from}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (!outgoing.length && !incoming.length) {
+        html = '<div style="color:#666">No connections</div>';
+    }
+    
+    document.getElementById('edge-list').innerHTML = html;
+}
+
+function highlightModule(modName) {
+    node.classed("dim", n => n.moduleName !== modName && n.type !== 'dependency');
+    edge.classed("dim", e => {
+        const srcMod = nodeById[e.source.id]?.moduleName;
+        const tgtMod = nodeById[e.target.id]?.moduleName;
+        return srcMod !== modName && tgtMod !== modName;
+    });
+}
+
+// Layout functions
+function toggleLayout(layout) {
+    currentLayout = layout;
+    document.querySelectorAll('.controls button').forEach(b => {
+        if (b.id.startsWith('btn-') && ['force', 'horizontal', 'vertical'].includes(b.id.replace('btn-', ''))) {
+            b.classList.toggle('active', b.id === `btn-${layout}`);
+        }
+    });
+    
+    if (layout === 'force') {
+        simulation.alpha(1).restart();
+    } else {
+        simulation.stop();
+        layoutNodes(layout);
+    }
+}
+
+function layoutNodes(layout) {
+    const modules = [...new Set(nodes.filter(n => n.type === 'module').map(n => n.id))];
+    const padding = 50;
+    
+    if (layout === 'horizontal') {
+        // Group by module, spread horizontally
+        modules.forEach((mod, mi) => {
+            const modNodes = nodes.filter(n => n.moduleName === mod || n.id === mod);
+            const x = padding + mi * (width - padding * 2) / Math.max(modules.length - 1, 1);
+            modNodes.forEach((n, ni) => {
+                n.x = x;
+                n.y = padding + ni * 50;
+            });
+        });
+        // Dependencies on the right
+        const deps = nodes.filter(n => n.type === 'dependency');
+        deps.forEach((n, i) => {
+            n.x = width - padding;
+            n.y = padding + i * 40;
+        });
+    } else if (layout === 'vertical') {
+        // Modules at top, functions below, dependencies at bottom
+        const modNodes = nodes.filter(n => n.type === 'module');
+        const funcNodes = nodes.filter(n => n.type === 'function' || n.type === 'async_function' || n.type === 'class');
+        const depNodes = nodes.filter(n => n.type === 'dependency');
+        
+        modNodes.forEach((n, i) => {
+            n.x = padding + i * 150;
+            n.y = padding;
+        });
+        funcNodes.forEach((n, i) => {
+            n.x = padding + (i % 6) * 130;
+            n.y = 120 + Math.floor(i / 6) * 60;
+        });
+        depNodes.forEach((n, i) => {
+            n.x = padding + (i % 8) * 100;
+            n.y = height - padding - 50;
+        });
+    }
+    
+    // Update positions
+    node.transition().duration(500).attr("transform", d => `translate(${d.x},${d.y})`);
+    edge.transition().duration(500).attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+}
+
+// Edge type toggle
+function toggleEdgeType(type) {
+    edgeVisibility[type] = !edgeVisibility[type];
+    document.getElementById(`btn-${type}`).classList.toggle('active', edgeVisibility[type]);
+    edge.style("display", d => edgeVisibility[d.type || 'internal'] ? null : "none");
+}
+
+// View controls
+function resetView() {
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+}
+
+function fitToView() {
+    const bounds = g.node().getBBox();
+    const scale = Math.min(width / bounds.width, height / bounds.height) * 0.9;
+    const tx = (width - bounds.width * scale) / 2 - bounds.x * scale;
+    const ty = (height - bounds.height * scale) / 2 - bounds.y * scale;
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
+// Initial fit
+setTimeout(fitToView, 1000);
+</script>
+</body>
+</html>

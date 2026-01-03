@@ -80,18 +80,21 @@ def process(params: dict) -> dict:
         is_entry = state_id == entry_state
         is_terminal = state_id in terminal_states
         layer = layers.get(state_id, 5)  # Default middle layer
+        # Include full state definition for click-to-view
+        state_def = state_info if isinstance(state_info, dict) else {"value": state_info}
         nodes.append({
-            "id": state_id, 
+            "id": state_id,
             "label": state_id,
             "description": desc,
             "type": "state",
             "isEntry": is_entry,
             "isTerminal": is_terminal,
-            "layer": layer
+            "layer": layer,
+            "definition": state_def
         })
-    
-    # Build the HTML
-    html_content = _build_html(skill_name, nodes, links)
+
+    # Build the HTML with gates for click-to-view
+    html_content = _build_html(skill_name, nodes, links, gates_dict)
     
     try:
         with open(html_path, "w", encoding="utf-8") as f:
@@ -138,10 +141,11 @@ def _calculate_layers(entry_state: str, adjacency: dict, all_states: set, termin
     return layers
 
 
-def _build_html(title: str, nodes: list, links: list) -> str:
+def _build_html(title: str, nodes: list, links: list, gates: dict = None) -> str:
     """Build the interactive D3.js HTML visualization with hierarchical layout."""
     nodes_json = json.dumps(nodes)
     links_json = json.dumps(links)
+    gates_json = json.dumps(gates or {})
 
     return f'''<!DOCTYPE html>
 <html>
@@ -184,6 +188,9 @@ h3, h4 {{ margin: 10px 0 5px 0; color: #00d4ff; }}
 #details {{ font-size: 12px; line-height: 1.5; }}
 #flow-list {{ font-size: 11px; max-height: 300px; overflow-y: auto; }}
 #flow-list div {{ padding: 3px 0; border-bottom: 1px solid #333; }}
+#definition-panel {{ font-size: 11px; margin-top: 10px; }}
+.definition-code {{ background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 8px; font-family: 'Consolas', monospace; white-space: pre-wrap; max-height: 200px; overflow-y: auto; color: #b8b8b8; }}
+.def-label {{ color: #888; font-size: 10px; margin-bottom: 3px; }}
 </style>
 </head>
 <body>
@@ -214,6 +221,8 @@ h3, h4 {{ margin: 10px 0 5px 0; color: #00d4ff; }}
   <div id="info">
     <h3>Selected Node</h3>
     <div id="details">Click a node to see details</div>
+    <h4>Definition</h4>
+    <div id="definition-panel">Click a state to view its definition</div>
     <h4>Transitions</h4>
     <div id="flow-list"></div>
     <div class="legend">
@@ -238,6 +247,7 @@ h3, h4 {{ margin: 10px 0 5px 0; color: #00d4ff; }}
 <script>
 const nodes = {nodes_json};
 const links = {links_json};
+const gates = {gates_json};
 
 // Calculate layout dimensions based on layers
 const layerMap = {{}};
@@ -729,6 +739,9 @@ node.on("click", (e, d) => {{
     info += d.isTerminal ? "<span style='color:#ff6b6b'>⬤ Terminal State</span><br>" : "";
     if (d.description) info += "<br>" + d.description;
     document.getElementById("details").innerHTML = info;
+
+    // Update definition panel
+    updateDefinitionPanel(d);
     
     // Show transitions - categorized by type
     const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
@@ -798,6 +811,50 @@ node.on("click", (e, d) => {{
     }}
     document.getElementById("flow-list").innerHTML = flowHtml;
 }});
+
+function updateDefinitionPanel(d) {{
+    const panel = document.getElementById("definition-panel");
+    let html = "";
+
+    // Show state definition
+    if (d.definition) {{
+        html += "<div class='def-label'>State Definition:</div>";
+        html += "<div class='definition-code'>" + escapeHtml(JSON.stringify(d.definition, null, 2)) + "</div>";
+    }}
+
+    // Find and show gates referenced by outgoing transitions
+    const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
+    const gateRefs = new Set();
+    outLinks.forEach(l => {{
+        if (l.gates) {{
+            l.gates.split(", ").forEach(g => gateRefs.add(g.trim()));
+        }}
+    }});
+
+    if (gateRefs.size > 0) {{
+        html += "<div class='def-label' style='margin-top:10px'>Referenced Gates:</div>";
+        gateRefs.forEach(gateId => {{
+            const gateDef = gates[gateId];
+            if (gateDef) {{
+                html += "<div style='margin:5px 0'><b style='color:#88aaff'>" + gateId + "</b></div>";
+                html += "<div class='definition-code'>" + escapeHtml(JSON.stringify(gateDef, null, 2)) + "</div>";
+            }} else {{
+                html += "<div style='color:#666'>" + gateId + " (no definition)</div>";
+            }}
+        }});
+    }}
+
+    if (!html) {{
+        html = "<div style='color:#666'>No definition available</div>";
+    }}
+
+    panel.innerHTML = html;
+}}
+
+function escapeHtml(str) {{
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}}
 
 function highlightUpstream(nodeId) {{
     const upstreamNodes = new Set([nodeId]);

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Function Graph: test_generator</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #0f0f23; color: #eee; }
+h1 { color: #00d4ff; margin-bottom: 5px; font-size: 24px; }
+.subtitle { color: #888; margin-bottom: 15px; font-size: 14px; }
+#container { display: flex; gap: 20px; height: calc(100vh - 120px); }
+#graph { flex: 1; position: relative; }
+#sidebar { width: 350px; background: #1a1a2e; padding: 15px; border-radius: 8px; overflow-y: auto; }
+svg { background: #16213e; border-radius: 8px; width: 100%; height: 100%; }
+
+/* Node styles */
+.node { cursor: pointer; }
+.node-module { fill: #2a2a4a; stroke-width: 3; }
+.node-function { fill: #3a3a5a; stroke-width: 2; }
+.node-dependency { fill: #1a1a3a; stroke: #666; stroke-width: 1; stroke-dasharray: 4; }
+.node-label { font-size: 11px; fill: #fff; pointer-events: none; font-weight: 500; }
+.node-sublabel { font-size: 9px; fill: #888; pointer-events: none; }
+
+/* Edge styles */
+.edge { fill: none; stroke-opacity: 0.6; }
+.edge-internal { stroke: #4ecdc4; stroke-width: 2; }
+.edge-external { stroke: #f39c12; stroke-width: 1.5; stroke-dasharray: 4; }
+.edge-local { stroke: #9b59b6; stroke-width: 2; }
+.edge-label { font-size: 8px; fill: #666; pointer-events: none; }
+
+/* Highlight styles */
+.highlight { stroke-width: 3 !important; stroke-opacity: 1 !important; }
+.dim { opacity: 0.2; }
+
+/* Controls */
+.controls { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.controls button { background: #3a3a5a; color: #fff; border: 1px solid #555; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.controls button:hover { background: #4a4a6a; }
+.controls button.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
+
+/* Module legend */
+.module-legend { margin-top: 15px; }
+.module-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer; }
+.module-item:hover { background: #2a2a4a; }
+.module-dot { width: 12px; height: 12px; border-radius: 3px; }
+.module-name { font-size: 12px; }
+
+/* Info panel */
+h3 { color: #00d4ff; margin: 15px 0 8px 0; font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+.info-section { font-size: 12px; line-height: 1.6; }
+.info-label { color: #888; }
+.info-value { color: #fff; }
+
+/* Source code panel */
+.source-panel { margin-top: 10px; }
+.source-code { background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 10px; font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; line-height: 1.4; overflow-x: auto; max-height: 300px; overflow-y: auto; white-space: pre; color: #b8b8b8; }
+.source-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.source-toggle { background: #3a3a5a; color: #fff; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; }
+.source-toggle:hover { background: #4a4a6a; }
+.docstring { color: #6a9955; font-style: italic; }
+.metric { display: flex; justify-content: space-between; padding: 3px 0; }
+.metric-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 2px; }
+.metric-fill { height: 100%; border-radius: 2px; }
+
+/* Edge list */
+.edge-list { max-height: 200px; overflow-y: auto; }
+.edge-item { padding: 4px 0; border-bottom: 1px solid #333; font-size: 11px; }
+.edge-item .from { color: #4ecdc4; }
+.edge-item .to { color: #f39c12; }
+.edge-item .type { color: #666; font-size: 10px; }
+
+/* Tooltip */
+#tooltip { position: absolute; background: #1a1a2e; border: 1px solid #00d4ff; padding: 10px; border-radius: 4px; pointer-events: none; display: none; max-width: 300px; z-index: 100; font-size: 11px; }
+</style>
+</head>
+<body>
+<h1>Function Graph: test_generator</h1>
+<div class="subtitle">Stackable function dependency visualization • Drag nodes to rearrange • Click to inspect</div>
+
+<div class="controls">
+  <button onclick="resetView()">Reset View</button>
+  <button onclick="fitToView()">Fit</button>
+  <button onclick="toggleLayout('force')" id="btn-force" class="active">Force</button>
+  <button onclick="toggleLayout('horizontal')" id="btn-horizontal">Horizontal</button>
+  <button onclick="toggleLayout('vertical')" id="btn-vertical">Vertical</button>
+  <span style="margin-left: 10px; color: #666">|</span>
+  <button onclick="toggleEdgeType('internal')" id="btn-internal" class="active">Internal</button>
+  <button onclick="toggleEdgeType('external')" id="btn-external" class="active">External</button>
+  <button onclick="toggleEdgeType('local')" id="btn-local" class="active">Local</button>
+</div>
+
+<div id="container">
+  <div id="graph"><svg></svg></div>
+  <div id="sidebar">
+    <h3>Modules</h3>
+    <div class="module-legend" id="module-legend"></div>
+
+    <h3>Selected Node</h3>
+    <div class="info-section" id="node-info">Click a node to see details</div>
+
+    <h3>Source Code</h3>
+    <div class="source-panel" id="source-panel">
+      <div id="source-content" style="color:#666;font-size:11px">Click a function to view source</div>
+    </div>
+
+    <h3>Connections</h3>
+    <div class="edge-list" id="edge-list"></div>
+  </div>
+</div>
+<div id="tooltip"></div>
+
+<script>
+const nodes = [{"id": "test_compute", "type": "module", "label": "test_compute", "metrics": {"fanIn": 14, "fanOut": 6, "instability": 0.3, "internalEdges": 0, "externalCallCount": 11, "localCallCount": 0, "callsByCategory": {"stdlib": 10, "pip": 1}, "localDependencies": []}, "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "test_compute.load_blueprint", "type": "function", "label": "load_blueprint", "direction": "inbound", "parent": "test_compute", "line": 22, "endLine": 80, "signature": "(params) -> Dict[]", "docstring": "Load an L++ blueprint from a JSON file.", "source": "def load_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Load an L++ blueprint from a JSON file.\"\"\"\n    path = params.get(\"path\")\n    if not path:\n        return {\"blueprint\": None, \"path\": None, \"error\": \"No path provided\"}\n\n    try:\n        path = Path(path)\n        if not path.exists():\n            return {\"blueprint\": None, \"path\": None,\n                    \"error\": f\"File not found: {path}\"}\n\n        with open(path) as f:\n            raw = json.load(f)\n\n        loader = BlueprintLoader(raw)\n        blueprint, loadError = loader.load()\n\n        if loadError:\n            return {\"blueprint\": None, \"path\": None, \"error\": loadError}\n\n        # Convert to dict structure for processing\n        bpData = {\n            \"id\": blueprint.id,\n            \"name\": blueprint.name,\n            \"version\": blueprint.version,\n            \"description\": blueprint.description,\n            \"context_schema\": raw.get(\"context_schema\", {}),\n            \"states\": {\n                sid: {\"description\": s.description}\n                for sid, s in blueprint.states.items()\n            },\n            \"transitions\": [\n                {\n                    \"id\": t.id,\n                    \"from\": t.from_state,\n                    \"to\": t.to_state,\n                    \"on_event\": t.on_event,\n                    \"gates\": list(t.gates),\n                    \"actions\": list(t.actions)\n                }\n                for t in blueprint.transitions\n            ],\n            \"gates\": {\n                gid: {\"type\": \"expression\", \"expression\": g.expression}\n                for gid, g in blueprint.gates.items()\n            },\n            \"actions\": {\n                aid: {\"type\": a.type.value}\n                for aid, a in blueprint.actions.items()\n            },\n            \"entry_state\": blueprint.entry_state,\n            \"terminal_states\": list(blueprint.terminal_states)\n        }\n\n        return {\"blueprint\": bpData, \"path\": str(path), \"error\": None}\n\n    except Exception as e:\n        return {\"blueprint\": None, \"path\": None, \"error\": str(e)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "test_compute.build_graph", "type": "function", "label": "build_graph", "direction": "inbound", "parent": "test_compute", "line": 87, "endLine": 135, "signature": "(params) -> Dict[]", "docstring": "Build adjacency graph from blueprint transitions.", "source": "def build_graph(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Build adjacency graph from blueprint transitions.\"\"\"\n    bp = params.get(\"blueprint\")\n    if not bp:\n        return {\"graph\": None}\n\n    # Build adjacency list: state -> [(event, target, transition_id, gates)]\n    adj = {sid: [] for sid in bp[\"states\"]}\n    wildcardEdges = []\n\n    for t in bp[\"transitions\"]:\n        fromState = t[\"from\"]\n        toState = t[\"to\"]\n        edge = {\n            \"event\": t[\"on_event\"],\n            \"to\": toState,\n            \"id\": t[\"id\"],\n            \"gates\": t.get(\"gates\", []),\n            \"actions\": t.get(\"actions\", [])\n        }\n\n        if fromState == \"*\":\n            wildcardEdges.append(edge)\n        else:\n            if fromState not in adj:\n                adj[fromState] = []\n            adj[fromState].append(edge)\n\n    # Apply wildcard edges to all states\n    for sid in adj:\n        adj[sid].extend(wildcardEdges)\n\n    # Build reverse adjacency for reachability analysis\n    reverseAdj = {sid: [] for sid in bp[\"states\"]}\n    for sid, edges in adj.items():\n        for edge in edges:\n            if edge[\"to\"] in reverseAdj:\n                reverseAdj[edge[\"to\"]].append({\"from\": sid, \"event\": edge[\"event\"]})\n\n    return {\n        \"graph\": {\n            \"adjacency\": adj,\n            \"reverse\": reverseAdj,\n            \"entry\": bp[\"entry_state\"],\n            \"terminals\": bp[\"terminal_states\"],\n            \"states\": list(bp[\"states\"].keys()),\n            \"transition_count\": len(bp[\"transitions\"])\n        }\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "test_compute.analyze_paths", "type": "function", "label": "analyze_paths", "direction": "inbound", "parent": "test_compute", "line": 138, "endLine": 228, "signature": "(params) -> Dict[]", "docstring": "Find all paths through the state machine using BFS for efficiency.", "source": "def analyze_paths(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Find all paths through the state machine using BFS for efficiency.\"\"\"\n    bp = params.get(\"blueprint\")\n    graph = params.get(\"graph\")\n\n    if not bp or not graph:\n        return {\"paths\": []}\n\n    adj = graph[\"adjacency\"]\n    entry = graph[\"entry\"]\n    terminals = set(graph[\"terminals\"])\n    allStates = set(graph[\"states\"])\n\n    paths = []\n\n    # Strategy 1: Find shortest path to each reachable state (state coverage)\n    # This gives us minimum paths needed to visit all states\n    for targetState in allStates:\n        if targetState == entry:\n            paths.append({\n                \"states\": [entry],\n                \"events\": [],\n                \"transitions\": [],\n                \"is_complete\": targetState in terminals\n            })\n            continue\n\n        shortestPath = _bfsPath(adj, entry, targetState)\n        if shortestPath:\n            paths.append({\n                \"states\": shortestPath[\"states\"],\n                \"events\": shortestPath[\"events\"],\n                \"transitions\": shortestPath[\"transitions\"],\n                \"is_complete\": targetState in terminals\n            })\n\n    # Strategy 2: Find paths that cover all transitions\n    # Build set of all transitions\n    allTransitions = set()\n    for t in bp[\"transitions\"]:\n        allTransitions.add(t[\"id\"])\n\n    coveredTransitions = set()\n    for p in paths:\n        coveredTransitions.update(p[\"transitions\"])\n\n    # Find additional paths to cover uncovered transitions\n    uncovered = allTransitions - coveredTransitions\n    for transId in uncovered:\n        # Find the transition details\n        trans = next((t for t in bp[\"transitions\"] if t[\"id\"] == transId), None)\n        if not trans:\n            continue\n\n        fromState = trans[\"from\"]\n        toState = trans[\"to\"]\n\n        # Skip wildcard transitions for now\n        if fromState == \"*\":\n            continue\n\n        # Find path to from_state, then add this transition\n        if fromState == entry:\n            pathToFrom = {\"states\": [entry], \"events\": [], \"transitions\": []}\n        else:\n            pathToFrom = _bfsPath(adj, entry, fromState)\n\n        if pathToFrom:\n            paths.append({\n                \"states\": pathToFrom[\"states\"] + [toState],\n                \"events\": pathToFrom[\"events\"] + [trans[\"on_event\"]],\n                \"transitions\": pathToFrom[\"transitions\"] + [transId],\n                \"is_complete\": toState in terminals\n            })\n            coveredTransitions.add(transId)\n\n    # Strategy 3: If terminal states exist, ensure paths to them\n    if terminals:\n        for term in terminals:\n            termPaths = [p for p in paths if p[\"states\"][-1] == term]\n            if not termPaths:\n                shortestPath = _bfsPath(adj, entry, term)\n                if shortestPath:\n                    paths.append({\n                        \"states\": shortestPath[\"states\"],\n                        \"events\": shortestPath[\"events\"],\n                        \"transitions\": shortestPath[\"transitions\"],\n                        \"is_complete\": True\n                    })\n\n    return {\"paths\": paths}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "test_compute.analyze_gates", "type": "function", "label": "analyze_gates", "direction": "inbound", "parent": "test_compute", "line": 266, "endLine": 289, "signature": "(params) -> Dict[]", "docstring": "Analyze gate expressions to extract boundary conditions.", "source": "def analyze_gates(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Analyze gate expressions to extract boundary conditions.\"\"\"\n    bp = params.get(\"blueprint\")\n    if not bp:\n        return {\"analysis\": None}\n\n    gates = bp.get(\"gates\", {})\n    analysis = {}\n\n    for gateId, gate in gates.items():\n        expr = gate.get(\"expression\", \"\")\n        boundaries = _extractBoundaries(expr)\n        booleans = _extractBooleans(expr)\n        nullChecks = _extractNullChecks(expr)\n\n        analysis[gateId] = {\n            \"expression\": expr,\n            \"boundaries\": boundaries,\n            \"booleans\": booleans,\n            \"null_checks\": nullChecks,\n            \"variables\": _extractVariables(expr)\n        }\n\n    return {\"analysis\": analysis}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "test_compute.generate_path_tests", "type": "function", "label": "generate_path_tests", "direction": "inbound", "parent": "test_compute", "line": 394, "endLine": 425, "signature": "(params) -> Dict[]", "docstring": "Generate tests for path coverage.", "source": "def generate_path_tests(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Generate tests for path coverage.\"\"\"\n    bp = params.get(\"blueprint\")\n    paths = params.get(\"paths\", [])\n\n    if not bp or not paths:\n        return {\"tests\": []}\n\n    tests = []\n    for i, path in enumerate(paths):\n        if not path[\"events\"]:\n            continue\n\n        testId = f\"path_{i+1}\"\n        finalState = path[\"states\"][-1] if path[\"states\"] else bp[\"entry_state\"]\n\n        test = {\n            \"id\": testId,\n            \"type\": \"path_coverage\",\n            \"description\": f\"Path: {' -> '.join(path['states'])}\",\n            \"initial_context\": _genDefaultContext(bp),\n            \"events\": [\n                {\"event\": evt, \"payload\": {}}\n                for evt in path[\"events\"]\n            ],\n            \"expected_final_state\": finalState,\n            \"transitions_covered\": path[\"transitions\"],\n            \"is_complete_path\": path.get(\"is_complete\", False)\n        }\n        tests.append(test)\n\n    return {\"tests\": tests}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "test_compute.generate_state_tests", "type": "function", "label": "generate_state_tests", "direction": "inbound", "parent": "test_compute", "line": 428, "endLine": 478, "signature": "(params) -> Dict[]", "docstring": "Generate tests for state coverage.", "source": "def generate_state_tests(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Generate tests for state coverage.\"\"\"\n    bp = params.get(\"blueprint\")\n    paths = params.get(\"paths\", [])\n\n    if not bp:\n        return {\"tests\": []}\n\n    # Find minimum set of paths that cover all states\n    allStates = set(bp[\"states\"].keys())\n    coveredStates = set()\n    selectedPaths = []\n\n    # Sort paths by number of unique states covered\n    sortedPaths = sorted(\n        paths,\n        key=lambda p: len(set(p[\"states\"]) - coveredStates),\n        reverse=True\n    )\n\n    for path in sortedPaths:\n        pathStates = set(path[\"states\"])\n        newStates = pathStates - coveredStates\n\n        if newStates:\n            selectedPaths.append(path)\n            coveredStates.update(pathStates)\n\n        if coveredStates >= allStates:\n            break\n\n    tests = []\n    for i, path in enumerate(selectedPaths):\n        if not path[\"events\"]:\n            continue\n\n        test = {\n            \"id\": f\"state_coverage_{i+1}\",\n            \"type\": \"state_coverage\",\n            \"description\": f\"Covers states: {', '.join(path['states'])}\",\n            \"initial_context\": _genDefaultContext(bp),\n            \"events\": [\n                {\"event\": evt, \"payload\": {}}\n                for evt in path[\"events\"]\n            ],\n            \"expected_final_state\": path[\"states\"][-1],\n            \"states_covered\": path[\"states\"]\n        }\n        tests.append(test)\n\n    return {\"tests\": tests}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "test_compute.generate_gate_tests", "type": "function", "label": "generate_gate_tests", "direction": "inbound", "parent": "test_compute", "line": 481, "endLine": 564, "signature": "(params) -> Dict[]", "docstring": "Generate boundary condition tests for gates.", "source": "def generate_gate_tests(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Generate boundary condition tests for gates.\"\"\"\n    bp = params.get(\"blueprint\")\n    gateAnalysis = params.get(\"gate_analysis\")\n\n    if not bp or not gateAnalysis:\n        return {\"tests\": []}\n\n    tests = []\n    testIdx = 0\n\n    for gateId, analysis in gateAnalysis.items():\n        # Find transitions that use this gate\n        gateTransitions = [\n            t for t in bp[\"transitions\"]\n            if gateId in t.get(\"gates\", [])\n        ]\n\n        if not gateTransitions:\n            continue\n\n        trans = gateTransitions[0]  # Use first transition for testing\n\n        # Generate boundary tests\n        for boundary in analysis.get(\"boundaries\", []):\n            for i, val in enumerate(boundary[\"test_values\"]):\n                testIdx += 1\n                ctx = _genDefaultContext(bp)\n                ctx[boundary[\"variable\"]] = val\n\n                # Determine expected outcome\n                expected = _evalBoundary(boundary[\"operator\"], val,\n                                         boundary[\"value\"])\n\n                tests.append({\n                    \"id\": f\"gate_boundary_{testIdx}\",\n                    \"type\": \"gate_boundary\",\n                    \"description\": (f\"Gate {gateId}: {boundary['variable']} \"\n                                    f\"{boundary['operator']} {boundary['value']} \"\n                                    f\"with value={val}\"),\n                    \"gate_id\": gateId,\n                    \"initial_context\": ctx,\n                    \"events\": [{\"event\": trans[\"on_event\"], \"payload\": {}}],\n                    \"expected_gate_result\": expected,\n                    \"from_state\": trans[\"from\"]\n                })\n\n        # Generate boolean tests\n        for boolVar in analysis.get(\"booleans\", []):\n            for val in boolVar[\"test_values\"]:\n                testIdx += 1\n                ctx = _genDefaultContext(bp)\n                ctx[boolVar[\"variable\"]] = val\n\n                tests.append({\n                    \"id\": f\"gate_boolean_{testIdx}\",\n                    \"type\": \"gate_boolean\",\n                    \"description\": (f\"Gate {gateId}: {boolVar['variable']} \"\n                                    f\"= {val}\"),\n                    \"gate_id\": gateId,\n                    \"initial_context\": ctx,\n                    \"events\": [{\"event\": trans[\"on_event\"], \"payload\": {}}],\n                    \"from_state\": trans[\"from\"]\n                })\n\n        # Generate null check tests\n        for nullCheck in analysis.get(\"null_checks\", []):\n            for val in nullCheck[\"test_values\"]:\n                testIdx += 1\n                ctx = _genDefaultContext(bp)\n                ctx[nullCheck[\"variable\"]] = val\n\n                tests.append({\n                    \"id\": f\"gate_null_{testIdx}\",\n                    \"type\": \"gate_null_check\",\n                    \"description\": (f\"Gate {gateId}: {nullCheck['variable']} \"\n                                    f\"= {val}\"),\n                    \"gate_id\": gateId,\n                    \"initial_context\": ctx,\n                    \"events\": [{\"event\": trans[\"on_event\"], \"payload\": {}}],\n                    \"from_state\": trans[\"from\"]\n                })\n\n    return {\"tests\": tests}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "test_compute.generate_negative_tests", "type": "function", "label": "generate_negative_tests", "direction": "inbound", "parent": "test_compute", "line": 584, "endLine": 635, "signature": "(params) -> Dict[]", "docstring": "Generate tests for invalid inputs and edge cases.", "source": "def generate_negative_tests(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Generate tests for invalid inputs and edge cases.\"\"\"\n    bp = params.get(\"blueprint\")\n    graph = params.get(\"graph\")\n\n    if not bp or not graph:\n        return {\"tests\": []}\n\n    tests = []\n    adj = graph[\"adjacency\"]\n    allEvents = set()\n\n    # Collect all valid events\n    for edges in adj.values():\n        for edge in edges:\n            allEvents.add(edge[\"event\"])\n\n    # For each state, find events that are NOT valid\n    testIdx = 0\n    for state in bp[\"states\"]:\n        validEvents = {e[\"event\"] for e in adj.get(state, [])}\n        invalidEvents = allEvents - validEvents\n\n        for evt in list(invalidEvents)[:3]:  # Limit to 3 per state\n            testIdx += 1\n            tests.append({\n                \"id\": f\"negative_invalid_event_{testIdx}\",\n                \"type\": \"negative_invalid_event\",\n                \"description\": (f\"Invalid event '{evt}' in state '{state}'\"),\n                \"initial_state\": state,\n                \"initial_context\": _genDefaultContext(bp),\n                \"events\": [{\"event\": evt, \"payload\": {}}],\n                \"expected_behavior\": \"no_transition\",\n                \"expected_state\": state\n            })\n\n    # Test gate failures (events that should fail due to guards)\n    for trans in bp[\"transitions\"]:\n        if trans.get(\"gates\"):\n            testIdx += 1\n            tests.append({\n                \"id\": f\"negative_gate_fail_{testIdx}\",\n                \"type\": \"negative_gate_failure\",\n                \"description\": (f\"Gate should block transition {trans['id']}\"),\n                \"from_state\": trans[\"from\"],\n                \"initial_context\": {},  # Empty context likely fails gates\n                \"events\": [{\"event\": trans[\"on_event\"], \"payload\": {}}],\n                \"expected_behavior\": \"gate_blocked\",\n                \"gates\": trans[\"gates\"]\n            })\n\n    return {\"tests\": tests}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "test_compute.generate_property_tests", "type": "function", "label": "generate_property_tests", "direction": "inbound", "parent": "test_compute", "line": 638, "endLine": 688, "signature": "(params) -> Dict[]", "docstring": "Generate property-based tests from context schema.", "source": "def generate_property_tests(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Generate property-based tests from context schema.\"\"\"\n    bp = params.get(\"blueprint\")\n    if not bp:\n        return {\"tests\": []}\n\n    schema = bp.get(\"context_schema\", {})\n    props = schema.get(\"properties\", {})\n\n    tests = []\n    testIdx = 0\n\n    # Generate tests based on property types\n    for propName, propDef in props.items():\n        propType = propDef.get(\"type\", \"string\")\n        enumVals = propDef.get(\"enum\")\n\n        # Generate sample values based on type\n        if enumVals:\n            sampleVals = enumVals[:3]\n        elif propType == \"number\":\n            sampleVals = [0, 1, -1, 100, 0.5]\n        elif propType == \"boolean\":\n            sampleVals = [True, False]\n        elif propType == \"string\":\n            sampleVals = [\"\", \"test\", \"a\" * 100]\n        elif propType == \"array\":\n            sampleVals = [[], [\"item\"], [\"a\", \"b\", \"c\"]]\n        elif propType == \"object\":\n            sampleVals = [{}, {\"key\": \"value\"}]\n        else:\n            sampleVals = [None]\n\n        for val in sampleVals[:2]:  # Limit samples per property\n            testIdx += 1\n            ctx = _genDefaultContext(bp)\n            ctx[propName] = val\n\n            tests.append({\n                \"id\": f\"property_{testIdx}\",\n                \"type\": \"property_based\",\n                \"description\": f\"Property {propName} = {repr(val)[:30]}\",\n                \"property\": propName,\n                \"property_type\": propType,\n                \"initial_context\": ctx,\n                \"invariants\": [\n                    f\"context['{propName}'] maintains type {propType}\"\n                ]\n            })\n\n    return {\"tests\": tests}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "test_compute.combine_tests", "type": "function", "label": "combine_tests", "direction": "inbound", "parent": "test_compute", "line": 723, "endLine": 778, "signature": "(params) -> Dict[]", "docstring": "Combine all test types and compute coverage.", "source": "def combine_tests(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Combine all test types and compute coverage.\"\"\"\n    bp = params.get(\"blueprint\")\n    pathTests = params.get(\"path_tests\", []) or []\n    stateTests = params.get(\"state_tests\", []) or []\n    gateTests = params.get(\"gate_tests\", []) or []\n    negativeTests = params.get(\"negative_tests\", []) or []\n    propertyTests = params.get(\"property_tests\", []) or []\n\n    allTests = pathTests + stateTests + gateTests + negativeTests + propertyTests\n\n    # Compute coverage metrics\n    allStates = set(bp[\"states\"].keys()) if bp else set()\n    allTransitions = {t[\"id\"] for t in bp[\"transitions\"]} if bp else set()\n    allGates = set(bp.get(\"gates\", {}).keys()) if bp else set()\n\n    coveredStates = set()\n    coveredTransitions = set()\n    coveredGates = set()\n\n    for test in allTests:\n        coveredStates.update(test.get(\"states_covered\", []))\n        coveredTransitions.update(test.get(\"transitions_covered\", []))\n        if test.get(\"gate_id\"):\n            coveredGates.add(test[\"gate_id\"])\n\n    coverage = {\n        \"total_tests\": len(allTests),\n        \"by_type\": {\n            \"path_coverage\": len(pathTests),\n            \"state_coverage\": len(stateTests),\n            \"gate_boundary\": len(gateTests),\n            \"negative\": len(negativeTests),\n            \"property_based\": len(propertyTests)\n        },\n        \"state_coverage\": {\n            \"total\": len(allStates),\n            \"covered\": len(coveredStates),\n            \"percentage\": (len(coveredStates) / len(allStates) * 100\n                          if allStates else 0)\n        },\n        \"transition_coverage\": {\n            \"total\": len(allTransitions),\n            \"covered\": len(coveredTransitions),\n            \"percentage\": (len(coveredTransitions) / len(allTransitions) * 100\n                          if allTransitions else 0)\n        },\n        \"gate_coverage\": {\n            \"total\": len(allGates),\n            \"covered\": len(coveredGates),\n            \"percentage\": (len(coveredGates) / len(allGates) * 100\n                          if allGates else 0)\n        }\n    }\n\n    return {\"tests\": allTests, \"coverage\": coverage}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "test_compute.format_json", "type": "function", "label": "format_json", "direction": "inbound", "parent": "test_compute", "line": 785, "endLine": 819, "signature": "(params) -> Dict[]", "docstring": "Format tests as L++ JSON test suite.", "source": "def format_json(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Format tests as L++ JSON test suite.\"\"\"\n    bp = params.get(\"blueprint\")\n    tests = params.get(\"tests\", [])\n\n    if not bp:\n        return {\"output\": \"{}\"}\n\n    testSuite = {\n        \"test_suite\": f\"{bp['id']}_tests\",\n        \"blueprint_id\": bp[\"id\"],\n        \"blueprint_version\": bp[\"version\"],\n        \"generated_at\": \"auto\",\n        \"tests\": []\n    }\n\n    for test in tests:\n        formatted = {\n            \"id\": test[\"id\"],\n            \"type\": test[\"type\"],\n            \"description\": test[\"description\"],\n            \"initial_context\": test.get(\"initial_context\", {}),\n            \"events\": test.get(\"events\", [])\n        }\n\n        if test.get(\"expected_final_state\"):\n            formatted[\"expected_final_state\"] = test[\"expected_final_state\"]\n        if test.get(\"expected_context\"):\n            formatted[\"expected_context\"] = test[\"expected_context\"]\n        if test.get(\"expected_behavior\"):\n            formatted[\"expected_behavior\"] = test[\"expected_behavior\"]\n\n        testSuite[\"tests\"].append(formatted)\n\n    return {\"output\": json.dumps(testSuite, indent=2)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "test_compute.format_pytest", "type": "function", "label": "format_pytest", "direction": "inbound", "parent": "test_compute", "line": 822, "endLine": 904, "signature": "(params) -> Dict[]", "docstring": "Format tests as Python pytest module.", "source": "def format_pytest(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Format tests as Python pytest module.\"\"\"\n    bp = params.get(\"blueprint\")\n    tests = params.get(\"tests\", [])\n\n    if not bp:\n        return {\"output\": \"# No blueprint loaded\"}\n\n    lines = [\n        '\"\"\"',\n        f\"Auto-generated pytest tests for {bp['name']}\",\n        f\"Blueprint ID: {bp['id']}\",\n        f\"Blueprint Version: {bp['version']}\",\n        '\"\"\"',\n        \"\",\n        \"import pytest\",\n        \"from pathlib import Path\",\n        \"\",\n        \"# Import your operator creation function here\",\n        \"# from your_module import create_operator\",\n        \"\",\n        \"\",\n        \"# Fixture for creating fresh operator instance\",\n        \"@pytest.fixture\",\n        \"def operator():\",\n        '    \"\"\"Create a fresh operator instance for each test.\"\"\"',\n        \"    # TODO: Implement operator creation\",\n        \"    # return create_operator()\",\n        \"    pass\",\n        \"\",\n        \"\"\n    ]\n\n    for test in tests:\n        testName = _toPythonName(test[\"id\"])\n        lines.append(f\"def test_{testName}(operator):\")\n        lines.append(f'    \"\"\"')\n        lines.append(f\"    {test['description']}\")\n        lines.append(f\"    Type: {test['type']}\")\n        lines.append(f'    \"\"\"')\n\n        # Set initial context\n        if test.get(\"initial_context\"):\n            lines.append(\"    # Set initial context\")\n            for key, val in test[\"initial_context\"].items():\n                lines.append(f\"    operator.context['{key}'] = {repr(val)}\")\n            lines.append(\"\")\n\n        # Set initial state if specified\n        if test.get(\"initial_state\"):\n            lines.append(f\"    operator._state = '{test['initial_state']}'\")\n            lines.append(\"\")\n\n        # Dispatch events\n        if test.get(\"events\"):\n            lines.append(\"    # Dispatch events\")\n            for evt in test[\"events\"]:\n                payload = evt.get(\"payload\", {})\n                lines.append(f\"    operator.dispatch('{evt['event']}', {payload})\")\n            lines.append(\"\")\n\n        # Assertions\n        if test.get(\"expected_final_state\"):\n            lines.append(\"    # Verify final state\")\n            lines.append(\n                f\"    assert operator.state == '{test['expected_final_state']}'\"\n            )\n        elif test.get(\"expected_state\"):\n            lines.append(\"    # Verify state unchanged\")\n            lines.append(\n                f\"    assert operator.state == '{test['expected_state']}'\"\n            )\n\n        if test.get(\"expected_behavior\") == \"no_transition\":\n            lines.append(\"    # Verify no transition occurred\")\n            lines.append(\n                f\"    assert operator.state == '{test.get('initial_state', 'unknown')}'\"\n            )\n\n        lines.append(\"\")\n        lines.append(\"\")\n\n    return {\"output\": \"\\n\".join(lines)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "test_compute.export_tests", "type": "function", "label": "export_tests", "direction": "inbound", "parent": "test_compute", "line": 916, "endLine": 940, "signature": "(params) -> Dict[]", "docstring": "Write formatted tests to file.", "source": "def export_tests(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Write formatted tests to file.\"\"\"\n    content = params.get(\"content\", \"\")\n    path = params.get(\"path\")\n    fmt = params.get(\"format\", \"json\")\n\n    if not path:\n        return {\"path\": None}\n\n    try:\n        outPath = Path(path)\n\n        # Add appropriate extension if missing\n        if fmt == \"json\" and not outPath.suffix:\n            outPath = outPath.with_suffix(\".json\")\n        elif fmt == \"pytest\" and not outPath.suffix:\n            outPath = outPath.with_suffix(\".py\")\n\n        outPath.parent.mkdir(parents=True, exist_ok=True)\n        outPath.write_text(content)\n\n        return {\"path\": str(outPath)}\n\n    except Exception as e:\n        return {\"path\": None, \"error\": str(e)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "test_compute.clear_state", "type": "function", "label": "clear_state", "direction": "inbound", "parent": "test_compute", "line": 947, "endLine": 962, "signature": "(params) -> Dict[]", "docstring": "Reset all analysis state.", "source": "def clear_state(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Reset all analysis state.\"\"\"\n    return {\n        \"blueprint\": None,\n        \"graph\": None,\n        \"paths\": None,\n        \"gate_analysis\": None,\n        \"path_tests\": None,\n        \"state_tests\": None,\n        \"gate_tests\": None,\n        \"negative_tests\": None,\n        \"property_tests\": None,\n        \"all_tests\": None,\n        \"formatted_output\": None,\n        \"error\": None\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "json", "type": "dependency", "label": "json", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "re", "type": "dependency", "label": "re", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "collections", "type": "dependency", "label": "collections", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "pathlib", "type": "dependency", "label": "pathlib", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "typing", "type": "dependency", "label": "typing", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "test_compute"}, {"id": "frame_py.loader", "type": "dependency", "label": "loader", "direction": "outbound", "category": "pip", "moduleColor": "#00d4ff", "moduleName": "test_compute"}];
+const edges = [{"from": "test_compute.load_blueprint", "to": "pathlib", "type": "external", "category": "stdlib", "line": 29}, {"from": "test_compute.load_blueprint", "to": "json", "type": "external", "category": "stdlib", "line": 35}, {"from": "test_compute.load_blueprint", "to": "frame_py", "type": "external", "category": "pip", "line": 37}, {"from": "test_compute._bfsPath", "to": "collections", "type": "external", "category": "stdlib", "line": 236}, {"from": "test_compute._extractBoundaries", "to": "re", "type": "external", "category": "stdlib", "line": 307}, {"from": "test_compute._extractBooleans", "to": "re", "type": "external", "category": "stdlib", "line": 347}, {"from": "test_compute._extractNullChecks", "to": "re", "type": "external", "category": "stdlib", "line": 370}, {"from": "test_compute._extractVariables", "to": "re", "type": "external", "category": "stdlib", "line": 386}, {"from": "test_compute.format_json", "to": "json", "type": "external", "category": "stdlib", "line": 819}, {"from": "test_compute._toPythonName", "to": "re", "type": "external", "category": "stdlib", "line": 909}, {"from": "test_compute.export_tests", "to": "pathlib", "type": "external", "category": "stdlib", "line": 926}];
+const moduleColors = {"test_compute": "#00d4ff"};
+
+// Edge type visibility
+const edgeVisibility = { internal: true, external: true, local: true };
+let currentLayout = 'force';
+
+// Create node lookup
+const nodeById = {};
+nodes.forEach(n => nodeById[n.id] = n);
+
+// Setup SVG
+const container = document.getElementById('graph');
+const width = container.clientWidth;
+const height = container.clientHeight || 600;
+
+const svg = d3.select("svg").attr("viewBox", [0, 0, width, height]);
+const g = svg.append("g");
+
+// Zoom behavior
+const zoom = d3.zoom()
+    .scaleExtent([0.1, 4])
+    .filter(e => !e.target.closest('.node'))
+    .on("zoom", e => g.attr("transform", e.transform));
+svg.call(zoom);
+
+// Arrow markers
+const defs = svg.append("defs");
+["internal", "external", "local"].forEach(type => {
+    const color = type === "internal" ? "#4ecdc4" : type === "external" ? "#f39c12" : "#9b59b6";
+    defs.append("marker")
+        .attr("id", `arrow-${type}`)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 20)
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-4L10,0L0,4")
+        .attr("fill", color);
+});
+
+// Build module legend
+const legendDiv = document.getElementById('module-legend');
+Object.entries(moduleColors).forEach(([mod, color]) => {
+    const item = document.createElement('div');
+    item.className = 'module-item';
+    item.innerHTML = `<div class="module-dot" style="background:${color}"></div><span class="module-name">${mod}</span>`;
+    item.onclick = () => highlightModule(mod);
+    legendDiv.appendChild(item);
+});
+
+// Process edges - resolve node references
+const processedEdges = edges.map(e => ({
+    ...e,
+    source: nodeById[e.from] || { id: e.from, x: 0, y: 0 },
+    target: nodeById[e.to] || { id: e.to, x: 0, y: 0 }
+})).filter(e => e.source && e.target);
+
+// Force simulation
+const simulation = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(processedEdges).id(d => d.id).distance(80).strength(0.5))
+    .force("charge", d3.forceManyBody().strength(-300))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force("collision", d3.forceCollide().radius(40));
+
+// Draw edges
+const edge = g.append("g").selectAll("path")
+    .data(processedEdges)
+    .join("path")
+    .attr("class", d => `edge edge-${d.type || 'internal'}`)
+    .attr("marker-end", d => `url(#arrow-${d.type || 'internal'})`);
+
+// Node size based on type
+function nodeSize(d) {
+    if (d.type === 'module') return { w: 120, h: 40 };
+    if (d.type === 'function' || d.type === 'async_function') return { w: 100, h: 30 };
+    if (d.type === 'class') return { w: 110, h: 35 };
+    return { w: 80, h: 25 };  // dependency
+}
+
+// Draw nodes
+const node = g.append("g").selectAll("g")
+    .data(nodes)
+    .join("g")
+    .attr("class", "node")
+    .call(d3.drag()
+        .on("start", dragStart)
+        .on("drag", dragging)
+        .on("end", dragEnd));
+
+node.append("rect")
+    .attr("class", d => `node-${d.type === 'dependency' ? 'dependency' : d.type === 'module' ? 'module' : 'function'}`)
+    .attr("width", d => nodeSize(d).w)
+    .attr("height", d => nodeSize(d).h)
+    .attr("x", d => -nodeSize(d).w / 2)
+    .attr("y", d => -nodeSize(d).h / 2)
+    .attr("rx", 6)
+    .attr("stroke", d => d.moduleColor || "#666");
+
+node.append("text")
+    .attr("class", "node-label")
+    .attr("text-anchor", "middle")
+    .attr("dy", d => d.signature ? -3 : 4)
+    .text(d => d.label || d.id);
+
+node.filter(d => d.signature).append("text")
+    .attr("class", "node-sublabel")
+    .attr("text-anchor", "middle")
+    .attr("dy", 10)
+    .text(d => d.signature.length > 20 ? d.signature.slice(0, 18) + ".." : d.signature);
+
+// Tooltip
+const tooltip = d3.select("#tooltip");
+node.on("mouseover", (e, d) => {
+    let html = `<b>${d.label || d.id}</b>`;
+    if (d.type) html += `<br><span style="color:#888">${d.type}</span>`;
+    if (d.signature) html += `<br><code>${d.signature}</code>`;
+    if (d.direction) html += `<br>Direction: ${d.direction}`;
+    tooltip.style("display", "block").html(html);
+})
+.on("mousemove", e => {
+    tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 10) + "px");
+})
+.on("mouseout", () => tooltip.style("display", "none"));
+
+// Click to select
+node.on("click", (e, d) => {
+    e.stopPropagation();
+    selectNode(d);
+});
+
+svg.on("click", () => clearSelection());
+
+// Update positions
+simulation.on("tick", () => {
+    edge.attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
+});
+
+// Drag functions
+function dragStart(e, d) {
+    if (!e.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+}
+function dragging(e, d) {
+    d.fx = e.x;
+    d.fy = e.y;
+}
+function dragEnd(e, d) {
+    if (!e.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+}
+
+// Selection functions
+let selectedNode = null;
+
+function selectNode(d) {
+    selectedNode = d;
+    
+    // Highlight node
+    node.classed("dim", n => n.id !== d.id && !isConnected(d, n));
+    node.select("rect").attr("stroke-width", n => n.id === d.id ? 4 : 2);
+    
+    // Highlight edges
+    edge.classed("dim", e => e.source.id !== d.id && e.target.id !== d.id);
+    edge.classed("highlight", e => e.source.id === d.id || e.target.id === d.id);
+    
+    // Update info panel
+    updateNodeInfo(d);
+    updateEdgeList(d);
+}
+
+function clearSelection() {
+    selectedNode = null;
+    node.classed("dim", false);
+    node.select("rect").attr("stroke-width", 2);
+    edge.classed("dim", false).classed("highlight", false);
+    document.getElementById('node-info').innerHTML = 'Click a node to see details';
+    document.getElementById('edge-list').innerHTML = '';
+}
+
+function isConnected(a, b) {
+    return processedEdges.some(e => 
+        (e.source.id === a.id && e.target.id === b.id) ||
+        (e.source.id === b.id && e.target.id === a.id)
+    );
+}
+
+function updateNodeInfo(d) {
+    let html = `<div class="metric"><span class="info-label">ID:</span><span class="info-value">${d.id}</span></div>`;
+    html += `<div class="metric"><span class="info-label">Type:</span><span class="info-value">${d.type}</span></div>`;
+    if (d.moduleName) html += `<div class="metric"><span class="info-label">Module:</span><span class="info-value">${d.moduleName}</span></div>`;
+    if (d.line) html += `<div class="metric"><span class="info-label">Line:</span><span class="info-value">${d.line}${d.endLine ? '-' + d.endLine : ''}</span></div>`;
+    if (d.signature) html += `<div class="metric"><span class="info-label">Signature:</span><span class="info-value" style="font-family:monospace">${d.signature}</span></div>`;
+    if (d.direction) html += `<div class="metric"><span class="info-label">Direction:</span><span class="info-value">${d.direction}</span></div>`;
+    if (d.category) html += `<div class="metric"><span class="info-label">Category:</span><span class="info-value">${d.category}</span></div>`;
+
+    if (d.metrics) {
+        html += `<div style="margin-top:10px"><b>Coupling Metrics</b></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-In:</span><span class="info-value">${d.metrics.fanIn}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-Out:</span><span class="info-value">${d.metrics.fanOut}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Instability:</span><span class="info-value">${(d.metrics.instability * 100).toFixed(1)}%</span></div>`;
+        html += `<div class="metric-bar"><div class="metric-fill" style="width:${d.metrics.instability * 100}%;background:${d.metrics.instability > 0.5 ? '#ff6b6b' : '#4ecdc4'}"></div></div>`;
+        html += `<div class="metric"><span class="info-label">Internal Edges:</span><span class="info-value">${d.metrics.internalEdges}</span></div>`;
+    }
+
+    document.getElementById('node-info').innerHTML = html;
+
+    // Update source code panel
+    updateSourcePanel(d);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function updateSourcePanel(d) {
+    const panel = document.getElementById('source-content');
+
+    if (d.source) {
+        let sourceHtml = '';
+        if (d.docstring) {
+            sourceHtml += `<div class="docstring" style="margin-bottom:8px;padding:5px;background:#1a1a2a;border-radius:3px">${escapeHtml(d.docstring)}</div>`;
+        }
+        sourceHtml += `<div class="source-code">${escapeHtml(d.source)}</div>`;
+        panel.innerHTML = sourceHtml;
+    } else if (d.type === 'module') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">Module: ${d.label}<br>Click a function to view its source code.</div>`;
+    } else if (d.type === 'dependency') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">External dependency: ${d.label}<br>Category: ${d.category || 'unknown'}</div>`;
+    } else {
+        panel.innerHTML = `<div style="color:#666;font-size:11px">No source available for this node</div>`;
+    }
+}
+
+function updateEdgeList(d) {
+    const outgoing = processedEdges.filter(e => e.source.id === d.id);
+    const incoming = processedEdges.filter(e => e.target.id === d.id);
+    
+    let html = '';
+    if (outgoing.length) {
+        html += '<div style="color:#4ecdc4;font-weight:bold;margin-bottom:5px">Outgoing →</div>';
+        outgoing.forEach(e => {
+            html += `<div class="edge-item">→ <span class="to">${e.target.id || e.to}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (incoming.length) {
+        html += '<div style="color:#f39c12;font-weight:bold;margin:10px 0 5px 0">← Incoming</div>';
+        incoming.forEach(e => {
+            html += `<div class="edge-item">← <span class="from">${e.source.id || e.from}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (!outgoing.length && !incoming.length) {
+        html = '<div style="color:#666">No connections</div>';
+    }
+    
+    document.getElementById('edge-list').innerHTML = html;
+}
+
+function highlightModule(modName) {
+    node.classed("dim", n => n.moduleName !== modName && n.type !== 'dependency');
+    edge.classed("dim", e => {
+        const srcMod = nodeById[e.source.id]?.moduleName;
+        const tgtMod = nodeById[e.target.id]?.moduleName;
+        return srcMod !== modName && tgtMod !== modName;
+    });
+}
+
+// Layout functions
+function toggleLayout(layout) {
+    currentLayout = layout;
+    document.querySelectorAll('.controls button').forEach(b => {
+        if (b.id.startsWith('btn-') && ['force', 'horizontal', 'vertical'].includes(b.id.replace('btn-', ''))) {
+            b.classList.toggle('active', b.id === `btn-${layout}`);
+        }
+    });
+    
+    if (layout === 'force') {
+        simulation.alpha(1).restart();
+    } else {
+        simulation.stop();
+        layoutNodes(layout);
+    }
+}
+
+function layoutNodes(layout) {
+    const modules = [...new Set(nodes.filter(n => n.type === 'module').map(n => n.id))];
+    const padding = 50;
+    
+    if (layout === 'horizontal') {
+        // Group by module, spread horizontally
+        modules.forEach((mod, mi) => {
+            const modNodes = nodes.filter(n => n.moduleName === mod || n.id === mod);
+            const x = padding + mi * (width - padding * 2) / Math.max(modules.length - 1, 1);
+            modNodes.forEach((n, ni) => {
+                n.x = x;
+                n.y = padding + ni * 50;
+            });
+        });
+        // Dependencies on the right
+        const deps = nodes.filter(n => n.type === 'dependency');
+        deps.forEach((n, i) => {
+            n.x = width - padding;
+            n.y = padding + i * 40;
+        });
+    } else if (layout === 'vertical') {
+        // Modules at top, functions below, dependencies at bottom
+        const modNodes = nodes.filter(n => n.type === 'module');
+        const funcNodes = nodes.filter(n => n.type === 'function' || n.type === 'async_function' || n.type === 'class');
+        const depNodes = nodes.filter(n => n.type === 'dependency');
+        
+        modNodes.forEach((n, i) => {
+            n.x = padding + i * 150;
+            n.y = padding;
+        });
+        funcNodes.forEach((n, i) => {
+            n.x = padding + (i % 6) * 130;
+            n.y = 120 + Math.floor(i / 6) * 60;
+        });
+        depNodes.forEach((n, i) => {
+            n.x = padding + (i % 8) * 100;
+            n.y = height - padding - 50;
+        });
+    }
+    
+    // Update positions
+    node.transition().duration(500).attr("transform", d => `translate(${d.x},${d.y})`);
+    edge.transition().duration(500).attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+}
+
+// Edge type toggle
+function toggleEdgeType(type) {
+    edgeVisibility[type] = !edgeVisibility[type];
+    document.getElementById(`btn-${type}`).classList.toggle('active', edgeVisibility[type]);
+    edge.style("display", d => edgeVisibility[d.type || 'internal'] ? null : "none");
+}
+
+// View controls
+function resetView() {
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+}
+
+function fitToView() {
+    const bounds = g.node().getBBox();
+    const scale = Math.min(width / bounds.width, height / bounds.height) * 0.9;
+    const tx = (width - bounds.width * scale) / 2 - bounds.x * scale;
+    const ty = (height - bounds.height * scale) / 2 - bounds.y * scale;
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
+// Initial fit
+setTimeout(fitToView, 1000);
+</script>
+</body>
+</html>

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Function Graph: blueprint_composer</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #0f0f23; color: #eee; }
+h1 { color: #00d4ff; margin-bottom: 5px; font-size: 24px; }
+.subtitle { color: #888; margin-bottom: 15px; font-size: 14px; }
+#container { display: flex; gap: 20px; height: calc(100vh - 120px); }
+#graph { flex: 1; position: relative; }
+#sidebar { width: 350px; background: #1a1a2e; padding: 15px; border-radius: 8px; overflow-y: auto; }
+svg { background: #16213e; border-radius: 8px; width: 100%; height: 100%; }
+
+/* Node styles */
+.node { cursor: pointer; }
+.node-module { fill: #2a2a4a; stroke-width: 3; }
+.node-function { fill: #3a3a5a; stroke-width: 2; }
+.node-dependency { fill: #1a1a3a; stroke: #666; stroke-width: 1; stroke-dasharray: 4; }
+.node-label { font-size: 11px; fill: #fff; pointer-events: none; font-weight: 500; }
+.node-sublabel { font-size: 9px; fill: #888; pointer-events: none; }
+
+/* Edge styles */
+.edge { fill: none; stroke-opacity: 0.6; }
+.edge-internal { stroke: #4ecdc4; stroke-width: 2; }
+.edge-external { stroke: #f39c12; stroke-width: 1.5; stroke-dasharray: 4; }
+.edge-local { stroke: #9b59b6; stroke-width: 2; }
+.edge-label { font-size: 8px; fill: #666; pointer-events: none; }
+
+/* Highlight styles */
+.highlight { stroke-width: 3 !important; stroke-opacity: 1 !important; }
+.dim { opacity: 0.2; }
+
+/* Controls */
+.controls { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.controls button { background: #3a3a5a; color: #fff; border: 1px solid #555; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.controls button:hover { background: #4a4a6a; }
+.controls button.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
+
+/* Module legend */
+.module-legend { margin-top: 15px; }
+.module-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer; }
+.module-item:hover { background: #2a2a4a; }
+.module-dot { width: 12px; height: 12px; border-radius: 3px; }
+.module-name { font-size: 12px; }
+
+/* Info panel */
+h3 { color: #00d4ff; margin: 15px 0 8px 0; font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+.info-section { font-size: 12px; line-height: 1.6; }
+.info-label { color: #888; }
+.info-value { color: #fff; }
+
+/* Source code panel */
+.source-panel { margin-top: 10px; }
+.source-code { background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 10px; font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; line-height: 1.4; overflow-x: auto; max-height: 300px; overflow-y: auto; white-space: pre; color: #b8b8b8; }
+.source-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.source-toggle { background: #3a3a5a; color: #fff; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; }
+.source-toggle:hover { background: #4a4a6a; }
+.docstring { color: #6a9955; font-style: italic; }
+.metric { display: flex; justify-content: space-between; padding: 3px 0; }
+.metric-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 2px; }
+.metric-fill { height: 100%; border-radius: 2px; }
+
+/* Edge list */
+.edge-list { max-height: 200px; overflow-y: auto; }
+.edge-item { padding: 4px 0; border-bottom: 1px solid #333; font-size: 11px; }
+.edge-item .from { color: #4ecdc4; }
+.edge-item .to { color: #f39c12; }
+.edge-item .type { color: #666; font-size: 10px; }
+
+/* Tooltip */
+#tooltip { position: absolute; background: #1a1a2e; border: 1px solid #00d4ff; padding: 10px; border-radius: 4px; pointer-events: none; display: none; max-width: 300px; z-index: 100; font-size: 11px; }
+</style>
+</head>
+<body>
+<h1>Function Graph: blueprint_composer</h1>
+<div class="subtitle">Stackable function dependency visualization • Drag nodes to rearrange • Click to inspect</div>
+
+<div class="controls">
+  <button onclick="resetView()">Reset View</button>
+  <button onclick="fitToView()">Fit</button>
+  <button onclick="toggleLayout('force')" id="btn-force" class="active">Force</button>
+  <button onclick="toggleLayout('horizontal')" id="btn-horizontal">Horizontal</button>
+  <button onclick="toggleLayout('vertical')" id="btn-vertical">Vertical</button>
+  <span style="margin-left: 10px; color: #666">|</span>
+  <button onclick="toggleEdgeType('internal')" id="btn-internal" class="active">Internal</button>
+  <button onclick="toggleEdgeType('external')" id="btn-external" class="active">External</button>
+  <button onclick="toggleEdgeType('local')" id="btn-local" class="active">Local</button>
+</div>
+
+<div id="container">
+  <div id="graph"><svg></svg></div>
+  <div id="sidebar">
+    <h3>Modules</h3>
+    <div class="module-legend" id="module-legend"></div>
+
+    <h3>Selected Node</h3>
+    <div class="info-section" id="node-info">Click a node to see details</div>
+
+    <h3>Source Code</h3>
+    <div class="source-panel" id="source-panel">
+      <div id="source-content" style="color:#666;font-size:11px">Click a function to view source</div>
+    </div>
+
+    <h3>Connections</h3>
+    <div class="edge-list" id="edge-list"></div>
+  </div>
+</div>
+<div id="tooltip"></div>
+
+<script>
+const nodes = [{"id": "composer_compute", "type": "module", "label": "composer_compute", "metrics": {"fanIn": 16, "fanOut": 4, "instability": 0.2, "internalEdges": 2, "externalCallCount": 24, "localCallCount": 0, "callsByCategory": {"stdlib": 24}, "localDependencies": []}, "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "composer_compute.load_parent", "type": "function", "label": "load_parent", "direction": "inbound", "parent": "composer_compute", "line": 25, "endLine": 46, "signature": "(params) -> Dict[]", "docstring": "Load the parent blueprint from a JSON file.", "source": "def load_parent(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Load the parent blueprint from a JSON file.\"\"\"\n    path = params.get(\"path\")\n    if not path:\n        return {\"blueprint\": None, \"path\": None, \"error\": \"No path provided\"}\n\n    try:\n        p = Path(path)\n        if not p.exists():\n            return {\"blueprint\": None, \"path\": None,\n                    \"error\": f\"File not found: {path}\"}\n\n        with open(p) as f:\n            raw = json.load(f)\n\n        bp = _normalize_blueprint(raw)\n        return {\"blueprint\": bp, \"path\": str(p), \"error\": None}\n    except json.JSONDecodeError as e:\n        return {\"blueprint\": None, \"path\": None,\n                \"error\": f\"Invalid JSON: {e}\"}\n    except Exception as e:\n        return {\"blueprint\": None, \"path\": None, \"error\": str(e)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "composer_compute.load_child", "type": "function", "label": "load_child", "direction": "inbound", "parent": "composer_compute", "line": 49, "endLine": 70, "signature": "(params) -> Dict[]", "docstring": "Load a child blueprint to be embedded.", "source": "def load_child(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Load a child blueprint to be embedded.\"\"\"\n    path = params.get(\"path\")\n    if not path:\n        return {\"blueprint\": None, \"path\": None, \"error\": \"No path provided\"}\n\n    try:\n        p = Path(path)\n        if not p.exists():\n            return {\"blueprint\": None, \"path\": None,\n                    \"error\": f\"File not found: {path}\"}\n\n        with open(p) as f:\n            raw = json.load(f)\n\n        bp = _normalize_blueprint(raw)\n        return {\"blueprint\": bp, \"path\": str(p), \"error\": None}\n    except json.JSONDecodeError as e:\n        return {\"blueprint\": None, \"path\": None,\n                \"error\": f\"Invalid JSON: {e}\"}\n    except Exception as e:\n        return {\"blueprint\": None, \"path\": None, \"error\": str(e)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "composer_compute.init_embedding", "type": "function", "label": "init_embedding", "direction": "inbound", "parent": "composer_compute", "line": 96, "endLine": 119, "signature": "(params) -> Dict[]", "docstring": "Initialize a new embedding definition.", "source": "def init_embedding(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Initialize a new embedding definition.\"\"\"\n    targetState = params.get(\"target_state\")\n    nsPrefix = params.get(\"namespace_prefix\")\n\n    if not targetState:\n        targetState = \"embedded\"\n\n    if not nsPrefix:\n        nsPrefix = targetState\n\n    embedding = {\n        \"target_state\": targetState,\n        \"namespace_prefix\": nsPrefix,\n        \"child\": None,\n        \"child_path\": None,\n        \"contract\": {\n            \"input_map\": {},\n            \"output_map\": {}\n        },\n        \"event_map\": {}\n    }\n\n    return {\"embedding\": embedding, \"namespace_prefix\": nsPrefix}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "composer_compute.set_input_contract", "type": "function", "label": "set_input_contract", "direction": "inbound", "parent": "composer_compute", "line": 122, "endLine": 131, "signature": "(params) -> Dict[]", "docstring": "Set the input contract mapping for an embedding.", "source": "def set_input_contract(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Set the input contract mapping for an embedding.\"\"\"\n    embedding = copy.deepcopy(params.get(\"embedding\", {}))\n    inputMap = params.get(\"input_map\", {})\n\n    if not embedding:\n        return {\"embedding\": None}\n\n    embedding[\"contract\"][\"input_map\"] = inputMap\n    return {\"embedding\": embedding}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "composer_compute.set_output_contract", "type": "function", "label": "set_output_contract", "direction": "inbound", "parent": "composer_compute", "line": 134, "endLine": 143, "signature": "(params) -> Dict[]", "docstring": "Set the output contract mapping for an embedding.", "source": "def set_output_contract(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Set the output contract mapping for an embedding.\"\"\"\n    embedding = copy.deepcopy(params.get(\"embedding\", {}))\n    outputMap = params.get(\"output_map\", {})\n\n    if not embedding:\n        return {\"embedding\": None}\n\n    embedding[\"contract\"][\"output_map\"] = outputMap\n    return {\"embedding\": embedding}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "composer_compute.set_event_map", "type": "function", "label": "set_event_map", "direction": "inbound", "parent": "composer_compute", "line": 146, "endLine": 155, "signature": "(params) -> Dict[]", "docstring": "Set the event mapping for an embedding.", "source": "def set_event_map(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Set the event mapping for an embedding.\"\"\"\n    embedding = copy.deepcopy(params.get(\"embedding\", {}))\n    eventMap = params.get(\"event_map\", {})\n\n    if not embedding:\n        return {\"embedding\": None}\n\n    embedding[\"event_map\"] = eventMap\n    return {\"embedding\": embedding}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "composer_compute.finalize_embedding", "type": "function", "label": "finalize_embedding", "direction": "inbound", "parent": "composer_compute", "line": 158, "endLine": 174, "signature": "(params) -> Dict[]", "docstring": "Finalize the current embedding and add to list.", "source": "def finalize_embedding(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Finalize the current embedding and add to list.\"\"\"\n    embedding = copy.deepcopy(params.get(\"embedding\", {}))\n    embeddings = list(params.get(\"embeddings\") or [])\n    childBp = params.get(\"child_blueprint\")\n    childPath = params.get(\"child_path\")\n\n    if not embedding:\n        return {\"embeddings\": embeddings, \"current_embedding\": None}\n\n    # Attach child blueprint to embedding\n    embedding[\"child\"] = childBp\n    embedding[\"child_path\"] = childPath\n\n    embeddings.append(embedding)\n\n    return {\"embeddings\": embeddings, \"current_embedding\": None}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "composer_compute.compose", "type": "function", "label": "compose", "direction": "inbound", "parent": "composer_compute", "line": 181, "endLine": 209, "signature": "(params) -> Dict[]", "docstring": "Execute the composition - embed child blueprints into parent.", "source": "def compose(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Execute the composition - embed child blueprints into parent.\"\"\"\n    parent = params.get(\"parent\")\n    embeddings = params.get(\"embeddings\", [])\n\n    if not parent:\n        return {\"composed\": None, \"error\": \"No parent blueprint\"}\n\n    if not embeddings:\n        return {\"composed\": None, \"error\": \"No embeddings defined\"}\n\n    try:\n        composed = copy.deepcopy(parent)\n\n        for emb in embeddings:\n            composed = _apply_embedding(composed, emb)\n\n        # Update metadata\n        composed[\"id\"] = f\"{parent.get('id', 'unknown')}_composed\"\n        composed[\"name\"] = f\"{parent.get('name', 'Unknown')} (Composed)\"\n        composed[\"version\"] = _bumpVersion(parent.get(\"version\", \"0.0.0\"))\n        composed[\"description\"] = (\n            f\"Composed blueprint from {parent.get('name')} with \"\n            f\"{len(embeddings)} embedding(s)\"\n        )\n\n        return {\"composed\": composed, \"error\": None}\n    except Exception as e:\n        return {\"composed\": None, \"error\": str(e)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "composer_compute.validate_composition", "type": "function", "label": "validate_composition", "direction": "inbound", "parent": "composer_compute", "line": 480, "endLine": 522, "signature": "(params) -> Dict[]", "docstring": "Validate the composed blueprint.", "source": "def validate_composition(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Validate the composed blueprint.\"\"\"\n    composed = params.get(\"composed\")\n    parent = params.get(\"parent\")\n    embeddings = params.get(\"embeddings\", [])\n\n    errors = []\n    warnings = []\n\n    if not composed:\n        return {\"result\": {\"errors\": [\"No composed blueprint\"], \"warnings\": []}}\n\n    # 1. Check for circular references\n    circularErrors = _check_circular_references(embeddings)\n    errors.extend(circularErrors)\n\n    # 2. Validate all contracts are satisfied\n    contractErrors = _validate_contracts(composed, embeddings)\n    errors.extend(contractErrors)\n\n    # 3. Check for ID collisions\n    collisionErrors = _check_id_collisions(composed)\n    errors.extend(collisionErrors)\n\n    # 4. Validate all state references\n    stateErrors = _validate_state_references(composed)\n    errors.extend(stateErrors)\n\n    # 5. Check for orphaned elements\n    orphanWarnings = _check_orphaned_elements(composed)\n    warnings.extend(orphanWarnings)\n\n    # 6. Validate entry/terminal states\n    entryErrors = _validate_entry_terminal(composed)\n    errors.extend(entryErrors)\n\n    return {\n        \"result\": {\n            \"errors\": errors,\n            \"warnings\": warnings,\n            \"valid\": len(errors) == 0\n        }\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "composer_compute.flatten", "type": "function", "label": "flatten", "direction": "inbound", "parent": "composer_compute", "line": 683, "endLine": 694, "signature": "(params) -> Dict[]", "docstring": "Flatten nested compositions (resolve all namespace prefixes).", "source": "def flatten(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Flatten nested compositions (resolve all namespace prefixes).\"\"\"\n    composed = params.get(\"composed\")\n\n    if not composed:\n        return {\"flattened\": None}\n\n    # For now, just return as-is. True flattening would involve\n    # resolving nested compositions recursively.\n    flattened = copy.deepcopy(composed)\n\n    return {\"flattened\": flattened}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "composer_compute.export_composed", "type": "function", "label": "export_composed", "direction": "inbound", "parent": "composer_compute", "line": 701, "endLine": 721, "signature": "(params) -> Dict[]", "docstring": "Export composed blueprint to file.", "source": "def export_composed(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Export composed blueprint to file.\"\"\"\n    blueprint = params.get(\"blueprint\")\n    path = params.get(\"path\")\n\n    if not blueprint:\n        return {\"path\": None, \"error\": \"No composed blueprint to export\"}\n\n    if not path:\n        return {\"path\": None, \"error\": \"No export path specified\"}\n\n    try:\n        p = Path(path)\n        p.parent.mkdir(parents=True, exist_ok=True)\n\n        with open(p, \"w\") as f:\n            json.dump(blueprint, f, indent=2)\n\n        return {\"path\": str(p), \"error\": None}\n    except Exception as e:\n        return {\"path\": None, \"error\": str(e)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "composer_compute.load_manifest", "type": "function", "label": "load_manifest", "direction": "inbound", "parent": "composer_compute", "line": 728, "endLine": 836, "signature": "(params) -> Dict[]", "docstring": "Load a composition manifest file.", "source": "def load_manifest(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Load a composition manifest file.\"\"\"\n    path = params.get(\"path\")\n\n    if not path:\n        return {\n            \"manifest\": None,\n            \"parent\": None,\n            \"parent_path\": None,\n            \"embeddings\": None,\n            \"error\": \"No path provided\"\n        }\n\n    try:\n        p = Path(path)\n        if not p.exists():\n            return {\n                \"manifest\": None,\n                \"parent\": None,\n                \"parent_path\": None,\n                \"embeddings\": None,\n                \"error\": f\"File not found: {path}\"\n            }\n\n        with open(p) as f:\n            manifest = json.load(f)\n\n        # Load parent blueprint\n        parentPath = manifest.get(\"parent\")\n        if not parentPath:\n            return {\n                \"manifest\": manifest,\n                \"parent\": None,\n                \"parent_path\": None,\n                \"embeddings\": None,\n                \"error\": \"Manifest missing parent path\"\n            }\n\n        # Resolve relative paths from manifest location\n        manifestDir = p.parent\n        parentFullPath = (manifestDir / parentPath).resolve()\n\n        parentResult = load_parent({\"path\": str(parentFullPath)})\n        if parentResult.get(\"error\"):\n            return {\n                \"manifest\": manifest,\n                \"parent\": None,\n                \"parent_path\": None,\n                \"embeddings\": None,\n                \"error\": parentResult[\"error\"]\n            }\n\n        # Load all child blueprints and build embeddings\n        embeddings = []\n        for embDef in manifest.get(\"embeddings\", []):\n            childPath = embDef.get(\"child\")\n            if not childPath:\n                continue\n\n            childFullPath = (manifestDir / childPath).resolve()\n            childResult = load_child({\"path\": str(childFullPath)})\n            if childResult.get(\"error\"):\n                return {\n                    \"manifest\": manifest,\n                    \"parent\": parentResult[\"blueprint\"],\n                    \"parent_path\": str(parentFullPath),\n                    \"embeddings\": None,\n                    \"error\": f\"Failed to load child: {childResult['error']}\"\n                }\n\n            embedding = {\n                \"target_state\": embDef.get(\"target_state\"),\n                \"namespace_prefix\": embDef.get(\n                    \"namespace_prefix\", embDef.get(\"target_state\")\n                ),\n                \"child\": childResult[\"blueprint\"],\n                \"child_path\": str(childFullPath),\n                \"contract\": embDef.get(\"contract\", {\n                    \"input_map\": {},\n                    \"output_map\": {}\n                }),\n                \"event_map\": embDef.get(\"event_map\", {})\n            }\n            embeddings.append(embedding)\n\n        return {\n            \"manifest\": manifest,\n            \"parent\": parentResult[\"blueprint\"],\n            \"parent_path\": str(parentFullPath),\n            \"embeddings\": embeddings,\n            \"error\": None\n        }\n\n    except json.JSONDecodeError as e:\n        return {\n            \"manifest\": None,\n            \"parent\": None,\n            \"parent_path\": None,\n            \"embeddings\": None,\n            \"error\": f\"Invalid JSON: {e}\"\n        }\n    except Exception as e:\n        return {\n            \"manifest\": None,\n            \"parent\": None,\n            \"parent_path\": None,\n            \"embeddings\": None,\n            \"error\": str(e)\n        }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "composer_compute.compose_from_manifest", "type": "function", "label": "compose_from_manifest", "direction": "inbound", "parent": "composer_compute", "line": 839, "endLine": 858, "signature": "(params) -> Dict[]", "docstring": "Compose blueprints based on a loaded manifest.", "source": "def compose_from_manifest(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Compose blueprints based on a loaded manifest.\"\"\"\n    manifest = params.get(\"manifest\")\n\n    if not manifest:\n        return {\"composed\": None, \"error\": \"No manifest loaded\"}\n\n    # The manifest should have already triggered loading parent and embeddings\n    # This function is called after load_manifest populates the context\n    # We need to access these from context, but since we're in a compute unit,\n    # we need them passed in\n\n    # Actually, since the blueprint drives the flow, the context will have\n    # parent_blueprint and embeddings populated by load_manifest\n    # But this compute unit is called separately, so we use compose()\n\n    # For manifest-based compose, we should receive parent and embeddings\n    # from the context via the action's input_map\n\n    return {\"composed\": None, \"error\": \"Use compose action after load_manifest\"}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "composer_compute.generate_manifest", "type": "function", "label": "generate_manifest", "direction": "inbound", "parent": "composer_compute", "line": 861, "endLine": 885, "signature": "(params) -> Dict[]", "docstring": "Generate a composition manifest from current state.", "source": "def generate_manifest(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Generate a composition manifest from current state.\"\"\"\n    parentPath = params.get(\"parent_path\")\n    embeddings = params.get(\"embeddings\", [])\n\n    if not parentPath:\n        return {\"manifest\": None}\n\n    manifest = {\n        \"parent\": parentPath,\n        \"embeddings\": []\n    }\n\n    for emb in embeddings:\n        embDef = {\n            \"target_state\": emb.get(\"target_state\"),\n            \"child\": emb.get(\"child_path\"),\n            \"contract\": emb.get(\"contract\", {}),\n            \"event_map\": emb.get(\"event_map\", {})\n        }\n        if emb.get(\"namespace_prefix\") != emb.get(\"target_state\"):\n            embDef[\"namespace_prefix\"] = emb.get(\"namespace_prefix\")\n        manifest[\"embeddings\"].append(embDef)\n\n    return {\"manifest\": manifest}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "composer_compute.export_manifest", "type": "function", "label": "export_manifest", "direction": "inbound", "parent": "composer_compute", "line": 888, "endLine": 908, "signature": "(params) -> Dict[]", "docstring": "Export composition manifest to file.", "source": "def export_manifest(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Export composition manifest to file.\"\"\"\n    manifest = params.get(\"manifest\")\n    path = params.get(\"path\")\n\n    if not manifest:\n        return {\"path\": None, \"error\": \"No manifest to export\"}\n\n    if not path:\n        return {\"path\": None, \"error\": \"No export path specified\"}\n\n    try:\n        p = Path(path)\n        p.parent.mkdir(parents=True, exist_ok=True)\n\n        with open(p, \"w\") as f:\n            json.dump(manifest, f, indent=2)\n\n        return {\"path\": str(p), \"error\": None}\n    except Exception as e:\n        return {\"path\": None, \"error\": str(e)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "composer_compute.clear_all", "type": "function", "label": "clear_all", "direction": "inbound", "parent": "composer_compute", "line": 911, "endLine": 921, "signature": "(params) -> Dict[]", "docstring": "Clear all state.", "source": "def clear_all(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Clear all state.\"\"\"\n    return {\n        \"parent_blueprint\": None,\n        \"child_blueprint\": None,\n        \"embeddings\": None,\n        \"current_embedding\": None,\n        \"composed_blueprint\": None,\n        \"validation_result\": None,\n        \"manifest\": None\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "json", "type": "dependency", "label": "json", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "copy", "type": "dependency", "label": "copy", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "pathlib", "type": "dependency", "label": "pathlib", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}, {"id": "typing", "type": "dependency", "label": "typing", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "composer_compute"}];
+const edges = [{"from": "composer_compute.load_manifest", "to": "composer_compute.load_parent", "type": "internal", "line": 770}, {"from": "composer_compute.load_manifest", "to": "composer_compute.load_child", "type": "internal", "line": 788}, {"from": "composer_compute.load_parent", "to": "pathlib", "type": "external", "category": "stdlib", "line": 32}, {"from": "composer_compute.load_parent", "to": "json", "type": "external", "category": "stdlib", "line": 38}, {"from": "composer_compute.load_child", "to": "pathlib", "type": "external", "category": "stdlib", "line": 56}, {"from": "composer_compute.load_child", "to": "json", "type": "external", "category": "stdlib", "line": 62}, {"from": "composer_compute.set_input_contract", "to": "copy", "type": "external", "category": "stdlib", "line": 124}, {"from": "composer_compute.set_output_contract", "to": "copy", "type": "external", "category": "stdlib", "line": 136}, {"from": "composer_compute.set_event_map", "to": "copy", "type": "external", "category": "stdlib", "line": 148}, {"from": "composer_compute.finalize_embedding", "to": "copy", "type": "external", "category": "stdlib", "line": 160}, {"from": "composer_compute.compose", "to": "copy", "type": "external", "category": "stdlib", "line": 193}, {"from": "composer_compute._apply_embedding", "to": "copy", "type": "external", "category": "stdlib", "line": 217}, {"from": "composer_compute._prefix_child", "to": "copy", "type": "external", "category": "stdlib", "line": 277}, {"from": "composer_compute._prefix_child", "to": "copy", "type": "external", "category": "stdlib", "line": 306}, {"from": "composer_compute._prefix_child", "to": "copy", "type": "external", "category": "stdlib", "line": 312}, {"from": "composer_compute._map_action_contracts", "to": "copy", "type": "external", "category": "stdlib", "line": 371}, {"from": "composer_compute._map_transitions", "to": "copy", "type": "external", "category": "stdlib", "line": 407}, {"from": "composer_compute._rewire_parent_transitions", "to": "copy", "type": "external", "category": "stdlib", "line": 436}, {"from": "composer_compute._rewire_parent_transitions", "to": "copy", "type": "external", "category": "stdlib", "line": 448}, {"from": "composer_compute.flatten", "to": "copy", "type": "external", "category": "stdlib", "line": 692}, {"from": "composer_compute.export_composed", "to": "pathlib", "type": "external", "category": "stdlib", "line": 713}, {"from": "composer_compute.export_composed", "to": "json", "type": "external", "category": "stdlib", "line": 717}, {"from": "composer_compute.load_manifest", "to": "pathlib", "type": "external", "category": "stdlib", "line": 742}, {"from": "composer_compute.load_manifest", "to": "json", "type": "external", "category": "stdlib", "line": 753}, {"from": "composer_compute.export_manifest", "to": "pathlib", "type": "external", "category": "stdlib", "line": 900}, {"from": "composer_compute.export_manifest", "to": "json", "type": "external", "category": "stdlib", "line": 904}];
+const moduleColors = {"composer_compute": "#00d4ff"};
+
+// Edge type visibility
+const edgeVisibility = { internal: true, external: true, local: true };
+let currentLayout = 'force';
+
+// Create node lookup
+const nodeById = {};
+nodes.forEach(n => nodeById[n.id] = n);
+
+// Setup SVG
+const container = document.getElementById('graph');
+const width = container.clientWidth;
+const height = container.clientHeight || 600;
+
+const svg = d3.select("svg").attr("viewBox", [0, 0, width, height]);
+const g = svg.append("g");
+
+// Zoom behavior
+const zoom = d3.zoom()
+    .scaleExtent([0.1, 4])
+    .filter(e => !e.target.closest('.node'))
+    .on("zoom", e => g.attr("transform", e.transform));
+svg.call(zoom);
+
+// Arrow markers
+const defs = svg.append("defs");
+["internal", "external", "local"].forEach(type => {
+    const color = type === "internal" ? "#4ecdc4" : type === "external" ? "#f39c12" : "#9b59b6";
+    defs.append("marker")
+        .attr("id", `arrow-${type}`)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 20)
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-4L10,0L0,4")
+        .attr("fill", color);
+});
+
+// Build module legend
+const legendDiv = document.getElementById('module-legend');
+Object.entries(moduleColors).forEach(([mod, color]) => {
+    const item = document.createElement('div');
+    item.className = 'module-item';
+    item.innerHTML = `<div class="module-dot" style="background:${color}"></div><span class="module-name">${mod}</span>`;
+    item.onclick = () => highlightModule(mod);
+    legendDiv.appendChild(item);
+});
+
+// Process edges - resolve node references
+const processedEdges = edges.map(e => ({
+    ...e,
+    source: nodeById[e.from] || { id: e.from, x: 0, y: 0 },
+    target: nodeById[e.to] || { id: e.to, x: 0, y: 0 }
+})).filter(e => e.source && e.target);
+
+// Force simulation
+const simulation = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(processedEdges).id(d => d.id).distance(80).strength(0.5))
+    .force("charge", d3.forceManyBody().strength(-300))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force("collision", d3.forceCollide().radius(40));
+
+// Draw edges
+const edge = g.append("g").selectAll("path")
+    .data(processedEdges)
+    .join("path")
+    .attr("class", d => `edge edge-${d.type || 'internal'}`)
+    .attr("marker-end", d => `url(#arrow-${d.type || 'internal'})`);
+
+// Node size based on type
+function nodeSize(d) {
+    if (d.type === 'module') return { w: 120, h: 40 };
+    if (d.type === 'function' || d.type === 'async_function') return { w: 100, h: 30 };
+    if (d.type === 'class') return { w: 110, h: 35 };
+    return { w: 80, h: 25 };  // dependency
+}
+
+// Draw nodes
+const node = g.append("g").selectAll("g")
+    .data(nodes)
+    .join("g")
+    .attr("class", "node")
+    .call(d3.drag()
+        .on("start", dragStart)
+        .on("drag", dragging)
+        .on("end", dragEnd));
+
+node.append("rect")
+    .attr("class", d => `node-${d.type === 'dependency' ? 'dependency' : d.type === 'module' ? 'module' : 'function'}`)
+    .attr("width", d => nodeSize(d).w)
+    .attr("height", d => nodeSize(d).h)
+    .attr("x", d => -nodeSize(d).w / 2)
+    .attr("y", d => -nodeSize(d).h / 2)
+    .attr("rx", 6)
+    .attr("stroke", d => d.moduleColor || "#666");
+
+node.append("text")
+    .attr("class", "node-label")
+    .attr("text-anchor", "middle")
+    .attr("dy", d => d.signature ? -3 : 4)
+    .text(d => d.label || d.id);
+
+node.filter(d => d.signature).append("text")
+    .attr("class", "node-sublabel")
+    .attr("text-anchor", "middle")
+    .attr("dy", 10)
+    .text(d => d.signature.length > 20 ? d.signature.slice(0, 18) + ".." : d.signature);
+
+// Tooltip
+const tooltip = d3.select("#tooltip");
+node.on("mouseover", (e, d) => {
+    let html = `<b>${d.label || d.id}</b>`;
+    if (d.type) html += `<br><span style="color:#888">${d.type}</span>`;
+    if (d.signature) html += `<br><code>${d.signature}</code>`;
+    if (d.direction) html += `<br>Direction: ${d.direction}`;
+    tooltip.style("display", "block").html(html);
+})
+.on("mousemove", e => {
+    tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 10) + "px");
+})
+.on("mouseout", () => tooltip.style("display", "none"));
+
+// Click to select
+node.on("click", (e, d) => {
+    e.stopPropagation();
+    selectNode(d);
+});
+
+svg.on("click", () => clearSelection());
+
+// Update positions
+simulation.on("tick", () => {
+    edge.attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
+});
+
+// Drag functions
+function dragStart(e, d) {
+    if (!e.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+}
+function dragging(e, d) {
+    d.fx = e.x;
+    d.fy = e.y;
+}
+function dragEnd(e, d) {
+    if (!e.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+}
+
+// Selection functions
+let selectedNode = null;
+
+function selectNode(d) {
+    selectedNode = d;
+    
+    // Highlight node
+    node.classed("dim", n => n.id !== d.id && !isConnected(d, n));
+    node.select("rect").attr("stroke-width", n => n.id === d.id ? 4 : 2);
+    
+    // Highlight edges
+    edge.classed("dim", e => e.source.id !== d.id && e.target.id !== d.id);
+    edge.classed("highlight", e => e.source.id === d.id || e.target.id === d.id);
+    
+    // Update info panel
+    updateNodeInfo(d);
+    updateEdgeList(d);
+}
+
+function clearSelection() {
+    selectedNode = null;
+    node.classed("dim", false);
+    node.select("rect").attr("stroke-width", 2);
+    edge.classed("dim", false).classed("highlight", false);
+    document.getElementById('node-info').innerHTML = 'Click a node to see details';
+    document.getElementById('edge-list').innerHTML = '';
+}
+
+function isConnected(a, b) {
+    return processedEdges.some(e => 
+        (e.source.id === a.id && e.target.id === b.id) ||
+        (e.source.id === b.id && e.target.id === a.id)
+    );
+}
+
+function updateNodeInfo(d) {
+    let html = `<div class="metric"><span class="info-label">ID:</span><span class="info-value">${d.id}</span></div>`;
+    html += `<div class="metric"><span class="info-label">Type:</span><span class="info-value">${d.type}</span></div>`;
+    if (d.moduleName) html += `<div class="metric"><span class="info-label">Module:</span><span class="info-value">${d.moduleName}</span></div>`;
+    if (d.line) html += `<div class="metric"><span class="info-label">Line:</span><span class="info-value">${d.line}${d.endLine ? '-' + d.endLine : ''}</span></div>`;
+    if (d.signature) html += `<div class="metric"><span class="info-label">Signature:</span><span class="info-value" style="font-family:monospace">${d.signature}</span></div>`;
+    if (d.direction) html += `<div class="metric"><span class="info-label">Direction:</span><span class="info-value">${d.direction}</span></div>`;
+    if (d.category) html += `<div class="metric"><span class="info-label">Category:</span><span class="info-value">${d.category}</span></div>`;
+
+    if (d.metrics) {
+        html += `<div style="margin-top:10px"><b>Coupling Metrics</b></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-In:</span><span class="info-value">${d.metrics.fanIn}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-Out:</span><span class="info-value">${d.metrics.fanOut}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Instability:</span><span class="info-value">${(d.metrics.instability * 100).toFixed(1)}%</span></div>`;
+        html += `<div class="metric-bar"><div class="metric-fill" style="width:${d.metrics.instability * 100}%;background:${d.metrics.instability > 0.5 ? '#ff6b6b' : '#4ecdc4'}"></div></div>`;
+        html += `<div class="metric"><span class="info-label">Internal Edges:</span><span class="info-value">${d.metrics.internalEdges}</span></div>`;
+    }
+
+    document.getElementById('node-info').innerHTML = html;
+
+    // Update source code panel
+    updateSourcePanel(d);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function updateSourcePanel(d) {
+    const panel = document.getElementById('source-content');
+
+    if (d.source) {
+        let sourceHtml = '';
+        if (d.docstring) {
+            sourceHtml += `<div class="docstring" style="margin-bottom:8px;padding:5px;background:#1a1a2a;border-radius:3px">${escapeHtml(d.docstring)}</div>`;
+        }
+        sourceHtml += `<div class="source-code">${escapeHtml(d.source)}</div>`;
+        panel.innerHTML = sourceHtml;
+    } else if (d.type === 'module') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">Module: ${d.label}<br>Click a function to view its source code.</div>`;
+    } else if (d.type === 'dependency') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">External dependency: ${d.label}<br>Category: ${d.category || 'unknown'}</div>`;
+    } else {
+        panel.innerHTML = `<div style="color:#666;font-size:11px">No source available for this node</div>`;
+    }
+}
+
+function updateEdgeList(d) {
+    const outgoing = processedEdges.filter(e => e.source.id === d.id);
+    const incoming = processedEdges.filter(e => e.target.id === d.id);
+    
+    let html = '';
+    if (outgoing.length) {
+        html += '<div style="color:#4ecdc4;font-weight:bold;margin-bottom:5px">Outgoing →</div>';
+        outgoing.forEach(e => {
+            html += `<div class="edge-item">→ <span class="to">${e.target.id || e.to}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (incoming.length) {
+        html += '<div style="color:#f39c12;font-weight:bold;margin:10px 0 5px 0">← Incoming</div>';
+        incoming.forEach(e => {
+            html += `<div class="edge-item">← <span class="from">${e.source.id || e.from}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (!outgoing.length && !incoming.length) {
+        html = '<div style="color:#666">No connections</div>';
+    }
+    
+    document.getElementById('edge-list').innerHTML = html;
+}
+
+function highlightModule(modName) {
+    node.classed("dim", n => n.moduleName !== modName && n.type !== 'dependency');
+    edge.classed("dim", e => {
+        const srcMod = nodeById[e.source.id]?.moduleName;
+        const tgtMod = nodeById[e.target.id]?.moduleName;
+        return srcMod !== modName && tgtMod !== modName;
+    });
+}
+
+// Layout functions
+function toggleLayout(layout) {
+    currentLayout = layout;
+    document.querySelectorAll('.controls button').forEach(b => {
+        if (b.id.startsWith('btn-') && ['force', 'horizontal', 'vertical'].includes(b.id.replace('btn-', ''))) {
+            b.classList.toggle('active', b.id === `btn-${layout}`);
+        }
+    });
+    
+    if (layout === 'force') {
+        simulation.alpha(1).restart();
+    } else {
+        simulation.stop();
+        layoutNodes(layout);
+    }
+}
+
+function layoutNodes(layout) {
+    const modules = [...new Set(nodes.filter(n => n.type === 'module').map(n => n.id))];
+    const padding = 50;
+    
+    if (layout === 'horizontal') {
+        // Group by module, spread horizontally
+        modules.forEach((mod, mi) => {
+            const modNodes = nodes.filter(n => n.moduleName === mod || n.id === mod);
+            const x = padding + mi * (width - padding * 2) / Math.max(modules.length - 1, 1);
+            modNodes.forEach((n, ni) => {
+                n.x = x;
+                n.y = padding + ni * 50;
+            });
+        });
+        // Dependencies on the right
+        const deps = nodes.filter(n => n.type === 'dependency');
+        deps.forEach((n, i) => {
+            n.x = width - padding;
+            n.y = padding + i * 40;
+        });
+    } else if (layout === 'vertical') {
+        // Modules at top, functions below, dependencies at bottom
+        const modNodes = nodes.filter(n => n.type === 'module');
+        const funcNodes = nodes.filter(n => n.type === 'function' || n.type === 'async_function' || n.type === 'class');
+        const depNodes = nodes.filter(n => n.type === 'dependency');
+        
+        modNodes.forEach((n, i) => {
+            n.x = padding + i * 150;
+            n.y = padding;
+        });
+        funcNodes.forEach((n, i) => {
+            n.x = padding + (i % 6) * 130;
+            n.y = 120 + Math.floor(i / 6) * 60;
+        });
+        depNodes.forEach((n, i) => {
+            n.x = padding + (i % 8) * 100;
+            n.y = height - padding - 50;
+        });
+    }
+    
+    // Update positions
+    node.transition().duration(500).attr("transform", d => `translate(${d.x},${d.y})`);
+    edge.transition().duration(500).attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+}
+
+// Edge type toggle
+function toggleEdgeType(type) {
+    edgeVisibility[type] = !edgeVisibility[type];
+    document.getElementById(`btn-${type}`).classList.toggle('active', edgeVisibility[type]);
+    edge.style("display", d => edgeVisibility[d.type || 'internal'] ? null : "none");
+}
+
+// View controls
+function resetView() {
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+}
+
+function fitToView() {
+    const bounds = g.node().getBBox();
+    const scale = Math.min(width / bounds.width, height / bounds.height) * 0.9;
+    const tx = (width - bounds.width * scale) / 2 - bounds.x * scale;
+    const ty = (height - bounds.height * scale) / 2 - bounds.y * scale;
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
+// Initial fit
+setTimeout(fitToView, 1000);
+</script>
+</body>
+</html>

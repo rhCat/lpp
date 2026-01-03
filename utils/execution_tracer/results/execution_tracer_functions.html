@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Function Graph: execution_tracer</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #0f0f23; color: #eee; }
+h1 { color: #00d4ff; margin-bottom: 5px; font-size: 24px; }
+.subtitle { color: #888; margin-bottom: 15px; font-size: 14px; }
+#container { display: flex; gap: 20px; height: calc(100vh - 120px); }
+#graph { flex: 1; position: relative; }
+#sidebar { width: 350px; background: #1a1a2e; padding: 15px; border-radius: 8px; overflow-y: auto; }
+svg { background: #16213e; border-radius: 8px; width: 100%; height: 100%; }
+
+/* Node styles */
+.node { cursor: pointer; }
+.node-module { fill: #2a2a4a; stroke-width: 3; }
+.node-function { fill: #3a3a5a; stroke-width: 2; }
+.node-dependency { fill: #1a1a3a; stroke: #666; stroke-width: 1; stroke-dasharray: 4; }
+.node-label { font-size: 11px; fill: #fff; pointer-events: none; font-weight: 500; }
+.node-sublabel { font-size: 9px; fill: #888; pointer-events: none; }
+
+/* Edge styles */
+.edge { fill: none; stroke-opacity: 0.6; }
+.edge-internal { stroke: #4ecdc4; stroke-width: 2; }
+.edge-external { stroke: #f39c12; stroke-width: 1.5; stroke-dasharray: 4; }
+.edge-local { stroke: #9b59b6; stroke-width: 2; }
+.edge-label { font-size: 8px; fill: #666; pointer-events: none; }
+
+/* Highlight styles */
+.highlight { stroke-width: 3 !important; stroke-opacity: 1 !important; }
+.dim { opacity: 0.2; }
+
+/* Controls */
+.controls { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.controls button { background: #3a3a5a; color: #fff; border: 1px solid #555; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.controls button:hover { background: #4a4a6a; }
+.controls button.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
+
+/* Module legend */
+.module-legend { margin-top: 15px; }
+.module-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer; }
+.module-item:hover { background: #2a2a4a; }
+.module-dot { width: 12px; height: 12px; border-radius: 3px; }
+.module-name { font-size: 12px; }
+
+/* Info panel */
+h3 { color: #00d4ff; margin: 15px 0 8px 0; font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+.info-section { font-size: 12px; line-height: 1.6; }
+.info-label { color: #888; }
+.info-value { color: #fff; }
+
+/* Source code panel */
+.source-panel { margin-top: 10px; }
+.source-code { background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 10px; font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; line-height: 1.4; overflow-x: auto; max-height: 300px; overflow-y: auto; white-space: pre; color: #b8b8b8; }
+.source-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.source-toggle { background: #3a3a5a; color: #fff; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; }
+.source-toggle:hover { background: #4a4a6a; }
+.docstring { color: #6a9955; font-style: italic; }
+.metric { display: flex; justify-content: space-between; padding: 3px 0; }
+.metric-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 2px; }
+.metric-fill { height: 100%; border-radius: 2px; }
+
+/* Edge list */
+.edge-list { max-height: 200px; overflow-y: auto; }
+.edge-item { padding: 4px 0; border-bottom: 1px solid #333; font-size: 11px; }
+.edge-item .from { color: #4ecdc4; }
+.edge-item .to { color: #f39c12; }
+.edge-item .type { color: #666; font-size: 10px; }
+
+/* Tooltip */
+#tooltip { position: absolute; background: #1a1a2e; border: 1px solid #00d4ff; padding: 10px; border-radius: 4px; pointer-events: none; display: none; max-width: 300px; z-index: 100; font-size: 11px; }
+</style>
+</head>
+<body>
+<h1>Function Graph: execution_tracer</h1>
+<div class="subtitle">Stackable function dependency visualization • Drag nodes to rearrange • Click to inspect</div>
+
+<div class="controls">
+  <button onclick="resetView()">Reset View</button>
+  <button onclick="fitToView()">Fit</button>
+  <button onclick="toggleLayout('force')" id="btn-force" class="active">Force</button>
+  <button onclick="toggleLayout('horizontal')" id="btn-horizontal">Horizontal</button>
+  <button onclick="toggleLayout('vertical')" id="btn-vertical">Vertical</button>
+  <span style="margin-left: 10px; color: #666">|</span>
+  <button onclick="toggleEdgeType('internal')" id="btn-internal" class="active">Internal</button>
+  <button onclick="toggleEdgeType('external')" id="btn-external" class="active">External</button>
+  <button onclick="toggleEdgeType('local')" id="btn-local" class="active">Local</button>
+</div>
+
+<div id="container">
+  <div id="graph"><svg></svg></div>
+  <div id="sidebar">
+    <h3>Modules</h3>
+    <div class="module-legend" id="module-legend"></div>
+
+    <h3>Selected Node</h3>
+    <div class="info-section" id="node-info">Click a node to see details</div>
+
+    <h3>Source Code</h3>
+    <div class="source-panel" id="source-panel">
+      <div id="source-content" style="color:#666;font-size:11px">Click a function to view source</div>
+    </div>
+
+    <h3>Connections</h3>
+    <div class="edge-list" id="edge-list"></div>
+  </div>
+</div>
+<div id="tooltip"></div>
+
+<script>
+const nodes = [{"id": "tracer_compute", "type": "module", "label": "tracer_compute", "metrics": {"fanIn": 19, "fanOut": 5, "instability": 0.208, "internalEdges": 4, "externalCallCount": 12, "localCallCount": 0, "callsByCategory": {"stdlib": 12}, "localDependencies": []}, "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.init_tracer", "type": "function", "label": "init_tracer", "direction": "inbound", "parent": "tracer_compute", "line": 106, "endLine": 128, "signature": "(params) -> Dict[]", "docstring": "Initialize tracer with configuration.", "source": "def init_tracer(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Initialize tracer with configuration.\"\"\"\n    output_format = params.get(\"output_format\", \"human\")\n    include_context = params.get(\"include_context\", True)\n    include_timing = params.get(\"include_timing\", True)\n    max_spans = params.get(\"max_spans\", 10000)\n\n    if output_format not in OUTPUT_FORMATS:\n        output_format = \"human\"\n\n    config = {\n        \"output_format\": output_format,\n        \"include_context\": include_context,\n        \"include_timing\": include_timing,\n        \"max_spans\": max_spans,\n        \"initialized_at\": _now_iso()\n    }\n\n    return {\n        \"config\": config,\n        \"output_format\": output_format,\n        \"output\": f\"Tracer initialized with format: {output_format}\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.start_trace", "type": "function", "label": "start_trace", "direction": "inbound", "parent": "tracer_compute", "line": 135, "endLine": 175, "signature": "(params) -> Dict[]", "docstring": "Start a new trace for a blueprint execution.", "source": "def start_trace(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Start a new trace for a blueprint execution.\"\"\"\n    config = params.get(\"config\") or {}\n    blueprint_id = params.get(\"blueprint_id\", \"unknown\")\n    blueprint_name = params.get(\"blueprint_name\", \"Unknown Blueprint\")\n    metadata = params.get(\"metadata\") or {}\n\n    trace_id = _gen_trace_id()\n    root_span_id = _gen_span_id()\n    start_time = _now_iso()\n\n    # Create root span\n    root_span = {\n        \"span_id\": root_span_id,\n        \"trace_id\": trace_id,\n        \"parent_span_id\": None,\n        \"name\": f\"blueprint:{blueprint_name}\",\n        \"span_type\": \"blueprint\",\n        \"start_time\": start_time,\n        \"end_time\": None,\n        \"duration_ms\": None,\n        \"status\": \"OK\",\n        \"attributes\": {\n            \"lpp.blueprint.id\": blueprint_id,\n            \"lpp.blueprint.name\": blueprint_name,\n            \"lpp.blueprint.metadata\": metadata\n        },\n        \"events\": []\n    }\n\n    return {\n        \"trace_id\": trace_id,\n        \"root_span_id\": root_span_id,\n        \"spans\": [root_span],\n        \"active_spans\": {root_span_id: root_span},\n        \"events\": [],\n        \"blueprint_id\": blueprint_id,\n        \"blueprint_name\": blueprint_name,\n        \"start_time\": start_time,\n        \"output\": f\"Trace started: {trace_id} for {blueprint_name}\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.end_trace", "type": "function", "label": "end_trace", "direction": "inbound", "parent": "tracer_compute", "line": 178, "endLine": 213, "signature": "(params) -> Dict[]", "docstring": "End the current trace.", "source": "def end_trace(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"End the current trace.\"\"\"\n    trace_id = params.get(\"trace_id\")\n    root_span_id = params.get(\"root_span_id\")\n    spans = params.get(\"spans\", [])\n    active_spans = params.get(\"active_spans\", {})\n    start_time = params.get(\"start_time\")\n\n    end_time = _now_iso()\n\n    # Close all active spans\n    new_spans = []\n    for span in spans:\n        if span[\"span_id\"] in active_spans:\n            span = dict(span)\n            span[\"end_time\"] = end_time\n            span[\"duration_ms\"] = _duration_ms(span[\"start_time\"], end_time)\n        new_spans.append(span)\n\n    # Find and update root span\n    for i, span in enumerate(new_spans):\n        if span[\"span_id\"] == root_span_id:\n            new_spans[i] = dict(span)\n            new_spans[i][\"end_time\"] = end_time\n            new_spans[i][\"duration_ms\"] = _duration_ms(start_time, end_time)\n            break\n\n    total_duration = _duration_ms(start_time, end_time)\n\n    return {\n        \"spans\": new_spans,\n        \"active_spans\": {},\n        \"end_time\": end_time,\n        \"output\": f\"Trace ended: {trace_id} ({total_duration:.2f}ms, \"\n                  f\"{len(new_spans)} spans)\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.clear_trace", "type": "function", "label": "clear_trace", "direction": "inbound", "parent": "tracer_compute", "line": 216, "endLine": 229, "signature": "(params) -> Dict[]", "docstring": "Clear all trace data.", "source": "def clear_trace(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Clear all trace data.\"\"\"\n    return {\n        \"trace_id\": None,\n        \"root_span_id\": None,\n        \"spans\": None,\n        \"active_spans\": None,\n        \"events\": None,\n        \"start_time\": None,\n        \"end_time\": None,\n        \"analysis_result\": None,\n        \"formatted_output\": None,\n        \"output\": \"Trace cleared\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.record_span", "type": "function", "label": "record_span", "direction": "inbound", "parent": "tracer_compute", "line": 236, "endLine": 272, "signature": "(params) -> Dict[]", "docstring": "Record a complete span (already timed).", "source": "def record_span(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Record a complete span (already timed).\"\"\"\n    trace_id = params.get(\"trace_id\")\n    spans = params.get(\"spans\", [])\n    span_type = params.get(\"span_type\", \"generic\")\n    name = params.get(\"name\", \"unnamed\")\n    parent_span_id = params.get(\"parent_span_id\")\n    attributes = params.get(\"attributes\") or {}\n    start_time = params.get(\"start_time\") or _now_iso()\n    end_time = params.get(\"end_time\") or _now_iso()\n    duration_ms = params.get(\"duration_ms\")\n\n    if duration_ms is None:\n        duration_ms = _duration_ms(start_time, end_time)\n\n    span_id = _gen_span_id()\n\n    span = {\n        \"span_id\": span_id,\n        \"trace_id\": trace_id,\n        \"parent_span_id\": parent_span_id,\n        \"name\": name,\n        \"span_type\": span_type,\n        \"start_time\": start_time,\n        \"end_time\": end_time,\n        \"duration_ms\": duration_ms,\n        \"status\": \"OK\",\n        \"attributes\": attributes,\n        \"events\": []\n    }\n\n    new_spans = spans + [span]\n\n    return {\n        \"spans\": new_spans,\n        \"output\": f\"Recorded span: {name} ({duration_ms:.2f}ms)\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.start_span", "type": "function", "label": "start_span", "direction": "inbound", "parent": "tracer_compute", "line": 275, "endLine": 314, "signature": "(params) -> Dict[]", "docstring": "Start a new span (for timed events).", "source": "def start_span(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Start a new span (for timed events).\"\"\"\n    trace_id = params.get(\"trace_id\")\n    spans = params.get(\"spans\", [])\n    active_spans = params.get(\"active_spans\", {})\n    span_type = params.get(\"span_type\", \"generic\")\n    name = params.get(\"name\", \"unnamed\")\n    parent_span_id = params.get(\"parent_span_id\")\n    attributes = params.get(\"attributes\") or {}\n\n    # Auto-parent to current active span if not specified\n    if parent_span_id is None:\n        parent_span_id = _get_current_span_id(active_spans)\n\n    span_id = _gen_span_id()\n    start_time = _now_iso()\n\n    span = {\n        \"span_id\": span_id,\n        \"trace_id\": trace_id,\n        \"parent_span_id\": parent_span_id,\n        \"name\": name,\n        \"span_type\": span_type,\n        \"start_time\": start_time,\n        \"end_time\": None,\n        \"duration_ms\": None,\n        \"status\": \"UNSET\",\n        \"attributes\": attributes,\n        \"events\": []\n    }\n\n    new_spans = spans + [span]\n    new_active = dict(active_spans)\n    new_active[span_id] = span\n\n    return {\n        \"spans\": new_spans,\n        \"active_spans\": new_active,\n        \"output\": f\"Started span: {name} [{span_id[:8]}]\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.end_span", "type": "function", "label": "end_span", "direction": "inbound", "parent": "tracer_compute", "line": 317, "endLine": 361, "signature": "(params) -> Dict[]", "docstring": "End an active span.", "source": "def end_span(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"End an active span.\"\"\"\n    span_id = params.get(\"span_id\")\n    spans = params.get(\"spans\", [])\n    active_spans = params.get(\"active_spans\", {})\n    attributes = params.get(\"attributes\") or {}\n    status = params.get(\"status\", \"OK\")\n\n    if not span_id:\n        # End most recent active span\n        span_id = _get_current_span_id(active_spans)\n\n    if not span_id or span_id not in active_spans:\n        return {\n            \"spans\": spans,\n            \"active_spans\": active_spans,\n            \"output\": f\"No active span to end: {span_id}\"\n        }\n\n    end_time = _now_iso()\n\n    new_spans = []\n    span_name = \"unknown\"\n    duration = 0.0\n\n    for span in spans:\n        if span[\"span_id\"] == span_id:\n            span = dict(span)\n            span[\"end_time\"] = end_time\n            span[\"duration_ms\"] = _duration_ms(span[\"start_time\"], end_time)\n            span[\"status\"] = status\n            span[\"attributes\"].update(attributes)\n            span_name = span[\"name\"]\n            duration = span[\"duration_ms\"]\n        new_spans.append(span)\n\n    new_active = dict(active_spans)\n    if span_id in new_active:\n        del new_active[span_id]\n\n    return {\n        \"spans\": new_spans,\n        \"active_spans\": new_active,\n        \"output\": f\"Ended span: {span_name} ({duration:.2f}ms)\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.record_state_change", "type": "function", "label": "record_state_change", "direction": "inbound", "parent": "tracer_compute", "line": 368, "endLine": 421, "signature": "(params) -> Dict[]", "docstring": "Record a state transition event.", "source": "def record_state_change(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Record a state transition event.\"\"\"\n    trace_id = params.get(\"trace_id\")\n    spans = params.get(\"spans\", [])\n    events = params.get(\"events\", [])\n    active_spans = params.get(\"active_spans\", {})\n    from_state = params.get(\"from_state\")\n    to_state = params.get(\"to_state\")\n    transition_id = params.get(\"transition_id\")\n    trigger_event = params.get(\"trigger_event\")\n\n    timestamp = _now_iso()\n    parent_span_id = _get_current_span_id(active_spans)\n\n    # Create transition span\n    span_id = _gen_span_id()\n    span = {\n        \"span_id\": span_id,\n        \"trace_id\": trace_id,\n        \"parent_span_id\": parent_span_id,\n        \"name\": f\"transition:{from_state}->{to_state}\",\n        \"span_type\": \"transition\",\n        \"start_time\": timestamp,\n        \"end_time\": timestamp,\n        \"duration_ms\": 0,\n        \"status\": \"OK\",\n        \"attributes\": {\n            \"lpp.transition.id\": transition_id,\n            \"lpp.transition.from\": from_state,\n            \"lpp.transition.to\": to_state,\n            \"lpp.transition.event\": trigger_event\n        },\n        \"events\": []\n    }\n\n    # Create event entry\n    event = {\n        \"timestamp\": timestamp,\n        \"type\": \"state_change\",\n        \"trace_id\": trace_id,\n        \"span_id\": span_id,\n        \"attributes\": {\n            \"from_state\": from_state,\n            \"to_state\": to_state,\n            \"transition_id\": transition_id,\n            \"trigger_event\": trigger_event\n        }\n    }\n\n    return {\n        \"spans\": spans + [span],\n        \"events\": events + [event],\n        \"output\": f\"State: {from_state} -> {to_state} [{trigger_event}]\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.record_gate_eval", "type": "function", "label": "record_gate_eval", "direction": "inbound", "parent": "tracer_compute", "line": 424, "endLine": 477, "signature": "(params) -> Dict[]", "docstring": "Record a gate evaluation.", "source": "def record_gate_eval(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Record a gate evaluation.\"\"\"\n    trace_id = params.get(\"trace_id\")\n    spans = params.get(\"spans\", [])\n    events = params.get(\"events\", [])\n    active_spans = params.get(\"active_spans\", {})\n    gate_id = params.get(\"gate_id\")\n    expression = params.get(\"expression\")\n    result = params.get(\"result\")\n    input_values = params.get(\"input_values\") or {}\n\n    timestamp = _now_iso()\n    parent_span_id = _get_current_span_id(active_spans)\n\n    span_id = _gen_span_id()\n    span = {\n        \"span_id\": span_id,\n        \"trace_id\": trace_id,\n        \"parent_span_id\": parent_span_id,\n        \"name\": f\"gate:{gate_id}\",\n        \"span_type\": \"gate\",\n        \"start_time\": timestamp,\n        \"end_time\": timestamp,\n        \"duration_ms\": 0,\n        \"status\": \"OK\" if result else \"ERROR\",\n        \"attributes\": {\n            \"lpp.gate.id\": gate_id,\n            \"lpp.gate.expression\": expression,\n            \"lpp.gate.result\": result,\n            \"lpp.gate.inputs\": input_values\n        },\n        \"events\": []\n    }\n\n    event = {\n        \"timestamp\": timestamp,\n        \"type\": \"gate_eval\",\n        \"trace_id\": trace_id,\n        \"span_id\": span_id,\n        \"attributes\": {\n            \"gate_id\": gate_id,\n            \"expression\": expression,\n            \"result\": result,\n            \"input_values\": input_values\n        }\n    }\n\n    result_str = \"PASS\" if result else \"FAIL\"\n\n    return {\n        \"spans\": spans + [span],\n        \"events\": events + [event],\n        \"output\": f\"Gate {gate_id}: {result_str}\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.record_action", "type": "function", "label": "record_action", "direction": "inbound", "parent": "tracer_compute", "line": 480, "endLine": 531, "signature": "(params) -> Dict[]", "docstring": "Record an action execution.", "source": "def record_action(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Record an action execution.\"\"\"\n    trace_id = params.get(\"trace_id\")\n    spans = params.get(\"spans\", [])\n    events = params.get(\"events\", [])\n    active_spans = params.get(\"active_spans\", {})\n    action_id = params.get(\"action_id\")\n    action_type = params.get(\"action_type\", \"unknown\")\n    input_map = params.get(\"input_map\") or {}\n    output_map = params.get(\"output_map\") or {}\n    duration_ms = params.get(\"duration_ms\", 0)\n\n    timestamp = _now_iso()\n    parent_span_id = _get_current_span_id(active_spans)\n\n    span_id = _gen_span_id()\n    span = {\n        \"span_id\": span_id,\n        \"trace_id\": trace_id,\n        \"parent_span_id\": parent_span_id,\n        \"name\": f\"action:{action_id}\",\n        \"span_type\": \"action\",\n        \"start_time\": timestamp,\n        \"end_time\": timestamp,\n        \"duration_ms\": duration_ms,\n        \"status\": \"OK\",\n        \"attributes\": {\n            \"lpp.action.id\": action_id,\n            \"lpp.action.type\": action_type,\n            \"lpp.action.input_map\": input_map,\n            \"lpp.action.output_map\": output_map\n        },\n        \"events\": []\n    }\n\n    event = {\n        \"timestamp\": timestamp,\n        \"type\": \"action\",\n        \"trace_id\": trace_id,\n        \"span_id\": span_id,\n        \"attributes\": {\n            \"action_id\": action_id,\n            \"action_type\": action_type,\n            \"duration_ms\": duration_ms\n        }\n    }\n\n    return {\n        \"spans\": spans + [span],\n        \"events\": events + [event],\n        \"output\": f\"Action {action_id} ({action_type}) [{duration_ms:.2f}ms]\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.record_event", "type": "function", "label": "record_event", "direction": "inbound", "parent": "tracer_compute", "line": 534, "endLine": 559, "signature": "(params) -> Dict[]", "docstring": "Record an event dispatch.", "source": "def record_event(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Record an event dispatch.\"\"\"\n    trace_id = params.get(\"trace_id\")\n    events = params.get(\"events\", [])\n    active_spans = params.get(\"active_spans\", {})\n    event_name = params.get(\"event_name\")\n    event_payload = params.get(\"event_payload\") or {}\n\n    timestamp = _now_iso()\n    span_id = _get_current_span_id(active_spans)\n\n    event = {\n        \"timestamp\": timestamp,\n        \"type\": \"event_dispatch\",\n        \"trace_id\": trace_id,\n        \"span_id\": span_id,\n        \"attributes\": {\n            \"event_name\": event_name,\n            \"event_payload\": event_payload\n        }\n    }\n\n    return {\n        \"events\": events + [event],\n        \"output\": f\"Event: {event_name}\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.record_context_change", "type": "function", "label": "record_context_change", "direction": "inbound", "parent": "tracer_compute", "line": 562, "endLine": 592, "signature": "(params) -> Dict[]", "docstring": "Record a context mutation.", "source": "def record_context_change(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Record a context mutation.\"\"\"\n    trace_id = params.get(\"trace_id\")\n    events = params.get(\"events\", [])\n    active_spans = params.get(\"active_spans\", {})\n    key = params.get(\"key\")\n    old_value = params.get(\"old_value\")\n    new_value = params.get(\"new_value\")\n\n    timestamp = _now_iso()\n    span_id = _get_current_span_id(active_spans)\n\n    event = {\n        \"timestamp\": timestamp,\n        \"type\": \"context_mutation\",\n        \"trace_id\": trace_id,\n        \"span_id\": span_id,\n        \"attributes\": {\n            \"key\": key,\n            \"old_value\": old_value,\n            \"new_value\": new_value\n        }\n    }\n\n    old_str = _truncate(str(old_value), 20)\n    new_str = _truncate(str(new_value), 20)\n\n    return {\n        \"events\": events + [event],\n        \"output\": f\"Context: {key} = {old_str} -> {new_str}\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.format_otlp", "type": "function", "label": "format_otlp", "direction": "inbound", "parent": "tracer_compute", "line": 606, "endLine": 683, "signature": "(params) -> Dict[]", "docstring": "Format trace as OpenTelemetry Protocol JSON.", "source": "def format_otlp(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Format trace as OpenTelemetry Protocol JSON.\"\"\"\n    trace_id = params.get(\"trace_id\")\n    spans = params.get(\"spans\", [])\n    events = params.get(\"events\", [])\n    blueprint_id = params.get(\"blueprint_id\")\n    blueprint_name = params.get(\"blueprint_name\")\n    start_time = params.get(\"start_time\")\n    end_time = params.get(\"end_time\")\n\n    # Convert to OTLP format\n    otlp_spans = []\n    for span in spans:\n        otlp_span = {\n            \"traceId\": span.get(\"trace_id\", \"\"),\n            \"spanId\": span.get(\"span_id\", \"\"),\n            \"parentSpanId\": span.get(\"parent_span_id\", \"\"),\n            \"name\": span.get(\"name\", \"\"),\n            \"kind\": 1,  # SPAN_KIND_INTERNAL\n            \"startTimeUnixNano\": _iso_to_ns(span.get(\"start_time\")),\n            \"endTimeUnixNano\": _iso_to_ns(span.get(\"end_time\")),\n            \"attributes\": _attrs_to_otlp(span.get(\"attributes\", {})),\n            \"status\": {\n                \"code\": 1 if span.get(\"status\") == \"OK\" else 2,\n                \"message\": span.get(\"status\", \"OK\")\n            },\n            \"events\": [\n                {\n                    \"timeUnixNano\": _iso_to_ns(e.get(\"timestamp\")),\n                    \"name\": e.get(\"type\", \"event\"),\n                    \"attributes\": _attrs_to_otlp(e.get(\"attributes\", {}))\n                }\n                for e in span.get(\"events\", [])\n            ]\n        }\n        otlp_spans.append(otlp_span)\n\n    # Add trace-level events as span events on root\n    for evt in events:\n        otlp_event = {\n            \"timeUnixNano\": _iso_to_ns(evt.get(\"timestamp\")),\n            \"name\": evt.get(\"type\", \"event\"),\n            \"attributes\": _attrs_to_otlp(evt.get(\"attributes\", {}))\n        }\n        # Add to first (root) span\n        if otlp_spans:\n            otlp_spans[0][\"events\"].append(otlp_event)\n\n    otlp_doc = {\n        \"resourceSpans\": [{\n            \"resource\": {\n                \"attributes\": [\n                    {\"key\": \"service.name\",\n                     \"value\": {\"stringValue\": OTLP_SERVICE_NAME}},\n                    {\"key\": \"service.version\",\n                     \"value\": {\"stringValue\": OTLP_SERVICE_VERSION}},\n                    {\"key\": \"lpp.blueprint.id\",\n                     \"value\": {\"stringValue\": blueprint_id or \"\"}},\n                    {\"key\": \"lpp.blueprint.name\",\n                     \"value\": {\"stringValue\": blueprint_name or \"\"}}\n                ]\n            },\n            \"scopeSpans\": [{\n                \"scope\": {\n                    \"name\": \"lpp-tracer\",\n                    \"version\": \"1.0.0\"\n                },\n                \"spans\": otlp_spans\n            }]\n        }]\n    }\n\n    formatted = json.dumps(otlp_doc, indent=2)\n\n    return {\n        \"formatted_output\": formatted,\n        \"output\": f\"Formatted as OTLP JSON ({len(otlp_spans)} spans)\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.format_jsonl", "type": "function", "label": "format_jsonl", "direction": "inbound", "parent": "tracer_compute", "line": 715, "endLine": 757, "signature": "(params) -> Dict[]", "docstring": "Format trace as JSON Lines (one JSON object per line).", "source": "def format_jsonl(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Format trace as JSON Lines (one JSON object per line).\"\"\"\n    trace_id = params.get(\"trace_id\")\n    spans = params.get(\"spans\", [])\n    events = params.get(\"events\", [])\n\n    lines = []\n\n    # Add spans\n    for span in spans:\n        line = {\n            \"type\": \"span\",\n            \"trace_id\": trace_id,\n            \"span_id\": span.get(\"span_id\"),\n            \"parent_span_id\": span.get(\"parent_span_id\"),\n            \"name\": span.get(\"name\"),\n            \"span_type\": span.get(\"span_type\"),\n            \"start_time\": span.get(\"start_time\"),\n            \"end_time\": span.get(\"end_time\"),\n            \"duration_ms\": span.get(\"duration_ms\"),\n            \"status\": span.get(\"status\"),\n            \"attributes\": span.get(\"attributes\", {})\n        }\n        lines.append(json.dumps(line, default=str))\n\n    # Add events\n    for evt in events:\n        line = {\n            \"type\": \"event\",\n            \"trace_id\": trace_id,\n            \"span_id\": evt.get(\"span_id\"),\n            \"timestamp\": evt.get(\"timestamp\"),\n            \"event_type\": evt.get(\"type\"),\n            \"attributes\": evt.get(\"attributes\", {})\n        }\n        lines.append(json.dumps(line, default=str))\n\n    formatted = \"\\n\".join(lines)\n\n    return {\n        \"formatted_output\": formatted,\n        \"output\": f\"Formatted as JSON Lines ({len(lines)} lines)\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.format_human", "type": "function", "label": "format_human", "direction": "inbound", "parent": "tracer_compute", "line": 760, "endLine": 846, "signature": "(params) -> Dict[]", "docstring": "Format trace as human-readable text.", "source": "def format_human(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Format trace as human-readable text.\"\"\"\n    trace_id = params.get(\"trace_id\")\n    spans = params.get(\"spans\", [])\n    events = params.get(\"events\", [])\n    blueprint_name = params.get(\"blueprint_name\", \"Unknown\")\n    start_time = params.get(\"start_time\")\n    end_time = params.get(\"end_time\")\n\n    total_duration = _duration_ms(start_time, end_time) if end_time else 0\n\n    lines = [\n        \"=\" * 70,\n        f\"  L++ Execution Trace: {blueprint_name}\",\n        \"=\" * 70,\n        f\"  Trace ID: {trace_id}\",\n        f\"  Started:  {start_time}\",\n        f\"  Ended:    {end_time or 'in progress'}\",\n        f\"  Duration: {total_duration:.2f}ms\",\n        f\"  Spans:    {len(spans)}\",\n        f\"  Events:   {len(events)}\",\n        \"=\" * 70,\n        \"\",\n        \"SPANS:\",\n        \"-\" * 70\n    ]\n\n    # Sort spans by start time\n    sorted_spans = sorted(spans, key=lambda s: s.get(\"start_time\", \"\"))\n\n    for span in sorted_spans:\n        name = span.get(\"name\", \"unknown\")\n        span_type = span.get(\"span_type\", \"generic\")\n        dur = span.get(\"duration_ms\", 0) or 0\n        status = span.get(\"status\", \"?\")\n\n        lines.append(\n            f\"  [{span_type:12}] {name:40} {dur:8.2f}ms [{status}]\"\n        )\n\n        # Show key attributes\n        attrs = span.get(\"attributes\", {})\n        for k, v in attrs.items():\n            if k.startswith(\"lpp.\"):\n                short_key = k.replace(\"lpp.\", \"\")\n                val_str = _truncate(str(v), 40)\n                lines.append(f\"                  {short_key}: {val_str}\")\n\n    lines.extend([\n        \"\",\n        \"EVENTS:\",\n        \"-\" * 70\n    ])\n\n    # Sort events by timestamp\n    sorted_events = sorted(events, key=lambda e: e.get(\"timestamp\", \"\"))\n\n    for evt in sorted_events:\n        ts = evt.get(\"timestamp\", \"\")\n        if ts:\n            ts = ts.split(\"T\")[1][:12]  # Just time portion\n        evt_type = evt.get(\"type\", \"unknown\")\n        attrs = evt.get(\"attributes\", {})\n\n        summary = \"\"\n        if evt_type == \"state_change\":\n            summary = f\"{attrs.get('from_state')} -> {attrs.get('to_state')}\"\n        elif evt_type == \"gate_eval\":\n            result = \"PASS\" if attrs.get(\"result\") else \"FAIL\"\n            summary = f\"{attrs.get('gate_id')}: {result}\"\n        elif evt_type == \"action\":\n            summary = f\"{attrs.get('action_id')} ({attrs.get('action_type')})\"\n        elif evt_type == \"event_dispatch\":\n            summary = attrs.get(\"event_name\", \"\")\n        elif evt_type == \"context_mutation\":\n            summary = f\"{attrs.get('key')} changed\"\n\n        lines.append(f\"  [{ts}] {evt_type:18} {summary}\")\n\n    lines.extend([\"\", \"=\" * 70])\n\n    formatted = \"\\n\".join(lines)\n\n    return {\n        \"formatted_output\": formatted,\n        \"output\": f\"Formatted as human-readable ({len(lines)} lines)\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.format_timeline", "type": "function", "label": "format_timeline", "direction": "inbound", "parent": "tracer_compute", "line": 849, "endLine": 967, "signature": "(params) -> Dict[]", "docstring": "Format trace as ASCII timeline visualization.", "source": "def format_timeline(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Format trace as ASCII timeline visualization.\"\"\"\n    trace_id = params.get(\"trace_id\")\n    spans = params.get(\"spans\", [])\n    events = params.get(\"events\", [])\n    blueprint_name = params.get(\"blueprint_name\", \"Unknown\")\n    start_time = params.get(\"start_time\")\n    end_time = params.get(\"end_time\")\n\n    if not spans:\n        return {\n            \"formatted_output\": \"No spans to visualize\",\n            \"output\": \"No spans to visualize\"\n        }\n\n    total_duration = _duration_ms(start_time, end_time) if end_time else 1000\n    if total_duration == 0:\n        total_duration = 1  # Avoid division by zero\n\n    width = 60  # Timeline width in characters\n\n    lines = [\n        \"=\" * 70,\n        f\"  Timeline: {blueprint_name}\",\n        f\"  Trace: {trace_id}\",\n        f\"  Total Duration: {total_duration:.2f}ms\",\n        \"=\" * 70,\n        \"\",\n        f\"{'Span':<30} {'Timeline':>{width}} {'ms':>8}\",\n        \"-\" * 100\n    ]\n\n    # Sort spans by start time\n    sorted_spans = sorted(spans, key=lambda s: s.get(\"start_time\", \"\"))\n\n    trace_start = _parse_iso(start_time) if start_time else None\n\n    for span in sorted_spans:\n        name = span.get(\"name\", \"unknown\")[:28]\n        span_start = span.get(\"start_time\")\n        span_end = span.get(\"end_time\") or end_time\n        dur = span.get(\"duration_ms\", 0) or 0\n\n        # Calculate position on timeline\n        if trace_start and span_start:\n            start_offset = _duration_ms(start_time, span_start)\n            end_offset = _duration_ms(start_time, span_end) if span_end else \\\n                start_offset + dur\n        else:\n            start_offset = 0\n            end_offset = dur\n\n        # Convert to character positions\n        start_pos = int((start_offset / total_duration) * width)\n        end_pos = int((end_offset / total_duration) * width)\n\n        start_pos = max(0, min(width - 1, start_pos))\n        end_pos = max(start_pos + 1, min(width, end_pos))\n\n        # Build timeline bar\n        bar = [\".\"] * width\n        bar_char = \"#\"\n\n        # Use different chars for different span types\n        span_type = span.get(\"span_type\", \"\")\n        if span_type == \"transition\":\n            bar_char = \">\"\n        elif span_type == \"gate\":\n            bar_char = \"?\"\n        elif span_type == \"action\":\n            bar_char = \"*\"\n        elif span_type == \"blueprint\":\n            bar_char = \"=\"\n\n        for i in range(start_pos, end_pos):\n            bar[i] = bar_char\n\n        timeline_str = \"\".join(bar)\n        lines.append(f\"{name:<30} |{timeline_str}| {dur:>7.2f}\")\n\n    # Add legend\n    lines.extend([\n        \"\",\n        \"-\" * 100,\n        \"Legend: = blueprint  > transition  ? gate  * action  # other\",\n        \"\",\n        \"Events:\",\n        \"-\" * 100\n    ])\n\n    # Show events on timeline\n    sorted_events = sorted(events, key=lambda e: e.get(\"timestamp\", \"\"))\n\n    for evt in sorted_events[:20]:  # Limit to 20 events\n        ts = evt.get(\"timestamp\")\n        evt_type = evt.get(\"type\", \"unknown\")[:15]\n\n        if trace_start and ts:\n            offset = _duration_ms(start_time, ts)\n            pos = int((offset / total_duration) * width)\n            pos = max(0, min(width - 1, pos))\n        else:\n            pos = 0\n\n        # Build marker line\n        marker = [\" \"] * width\n        marker[pos] = \"v\"\n        marker_str = \"\".join(marker)\n\n        lines.append(f\"{evt_type:<30} |{marker_str}|\")\n\n    lines.append(\"=\" * 70)\n\n    formatted = \"\\n\".join(lines)\n\n    return {\n        \"formatted_output\": formatted,\n        \"output\": f\"Formatted as timeline ({len(sorted_spans)} spans)\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.export_trace", "type": "function", "label": "export_trace", "direction": "inbound", "parent": "tracer_compute", "line": 974, "endLine": 1035, "signature": "(params) -> Dict[]", "docstring": "Export trace to a file.", "source": "def export_trace(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Export trace to a file.\"\"\"\n    formatted_output = params.get(\"formatted_output\")\n    output_format = params.get(\"output_format\", \"human\")\n    path = params.get(\"path\")\n    trace_id = params.get(\"trace_id\")\n    spans = params.get(\"spans\", [])\n    events = params.get(\"events\", [])\n    blueprint_id = params.get(\"blueprint_id\")\n    blueprint_name = params.get(\"blueprint_name\")\n    start_time = params.get(\"start_time\")\n    end_time = params.get(\"end_time\")\n\n    # Generate default path if not provided\n    if not path:\n        ext_map = {\n            \"otlp\": \"json\",\n            \"jsonl\": \"jsonl\",\n            \"human\": \"txt\",\n            \"timeline\": \"txt\"\n        }\n        ext = ext_map.get(output_format, \"txt\")\n        path = f\"trace_{trace_id[:8]}.{ext}\"\n\n    # Format if not already formatted\n    if not formatted_output:\n        format_params = {\n            \"trace_id\": trace_id,\n            \"spans\": spans,\n            \"events\": events,\n            \"blueprint_id\": blueprint_id,\n            \"blueprint_name\": blueprint_name,\n            \"start_time\": start_time,\n            \"end_time\": end_time\n        }\n\n        if output_format == \"otlp\":\n            result = format_otlp(format_params)\n        elif output_format == \"jsonl\":\n            result = format_jsonl(format_params)\n        elif output_format == \"timeline\":\n            result = format_timeline(format_params)\n        else:\n            result = format_human(format_params)\n\n        formatted_output = result.get(\"formatted_output\", \"\")\n\n    # Write to file\n    try:\n        path_obj = Path(path)\n        path_obj.parent.mkdir(parents=True, exist_ok=True)\n        path_obj.write_text(formatted_output)\n\n        return {\n            \"export_path\": str(path_obj.absolute()),\n            \"output\": f\"Exported trace to: {path_obj.absolute()}\"\n        }\n    except Exception as e:\n        return {\n            \"export_path\": None,\n            \"output\": f\"Export failed: {e}\"\n        }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.analyze_trace", "type": "function", "label": "analyze_trace", "direction": "inbound", "parent": "tracer_compute", "line": 1042, "endLine": 1184, "signature": "(params) -> Dict[]", "docstring": "Analyze trace data for insights.", "source": "def analyze_trace(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Analyze trace data for insights.\"\"\"\n    trace_id = params.get(\"trace_id\")\n    spans = params.get(\"spans\", [])\n    events = params.get(\"events\", [])\n    start_time = params.get(\"start_time\")\n    end_time = params.get(\"end_time\")\n\n    total_duration = _duration_ms(start_time, end_time) if end_time else 0\n\n    # Collect statistics\n    span_count = len(spans)\n    event_count = len(events)\n\n    # Analyze by span type\n    by_type = {}\n    for span in spans:\n        span_type = span.get(\"span_type\", \"unknown\")\n        if span_type not in by_type:\n            by_type[span_type] = {\"count\": 0, \"total_ms\": 0, \"spans\": []}\n        by_type[span_type][\"count\"] += 1\n        dur = span.get(\"duration_ms\", 0) or 0\n        by_type[span_type][\"total_ms\"] += dur\n        by_type[span_type][\"spans\"].append(span)\n\n    # Find slowest spans\n    sorted_by_duration = sorted(\n        spans,\n        key=lambda s: s.get(\"duration_ms\", 0) or 0,\n        reverse=True\n    )\n    slowest = sorted_by_duration[:5]\n\n    # Analyze state transitions\n    state_changes = [e for e in events if e.get(\"type\") == \"state_change\"]\n    state_visits = {}\n    for sc in state_changes:\n        attrs = sc.get(\"attributes\", {})\n        to_state = attrs.get(\"to_state\")\n        if to_state:\n            state_visits[to_state] = state_visits.get(to_state, 0) + 1\n\n    # Analyze gate results\n    gate_evals = [e for e in events if e.get(\"type\") == \"gate_eval\"]\n    gate_stats = {\"pass\": 0, \"fail\": 0}\n    for ge in gate_evals:\n        attrs = ge.get(\"attributes\", {})\n        if attrs.get(\"result\"):\n            gate_stats[\"pass\"] += 1\n        else:\n            gate_stats[\"fail\"] += 1\n\n    # Analyze events\n    event_types = {}\n    for evt in events:\n        evt_type = evt.get(\"type\", \"unknown\")\n        event_types[evt_type] = event_types.get(evt_type, 0) + 1\n\n    analysis = {\n        \"trace_id\": trace_id,\n        \"total_duration_ms\": total_duration,\n        \"span_count\": span_count,\n        \"event_count\": event_count,\n        \"spans_by_type\": {\n            k: {\"count\": v[\"count\"], \"total_ms\": v[\"total_ms\"]}\n            for k, v in by_type.items()\n        },\n        \"slowest_spans\": [\n            {\n                \"name\": s.get(\"name\"),\n                \"type\": s.get(\"span_type\"),\n                \"duration_ms\": s.get(\"duration_ms\", 0)\n            }\n            for s in slowest\n        ],\n        \"state_visits\": state_visits,\n        \"gate_stats\": gate_stats,\n        \"event_types\": event_types\n    }\n\n    # Format output\n    lines = [\n        \"=\" * 60,\n        \"  Trace Analysis\",\n        \"=\" * 60,\n        f\"  Trace ID:    {trace_id}\",\n        f\"  Duration:    {total_duration:.2f}ms\",\n        f\"  Spans:       {span_count}\",\n        f\"  Events:      {event_count}\",\n        \"\",\n        \"  SPANS BY TYPE:\",\n        \"  \" + \"-\" * 50\n    ]\n\n    for st, stats in by_type.items():\n        avg = stats[\"total_ms\"] / stats[\"count\"] if stats[\"count\"] else 0\n        lines.append(\n            f\"    {st:15} count: {stats['count']:4}  \"\n            f\"total: {stats['total_ms']:8.2f}ms  avg: {avg:.2f}ms\"\n        )\n\n    lines.extend([\n        \"\",\n        \"  SLOWEST SPANS:\",\n        \"  \" + \"-\" * 50\n    ])\n\n    for s in slowest:\n        lines.append(\n            f\"    {s.get('name', 'unknown')[:35]:35} \"\n            f\"{s.get('duration_ms', 0):8.2f}ms\"\n        )\n\n    lines.extend([\n        \"\",\n        \"  STATE VISITS:\",\n        \"  \" + \"-\" * 50\n    ])\n\n    for state, count in sorted(state_visits.items(),\n                                key=lambda x: x[1], reverse=True):\n        lines.append(f\"    {state:30} {count:4} visits\")\n\n    lines.extend([\n        \"\",\n        \"  GATE EVALUATION:\",\n        \"  \" + \"-\" * 50,\n        f\"    Pass: {gate_stats['pass']}  Fail: {gate_stats['fail']}\",\n        \"\",\n        \"  EVENT TYPES:\",\n        \"  \" + \"-\" * 50\n    ])\n\n    for evt_type, count in sorted(event_types.items(),\n                                   key=lambda x: x[1], reverse=True):\n        lines.append(f\"    {evt_type:30} {count:4}\")\n\n    lines.append(\"=\" * 60)\n\n    return {\n        \"analysis_result\": analysis,\n        \"output\": \"\\n\".join(lines)\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "tracer_compute.render_status", "type": "function", "label": "render_status", "direction": "inbound", "parent": "tracer_compute", "line": 1191, "endLine": 1224, "signature": "(params) -> Dict[]", "docstring": "Render current tracer status.", "source": "def render_status(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Render current tracer status.\"\"\"\n    trace_id = params.get(\"trace_id\")\n    blueprint_name = params.get(\"blueprint_name\", \"N/A\")\n    spans = params.get(\"spans\") or []\n    events = params.get(\"events\") or []\n    active_spans = params.get(\"active_spans\") or {}\n    start_time = params.get(\"start_time\")\n    output_format = params.get(\"output_format\", \"human\")\n\n    lines = [\n        \"=\" * 50,\n        \"  L++ Execution Tracer Status\",\n        \"=\" * 50,\n        f\"  Trace ID:      {trace_id or 'None'}\",\n        f\"  Blueprint:     {blueprint_name}\",\n        f\"  Format:        {output_format}\",\n        f\"  Started:       {start_time or 'N/A'}\",\n        f\"  Spans:         {len(spans)}\",\n        f\"  Active Spans:  {len(active_spans)}\",\n        f\"  Events:        {len(events)}\",\n    ]\n\n    if active_spans:\n        lines.append(\"\")\n        lines.append(\"  Active Spans:\")\n        for sid, span in list(active_spans.items())[:5]:\n            lines.append(f\"    - {span.get('name', 'unknown')} [{sid[:8]}]\")\n\n    lines.append(\"=\" * 50)\n\n    return {\n        \"output\": \"\\n\".join(lines)\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "json", "type": "dependency", "label": "json", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "uuid", "type": "dependency", "label": "uuid", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "pathlib", "type": "dependency", "label": "pathlib", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "typing", "type": "dependency", "label": "typing", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}, {"id": "datetime", "type": "dependency", "label": "datetime", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "tracer_compute"}];
+const edges = [{"from": "tracer_compute.export_trace", "to": "tracer_compute.format_otlp", "type": "internal", "line": 1011}, {"from": "tracer_compute.export_trace", "to": "tracer_compute.format_jsonl", "type": "internal", "line": 1013}, {"from": "tracer_compute.export_trace", "to": "tracer_compute.format_timeline", "type": "internal", "line": 1015}, {"from": "tracer_compute.export_trace", "to": "tracer_compute.format_human", "type": "internal", "line": 1017}, {"from": "tracer_compute._now_iso", "to": "datetime", "type": "external", "category": "stdlib", "line": 42}, {"from": "tracer_compute._now_ns", "to": "datetime", "type": "external", "category": "stdlib", "line": 47}, {"from": "tracer_compute._gen_id", "to": "uuid", "type": "external", "category": "stdlib", "line": 52}, {"from": "tracer_compute._gen_trace_id", "to": "uuid", "type": "external", "category": "stdlib", "line": 57}, {"from": "tracer_compute._gen_span_id", "to": "uuid", "type": "external", "category": "stdlib", "line": 62}, {"from": "tracer_compute._parse_iso", "to": "datetime", "type": "external", "category": "stdlib", "line": 69}, {"from": "tracer_compute._parse_iso", "to": "datetime", "type": "external", "category": "stdlib", "line": 72}, {"from": "tracer_compute.format_otlp", "to": "json", "type": "external", "category": "stdlib", "line": 678}, {"from": "tracer_compute._attrs_to_otlp", "to": "json", "type": "external", "category": "stdlib", "line": 709}, {"from": "tracer_compute.format_jsonl", "to": "json", "type": "external", "category": "stdlib", "line": 738}, {"from": "tracer_compute.format_jsonl", "to": "json", "type": "external", "category": "stdlib", "line": 750}, {"from": "tracer_compute.export_trace", "to": "pathlib", "type": "external", "category": "stdlib", "line": 1023}];
+const moduleColors = {"tracer_compute": "#00d4ff"};
+
+// Edge type visibility
+const edgeVisibility = { internal: true, external: true, local: true };
+let currentLayout = 'force';
+
+// Create node lookup
+const nodeById = {};
+nodes.forEach(n => nodeById[n.id] = n);
+
+// Setup SVG
+const container = document.getElementById('graph');
+const width = container.clientWidth;
+const height = container.clientHeight || 600;
+
+const svg = d3.select("svg").attr("viewBox", [0, 0, width, height]);
+const g = svg.append("g");
+
+// Zoom behavior
+const zoom = d3.zoom()
+    .scaleExtent([0.1, 4])
+    .filter(e => !e.target.closest('.node'))
+    .on("zoom", e => g.attr("transform", e.transform));
+svg.call(zoom);
+
+// Arrow markers
+const defs = svg.append("defs");
+["internal", "external", "local"].forEach(type => {
+    const color = type === "internal" ? "#4ecdc4" : type === "external" ? "#f39c12" : "#9b59b6";
+    defs.append("marker")
+        .attr("id", `arrow-${type}`)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 20)
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-4L10,0L0,4")
+        .attr("fill", color);
+});
+
+// Build module legend
+const legendDiv = document.getElementById('module-legend');
+Object.entries(moduleColors).forEach(([mod, color]) => {
+    const item = document.createElement('div');
+    item.className = 'module-item';
+    item.innerHTML = `<div class="module-dot" style="background:${color}"></div><span class="module-name">${mod}</span>`;
+    item.onclick = () => highlightModule(mod);
+    legendDiv.appendChild(item);
+});
+
+// Process edges - resolve node references
+const processedEdges = edges.map(e => ({
+    ...e,
+    source: nodeById[e.from] || { id: e.from, x: 0, y: 0 },
+    target: nodeById[e.to] || { id: e.to, x: 0, y: 0 }
+})).filter(e => e.source && e.target);
+
+// Force simulation
+const simulation = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(processedEdges).id(d => d.id).distance(80).strength(0.5))
+    .force("charge", d3.forceManyBody().strength(-300))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force("collision", d3.forceCollide().radius(40));
+
+// Draw edges
+const edge = g.append("g").selectAll("path")
+    .data(processedEdges)
+    .join("path")
+    .attr("class", d => `edge edge-${d.type || 'internal'}`)
+    .attr("marker-end", d => `url(#arrow-${d.type || 'internal'})`);
+
+// Node size based on type
+function nodeSize(d) {
+    if (d.type === 'module') return { w: 120, h: 40 };
+    if (d.type === 'function' || d.type === 'async_function') return { w: 100, h: 30 };
+    if (d.type === 'class') return { w: 110, h: 35 };
+    return { w: 80, h: 25 };  // dependency
+}
+
+// Draw nodes
+const node = g.append("g").selectAll("g")
+    .data(nodes)
+    .join("g")
+    .attr("class", "node")
+    .call(d3.drag()
+        .on("start", dragStart)
+        .on("drag", dragging)
+        .on("end", dragEnd));
+
+node.append("rect")
+    .attr("class", d => `node-${d.type === 'dependency' ? 'dependency' : d.type === 'module' ? 'module' : 'function'}`)
+    .attr("width", d => nodeSize(d).w)
+    .attr("height", d => nodeSize(d).h)
+    .attr("x", d => -nodeSize(d).w / 2)
+    .attr("y", d => -nodeSize(d).h / 2)
+    .attr("rx", 6)
+    .attr("stroke", d => d.moduleColor || "#666");
+
+node.append("text")
+    .attr("class", "node-label")
+    .attr("text-anchor", "middle")
+    .attr("dy", d => d.signature ? -3 : 4)
+    .text(d => d.label || d.id);
+
+node.filter(d => d.signature).append("text")
+    .attr("class", "node-sublabel")
+    .attr("text-anchor", "middle")
+    .attr("dy", 10)
+    .text(d => d.signature.length > 20 ? d.signature.slice(0, 18) + ".." : d.signature);
+
+// Tooltip
+const tooltip = d3.select("#tooltip");
+node.on("mouseover", (e, d) => {
+    let html = `<b>${d.label || d.id}</b>`;
+    if (d.type) html += `<br><span style="color:#888">${d.type}</span>`;
+    if (d.signature) html += `<br><code>${d.signature}</code>`;
+    if (d.direction) html += `<br>Direction: ${d.direction}`;
+    tooltip.style("display", "block").html(html);
+})
+.on("mousemove", e => {
+    tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 10) + "px");
+})
+.on("mouseout", () => tooltip.style("display", "none"));
+
+// Click to select
+node.on("click", (e, d) => {
+    e.stopPropagation();
+    selectNode(d);
+});
+
+svg.on("click", () => clearSelection());
+
+// Update positions
+simulation.on("tick", () => {
+    edge.attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
+});
+
+// Drag functions
+function dragStart(e, d) {
+    if (!e.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+}
+function dragging(e, d) {
+    d.fx = e.x;
+    d.fy = e.y;
+}
+function dragEnd(e, d) {
+    if (!e.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+}
+
+// Selection functions
+let selectedNode = null;
+
+function selectNode(d) {
+    selectedNode = d;
+    
+    // Highlight node
+    node.classed("dim", n => n.id !== d.id && !isConnected(d, n));
+    node.select("rect").attr("stroke-width", n => n.id === d.id ? 4 : 2);
+    
+    // Highlight edges
+    edge.classed("dim", e => e.source.id !== d.id && e.target.id !== d.id);
+    edge.classed("highlight", e => e.source.id === d.id || e.target.id === d.id);
+    
+    // Update info panel
+    updateNodeInfo(d);
+    updateEdgeList(d);
+}
+
+function clearSelection() {
+    selectedNode = null;
+    node.classed("dim", false);
+    node.select("rect").attr("stroke-width", 2);
+    edge.classed("dim", false).classed("highlight", false);
+    document.getElementById('node-info').innerHTML = 'Click a node to see details';
+    document.getElementById('edge-list').innerHTML = '';
+}
+
+function isConnected(a, b) {
+    return processedEdges.some(e => 
+        (e.source.id === a.id && e.target.id === b.id) ||
+        (e.source.id === b.id && e.target.id === a.id)
+    );
+}
+
+function updateNodeInfo(d) {
+    let html = `<div class="metric"><span class="info-label">ID:</span><span class="info-value">${d.id}</span></div>`;
+    html += `<div class="metric"><span class="info-label">Type:</span><span class="info-value">${d.type}</span></div>`;
+    if (d.moduleName) html += `<div class="metric"><span class="info-label">Module:</span><span class="info-value">${d.moduleName}</span></div>`;
+    if (d.line) html += `<div class="metric"><span class="info-label">Line:</span><span class="info-value">${d.line}${d.endLine ? '-' + d.endLine : ''}</span></div>`;
+    if (d.signature) html += `<div class="metric"><span class="info-label">Signature:</span><span class="info-value" style="font-family:monospace">${d.signature}</span></div>`;
+    if (d.direction) html += `<div class="metric"><span class="info-label">Direction:</span><span class="info-value">${d.direction}</span></div>`;
+    if (d.category) html += `<div class="metric"><span class="info-label">Category:</span><span class="info-value">${d.category}</span></div>`;
+
+    if (d.metrics) {
+        html += `<div style="margin-top:10px"><b>Coupling Metrics</b></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-In:</span><span class="info-value">${d.metrics.fanIn}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-Out:</span><span class="info-value">${d.metrics.fanOut}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Instability:</span><span class="info-value">${(d.metrics.instability * 100).toFixed(1)}%</span></div>`;
+        html += `<div class="metric-bar"><div class="metric-fill" style="width:${d.metrics.instability * 100}%;background:${d.metrics.instability > 0.5 ? '#ff6b6b' : '#4ecdc4'}"></div></div>`;
+        html += `<div class="metric"><span class="info-label">Internal Edges:</span><span class="info-value">${d.metrics.internalEdges}</span></div>`;
+    }
+
+    document.getElementById('node-info').innerHTML = html;
+
+    // Update source code panel
+    updateSourcePanel(d);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function updateSourcePanel(d) {
+    const panel = document.getElementById('source-content');
+
+    if (d.source) {
+        let sourceHtml = '';
+        if (d.docstring) {
+            sourceHtml += `<div class="docstring" style="margin-bottom:8px;padding:5px;background:#1a1a2a;border-radius:3px">${escapeHtml(d.docstring)}</div>`;
+        }
+        sourceHtml += `<div class="source-code">${escapeHtml(d.source)}</div>`;
+        panel.innerHTML = sourceHtml;
+    } else if (d.type === 'module') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">Module: ${d.label}<br>Click a function to view its source code.</div>`;
+    } else if (d.type === 'dependency') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">External dependency: ${d.label}<br>Category: ${d.category || 'unknown'}</div>`;
+    } else {
+        panel.innerHTML = `<div style="color:#666;font-size:11px">No source available for this node</div>`;
+    }
+}
+
+function updateEdgeList(d) {
+    const outgoing = processedEdges.filter(e => e.source.id === d.id);
+    const incoming = processedEdges.filter(e => e.target.id === d.id);
+    
+    let html = '';
+    if (outgoing.length) {
+        html += '<div style="color:#4ecdc4;font-weight:bold;margin-bottom:5px">Outgoing →</div>';
+        outgoing.forEach(e => {
+            html += `<div class="edge-item">→ <span class="to">${e.target.id || e.to}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (incoming.length) {
+        html += '<div style="color:#f39c12;font-weight:bold;margin:10px 0 5px 0">← Incoming</div>';
+        incoming.forEach(e => {
+            html += `<div class="edge-item">← <span class="from">${e.source.id || e.from}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (!outgoing.length && !incoming.length) {
+        html = '<div style="color:#666">No connections</div>';
+    }
+    
+    document.getElementById('edge-list').innerHTML = html;
+}
+
+function highlightModule(modName) {
+    node.classed("dim", n => n.moduleName !== modName && n.type !== 'dependency');
+    edge.classed("dim", e => {
+        const srcMod = nodeById[e.source.id]?.moduleName;
+        const tgtMod = nodeById[e.target.id]?.moduleName;
+        return srcMod !== modName && tgtMod !== modName;
+    });
+}
+
+// Layout functions
+function toggleLayout(layout) {
+    currentLayout = layout;
+    document.querySelectorAll('.controls button').forEach(b => {
+        if (b.id.startsWith('btn-') && ['force', 'horizontal', 'vertical'].includes(b.id.replace('btn-', ''))) {
+            b.classList.toggle('active', b.id === `btn-${layout}`);
+        }
+    });
+    
+    if (layout === 'force') {
+        simulation.alpha(1).restart();
+    } else {
+        simulation.stop();
+        layoutNodes(layout);
+    }
+}
+
+function layoutNodes(layout) {
+    const modules = [...new Set(nodes.filter(n => n.type === 'module').map(n => n.id))];
+    const padding = 50;
+    
+    if (layout === 'horizontal') {
+        // Group by module, spread horizontally
+        modules.forEach((mod, mi) => {
+            const modNodes = nodes.filter(n => n.moduleName === mod || n.id === mod);
+            const x = padding + mi * (width - padding * 2) / Math.max(modules.length - 1, 1);
+            modNodes.forEach((n, ni) => {
+                n.x = x;
+                n.y = padding + ni * 50;
+            });
+        });
+        // Dependencies on the right
+        const deps = nodes.filter(n => n.type === 'dependency');
+        deps.forEach((n, i) => {
+            n.x = width - padding;
+            n.y = padding + i * 40;
+        });
+    } else if (layout === 'vertical') {
+        // Modules at top, functions below, dependencies at bottom
+        const modNodes = nodes.filter(n => n.type === 'module');
+        const funcNodes = nodes.filter(n => n.type === 'function' || n.type === 'async_function' || n.type === 'class');
+        const depNodes = nodes.filter(n => n.type === 'dependency');
+        
+        modNodes.forEach((n, i) => {
+            n.x = padding + i * 150;
+            n.y = padding;
+        });
+        funcNodes.forEach((n, i) => {
+            n.x = padding + (i % 6) * 130;
+            n.y = 120 + Math.floor(i / 6) * 60;
+        });
+        depNodes.forEach((n, i) => {
+            n.x = padding + (i % 8) * 100;
+            n.y = height - padding - 50;
+        });
+    }
+    
+    // Update positions
+    node.transition().duration(500).attr("transform", d => `translate(${d.x},${d.y})`);
+    edge.transition().duration(500).attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+}
+
+// Edge type toggle
+function toggleEdgeType(type) {
+    edgeVisibility[type] = !edgeVisibility[type];
+    document.getElementById(`btn-${type}`).classList.toggle('active', edgeVisibility[type]);
+    edge.style("display", d => edgeVisibility[d.type || 'internal'] ? null : "none");
+}
+
+// View controls
+function resetView() {
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+}
+
+function fitToView() {
+    const bounds = g.node().getBBox();
+    const scale = Math.min(width / bounds.width, height / bounds.height) * 0.9;
+    const tx = (width - bounds.width * scale) / 2 - bounds.x * scale;
+    const ty = (height - bounds.height * scale) / 2 - bounds.y * scale;
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
+// Initial fit
+setTimeout(fitToView, 1000);
+</script>
+</body>
+</html>

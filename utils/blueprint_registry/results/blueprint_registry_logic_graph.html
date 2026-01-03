@@ -39,6 +39,9 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 #details { font-size: 12px; line-height: 1.5; }
 #flow-list { font-size: 11px; max-height: 300px; overflow-y: auto; }
 #flow-list div { padding: 3px 0; border-bottom: 1px solid #333; }
+#definition-panel { font-size: 11px; margin-top: 10px; }
+.definition-code { background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 8px; font-family: 'Consolas', monospace; white-space: pre-wrap; max-height: 200px; overflow-y: auto; color: #b8b8b8; }
+.def-label { color: #888; font-size: 10px; margin-bottom: 3px; }
 </style>
 </head>
 <body>
@@ -69,6 +72,8 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
   <div id="info">
     <h3>Selected Node</h3>
     <div id="details">Click a node to see details</div>
+    <h4>Definition</h4>
+    <div id="definition-panel">Click a state to view its definition</div>
     <h4>Transitions</h4>
     <div id="flow-list"></div>
     <div class="legend">
@@ -91,8 +96,9 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 </div>
 <div id="tooltip"></div>
 <script>
-const nodes = [{"id": "idle", "label": "idle", "description": "Initial state", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0}, {"id": "initializing", "label": "initializing", "description": "From function: init_registry", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1}, {"id": "loading", "label": "loading", "description": "From function: load_registry", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}, {"id": "saving", "label": "saving", "description": "From function: save_registry", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3}, {"id": "registering", "label": "registering", "description": "From function: register_blueprint", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4}, {"id": "listing", "label": "listing", "description": "From function: list_blueprints", "type": "state", "isEntry": false, "isTerminal": false, "layer": 5}, {"id": "querying", "label": "querying", "description": "From function: search_blueprints", "type": "state", "isEntry": false, "isTerminal": false, "layer": 6}, {"id": "compare-versions", "label": "compare-versions", "description": "From function: compare_versions", "type": "state", "isEntry": false, "isTerminal": false, "layer": 7}, {"id": "rollback-version", "label": "rollback-version", "description": "From function: rollback_version", "type": "state", "isEntry": false, "isTerminal": false, "layer": 8}, {"id": "validating", "label": "validating", "description": "From function: check_circular_deps", "type": "state", "isEntry": false, "isTerminal": false, "layer": 9}, {"id": "export-registry", "label": "export-registry", "description": "From function: export_registry", "type": "state", "isEntry": false, "isTerminal": false, "layer": 10}, {"id": "dfs", "label": "dfs", "description": "From function: dfs", "type": "state", "isEntry": false, "isTerminal": false, "layer": 11}, {"id": "complete", "label": "complete", "description": "Terminal state", "type": "state", "isEntry": false, "isTerminal": true, "layer": 13}];
-const links = [{"source": "idle", "target": "initializing", "label": "IDLE_DONE", "gates": ""}, {"source": "initializing", "target": "loading", "label": "INITIALIZING_DONE", "gates": ""}, {"source": "loading", "target": "saving", "label": "LOADING_DONE", "gates": ""}, {"source": "saving", "target": "registering", "label": "SAVING_DONE", "gates": ""}, {"source": "registering", "target": "listing", "label": "REGISTERING_DONE", "gates": ""}, {"source": "listing", "target": "querying", "label": "LISTING_DONE", "gates": ""}, {"source": "querying", "target": "compare-versions", "label": "QUERYING_DONE", "gates": ""}, {"source": "compare-versions", "target": "rollback-version", "label": "COMPARE-VERSIONS_DONE", "gates": ""}, {"source": "rollback-version", "target": "validating", "label": "ROLLBACK-VERSION_DONE", "gates": ""}, {"source": "validating", "target": "export-registry", "label": "VALIDATING_DONE", "gates": ""}, {"source": "export-registry", "target": "dfs", "label": "EXPORT-REGISTRY_DONE", "gates": ""}, {"source": "dfs", "target": "complete", "label": "DFS_DONE", "gates": ""}, {"source": "rollback-version", "target": "idle", "label": "RESET", "gates": ""}, {"source": "initializing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "export-registry", "target": "idle", "label": "RESET", "gates": ""}, {"source": "compare-versions", "target": "idle", "label": "RESET", "gates": ""}, {"source": "listing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "registering", "target": "idle", "label": "RESET", "gates": ""}, {"source": "dfs", "target": "idle", "label": "RESET", "gates": ""}, {"source": "saving", "target": "idle", "label": "RESET", "gates": ""}, {"source": "complete", "target": "idle", "label": "RESET", "gates": ""}, {"source": "loading", "target": "idle", "label": "RESET", "gates": ""}, {"source": "querying", "target": "idle", "label": "RESET", "gates": ""}, {"source": "validating", "target": "idle", "label": "RESET", "gates": ""}];
+const nodes = [{"id": "idle", "label": "idle", "description": "Initial state", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0, "definition": {"name": "Idle", "description": "Initial state"}}, {"id": "initializing", "label": "initializing", "description": "From function: init_registry", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1, "definition": {"name": "Initializing", "description": "From function: init_registry"}}, {"id": "loading", "label": "loading", "description": "From function: load_registry", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2, "definition": {"name": "Loading", "description": "From function: load_registry"}}, {"id": "saving", "label": "saving", "description": "From function: save_registry", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3, "definition": {"name": "Saving", "description": "From function: save_registry"}}, {"id": "registering", "label": "registering", "description": "From function: register_blueprint", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4, "definition": {"name": "Registering", "description": "From function: register_blueprint"}}, {"id": "listing", "label": "listing", "description": "From function: list_blueprints", "type": "state", "isEntry": false, "isTerminal": false, "layer": 5, "definition": {"name": "Listing", "description": "From function: list_blueprints"}}, {"id": "querying", "label": "querying", "description": "From function: search_blueprints", "type": "state", "isEntry": false, "isTerminal": false, "layer": 6, "definition": {"name": "Querying", "description": "From function: search_blueprints"}}, {"id": "compare-versions", "label": "compare-versions", "description": "From function: compare_versions", "type": "state", "isEntry": false, "isTerminal": false, "layer": 7, "definition": {"name": "Compare Versions", "description": "From function: compare_versions"}}, {"id": "rollback-version", "label": "rollback-version", "description": "From function: rollback_version", "type": "state", "isEntry": false, "isTerminal": false, "layer": 8, "definition": {"name": "Rollback Version", "description": "From function: rollback_version"}}, {"id": "validating", "label": "validating", "description": "From function: check_circular_deps", "type": "state", "isEntry": false, "isTerminal": false, "layer": 9, "definition": {"name": "Validating", "description": "From function: check_circular_deps"}}, {"id": "export-registry", "label": "export-registry", "description": "From function: export_registry", "type": "state", "isEntry": false, "isTerminal": false, "layer": 10, "definition": {"name": "Export Registry", "description": "From function: export_registry"}}, {"id": "dfs", "label": "dfs", "description": "From function: dfs", "type": "state", "isEntry": false, "isTerminal": false, "layer": 11, "definition": {"name": "Dfs", "description": "From function: dfs"}}, {"id": "complete", "label": "complete", "description": "Terminal state", "type": "state", "isEntry": false, "isTerminal": true, "layer": 13, "definition": {"name": "Complete", "description": "Terminal state"}}];
+const links = [{"source": "idle", "target": "initializing", "label": "IDLE_DONE", "gates": ""}, {"source": "initializing", "target": "loading", "label": "INITIALIZING_DONE", "gates": ""}, {"source": "loading", "target": "saving", "label": "LOADING_DONE", "gates": ""}, {"source": "saving", "target": "registering", "label": "SAVING_DONE", "gates": ""}, {"source": "registering", "target": "listing", "label": "REGISTERING_DONE", "gates": ""}, {"source": "listing", "target": "querying", "label": "LISTING_DONE", "gates": ""}, {"source": "querying", "target": "compare-versions", "label": "QUERYING_DONE", "gates": ""}, {"source": "compare-versions", "target": "rollback-version", "label": "COMPARE-VERSIONS_DONE", "gates": ""}, {"source": "rollback-version", "target": "validating", "label": "ROLLBACK-VERSION_DONE", "gates": ""}, {"source": "validating", "target": "export-registry", "label": "VALIDATING_DONE", "gates": ""}, {"source": "export-registry", "target": "dfs", "label": "EXPORT-REGISTRY_DONE", "gates": ""}, {"source": "dfs", "target": "complete", "label": "DFS_DONE", "gates": ""}, {"source": "registering", "target": "idle", "label": "RESET", "gates": ""}, {"source": "rollback-version", "target": "idle", "label": "RESET", "gates": ""}, {"source": "dfs", "target": "idle", "label": "RESET", "gates": ""}, {"source": "compare-versions", "target": "idle", "label": "RESET", "gates": ""}, {"source": "saving", "target": "idle", "label": "RESET", "gates": ""}, {"source": "listing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "export-registry", "target": "idle", "label": "RESET", "gates": ""}, {"source": "validating", "target": "idle", "label": "RESET", "gates": ""}, {"source": "initializing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "loading", "target": "idle", "label": "RESET", "gates": ""}, {"source": "complete", "target": "idle", "label": "RESET", "gates": ""}, {"source": "querying", "target": "idle", "label": "RESET", "gates": ""}];
+const gates = {};
 
 // Calculate layout dimensions based on layers
 const layerMap = {};
@@ -584,6 +590,9 @@ node.on("click", (e, d) => {
     info += d.isTerminal ? "<span style='color:#ff6b6b'>⬤ Terminal State</span><br>" : "";
     if (d.description) info += "<br>" + d.description;
     document.getElementById("details").innerHTML = info;
+
+    // Update definition panel
+    updateDefinitionPanel(d);
     
     // Show transitions - categorized by type
     const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
@@ -653,6 +662,50 @@ node.on("click", (e, d) => {
     }
     document.getElementById("flow-list").innerHTML = flowHtml;
 });
+
+function updateDefinitionPanel(d) {
+    const panel = document.getElementById("definition-panel");
+    let html = "";
+
+    // Show state definition
+    if (d.definition) {
+        html += "<div class='def-label'>State Definition:</div>";
+        html += "<div class='definition-code'>" + escapeHtml(JSON.stringify(d.definition, null, 2)) + "</div>";
+    }
+
+    // Find and show gates referenced by outgoing transitions
+    const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
+    const gateRefs = new Set();
+    outLinks.forEach(l => {
+        if (l.gates) {
+            l.gates.split(", ").forEach(g => gateRefs.add(g.trim()));
+        }
+    });
+
+    if (gateRefs.size > 0) {
+        html += "<div class='def-label' style='margin-top:10px'>Referenced Gates:</div>";
+        gateRefs.forEach(gateId => {
+            const gateDef = gates[gateId];
+            if (gateDef) {
+                html += "<div style='margin:5px 0'><b style='color:#88aaff'>" + gateId + "</b></div>";
+                html += "<div class='definition-code'>" + escapeHtml(JSON.stringify(gateDef, null, 2)) + "</div>";
+            } else {
+                html += "<div style='color:#666'>" + gateId + " (no definition)</div>";
+            }
+        });
+    }
+
+    if (!html) {
+        html = "<div style='color:#666'>No definition available</div>";
+    }
+
+    panel.innerHTML = html;
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 function highlightUpstream(nodeId) {
     const upstreamNodes = new Set([nodeId]);

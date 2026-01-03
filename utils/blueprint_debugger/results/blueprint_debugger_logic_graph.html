@@ -39,6 +39,9 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 #details { font-size: 12px; line-height: 1.5; }
 #flow-list { font-size: 11px; max-height: 300px; overflow-y: auto; }
 #flow-list div { padding: 3px 0; border-bottom: 1px solid #333; }
+#definition-panel { font-size: 11px; margin-top: 10px; }
+.definition-code { background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 8px; font-family: 'Consolas', monospace; white-space: pre-wrap; max-height: 200px; overflow-y: auto; color: #b8b8b8; }
+.def-label { color: #888; font-size: 10px; margin-bottom: 3px; }
 </style>
 </head>
 <body>
@@ -69,6 +72,8 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
   <div id="info">
     <h3>Selected Node</h3>
     <div id="details">Click a node to see details</div>
+    <h4>Definition</h4>
+    <div id="definition-panel">Click a state to view its definition</div>
     <h4>Transitions</h4>
     <div id="flow-list"></div>
     <div class="legend">
@@ -91,8 +96,9 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 </div>
 <div id="tooltip"></div>
 <script>
-const nodes = [{"id": "idle", "label": "idle", "description": "Initial state", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0}, {"id": "loading", "label": "loading", "description": "From function: load_blueprint", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1}, {"id": "initializing", "label": "initializing", "description": "From function: init_debug_session", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}, {"id": "registering", "label": "registering", "description": "From function: reset_session", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3}, {"id": "remove-breakpoint", "label": "remove-breakpoint", "description": "From function: remove_breakpoint", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4}, {"id": "listing", "label": "listing", "description": "From function: list_breakpoints", "type": "state", "isEntry": false, "isTerminal": false, "layer": 5}, {"id": "step", "label": "step", "description": "From function: step", "type": "state", "isEntry": false, "isTerminal": false, "layer": 6}, {"id": "step-over", "label": "step-over", "description": "From function: step_over", "type": "state", "isEntry": false, "isTerminal": false, "layer": 7}, {"id": "step-back", "label": "step-back", "description": "From function: step_back", "type": "state", "isEntry": false, "isTerminal": false, "layer": 8}, {"id": "processing", "label": "processing", "description": "From function: run_to_breakpoint", "type": "state", "isEntry": false, "isTerminal": false, "layer": 9}, {"id": "continue-execution", "label": "continue-execution", "description": "From function: continue_execution", "type": "state", "isEntry": false, "isTerminal": false, "layer": 10}, {"id": "inspect-state", "label": "inspect-state", "description": "From function: inspect_state", "type": "state", "isEntry": false, "isTerminal": false, "layer": 11}, {"id": "inspect-context", "label": "inspect-context", "description": "From function: inspect_context", "type": "state", "isEntry": false, "isTerminal": false, "layer": 12}, {"id": "evaluate-expression", "label": "evaluate-expression", "description": "From function: evaluate_expression", "type": "state", "isEntry": false, "isTerminal": false, "layer": 13}, {"id": "remove-watch", "label": "remove-watch", "description": "From function: remove_watch", "type": "state", "isEntry": false, "isTerminal": false, "layer": 14}, {"id": "goto-step", "label": "goto-step", "description": "From function: goto_step", "type": "state", "isEntry": false, "isTerminal": false, "layer": 15}, {"id": "compare-states", "label": "compare-states", "description": "From function: compare_states", "type": "state", "isEntry": false, "isTerminal": false, "layer": 16}, {"id": "explaining", "label": "explaining", "description": "From function: render_status", "type": "state", "isEntry": false, "isTerminal": false, "layer": 17}, {"id": "complete", "label": "complete", "description": "Terminal state", "type": "state", "isEntry": false, "isTerminal": true, "layer": 19}];
-const links = [{"source": "idle", "target": "loading", "label": "IDLE_DONE", "gates": ""}, {"source": "loading", "target": "initializing", "label": "LOADING_DONE", "gates": ""}, {"source": "initializing", "target": "registering", "label": "INITIALIZING_DONE", "gates": ""}, {"source": "registering", "target": "remove-breakpoint", "label": "REGISTERING_DONE", "gates": ""}, {"source": "remove-breakpoint", "target": "listing", "label": "REMOVE-BREAKPOINT_DONE", "gates": ""}, {"source": "listing", "target": "step", "label": "LISTING_DONE", "gates": ""}, {"source": "step", "target": "step-over", "label": "STEP_DONE", "gates": ""}, {"source": "step-over", "target": "step-back", "label": "STEP-OVER_DONE", "gates": ""}, {"source": "step-back", "target": "processing", "label": "STEP-BACK_DONE", "gates": ""}, {"source": "processing", "target": "continue-execution", "label": "PROCESSING_DONE", "gates": ""}, {"source": "continue-execution", "target": "inspect-state", "label": "CONTINUE-EXECUTION_DONE", "gates": ""}, {"source": "inspect-state", "target": "inspect-context", "label": "INSPECT-STATE_DONE", "gates": ""}, {"source": "inspect-context", "target": "evaluate-expression", "label": "INSPECT-CONTEXT_DONE", "gates": ""}, {"source": "evaluate-expression", "target": "remove-watch", "label": "EVALUATE-EXPRESSION_DONE", "gates": ""}, {"source": "remove-watch", "target": "goto-step", "label": "REMOVE-WATCH_DONE", "gates": ""}, {"source": "goto-step", "target": "compare-states", "label": "GOTO-STEP_DONE", "gates": ""}, {"source": "compare-states", "target": "explaining", "label": "COMPARE-STATES_DONE", "gates": ""}, {"source": "explaining", "target": "complete", "label": "EXPLAINING_DONE", "gates": ""}, {"source": "continue-execution", "target": "idle", "label": "RESET", "gates": ""}, {"source": "remove-breakpoint", "target": "idle", "label": "RESET", "gates": ""}, {"source": "step-over", "target": "idle", "label": "RESET", "gates": ""}, {"source": "inspect-context", "target": "idle", "label": "RESET", "gates": ""}, {"source": "listing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "initializing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "processing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "registering", "target": "idle", "label": "RESET", "gates": ""}, {"source": "remove-watch", "target": "idle", "label": "RESET", "gates": ""}, {"source": "loading", "target": "idle", "label": "RESET", "gates": ""}, {"source": "inspect-state", "target": "idle", "label": "RESET", "gates": ""}, {"source": "compare-states", "target": "idle", "label": "RESET", "gates": ""}, {"source": "goto-step", "target": "idle", "label": "RESET", "gates": ""}, {"source": "evaluate-expression", "target": "idle", "label": "RESET", "gates": ""}, {"source": "complete", "target": "idle", "label": "RESET", "gates": ""}, {"source": "step", "target": "idle", "label": "RESET", "gates": ""}, {"source": "explaining", "target": "idle", "label": "RESET", "gates": ""}, {"source": "step-back", "target": "idle", "label": "RESET", "gates": ""}];
+const nodes = [{"id": "idle", "label": "idle", "description": "Initial state", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0, "definition": {"name": "Idle", "description": "Initial state"}}, {"id": "loading", "label": "loading", "description": "From function: load_blueprint", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1, "definition": {"name": "Loading", "description": "From function: load_blueprint"}}, {"id": "initializing", "label": "initializing", "description": "From function: init_debug_session", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2, "definition": {"name": "Initializing", "description": "From function: init_debug_session"}}, {"id": "registering", "label": "registering", "description": "From function: reset_session", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3, "definition": {"name": "Registering", "description": "From function: reset_session"}}, {"id": "remove-breakpoint", "label": "remove-breakpoint", "description": "From function: remove_breakpoint", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4, "definition": {"name": "Remove Breakpoint", "description": "From function: remove_breakpoint"}}, {"id": "listing", "label": "listing", "description": "From function: list_breakpoints", "type": "state", "isEntry": false, "isTerminal": false, "layer": 5, "definition": {"name": "Listing", "description": "From function: list_breakpoints"}}, {"id": "step", "label": "step", "description": "From function: step", "type": "state", "isEntry": false, "isTerminal": false, "layer": 6, "definition": {"name": "Step", "description": "From function: step"}}, {"id": "step-over", "label": "step-over", "description": "From function: step_over", "type": "state", "isEntry": false, "isTerminal": false, "layer": 7, "definition": {"name": "Step Over", "description": "From function: step_over"}}, {"id": "step-back", "label": "step-back", "description": "From function: step_back", "type": "state", "isEntry": false, "isTerminal": false, "layer": 8, "definition": {"name": "Step Back", "description": "From function: step_back"}}, {"id": "processing", "label": "processing", "description": "From function: run_to_breakpoint", "type": "state", "isEntry": false, "isTerminal": false, "layer": 9, "definition": {"name": "Processing", "description": "From function: run_to_breakpoint"}}, {"id": "continue-execution", "label": "continue-execution", "description": "From function: continue_execution", "type": "state", "isEntry": false, "isTerminal": false, "layer": 10, "definition": {"name": "Continue Execution", "description": "From function: continue_execution"}}, {"id": "inspect-state", "label": "inspect-state", "description": "From function: inspect_state", "type": "state", "isEntry": false, "isTerminal": false, "layer": 11, "definition": {"name": "Inspect State", "description": "From function: inspect_state"}}, {"id": "inspect-context", "label": "inspect-context", "description": "From function: inspect_context", "type": "state", "isEntry": false, "isTerminal": false, "layer": 12, "definition": {"name": "Inspect Context", "description": "From function: inspect_context"}}, {"id": "evaluate-expression", "label": "evaluate-expression", "description": "From function: evaluate_expression", "type": "state", "isEntry": false, "isTerminal": false, "layer": 13, "definition": {"name": "Evaluate Expression", "description": "From function: evaluate_expression"}}, {"id": "remove-watch", "label": "remove-watch", "description": "From function: remove_watch", "type": "state", "isEntry": false, "isTerminal": false, "layer": 14, "definition": {"name": "Remove Watch", "description": "From function: remove_watch"}}, {"id": "goto-step", "label": "goto-step", "description": "From function: goto_step", "type": "state", "isEntry": false, "isTerminal": false, "layer": 15, "definition": {"name": "Goto Step", "description": "From function: goto_step"}}, {"id": "compare-states", "label": "compare-states", "description": "From function: compare_states", "type": "state", "isEntry": false, "isTerminal": false, "layer": 16, "definition": {"name": "Compare States", "description": "From function: compare_states"}}, {"id": "explaining", "label": "explaining", "description": "From function: render_status", "type": "state", "isEntry": false, "isTerminal": false, "layer": 17, "definition": {"name": "Explaining", "description": "From function: render_status"}}, {"id": "complete", "label": "complete", "description": "Terminal state", "type": "state", "isEntry": false, "isTerminal": true, "layer": 19, "definition": {"name": "Complete", "description": "Terminal state"}}];
+const links = [{"source": "idle", "target": "loading", "label": "IDLE_DONE", "gates": ""}, {"source": "loading", "target": "initializing", "label": "LOADING_DONE", "gates": ""}, {"source": "initializing", "target": "registering", "label": "INITIALIZING_DONE", "gates": ""}, {"source": "registering", "target": "remove-breakpoint", "label": "REGISTERING_DONE", "gates": ""}, {"source": "remove-breakpoint", "target": "listing", "label": "REMOVE-BREAKPOINT_DONE", "gates": ""}, {"source": "listing", "target": "step", "label": "LISTING_DONE", "gates": ""}, {"source": "step", "target": "step-over", "label": "STEP_DONE", "gates": ""}, {"source": "step-over", "target": "step-back", "label": "STEP-OVER_DONE", "gates": ""}, {"source": "step-back", "target": "processing", "label": "STEP-BACK_DONE", "gates": ""}, {"source": "processing", "target": "continue-execution", "label": "PROCESSING_DONE", "gates": ""}, {"source": "continue-execution", "target": "inspect-state", "label": "CONTINUE-EXECUTION_DONE", "gates": ""}, {"source": "inspect-state", "target": "inspect-context", "label": "INSPECT-STATE_DONE", "gates": ""}, {"source": "inspect-context", "target": "evaluate-expression", "label": "INSPECT-CONTEXT_DONE", "gates": ""}, {"source": "evaluate-expression", "target": "remove-watch", "label": "EVALUATE-EXPRESSION_DONE", "gates": ""}, {"source": "remove-watch", "target": "goto-step", "label": "REMOVE-WATCH_DONE", "gates": ""}, {"source": "goto-step", "target": "compare-states", "label": "GOTO-STEP_DONE", "gates": ""}, {"source": "compare-states", "target": "explaining", "label": "COMPARE-STATES_DONE", "gates": ""}, {"source": "explaining", "target": "complete", "label": "EXPLAINING_DONE", "gates": ""}, {"source": "inspect-state", "target": "idle", "label": "RESET", "gates": ""}, {"source": "inspect-context", "target": "idle", "label": "RESET", "gates": ""}, {"source": "initializing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "loading", "target": "idle", "label": "RESET", "gates": ""}, {"source": "registering", "target": "idle", "label": "RESET", "gates": ""}, {"source": "remove-breakpoint", "target": "idle", "label": "RESET", "gates": ""}, {"source": "continue-execution", "target": "idle", "label": "RESET", "gates": ""}, {"source": "explaining", "target": "idle", "label": "RESET", "gates": ""}, {"source": "goto-step", "target": "idle", "label": "RESET", "gates": ""}, {"source": "listing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "processing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "compare-states", "target": "idle", "label": "RESET", "gates": ""}, {"source": "step-back", "target": "idle", "label": "RESET", "gates": ""}, {"source": "evaluate-expression", "target": "idle", "label": "RESET", "gates": ""}, {"source": "remove-watch", "target": "idle", "label": "RESET", "gates": ""}, {"source": "step", "target": "idle", "label": "RESET", "gates": ""}, {"source": "step-over", "target": "idle", "label": "RESET", "gates": ""}, {"source": "complete", "target": "idle", "label": "RESET", "gates": ""}];
+const gates = {};
 
 // Calculate layout dimensions based on layers
 const layerMap = {};
@@ -584,6 +590,9 @@ node.on("click", (e, d) => {
     info += d.isTerminal ? "<span style='color:#ff6b6b'>⬤ Terminal State</span><br>" : "";
     if (d.description) info += "<br>" + d.description;
     document.getElementById("details").innerHTML = info;
+
+    // Update definition panel
+    updateDefinitionPanel(d);
     
     // Show transitions - categorized by type
     const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
@@ -653,6 +662,50 @@ node.on("click", (e, d) => {
     }
     document.getElementById("flow-list").innerHTML = flowHtml;
 });
+
+function updateDefinitionPanel(d) {
+    const panel = document.getElementById("definition-panel");
+    let html = "";
+
+    // Show state definition
+    if (d.definition) {
+        html += "<div class='def-label'>State Definition:</div>";
+        html += "<div class='definition-code'>" + escapeHtml(JSON.stringify(d.definition, null, 2)) + "</div>";
+    }
+
+    // Find and show gates referenced by outgoing transitions
+    const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
+    const gateRefs = new Set();
+    outLinks.forEach(l => {
+        if (l.gates) {
+            l.gates.split(", ").forEach(g => gateRefs.add(g.trim()));
+        }
+    });
+
+    if (gateRefs.size > 0) {
+        html += "<div class='def-label' style='margin-top:10px'>Referenced Gates:</div>";
+        gateRefs.forEach(gateId => {
+            const gateDef = gates[gateId];
+            if (gateDef) {
+                html += "<div style='margin:5px 0'><b style='color:#88aaff'>" + gateId + "</b></div>";
+                html += "<div class='definition-code'>" + escapeHtml(JSON.stringify(gateDef, null, 2)) + "</div>";
+            } else {
+                html += "<div style='color:#666'>" + gateId + " (no definition)</div>";
+            }
+        });
+    }
+
+    if (!html) {
+        html = "<div style='color:#666'>No definition available</div>";
+    }
+
+    panel.innerHTML = html;
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 function highlightUpstream(nodeId) {
     const upstreamNodes = new Set([nodeId]);

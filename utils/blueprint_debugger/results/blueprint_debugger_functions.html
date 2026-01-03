@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Function Graph: blueprint_debugger</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #0f0f23; color: #eee; }
+h1 { color: #00d4ff; margin-bottom: 5px; font-size: 24px; }
+.subtitle { color: #888; margin-bottom: 15px; font-size: 14px; }
+#container { display: flex; gap: 20px; height: calc(100vh - 120px); }
+#graph { flex: 1; position: relative; }
+#sidebar { width: 350px; background: #1a1a2e; padding: 15px; border-radius: 8px; overflow-y: auto; }
+svg { background: #16213e; border-radius: 8px; width: 100%; height: 100%; }
+
+/* Node styles */
+.node { cursor: pointer; }
+.node-module { fill: #2a2a4a; stroke-width: 3; }
+.node-function { fill: #3a3a5a; stroke-width: 2; }
+.node-dependency { fill: #1a1a3a; stroke: #666; stroke-width: 1; stroke-dasharray: 4; }
+.node-label { font-size: 11px; fill: #fff; pointer-events: none; font-weight: 500; }
+.node-sublabel { font-size: 9px; fill: #888; pointer-events: none; }
+
+/* Edge styles */
+.edge { fill: none; stroke-opacity: 0.6; }
+.edge-internal { stroke: #4ecdc4; stroke-width: 2; }
+.edge-external { stroke: #f39c12; stroke-width: 1.5; stroke-dasharray: 4; }
+.edge-local { stroke: #9b59b6; stroke-width: 2; }
+.edge-label { font-size: 8px; fill: #666; pointer-events: none; }
+
+/* Highlight styles */
+.highlight { stroke-width: 3 !important; stroke-opacity: 1 !important; }
+.dim { opacity: 0.2; }
+
+/* Controls */
+.controls { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.controls button { background: #3a3a5a; color: #fff; border: 1px solid #555; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.controls button:hover { background: #4a4a6a; }
+.controls button.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
+
+/* Module legend */
+.module-legend { margin-top: 15px; }
+.module-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer; }
+.module-item:hover { background: #2a2a4a; }
+.module-dot { width: 12px; height: 12px; border-radius: 3px; }
+.module-name { font-size: 12px; }
+
+/* Info panel */
+h3 { color: #00d4ff; margin: 15px 0 8px 0; font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+.info-section { font-size: 12px; line-height: 1.6; }
+.info-label { color: #888; }
+.info-value { color: #fff; }
+
+/* Source code panel */
+.source-panel { margin-top: 10px; }
+.source-code { background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 10px; font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; line-height: 1.4; overflow-x: auto; max-height: 300px; overflow-y: auto; white-space: pre; color: #b8b8b8; }
+.source-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.source-toggle { background: #3a3a5a; color: #fff; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; }
+.source-toggle:hover { background: #4a4a6a; }
+.docstring { color: #6a9955; font-style: italic; }
+.metric { display: flex; justify-content: space-between; padding: 3px 0; }
+.metric-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 2px; }
+.metric-fill { height: 100%; border-radius: 2px; }
+
+/* Edge list */
+.edge-list { max-height: 200px; overflow-y: auto; }
+.edge-item { padding: 4px 0; border-bottom: 1px solid #333; font-size: 11px; }
+.edge-item .from { color: #4ecdc4; }
+.edge-item .to { color: #f39c12; }
+.edge-item .type { color: #666; font-size: 10px; }
+
+/* Tooltip */
+#tooltip { position: absolute; background: #1a1a2e; border: 1px solid #00d4ff; padding: 10px; border-radius: 4px; pointer-events: none; display: none; max-width: 300px; z-index: 100; font-size: 11px; }
+</style>
+</head>
+<body>
+<h1>Function Graph: blueprint_debugger</h1>
+<div class="subtitle">Stackable function dependency visualization • Drag nodes to rearrange • Click to inspect</div>
+
+<div class="controls">
+  <button onclick="resetView()">Reset View</button>
+  <button onclick="fitToView()">Fit</button>
+  <button onclick="toggleLayout('force')" id="btn-force" class="active">Force</button>
+  <button onclick="toggleLayout('horizontal')" id="btn-horizontal">Horizontal</button>
+  <button onclick="toggleLayout('vertical')" id="btn-vertical">Vertical</button>
+  <span style="margin-left: 10px; color: #666">|</span>
+  <button onclick="toggleEdgeType('internal')" id="btn-internal" class="active">Internal</button>
+  <button onclick="toggleEdgeType('external')" id="btn-external" class="active">External</button>
+  <button onclick="toggleEdgeType('local')" id="btn-local" class="active">Local</button>
+</div>
+
+<div id="container">
+  <div id="graph"><svg></svg></div>
+  <div id="sidebar">
+    <h3>Modules</h3>
+    <div class="module-legend" id="module-legend"></div>
+
+    <h3>Selected Node</h3>
+    <div class="info-section" id="node-info">Click a node to see details</div>
+
+    <h3>Source Code</h3>
+    <div class="source-panel" id="source-panel">
+      <div id="source-content" style="color:#666;font-size:11px">Click a function to view source</div>
+    </div>
+
+    <h3>Connections</h3>
+    <div class="edge-list" id="edge-list"></div>
+  </div>
+</div>
+<div id="tooltip"></div>
+
+<script>
+const nodes = [{"id": "debugger_compute", "type": "module", "label": "debugger_compute", "metrics": {"fanIn": 21, "fanOut": 8, "instability": 0.276, "internalEdges": 5, "externalCallCount": 25, "localCallCount": 0, "callsByCategory": {"stdlib": 19, "pip": 6}, "localDependencies": []}, "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.load_blueprint", "type": "function", "label": "load_blueprint", "direction": "inbound", "parent": "debugger_compute", "line": 23, "endLine": 98, "signature": "(params) -> Dict[]", "docstring": "Load an L++ blueprint from a JSON file for debugging.", "source": "def load_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Load an L++ blueprint from a JSON file for debugging.\"\"\"\n    path = params.get(\"path\")\n    if not path:\n        return {\"blueprint\": None, \"error\": \"No path provided\"}\n\n    try:\n        path = Path(path)\n        if not path.exists():\n            return {\"blueprint\": None, \"error\": f\"File not found: {path}\"}\n\n        with open(path) as f:\n            raw = json.load(f)\n\n        loader = BlueprintLoader(raw)\n        blueprint, load_error = loader.load()\n\n        if load_error:\n            return {\"blueprint\": None, \"error\": load_error}\n\n        # Convert to dict structure for debugging\n        bp_data = {\n            \"id\": blueprint.id,\n            \"name\": blueprint.name,\n            \"version\": blueprint.version,\n            \"description\": blueprint.description,\n            \"entry_state\": blueprint.entry_state,\n            \"terminal_states\": list(blueprint.terminal_states),\n            \"states\": {\n                sid: {\n                    \"description\": s.description,\n                    \"on_enter\": list(s.on_enter),\n                    \"on_exit\": list(s.on_exit)\n                } for sid, s in blueprint.states.items()\n            },\n            \"transitions\": [\n                {\n                    \"id\": t.id,\n                    \"from\": t.from_state,\n                    \"to\": t.to_state,\n                    \"on_event\": t.on_event,\n                    \"gates\": list(t.gates),\n                    \"actions\": list(t.actions)\n                }\n                for t in blueprint.transitions\n            ],\n            \"gates\": {\n                gid: {\n                    \"type\": g.type.value,\n                    \"expression\": g.expression,\n                    \"compute_unit\": g.compute_unit\n                } for gid, g in blueprint.gates.items()\n            },\n            \"actions\": {\n                aid: {\n                    \"type\": a.type.value,\n                    \"target\": a.target,\n                    \"value\": a.value,\n                    \"value_from\": a.value_from,\n                    \"compute_unit\": a.compute_unit,\n                    \"input_map\": a.input_map,\n                    \"output_map\": a.output_map\n                } for aid, a in blueprint.actions.items()\n            },\n            \"context_schema\": raw.get(\"context_schema\", {})\n        }\n\n        return {\n            \"blueprint\": bp_data,\n            \"blueprint_path\": str(path),\n            \"blueprint_name\": blueprint.name,\n            \"blueprint_id\": blueprint.id,\n            \"error\": None\n        }\n    except Exception as e:\n        return {\"blueprint\": None, \"error\": str(e)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.init_debug_session", "type": "function", "label": "init_debug_session", "direction": "inbound", "parent": "debugger_compute", "line": 105, "endLine": 144, "signature": "(params) -> Dict[]", "docstring": "Initialize a debug session from blueprint.", "source": "def init_debug_session(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Initialize a debug session from blueprint.\"\"\"\n    bp = params.get(\"blueprint\")\n    if not bp:\n        return {\"error\": \"No blueprint provided\"}\n\n    # Initialize context from schema\n    ctx = {\"_state\": bp[\"entry_state\"]}\n    schema = bp.get(\"context_schema\", {})\n    for prop in schema.get(\"properties\", {}).keys():\n        ctx[prop] = None\n\n    # Get available transitions\n    avail = _get_available_transitions(bp, bp[\"entry_state\"], ctx)\n\n    # Create initial history entry\n    history = [{\n        \"step\": 0,\n        \"timestamp\": datetime.now().isoformat(),\n        \"state\": bp[\"entry_state\"],\n        \"context\": copy.deepcopy(ctx),\n        \"event\": None,\n        \"transition_id\": None,\n        \"gate_results\": {},\n        \"action_results\": []\n    }]\n\n    return {\n        \"debug_state\": bp[\"entry_state\"],\n        \"debug_context\": ctx,\n        \"history\": history,\n        \"history_index\": 0,\n        \"breakpoints\": [],\n        \"watches\": [],\n        \"watch_values\": {},\n        \"available_events\": [t[\"event\"] for t in avail],\n        \"available_transitions\": avail,\n        \"is_paused\": False,\n        \"output\": f\"Debug session started at state: {bp['entry_state']}\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.reset_session", "type": "function", "label": "reset_session", "direction": "inbound", "parent": "debugger_compute", "line": 147, "endLine": 160, "signature": "(params) -> Dict[]", "docstring": "Reset debug session to initial state, preserving breakpoints.", "source": "def reset_session(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Reset debug session to initial state, preserving breakpoints.\"\"\"\n    bp = params.get(\"blueprint\")\n    breakpoints = params.get(\"breakpoints\", [])\n    watches = params.get(\"watches\", [])\n\n    if not bp:\n        return {\"error\": \"No blueprint provided\"}\n\n    result = init_debug_session({\"blueprint\": bp})\n    result[\"breakpoints\"] = breakpoints\n    result[\"watches\"] = watches\n    result[\"output\"] = f\"Session reset to initial state: {bp['entry_state']}\"\n    return result", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.set_breakpoint", "type": "function", "label": "set_breakpoint", "direction": "inbound", "parent": "debugger_compute", "line": 167, "endLine": 202, "signature": "(params) -> Dict[]", "docstring": "Add a breakpoint.", "source": "def set_breakpoint(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Add a breakpoint.\"\"\"\n    breakpoints = params.get(\"breakpoints\", [])\n    bp_type = params.get(\"bp_type\", \"state\")\n    target = params.get(\"target\")\n    condition = params.get(\"condition\")\n\n    if not target:\n        return {\n            \"breakpoints\": breakpoints,\n            \"output\": \"Error: breakpoint target required\"\n        }\n\n    # Validate breakpoint type\n    valid_types = [\"state\", \"transition\", \"gate\", \"event\", \"conditional\"]\n    if bp_type not in valid_types:\n        return {\n            \"breakpoints\": breakpoints,\n            \"output\": f\"Error: invalid type. Use: {valid_types}\"\n        }\n\n    bp_id = f\"bp_{len(breakpoints) + 1}_{uuid.uuid4().hex[:6]}\"\n    new_bp = {\n        \"id\": bp_id,\n        \"type\": bp_type,\n        \"target\": target,\n        \"condition\": condition,\n        \"enabled\": True,\n        \"hit_count\": 0\n    }\n\n    new_breakpoints = breakpoints + [new_bp]\n    return {\n        \"breakpoints\": new_breakpoints,\n        \"output\": f\"Breakpoint {bp_id} set: {bp_type} on '{target}'\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.remove_breakpoint", "type": "function", "label": "remove_breakpoint", "direction": "inbound", "parent": "debugger_compute", "line": 205, "endLine": 231, "signature": "(params) -> Dict[]", "docstring": "Remove a breakpoint by ID or index.", "source": "def remove_breakpoint(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Remove a breakpoint by ID or index.\"\"\"\n    breakpoints = params.get(\"breakpoints\", [])\n    bp_id = params.get(\"bp_id\")\n\n    if not bp_id:\n        return {\"breakpoints\": breakpoints, \"output\": \"Error: bp_id required\"}\n\n    # Try by ID first, then by index\n    new_breakpoints = []\n    removed = False\n    for i, bp in enumerate(breakpoints):\n        if bp[\"id\"] == bp_id or str(i) == str(bp_id):\n            removed = True\n        else:\n            new_breakpoints.append(bp)\n\n    if removed:\n        return {\n            \"breakpoints\": new_breakpoints,\n            \"output\": f\"Breakpoint {bp_id} removed\"\n        }\n    else:\n        return {\n            \"breakpoints\": breakpoints,\n            \"output\": f\"Breakpoint {bp_id} not found\"\n        }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.list_breakpoints", "type": "function", "label": "list_breakpoints", "direction": "inbound", "parent": "debugger_compute", "line": 234, "endLine": 252, "signature": "(params) -> Dict[]", "docstring": "List all breakpoints.", "source": "def list_breakpoints(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"List all breakpoints.\"\"\"\n    breakpoints = params.get(\"breakpoints\", [])\n\n    if not breakpoints:\n        return {\"output\": \"No breakpoints set\"}\n\n    lines = [\"Breakpoints:\", \"=\" * 50]\n    for i, bp in enumerate(breakpoints):\n        status = \"ON\" if bp.get(\"enabled\", True) else \"OFF\"\n        cond = f\" when: {bp['condition']}\" if bp.get(\"condition\") else \"\"\n        hits = bp.get(\"hit_count\", 0)\n        lines.append(\n            f\"  [{i}] {bp['id']} [{status}] \"\n            f\"{bp['type']}:{bp['target']}{cond} (hits: {hits})\"\n        )\n    lines.append(\"=\" * 50)\n\n    return {\"output\": \"\\n\".join(lines)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.step", "type": "function", "label": "step", "direction": "inbound", "parent": "debugger_compute", "line": 440, "endLine": 582, "signature": "(params) -> Dict[]", "docstring": "Execute one step (event/transition) with full details.", "source": "def step(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Execute one step (event/transition) with full details.\"\"\"\n    bp = params.get(\"blueprint\")\n    state = params.get(\"debug_state\")\n    ctx = params.get(\"debug_context\", {})\n    history = params.get(\"history\", [])\n    history_index = params.get(\"history_index\", 0)\n    breakpoints = params.get(\"breakpoints\", [])\n    watches = params.get(\"watches\", [])\n    event_name = params.get(\"event_name\")\n    event_payload = params.get(\"event_payload\", {})\n\n    if not bp or not state:\n        return {\"error\": \"No blueprint or state\"}\n\n    if not event_name:\n        # Get first available event\n        avail = _get_available_transitions(bp, state, ctx)\n        if not avail:\n            return {\n                \"debug_state\": state,\n                \"debug_context\": ctx,\n                \"history\": history,\n                \"history_index\": history_index,\n                \"output\": \"No available transitions from current state\",\n                \"error\": \"No transitions available\"\n            }\n        event_name = avail[0][\"event\"]\n\n    # Find matching transition\n    eval_ctx = copy.deepcopy(ctx)\n    eval_ctx[\"_state\"] = state\n\n    matched = None\n    gate_results = {}\n\n    for t in bp[\"transitions\"]:\n        if t[\"on_event\"] != event_name:\n            continue\n        if t[\"from\"] != \"*\" and t[\"from\"] != state:\n            continue\n\n        # Evaluate gates\n        gates_pass = True\n        for gate_id in t.get(\"gates\", []):\n            result, details = _evaluate_gate(bp, gate_id, eval_ctx)\n            gate_results[gate_id] = details\n            if not result:\n                gates_pass = False\n                break\n\n        if gates_pass:\n            matched = t\n            break\n\n    if not matched:\n        return {\n            \"debug_state\": state,\n            \"debug_context\": ctx,\n            \"history\": history,\n            \"history_index\": history_index,\n            \"last_gate_results\": gate_results,\n            \"available_events\": [],\n            \"available_transitions\": [],\n            \"output\": f\"No matching transition for event '{event_name}'\",\n            \"error\": f\"No transition for {event_name} from {state}\"\n        }\n\n    # Execute actions\n    new_ctx = copy.deepcopy(ctx)\n    action_results = []\n    for action_id in matched.get(\"actions\", []):\n        new_ctx, details = _execute_action(bp, action_id, new_ctx, event_payload)\n        action_results.append(details)\n\n    # Transition to new state\n    new_state = matched[\"to\"]\n    new_ctx[\"_state\"] = new_state\n\n    # Create history entry\n    new_history = history[:history_index + 1]  # Truncate if we stepped back\n    step_num = len(new_history)\n    new_history.append({\n        \"step\": step_num,\n        \"timestamp\": datetime.now().isoformat(),\n        \"state\": new_state,\n        \"prev_state\": state,\n        \"context\": copy.deepcopy(new_ctx),\n        \"event\": event_name,\n        \"event_payload\": event_payload,\n        \"transition_id\": matched[\"id\"],\n        \"gate_results\": gate_results,\n        \"action_results\": action_results\n    })\n    new_index = step_num\n\n    # Check breakpoints\n    hit_bp = None\n    is_paused = False\n    for bp_item in breakpoints:\n        if _check_breakpoint(bp_item, new_state, matched, event_name, new_ctx):\n            bp_item[\"hit_count\"] = bp_item.get(\"hit_count\", 0) + 1\n            hit_bp = bp_item\n            is_paused = True\n            break\n\n    # Get new available transitions\n    avail = _get_available_transitions(bp, new_state, new_ctx)\n\n    # Update watches\n    watch_values = _update_watches(watches, new_ctx)\n\n    # Build output\n    lines = [\n        f\"Step {step_num}: {state} --[{event_name}]--> {new_state}\"\n    ]\n    if action_results:\n        lines.append(f\"  Actions: {[a['action_id'] for a in action_results]}\")\n    if hit_bp:\n        lines.append(f\"  ** BREAKPOINT HIT: {hit_bp['id']} **\")\n\n    return {\n        \"debug_state\": new_state,\n        \"debug_context\": new_ctx,\n        \"history\": new_history,\n        \"history_index\": new_index,\n        \"available_events\": [t[\"event\"] for t in avail],\n        \"available_transitions\": avail,\n        \"last_transition\": {\n            \"id\": matched[\"id\"],\n            \"from\": state,\n            \"to\": new_state,\n            \"event\": event_name,\n            \"actions\": matched.get(\"actions\", [])\n        },\n        \"last_gate_results\": gate_results,\n        \"last_action_results\": action_results,\n        \"watch_values\": watch_values,\n        \"is_paused\": is_paused,\n        \"hit_breakpoint\": hit_bp,\n        \"output\": \"\\n\".join(lines),\n        \"error\": None\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.step_over", "type": "function", "label": "step_over", "direction": "inbound", "parent": "debugger_compute", "line": 585, "endLine": 591, "signature": "(params) -> Dict[]", "docstring": "Step over (execute without action details).", "source": "def step_over(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Step over (execute without action details).\"\"\"\n    result = step(params)\n    # Clear detailed action results for step_over\n    result[\"last_gate_results\"] = {}\n    result[\"last_action_results\"] = []\n    return result", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.step_back", "type": "function", "label": "step_back", "direction": "inbound", "parent": "debugger_compute", "line": 594, "endLine": 621, "signature": "(params) -> Dict[]", "docstring": "Step back to previous history entry.", "source": "def step_back(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Step back to previous history entry.\"\"\"\n    history = params.get(\"history\", [])\n    history_index = params.get(\"history_index\", 0)\n    bp = params.get(\"blueprint\")\n    watches = params.get(\"watches\", [])\n\n    if history_index <= 0:\n        return {\"output\": \"Cannot step back - at initial state\"}\n\n    new_index = history_index - 1\n    prev_entry = history[new_index]\n\n    state = prev_entry[\"state\"]\n    ctx = copy.deepcopy(prev_entry[\"context\"])\n\n    avail = _get_available_transitions(bp, state, ctx) if bp else []\n    watch_values = _update_watches(watches, ctx)\n\n    return {\n        \"debug_state\": state,\n        \"debug_context\": ctx,\n        \"history_index\": new_index,\n        \"available_events\": [t[\"event\"] for t in avail],\n        \"available_transitions\": avail,\n        \"watch_values\": watch_values,\n        \"output\": f\"Stepped back to step {new_index}: state '{state}'\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.run_to_breakpoint", "type": "function", "label": "run_to_breakpoint", "direction": "inbound", "parent": "debugger_compute", "line": 628, "endLine": 711, "signature": "(params) -> Dict[]", "docstring": "Run until a breakpoint is hit or terminal state reached.", "source": "def run_to_breakpoint(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Run until a breakpoint is hit or terminal state reached.\"\"\"\n    bp = params.get(\"blueprint\")\n    state = params.get(\"debug_state\")\n    ctx = params.get(\"debug_context\", {})\n    history = params.get(\"history\", [])\n    history_index = params.get(\"history_index\", 0)\n    breakpoints = params.get(\"breakpoints\", [])\n    watches = params.get(\"watches\", [])\n    max_steps = params.get(\"max_steps\", 1000)\n\n    if not bp:\n        return {\"error\": \"No blueprint\"}\n\n    current_state = state\n    current_ctx = copy.deepcopy(ctx)\n    current_history = copy.deepcopy(history)\n    current_index = history_index\n    steps_taken = 0\n    hit_bp = None\n\n    while steps_taken < max_steps:\n        # Check if at terminal state\n        if current_state in bp.get(\"terminal_states\", []):\n            break\n\n        # Get available transitions\n        avail = _get_available_transitions(bp, current_state, current_ctx)\n        if not avail:\n            break\n\n        # Take first available transition\n        event_name = avail[0][\"event\"]\n\n        result = step({\n            \"blueprint\": bp,\n            \"debug_state\": current_state,\n            \"debug_context\": current_ctx,\n            \"history\": current_history,\n            \"history_index\": current_index,\n            \"breakpoints\": breakpoints,\n            \"watches\": watches,\n            \"event_name\": event_name,\n            \"event_payload\": {}\n        })\n\n        if result.get(\"error\"):\n            break\n\n        current_state = result[\"debug_state\"]\n        current_ctx = result[\"debug_context\"]\n        current_history = result[\"history\"]\n        current_index = result[\"history_index\"]\n        steps_taken += 1\n\n        if result.get(\"hit_breakpoint\"):\n            hit_bp = result[\"hit_breakpoint\"]\n            break\n\n    avail = _get_available_transitions(bp, current_state, current_ctx)\n    watch_values = _update_watches(watches, current_ctx)\n\n    lines = [f\"Ran {steps_taken} steps\"]\n    if hit_bp:\n        lines.append(f\"Stopped at breakpoint: {hit_bp['id']}\")\n    elif current_state in bp.get(\"terminal_states\", []):\n        lines.append(f\"Reached terminal state: {current_state}\")\n    elif not avail:\n        lines.append(f\"No available transitions at: {current_state}\")\n    lines.append(f\"Current state: {current_state}\")\n\n    return {\n        \"debug_state\": current_state,\n        \"debug_context\": current_ctx,\n        \"history\": current_history,\n        \"history_index\": current_index,\n        \"available_events\": [t[\"event\"] for t in avail],\n        \"available_transitions\": avail,\n        \"watch_values\": watch_values,\n        \"is_paused\": hit_bp is not None,\n        \"hit_breakpoint\": hit_bp,\n        \"output\": \"\\n\".join(lines),\n        \"error\": None\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.continue_execution", "type": "function", "label": "continue_execution", "direction": "inbound", "parent": "debugger_compute", "line": 714, "endLine": 764, "signature": "(params) -> Dict[]", "docstring": "Continue execution after a breakpoint.", "source": "def continue_execution(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Continue execution after a breakpoint.\"\"\"\n    # First step past current position, then run to next breakpoint\n    bp = params.get(\"blueprint\")\n    state = params.get(\"debug_state\")\n    ctx = params.get(\"debug_context\", {})\n    history = params.get(\"history\", [])\n    history_index = params.get(\"history_index\", 0)\n    breakpoints = params.get(\"breakpoints\", [])\n    watches = params.get(\"watches\", [])\n\n    # Get available transitions\n    avail = _get_available_transitions(bp, state, ctx)\n    if not avail:\n        return {\n            \"debug_state\": state,\n            \"debug_context\": ctx,\n            \"history\": history,\n            \"history_index\": history_index,\n            \"output\": \"No transitions available to continue\",\n            \"error\": \"Cannot continue - no available transitions\"\n        }\n\n    # Take one step without checking breakpoints\n    event_name = avail[0][\"event\"]\n    step_result = step({\n        \"blueprint\": bp,\n        \"debug_state\": state,\n        \"debug_context\": ctx,\n        \"history\": history,\n        \"history_index\": history_index,\n        \"breakpoints\": [],  # Skip breakpoint check for first step\n        \"watches\": watches,\n        \"event_name\": event_name,\n        \"event_payload\": {}\n    })\n\n    if step_result.get(\"error\"):\n        return step_result\n\n    # Now run to next breakpoint\n    return run_to_breakpoint({\n        \"blueprint\": bp,\n        \"debug_state\": step_result[\"debug_state\"],\n        \"debug_context\": step_result[\"debug_context\"],\n        \"history\": step_result[\"history\"],\n        \"history_index\": step_result[\"history_index\"],\n        \"breakpoints\": breakpoints,\n        \"watches\": watches,\n        \"max_steps\": 1000\n    })", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.inspect_state", "type": "function", "label": "inspect_state", "direction": "inbound", "parent": "debugger_compute", "line": 771, "endLine": 804, "signature": "(params) -> Dict[]", "docstring": "Inspect current state details.", "source": "def inspect_state(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Inspect current state details.\"\"\"\n    bp = params.get(\"blueprint\")\n    state = params.get(\"debug_state\")\n    avail_trans = params.get(\"available_transitions\", [])\n\n    if not bp or not state:\n        return {\"output\": \"No state to inspect\"}\n\n    state_info = bp[\"states\"].get(state, {})\n\n    lines = [\n        \"State Inspection:\",\n        \"=\" * 50,\n        f\"  State: {state}\",\n        f\"  Description: {state_info.get('description', 'N/A')}\",\n    ]\n\n    if state in bp.get(\"terminal_states\", []):\n        lines.append(\"  [TERMINAL STATE]\")\n\n    if state == bp.get(\"entry_state\"):\n        lines.append(\"  [ENTRY STATE]\")\n\n    lines.append(\"\")\n    lines.append(f\"  Available Transitions ({len(avail_trans)}):\")\n    for t in avail_trans:\n        gates = t.get(\"gates\", [])\n        gate_str = f\" [gates: {gates}]\" if gates else \"\"\n        lines.append(f\"    {t['event']}: -> {t['to']}{gate_str}\")\n\n    lines.append(\"=\" * 50)\n\n    return {\"output\": \"\\n\".join(lines)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.inspect_context", "type": "function", "label": "inspect_context", "direction": "inbound", "parent": "debugger_compute", "line": 807, "endLine": 825, "signature": "(params) -> Dict[]", "docstring": "Inspect context values.", "source": "def inspect_context(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Inspect context values.\"\"\"\n    ctx = params.get(\"debug_context\", {})\n    key = params.get(\"key\")\n\n    if key:\n        value = ctx.get(key, \"<not found>\")\n        return {\"output\": f\"{key} = {json.dumps(value, default=str)}\"}\n\n    lines = [\"Context:\", \"=\" * 50]\n    for k, v in ctx.items():\n        if k != \"_state\":\n            val_str = json.dumps(v, default=str)\n            if len(val_str) > 60:\n                val_str = val_str[:57] + \"...\"\n            lines.append(f\"  {k}: {val_str}\")\n    lines.append(\"=\" * 50)\n\n    return {\"output\": \"\\n\".join(lines)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.evaluate_expression", "type": "function", "label": "evaluate_expression", "direction": "inbound", "parent": "debugger_compute", "line": 828, "endLine": 847, "signature": "(params) -> Dict[]", "docstring": "Evaluate an expression in current context.", "source": "def evaluate_expression(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Evaluate an expression in current context.\"\"\"\n    ctx = params.get(\"debug_context\", {})\n    expression = params.get(\"expression\")\n\n    if not expression:\n        return {\"output\": \"No expression provided\"}\n\n    try:\n        # Try as boolean expression first\n        result, error = safe_eval_bool(expression, ctx)\n        if error:\n            # Try as value expression\n            try:\n                result = eval(expression, {\"__builtins__\": {}}, ctx)\n            except Exception as e:\n                return {\"output\": f\"Error: {e}\"}\n        return {\"output\": f\"{expression} = {result}\"}\n    except Exception as e:\n        return {\"output\": f\"Error evaluating: {e}\"}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.add_watch", "type": "function", "label": "add_watch", "direction": "inbound", "parent": "debugger_compute", "line": 854, "endLine": 874, "signature": "(params) -> Dict[]", "docstring": "Add a watch expression.", "source": "def add_watch(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Add a watch expression.\"\"\"\n    watches = params.get(\"watches\", [])\n    expression = params.get(\"expression\")\n    name = params.get(\"name\")\n\n    if not expression:\n        return {\"watches\": watches, \"output\": \"Error: expression required\"}\n\n    watch_id = name or f\"watch_{len(watches) + 1}\"\n    new_watch = {\n        \"id\": watch_id,\n        \"name\": name or expression[:20],\n        \"expression\": expression\n    }\n\n    new_watches = watches + [new_watch]\n    return {\n        \"watches\": new_watches,\n        \"output\": f\"Watch added: {watch_id} = {expression}\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.remove_watch", "type": "function", "label": "remove_watch", "direction": "inbound", "parent": "debugger_compute", "line": 877, "endLine": 889, "signature": "(params) -> Dict[]", "docstring": "Remove a watch expression.", "source": "def remove_watch(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Remove a watch expression.\"\"\"\n    watches = params.get(\"watches\", [])\n    watch_id = params.get(\"watch_id\")\n\n    if not watch_id:\n        return {\"watches\": watches, \"output\": \"Error: watch_id required\"}\n\n    new_watches = [w for w in watches if w[\"id\"] != watch_id]\n    if len(new_watches) == len(watches):\n        return {\"watches\": watches, \"output\": f\"Watch {watch_id} not found\"}\n\n    return {\"watches\": new_watches, \"output\": f\"Watch {watch_id} removed\"}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.get_watches", "type": "function", "label": "get_watches", "direction": "inbound", "parent": "debugger_compute", "line": 892, "endLine": 909, "signature": "(params) -> Dict[]", "docstring": "Get current watch values.", "source": "def get_watches(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Get current watch values.\"\"\"\n    watches = params.get(\"watches\", [])\n    ctx = params.get(\"debug_context\", {})\n\n    if not watches:\n        return {\"watch_values\": {}, \"output\": \"No watches set\"}\n\n    watch_values = _update_watches(watches, ctx)\n\n    lines = [\"Watches:\", \"=\" * 50]\n    for watch in watches:\n        wid = watch[\"id\"]\n        val = watch_values.get(wid, \"<unknown>\")\n        lines.append(f\"  {wid}: {watch['expression']} = {val}\")\n    lines.append(\"=\" * 50)\n\n    return {\"watch_values\": watch_values, \"output\": \"\\n\".join(lines)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.get_history", "type": "function", "label": "get_history", "direction": "inbound", "parent": "debugger_compute", "line": 916, "endLine": 941, "signature": "(params) -> Dict[]", "docstring": "Get execution history.", "source": "def get_history(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Get execution history.\"\"\"\n    history = params.get(\"history\", [])\n    history_index = params.get(\"history_index\", 0)\n\n    if not history:\n        return {\"output\": \"No history recorded\"}\n\n    lines = [\"Execution History:\", \"=\" * 50]\n    for entry in history:\n        step_num = entry.get(\"step\", 0)\n        state = entry.get(\"state\", \"?\")\n        event = entry.get(\"event\")\n        prev = entry.get(\"prev_state\")\n\n        marker = \" <--\" if step_num == history_index else \"\"\n\n        if event:\n            lines.append(f\"  [{step_num}] {prev} --[{event}]--> {state}{marker}\")\n        else:\n            lines.append(f\"  [{step_num}] Initial: {state}{marker}\")\n\n    lines.append(\"=\" * 50)\n    lines.append(f\"Current position: step {history_index}\")\n\n    return {\"output\": \"\\n\".join(lines)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.goto_step", "type": "function", "label": "goto_step", "direction": "inbound", "parent": "debugger_compute", "line": 944, "endLine": 973, "signature": "(params) -> Dict[]", "docstring": "Jump to a specific step in history.", "source": "def goto_step(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Jump to a specific step in history.\"\"\"\n    history = params.get(\"history\", [])\n    target_step = params.get(\"target_step\")\n    bp = params.get(\"blueprint\")\n    watches = params.get(\"watches\", [])\n\n    if target_step is None:\n        return {\"output\": \"Error: step number required\"}\n\n    target_step = int(target_step)\n    if target_step < 0 or target_step >= len(history):\n        return {\"output\": f\"Error: step {target_step} out of range (0-{len(history)-1})\"}\n\n    entry = history[target_step]\n    state = entry[\"state\"]\n    ctx = copy.deepcopy(entry[\"context\"])\n\n    avail = _get_available_transitions(bp, state, ctx) if bp else []\n    watch_values = _update_watches(watches, ctx)\n\n    return {\n        \"debug_state\": state,\n        \"debug_context\": ctx,\n        \"history_index\": target_step,\n        \"available_events\": [t[\"event\"] for t in avail],\n        \"available_transitions\": avail,\n        \"watch_values\": watch_values,\n        \"output\": f\"Jumped to step {target_step}: state '{state}'\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.compare_states", "type": "function", "label": "compare_states", "direction": "inbound", "parent": "debugger_compute", "line": 976, "endLine": 1022, "signature": "(params) -> Dict[]", "docstring": "Compare context at two different history points.", "source": "def compare_states(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Compare context at two different history points.\"\"\"\n    history = params.get(\"history\", [])\n    step1 = params.get(\"step1\", 0)\n    step2 = params.get(\"step2\")\n\n    if step2 is None:\n        step2 = len(history) - 1\n\n    step1 = int(step1)\n    step2 = int(step2)\n\n    if step1 < 0 or step1 >= len(history):\n        return {\"output\": f\"Error: step1 {step1} out of range\"}\n    if step2 < 0 or step2 >= len(history):\n        return {\"output\": f\"Error: step2 {step2} out of range\"}\n\n    ctx1 = history[step1].get(\"context\", {})\n    ctx2 = history[step2].get(\"context\", {})\n\n    lines = [\n        f\"Comparing step {step1} vs step {step2}:\",\n        \"=\" * 50\n    ]\n\n    all_keys = set(ctx1.keys()) | set(ctx2.keys())\n    all_keys.discard(\"_state\")\n\n    for key in sorted(all_keys):\n        v1 = ctx1.get(key)\n        v2 = ctx2.get(key)\n        if v1 != v2:\n            lines.append(f\"  {key}:\")\n            lines.append(f\"    step {step1}: {json.dumps(v1, default=str)}\")\n            lines.append(f\"    step {step2}: {json.dumps(v2, default=str)}\")\n\n    state1 = history[step1].get(\"state\", \"?\")\n    state2 = history[step2].get(\"state\", \"?\")\n    if state1 != state2:\n        lines.append(f\"  State: {state1} -> {state2}\")\n\n    if len(lines) == 2:\n        lines.append(\"  No differences found\")\n\n    lines.append(\"=\" * 50)\n\n    return {\"output\": \"\\n\".join(lines)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "debugger_compute.render_status", "type": "function", "label": "render_status", "direction": "inbound", "parent": "debugger_compute", "line": 1029, "endLine": 1073, "signature": "(params) -> Dict[]", "docstring": "Render current debug status.", "source": "def render_status(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Render current debug status.\"\"\"\n    bp_name = params.get(\"blueprint_name\", \"Unknown\")\n    state = params.get(\"debug_state\", \"?\")\n    ctx = params.get(\"debug_context\", {})\n    history_index = params.get(\"history_index\", 0)\n    avail_events = params.get(\"available_events\", [])\n    breakpoints = params.get(\"breakpoints\", [])\n    is_paused = params.get(\"is_paused\", False)\n    hit_bp = params.get(\"hit_breakpoint\")\n\n    lines = [\n        \"=\" * 60,\n        f\"  L++ Debugger: {bp_name}\",\n        \"=\" * 60,\n    ]\n\n    if is_paused and hit_bp:\n        lines.append(f\"  ** PAUSED at breakpoint: {hit_bp['id']} **\")\n\n    lines.extend([\n        f\"  State: {state}\",\n        f\"  Step: {history_index}\",\n        f\"  Breakpoints: {len(breakpoints)}\",\n        \"\",\n        \"  Context (non-null):\"\n    ])\n\n    for k, v in ctx.items():\n        if k != \"_state\" and v is not None:\n            val_str = str(v)\n            if len(val_str) > 40:\n                val_str = val_str[:37] + \"...\"\n            lines.append(f\"    {k}: {val_str}\")\n\n    lines.append(\"\")\n    lines.append(f\"  Available Events ({len(avail_events)}):\")\n    for e in avail_events[:8]:\n        lines.append(f\"    - {e}\")\n    if len(avail_events) > 8:\n        lines.append(f\"    ... and {len(avail_events) - 8} more\")\n\n    lines.append(\"=\" * 60)\n\n    return {\"output\": \"\\n\".join(lines)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "json", "type": "dependency", "label": "json", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "copy", "type": "dependency", "label": "copy", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "uuid", "type": "dependency", "label": "uuid", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "pathlib", "type": "dependency", "label": "pathlib", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "typing", "type": "dependency", "label": "typing", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "datetime", "type": "dependency", "label": "datetime", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "frame_py.loader", "type": "dependency", "label": "loader", "direction": "outbound", "category": "pip", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}, {"id": "frame_py.safe_eval", "type": "dependency", "label": "safe_eval", "direction": "outbound", "category": "pip", "moduleColor": "#00d4ff", "moduleName": "debugger_compute"}];
+const edges = [{"from": "debugger_compute.reset_session", "to": "debugger_compute.init_debug_session", "type": "internal", "line": 156}, {"from": "debugger_compute.step_over", "to": "debugger_compute.step", "type": "internal", "line": 587}, {"from": "debugger_compute.run_to_breakpoint", "to": "debugger_compute.step", "type": "internal", "line": 662}, {"from": "debugger_compute.continue_execution", "to": "debugger_compute.step", "type": "internal", "line": 739}, {"from": "debugger_compute.continue_execution", "to": "debugger_compute.run_to_breakpoint", "type": "internal", "line": 755}, {"from": "debugger_compute.load_blueprint", "to": "pathlib", "type": "external", "category": "stdlib", "line": 30}, {"from": "debugger_compute.load_blueprint", "to": "json", "type": "external", "category": "stdlib", "line": 35}, {"from": "debugger_compute.load_blueprint", "to": "frame_py", "type": "external", "category": "pip", "line": 37}, {"from": "debugger_compute.init_debug_session", "to": "datetime", "type": "external", "category": "stdlib", "line": 123}, {"from": "debugger_compute.init_debug_session", "to": "copy", "type": "external", "category": "stdlib", "line": 125}, {"from": "debugger_compute.set_breakpoint", "to": "uuid", "type": "external", "category": "stdlib", "line": 188}, {"from": "debugger_compute._check_breakpoint", "to": "frame_py", "type": "external", "category": "pip", "line": 283}, {"from": "debugger_compute._check_breakpoint", "to": "frame_py", "type": "external", "category": "pip", "line": 288}, {"from": "debugger_compute._evaluate_gate", "to": "frame_py", "type": "external", "category": "pip", "line": 306}, {"from": "debugger_compute._get_available_transitions", "to": "copy", "type": "external", "category": "stdlib", "line": 330}, {"from": "debugger_compute._execute_action", "to": "copy", "type": "external", "category": "stdlib", "line": 379}, {"from": "debugger_compute._update_watches", "to": "frame_py", "type": "external", "category": "pip", "line": 423}, {"from": "debugger_compute.step", "to": "copy", "type": "external", "category": "stdlib", "line": 470}, {"from": "debugger_compute.step", "to": "copy", "type": "external", "category": "stdlib", "line": 509}, {"from": "debugger_compute.step", "to": "datetime", "type": "external", "category": "stdlib", "line": 524}, {"from": "debugger_compute.step", "to": "copy", "type": "external", "category": "stdlib", "line": 527}, {"from": "debugger_compute.step_back", "to": "copy", "type": "external", "category": "stdlib", "line": 608}, {"from": "debugger_compute.run_to_breakpoint", "to": "copy", "type": "external", "category": "stdlib", "line": 643}, {"from": "debugger_compute.run_to_breakpoint", "to": "copy", "type": "external", "category": "stdlib", "line": 644}, {"from": "debugger_compute.inspect_context", "to": "json", "type": "external", "category": "stdlib", "line": 814}, {"from": "debugger_compute.inspect_context", "to": "json", "type": "external", "category": "stdlib", "line": 819}, {"from": "debugger_compute.evaluate_expression", "to": "frame_py", "type": "external", "category": "pip", "line": 838}, {"from": "debugger_compute.goto_step", "to": "copy", "type": "external", "category": "stdlib", "line": 960}, {"from": "debugger_compute.compare_states", "to": "json", "type": "external", "category": "stdlib", "line": 1009}, {"from": "debugger_compute.compare_states", "to": "json", "type": "external", "category": "stdlib", "line": 1010}];
+const moduleColors = {"debugger_compute": "#00d4ff"};
+
+// Edge type visibility
+const edgeVisibility = { internal: true, external: true, local: true };
+let currentLayout = 'force';
+
+// Create node lookup
+const nodeById = {};
+nodes.forEach(n => nodeById[n.id] = n);
+
+// Setup SVG
+const container = document.getElementById('graph');
+const width = container.clientWidth;
+const height = container.clientHeight || 600;
+
+const svg = d3.select("svg").attr("viewBox", [0, 0, width, height]);
+const g = svg.append("g");
+
+// Zoom behavior
+const zoom = d3.zoom()
+    .scaleExtent([0.1, 4])
+    .filter(e => !e.target.closest('.node'))
+    .on("zoom", e => g.attr("transform", e.transform));
+svg.call(zoom);
+
+// Arrow markers
+const defs = svg.append("defs");
+["internal", "external", "local"].forEach(type => {
+    const color = type === "internal" ? "#4ecdc4" : type === "external" ? "#f39c12" : "#9b59b6";
+    defs.append("marker")
+        .attr("id", `arrow-${type}`)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 20)
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-4L10,0L0,4")
+        .attr("fill", color);
+});
+
+// Build module legend
+const legendDiv = document.getElementById('module-legend');
+Object.entries(moduleColors).forEach(([mod, color]) => {
+    const item = document.createElement('div');
+    item.className = 'module-item';
+    item.innerHTML = `<div class="module-dot" style="background:${color}"></div><span class="module-name">${mod}</span>`;
+    item.onclick = () => highlightModule(mod);
+    legendDiv.appendChild(item);
+});
+
+// Process edges - resolve node references
+const processedEdges = edges.map(e => ({
+    ...e,
+    source: nodeById[e.from] || { id: e.from, x: 0, y: 0 },
+    target: nodeById[e.to] || { id: e.to, x: 0, y: 0 }
+})).filter(e => e.source && e.target);
+
+// Force simulation
+const simulation = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(processedEdges).id(d => d.id).distance(80).strength(0.5))
+    .force("charge", d3.forceManyBody().strength(-300))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force("collision", d3.forceCollide().radius(40));
+
+// Draw edges
+const edge = g.append("g").selectAll("path")
+    .data(processedEdges)
+    .join("path")
+    .attr("class", d => `edge edge-${d.type || 'internal'}`)
+    .attr("marker-end", d => `url(#arrow-${d.type || 'internal'})`);
+
+// Node size based on type
+function nodeSize(d) {
+    if (d.type === 'module') return { w: 120, h: 40 };
+    if (d.type === 'function' || d.type === 'async_function') return { w: 100, h: 30 };
+    if (d.type === 'class') return { w: 110, h: 35 };
+    return { w: 80, h: 25 };  // dependency
+}
+
+// Draw nodes
+const node = g.append("g").selectAll("g")
+    .data(nodes)
+    .join("g")
+    .attr("class", "node")
+    .call(d3.drag()
+        .on("start", dragStart)
+        .on("drag", dragging)
+        .on("end", dragEnd));
+
+node.append("rect")
+    .attr("class", d => `node-${d.type === 'dependency' ? 'dependency' : d.type === 'module' ? 'module' : 'function'}`)
+    .attr("width", d => nodeSize(d).w)
+    .attr("height", d => nodeSize(d).h)
+    .attr("x", d => -nodeSize(d).w / 2)
+    .attr("y", d => -nodeSize(d).h / 2)
+    .attr("rx", 6)
+    .attr("stroke", d => d.moduleColor || "#666");
+
+node.append("text")
+    .attr("class", "node-label")
+    .attr("text-anchor", "middle")
+    .attr("dy", d => d.signature ? -3 : 4)
+    .text(d => d.label || d.id);
+
+node.filter(d => d.signature).append("text")
+    .attr("class", "node-sublabel")
+    .attr("text-anchor", "middle")
+    .attr("dy", 10)
+    .text(d => d.signature.length > 20 ? d.signature.slice(0, 18) + ".." : d.signature);
+
+// Tooltip
+const tooltip = d3.select("#tooltip");
+node.on("mouseover", (e, d) => {
+    let html = `<b>${d.label || d.id}</b>`;
+    if (d.type) html += `<br><span style="color:#888">${d.type}</span>`;
+    if (d.signature) html += `<br><code>${d.signature}</code>`;
+    if (d.direction) html += `<br>Direction: ${d.direction}`;
+    tooltip.style("display", "block").html(html);
+})
+.on("mousemove", e => {
+    tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 10) + "px");
+})
+.on("mouseout", () => tooltip.style("display", "none"));
+
+// Click to select
+node.on("click", (e, d) => {
+    e.stopPropagation();
+    selectNode(d);
+});
+
+svg.on("click", () => clearSelection());
+
+// Update positions
+simulation.on("tick", () => {
+    edge.attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
+});
+
+// Drag functions
+function dragStart(e, d) {
+    if (!e.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+}
+function dragging(e, d) {
+    d.fx = e.x;
+    d.fy = e.y;
+}
+function dragEnd(e, d) {
+    if (!e.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+}
+
+// Selection functions
+let selectedNode = null;
+
+function selectNode(d) {
+    selectedNode = d;
+    
+    // Highlight node
+    node.classed("dim", n => n.id !== d.id && !isConnected(d, n));
+    node.select("rect").attr("stroke-width", n => n.id === d.id ? 4 : 2);
+    
+    // Highlight edges
+    edge.classed("dim", e => e.source.id !== d.id && e.target.id !== d.id);
+    edge.classed("highlight", e => e.source.id === d.id || e.target.id === d.id);
+    
+    // Update info panel
+    updateNodeInfo(d);
+    updateEdgeList(d);
+}
+
+function clearSelection() {
+    selectedNode = null;
+    node.classed("dim", false);
+    node.select("rect").attr("stroke-width", 2);
+    edge.classed("dim", false).classed("highlight", false);
+    document.getElementById('node-info').innerHTML = 'Click a node to see details';
+    document.getElementById('edge-list').innerHTML = '';
+}
+
+function isConnected(a, b) {
+    return processedEdges.some(e => 
+        (e.source.id === a.id && e.target.id === b.id) ||
+        (e.source.id === b.id && e.target.id === a.id)
+    );
+}
+
+function updateNodeInfo(d) {
+    let html = `<div class="metric"><span class="info-label">ID:</span><span class="info-value">${d.id}</span></div>`;
+    html += `<div class="metric"><span class="info-label">Type:</span><span class="info-value">${d.type}</span></div>`;
+    if (d.moduleName) html += `<div class="metric"><span class="info-label">Module:</span><span class="info-value">${d.moduleName}</span></div>`;
+    if (d.line) html += `<div class="metric"><span class="info-label">Line:</span><span class="info-value">${d.line}${d.endLine ? '-' + d.endLine : ''}</span></div>`;
+    if (d.signature) html += `<div class="metric"><span class="info-label">Signature:</span><span class="info-value" style="font-family:monospace">${d.signature}</span></div>`;
+    if (d.direction) html += `<div class="metric"><span class="info-label">Direction:</span><span class="info-value">${d.direction}</span></div>`;
+    if (d.category) html += `<div class="metric"><span class="info-label">Category:</span><span class="info-value">${d.category}</span></div>`;
+
+    if (d.metrics) {
+        html += `<div style="margin-top:10px"><b>Coupling Metrics</b></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-In:</span><span class="info-value">${d.metrics.fanIn}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-Out:</span><span class="info-value">${d.metrics.fanOut}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Instability:</span><span class="info-value">${(d.metrics.instability * 100).toFixed(1)}%</span></div>`;
+        html += `<div class="metric-bar"><div class="metric-fill" style="width:${d.metrics.instability * 100}%;background:${d.metrics.instability > 0.5 ? '#ff6b6b' : '#4ecdc4'}"></div></div>`;
+        html += `<div class="metric"><span class="info-label">Internal Edges:</span><span class="info-value">${d.metrics.internalEdges}</span></div>`;
+    }
+
+    document.getElementById('node-info').innerHTML = html;
+
+    // Update source code panel
+    updateSourcePanel(d);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function updateSourcePanel(d) {
+    const panel = document.getElementById('source-content');
+
+    if (d.source) {
+        let sourceHtml = '';
+        if (d.docstring) {
+            sourceHtml += `<div class="docstring" style="margin-bottom:8px;padding:5px;background:#1a1a2a;border-radius:3px">${escapeHtml(d.docstring)}</div>`;
+        }
+        sourceHtml += `<div class="source-code">${escapeHtml(d.source)}</div>`;
+        panel.innerHTML = sourceHtml;
+    } else if (d.type === 'module') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">Module: ${d.label}<br>Click a function to view its source code.</div>`;
+    } else if (d.type === 'dependency') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">External dependency: ${d.label}<br>Category: ${d.category || 'unknown'}</div>`;
+    } else {
+        panel.innerHTML = `<div style="color:#666;font-size:11px">No source available for this node</div>`;
+    }
+}
+
+function updateEdgeList(d) {
+    const outgoing = processedEdges.filter(e => e.source.id === d.id);
+    const incoming = processedEdges.filter(e => e.target.id === d.id);
+    
+    let html = '';
+    if (outgoing.length) {
+        html += '<div style="color:#4ecdc4;font-weight:bold;margin-bottom:5px">Outgoing →</div>';
+        outgoing.forEach(e => {
+            html += `<div class="edge-item">→ <span class="to">${e.target.id || e.to}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (incoming.length) {
+        html += '<div style="color:#f39c12;font-weight:bold;margin:10px 0 5px 0">← Incoming</div>';
+        incoming.forEach(e => {
+            html += `<div class="edge-item">← <span class="from">${e.source.id || e.from}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (!outgoing.length && !incoming.length) {
+        html = '<div style="color:#666">No connections</div>';
+    }
+    
+    document.getElementById('edge-list').innerHTML = html;
+}
+
+function highlightModule(modName) {
+    node.classed("dim", n => n.moduleName !== modName && n.type !== 'dependency');
+    edge.classed("dim", e => {
+        const srcMod = nodeById[e.source.id]?.moduleName;
+        const tgtMod = nodeById[e.target.id]?.moduleName;
+        return srcMod !== modName && tgtMod !== modName;
+    });
+}
+
+// Layout functions
+function toggleLayout(layout) {
+    currentLayout = layout;
+    document.querySelectorAll('.controls button').forEach(b => {
+        if (b.id.startsWith('btn-') && ['force', 'horizontal', 'vertical'].includes(b.id.replace('btn-', ''))) {
+            b.classList.toggle('active', b.id === `btn-${layout}`);
+        }
+    });
+    
+    if (layout === 'force') {
+        simulation.alpha(1).restart();
+    } else {
+        simulation.stop();
+        layoutNodes(layout);
+    }
+}
+
+function layoutNodes(layout) {
+    const modules = [...new Set(nodes.filter(n => n.type === 'module').map(n => n.id))];
+    const padding = 50;
+    
+    if (layout === 'horizontal') {
+        // Group by module, spread horizontally
+        modules.forEach((mod, mi) => {
+            const modNodes = nodes.filter(n => n.moduleName === mod || n.id === mod);
+            const x = padding + mi * (width - padding * 2) / Math.max(modules.length - 1, 1);
+            modNodes.forEach((n, ni) => {
+                n.x = x;
+                n.y = padding + ni * 50;
+            });
+        });
+        // Dependencies on the right
+        const deps = nodes.filter(n => n.type === 'dependency');
+        deps.forEach((n, i) => {
+            n.x = width - padding;
+            n.y = padding + i * 40;
+        });
+    } else if (layout === 'vertical') {
+        // Modules at top, functions below, dependencies at bottom
+        const modNodes = nodes.filter(n => n.type === 'module');
+        const funcNodes = nodes.filter(n => n.type === 'function' || n.type === 'async_function' || n.type === 'class');
+        const depNodes = nodes.filter(n => n.type === 'dependency');
+        
+        modNodes.forEach((n, i) => {
+            n.x = padding + i * 150;
+            n.y = padding;
+        });
+        funcNodes.forEach((n, i) => {
+            n.x = padding + (i % 6) * 130;
+            n.y = 120 + Math.floor(i / 6) * 60;
+        });
+        depNodes.forEach((n, i) => {
+            n.x = padding + (i % 8) * 100;
+            n.y = height - padding - 50;
+        });
+    }
+    
+    // Update positions
+    node.transition().duration(500).attr("transform", d => `translate(${d.x},${d.y})`);
+    edge.transition().duration(500).attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+}
+
+// Edge type toggle
+function toggleEdgeType(type) {
+    edgeVisibility[type] = !edgeVisibility[type];
+    document.getElementById(`btn-${type}`).classList.toggle('active', edgeVisibility[type]);
+    edge.style("display", d => edgeVisibility[d.type || 'internal'] ? null : "none");
+}
+
+// View controls
+function resetView() {
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+}
+
+function fitToView() {
+    const bounds = g.node().getBBox();
+    const scale = Math.min(width / bounds.width, height / bounds.height) * 0.9;
+    const tx = (width - bounds.width * scale) / 2 - bounds.x * scale;
+    const ty = (height - bounds.height * scale) / 2 - bounds.y * scale;
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
+// Initial fit
+setTimeout(fitToView, 1000);
+</script>
+</body>
+</html>

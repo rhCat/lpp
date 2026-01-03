@@ -70,11 +70,23 @@ def extractExports(params: dict) -> dict:
     """Extract public functions and classes (inbound interface)."""
     tree = params.get("ast")
     filePath = params.get("filePath", "")
+    sourceCode = params.get("sourceCode", "")
     if not tree:
         return {"exports": []}
 
     moduleName = Path(filePath).stem if filePath else "unknown"
     exports = []
+    sourceLines = sourceCode.split('\n') if sourceCode else []
+
+    def get_source(node):
+        """Extract source code for a node using line numbers."""
+        if not sourceLines or not hasattr(node, 'lineno'):
+            return None
+        start = node.lineno - 1
+        end = getattr(node, 'end_lineno', start + 1)
+        if start < len(sourceLines) and end <= len(sourceLines):
+            return '\n'.join(sourceLines[start:end])
+        return None
 
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef):
@@ -84,10 +96,12 @@ def extractExports(params: dict) -> dict:
                     "name": node.name,
                     "module": moduleName,
                     "line": node.lineno,
+                    "endLine": getattr(node, 'end_lineno', node.lineno),
                     "args": [a.arg for a in node.args.args],
                     "returns": _get_annotation(node.returns),
                     "docstring": ast.get_docstring(node),
-                    "decorators": [_get_decorator_name(d) for d in node.decorator_list]
+                    "decorators": [_get_decorator_name(d) for d in node.decorator_list],
+                    "source": get_source(node)
                 })
         elif isinstance(node, ast.AsyncFunctionDef):
             if not node.name.startswith("_"):
@@ -96,10 +110,12 @@ def extractExports(params: dict) -> dict:
                     "name": node.name,
                     "module": moduleName,
                     "line": node.lineno,
+                    "endLine": getattr(node, 'end_lineno', node.lineno),
                     "args": [a.arg for a in node.args.args],
                     "returns": _get_annotation(node.returns),
                     "docstring": ast.get_docstring(node),
-                    "decorators": [_get_decorator_name(d) for d in node.decorator_list]
+                    "decorators": [_get_decorator_name(d) for d in node.decorator_list],
+                    "source": get_source(node)
                 })
         elif isinstance(node, ast.ClassDef):
             if not node.name.startswith("_"):
@@ -115,9 +131,11 @@ def extractExports(params: dict) -> dict:
                     "name": node.name,
                     "module": moduleName,
                     "line": node.lineno,
+                    "endLine": getattr(node, 'end_lineno', node.lineno),
                     "bases": [_get_name(b) for b in node.bases],
                     "methods": methods,
-                    "docstring": ast.get_docstring(node)
+                    "docstring": ast.get_docstring(node),
+                    "source": get_source(node)
                 })
 
     # Check for module-level __all__
@@ -384,7 +402,12 @@ def generateModuleGraph(params: dict) -> dict:
             "direction": "inbound",
             "parent": moduleName,
             "line": exp.get("line"),
-            "signature": _build_signature(exp)
+            "endLine": exp.get("endLine"),
+            "signature": _build_signature(exp),
+            "docstring": exp.get("docstring"),
+            "source": exp.get("source"),
+            "args": exp.get("args"),
+            "returns": exp.get("returns")
         })
 
     # Import nodes (outbound dependencies)
@@ -646,6 +669,14 @@ h3 {{ color: #00d4ff; margin: 15px 0 8px 0; font-size: 14px; border-bottom: 1px 
 .info-section {{ font-size: 12px; line-height: 1.6; }}
 .info-label {{ color: #888; }}
 .info-value {{ color: #fff; }}
+
+/* Source code panel */
+.source-panel {{ margin-top: 10px; }}
+.source-code {{ background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 10px; font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; line-height: 1.4; overflow-x: auto; max-height: 300px; overflow-y: auto; white-space: pre; color: #b8b8b8; }}
+.source-header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }}
+.source-toggle {{ background: #3a3a5a; color: #fff; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; }}
+.source-toggle:hover {{ background: #4a4a6a; }}
+.docstring {{ color: #6a9955; font-style: italic; }}
 .metric {{ display: flex; justify-content: space-between; padding: 3px 0; }}
 .metric-bar {{ height: 4px; background: #333; border-radius: 2px; margin-top: 2px; }}
 .metric-fill {{ height: 100%; border-radius: 2px; }}
@@ -682,15 +713,17 @@ h3 {{ color: #00d4ff; margin: 15px 0 8px 0; font-size: 14px; border-bottom: 1px 
   <div id="sidebar">
     <h3>Modules</h3>
     <div class="module-legend" id="module-legend"></div>
-    
+
     <h3>Selected Node</h3>
     <div class="info-section" id="node-info">Click a node to see details</div>
-    
+
+    <h3>Source Code</h3>
+    <div class="source-panel" id="source-panel">
+      <div id="source-content" style="color:#666;font-size:11px">Click a function to view source</div>
+    </div>
+
     <h3>Connections</h3>
     <div class="edge-list" id="edge-list"></div>
-    
-    <h3>Metrics</h3>
-    <div class="info-section" id="metrics-info"></div>
   </div>
 </div>
 <div id="tooltip"></div>
@@ -899,11 +932,11 @@ function updateNodeInfo(d) {{
     let html = `<div class="metric"><span class="info-label">ID:</span><span class="info-value">${{d.id}}</span></div>`;
     html += `<div class="metric"><span class="info-label">Type:</span><span class="info-value">${{d.type}}</span></div>`;
     if (d.moduleName) html += `<div class="metric"><span class="info-label">Module:</span><span class="info-value">${{d.moduleName}}</span></div>`;
-    if (d.line) html += `<div class="metric"><span class="info-label">Line:</span><span class="info-value">${{d.line}}</span></div>`;
+    if (d.line) html += `<div class="metric"><span class="info-label">Line:</span><span class="info-value">${{d.line}}${{d.endLine ? '-' + d.endLine : ''}}</span></div>`;
     if (d.signature) html += `<div class="metric"><span class="info-label">Signature:</span><span class="info-value" style="font-family:monospace">${{d.signature}}</span></div>`;
     if (d.direction) html += `<div class="metric"><span class="info-label">Direction:</span><span class="info-value">${{d.direction}}</span></div>`;
     if (d.category) html += `<div class="metric"><span class="info-label">Category:</span><span class="info-value">${{d.category}}</span></div>`;
-    
+
     if (d.metrics) {{
         html += `<div style="margin-top:10px"><b>Coupling Metrics</b></div>`;
         html += `<div class="metric"><span class="info-label">Fan-In:</span><span class="info-value">${{d.metrics.fanIn}}</span></div>`;
@@ -912,8 +945,35 @@ function updateNodeInfo(d) {{
         html += `<div class="metric-bar"><div class="metric-fill" style="width:${{d.metrics.instability * 100}}%;background:${{d.metrics.instability > 0.5 ? '#ff6b6b' : '#4ecdc4'}}"></div></div>`;
         html += `<div class="metric"><span class="info-label">Internal Edges:</span><span class="info-value">${{d.metrics.internalEdges}}</span></div>`;
     }}
-    
+
     document.getElementById('node-info').innerHTML = html;
+
+    // Update source code panel
+    updateSourcePanel(d);
+}}
+
+function escapeHtml(str) {{
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}}
+
+function updateSourcePanel(d) {{
+    const panel = document.getElementById('source-content');
+
+    if (d.source) {{
+        let sourceHtml = '';
+        if (d.docstring) {{
+            sourceHtml += `<div class="docstring" style="margin-bottom:8px;padding:5px;background:#1a1a2a;border-radius:3px">${{escapeHtml(d.docstring)}}</div>`;
+        }}
+        sourceHtml += `<div class="source-code">${{escapeHtml(d.source)}}</div>`;
+        panel.innerHTML = sourceHtml;
+    }} else if (d.type === 'module') {{
+        panel.innerHTML = `<div style="color:#888;font-size:11px">Module: ${{d.label}}<br>Click a function to view its source code.</div>`;
+    }} else if (d.type === 'dependency') {{
+        panel.innerHTML = `<div style="color:#888;font-size:11px">External dependency: ${{d.label}}<br>Category: ${{d.category || 'unknown'}}</div>`;
+    }} else {{
+        panel.innerHTML = `<div style="color:#666;font-size:11px">No source available for this node</div>`;
+    }}
 }}
 
 function updateEdgeList(d) {{

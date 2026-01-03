@@ -39,6 +39,9 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 #details { font-size: 12px; line-height: 1.5; }
 #flow-list { font-size: 11px; max-height: 300px; overflow-y: auto; }
 #flow-list div { padding: 3px 0; border-bottom: 1px solid #333; }
+#definition-panel { font-size: 11px; margin-top: 10px; }
+.definition-code { background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 8px; font-family: 'Consolas', monospace; white-space: pre-wrap; max-height: 200px; overflow-y: auto; color: #b8b8b8; }
+.def-label { color: #888; font-size: 10px; margin-bottom: 3px; }
 </style>
 </head>
 <body>
@@ -69,6 +72,8 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
   <div id="info">
     <h3>Selected Node</h3>
     <div id="details">Click a node to see details</div>
+    <h4>Definition</h4>
+    <div id="definition-panel">Click a state to view its definition</div>
     <h4>Transitions</h4>
     <div id="flow-list"></div>
     <div class="legend">
@@ -91,8 +96,9 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 </div>
 <div id="tooltip"></div>
 <script>
-const nodes = [{"id": "idle", "label": "idle", "description": "Awaiting task", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0}, {"id": "analyzing", "label": "analyzing", "description": "Root analysis", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1}, {"id": "expanding", "label": "expanding", "description": "Expand sub-features", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}, {"id": "planning", "label": "planning", "description": "Plan leaf execution", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}, {"id": "building", "label": "building", "description": "Build tools", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3}, {"id": "executing", "label": "executing", "description": "Execute leaf", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3}, {"id": "traversing", "label": "traversing", "description": "Next leaf", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4}, {"id": "reflecting", "label": "reflecting", "description": "Reflect on progress", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4}, {"id": "evaluating", "label": "evaluating", "description": "Evaluate completion", "type": "state", "isEntry": false, "isTerminal": false, "layer": 5}, {"id": "complete", "label": "complete", "description": "Done", "type": "state", "isEntry": false, "isTerminal": true, "layer": 7}, {"id": "error", "label": "error", "description": "Error", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}];
-const links = [{"source": "idle", "target": "idle", "label": "START", "gates": ""}, {"source": "idle", "target": "analyzing", "label": "SUBMIT", "gates": "can_submit"}, {"source": "analyzing", "target": "expanding", "label": "DONE", "gates": "has_tree, can_expand, no_error"}, {"source": "analyzing", "target": "planning", "label": "DONE", "gates": "has_tree, is_atomic, no_error"}, {"source": "analyzing", "target": "error", "label": "DONE", "gates": "has_error"}, {"source": "expanding", "target": "expanding", "label": "DONE", "gates": "can_expand, no_error"}, {"source": "expanding", "target": "planning", "label": "DONE", "gates": "is_atomic, no_error"}, {"source": "expanding", "target": "error", "label": "DONE", "gates": "has_error"}, {"source": "planning", "target": "building", "label": "DONE", "gates": "needs_tools, no_error"}, {"source": "planning", "target": "executing", "label": "DONE", "gates": "no_tools, no_error"}, {"source": "planning", "target": "error", "label": "DONE", "gates": "has_error"}, {"source": "building", "target": "building", "label": "DONE", "gates": "needs_tools, no_error"}, {"source": "building", "target": "executing", "label": "DONE", "gates": "no_tools, no_error"}, {"source": "building", "target": "error", "label": "DONE", "gates": "has_error"}, {"source": "executing", "target": "traversing", "label": "DONE", "gates": "has_more, no_error"}, {"source": "executing", "target": "reflecting", "label": "DONE", "gates": "all_done, no_error"}, {"source": "executing", "target": "error", "label": "DONE", "gates": "has_error"}, {"source": "traversing", "target": "building", "label": "DONE", "gates": "needs_tools, no_error"}, {"source": "traversing", "target": "executing", "label": "DONE", "gates": "no_tools, no_error"}, {"source": "traversing", "target": "error", "label": "DONE", "gates": "has_error"}, {"source": "reflecting", "target": "evaluating", "label": "DONE", "gates": "no_error"}, {"source": "reflecting", "target": "error", "label": "DONE", "gates": "has_error"}, {"source": "evaluating", "target": "complete", "label": "DONE", "gates": "is_complete, no_error"}, {"source": "evaluating", "target": "expanding", "label": "DONE", "gates": "not_complete, within_iter, no_error"}, {"source": "evaluating", "target": "complete", "label": "DONE", "gates": "max_iter"}, {"source": "evaluating", "target": "error", "label": "DONE", "gates": "has_error"}, {"source": "error", "target": "idle", "label": "RETRY", "gates": ""}, {"source": "expanding", "target": "idle", "label": "RESET", "gates": ""}, {"source": "executing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "complete", "target": "idle", "label": "RESET", "gates": ""}, {"source": "analyzing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "error", "target": "idle", "label": "RESET", "gates": ""}, {"source": "traversing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "planning", "target": "idle", "label": "RESET", "gates": ""}, {"source": "evaluating", "target": "idle", "label": "RESET", "gates": ""}, {"source": "building", "target": "idle", "label": "RESET", "gates": ""}, {"source": "reflecting", "target": "idle", "label": "RESET", "gates": ""}];
+const nodes = [{"id": "idle", "label": "idle", "description": "Awaiting task", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0, "definition": {"description": "Awaiting task"}}, {"id": "analyzing", "label": "analyzing", "description": "Root analysis", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1, "definition": {"description": "Root analysis"}}, {"id": "expanding", "label": "expanding", "description": "Expand sub-features", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2, "definition": {"description": "Expand sub-features"}}, {"id": "planning", "label": "planning", "description": "Plan leaf execution", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2, "definition": {"description": "Plan leaf execution"}}, {"id": "building", "label": "building", "description": "Build tools", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3, "definition": {"description": "Build tools"}}, {"id": "executing", "label": "executing", "description": "Execute leaf", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3, "definition": {"description": "Execute leaf"}}, {"id": "traversing", "label": "traversing", "description": "Next leaf", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4, "definition": {"description": "Next leaf"}}, {"id": "reflecting", "label": "reflecting", "description": "Reflect on progress", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4, "definition": {"description": "Reflect on progress"}}, {"id": "evaluating", "label": "evaluating", "description": "Evaluate completion", "type": "state", "isEntry": false, "isTerminal": false, "layer": 5, "definition": {"description": "Evaluate completion"}}, {"id": "complete", "label": "complete", "description": "Done", "type": "state", "isEntry": false, "isTerminal": true, "layer": 7, "definition": {"description": "Done"}}, {"id": "error", "label": "error", "description": "Error", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2, "definition": {"description": "Error"}}];
+const links = [{"source": "idle", "target": "idle", "label": "START", "gates": ""}, {"source": "idle", "target": "analyzing", "label": "SUBMIT", "gates": "can_submit"}, {"source": "analyzing", "target": "expanding", "label": "DONE", "gates": "has_tree, can_expand, no_error"}, {"source": "analyzing", "target": "planning", "label": "DONE", "gates": "has_tree, is_atomic, no_error"}, {"source": "analyzing", "target": "error", "label": "DONE", "gates": "has_error"}, {"source": "expanding", "target": "expanding", "label": "DONE", "gates": "can_expand, no_error"}, {"source": "expanding", "target": "planning", "label": "DONE", "gates": "is_atomic, no_error"}, {"source": "expanding", "target": "error", "label": "DONE", "gates": "has_error"}, {"source": "planning", "target": "building", "label": "DONE", "gates": "needs_tools, no_error"}, {"source": "planning", "target": "executing", "label": "DONE", "gates": "no_tools, no_error"}, {"source": "planning", "target": "error", "label": "DONE", "gates": "has_error"}, {"source": "building", "target": "building", "label": "DONE", "gates": "needs_tools, no_error"}, {"source": "building", "target": "executing", "label": "DONE", "gates": "no_tools, no_error"}, {"source": "building", "target": "error", "label": "DONE", "gates": "has_error"}, {"source": "executing", "target": "traversing", "label": "DONE", "gates": "has_more, no_error"}, {"source": "executing", "target": "reflecting", "label": "DONE", "gates": "all_done, no_error"}, {"source": "executing", "target": "error", "label": "DONE", "gates": "has_error"}, {"source": "traversing", "target": "building", "label": "DONE", "gates": "needs_tools, no_error"}, {"source": "traversing", "target": "executing", "label": "DONE", "gates": "no_tools, no_error"}, {"source": "traversing", "target": "error", "label": "DONE", "gates": "has_error"}, {"source": "reflecting", "target": "evaluating", "label": "DONE", "gates": "no_error"}, {"source": "reflecting", "target": "error", "label": "DONE", "gates": "has_error"}, {"source": "evaluating", "target": "complete", "label": "DONE", "gates": "is_complete, no_error"}, {"source": "evaluating", "target": "expanding", "label": "DONE", "gates": "not_complete, within_iter, no_error"}, {"source": "evaluating", "target": "complete", "label": "DONE", "gates": "max_iter"}, {"source": "evaluating", "target": "error", "label": "DONE", "gates": "has_error"}, {"source": "error", "target": "idle", "label": "RETRY", "gates": ""}, {"source": "executing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "reflecting", "target": "idle", "label": "RESET", "gates": ""}, {"source": "expanding", "target": "idle", "label": "RESET", "gates": ""}, {"source": "evaluating", "target": "idle", "label": "RESET", "gates": ""}, {"source": "error", "target": "idle", "label": "RESET", "gates": ""}, {"source": "building", "target": "idle", "label": "RESET", "gates": ""}, {"source": "planning", "target": "idle", "label": "RESET", "gates": ""}, {"source": "analyzing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "complete", "target": "idle", "label": "RESET", "gates": ""}, {"source": "traversing", "target": "idle", "label": "RESET", "gates": ""}];
+const gates = {"has_task": {"type": "expression", "expression": "task is not None and task != ''"}, "has_tree": {"type": "expression", "expression": "feature_tree is not None"}, "can_expand": {"type": "expression", "expression": "depth < max_depth and is_leaf == False"}, "is_atomic": {"type": "expression", "expression": "is_leaf == True or depth >= max_depth"}, "needs_tools": {"type": "expression", "expression": "tools_pending is not None and tools_pending > 0"}, "no_tools": {"type": "expression", "expression": "tools_pending is None or tools_pending == 0"}, "has_more": {"type": "expression", "expression": "exec_count < leaf_count"}, "all_done": {"type": "expression", "expression": "exec_count >= leaf_count"}, "is_complete": {"type": "expression", "expression": "is_complete == True"}, "not_complete": {"type": "expression", "expression": "is_complete is None or is_complete == False"}, "within_iter": {"type": "expression", "expression": "iteration < max_iterations"}, "max_iter": {"type": "expression", "expression": "iteration >= max_iterations"}, "has_error": {"type": "expression", "expression": "error is not None"}, "no_error": {"type": "expression", "expression": "error is None"}, "can_submit": {"type": "expression", "expression": "True"}};
 
 // Calculate layout dimensions based on layers
 const layerMap = {};
@@ -584,6 +590,9 @@ node.on("click", (e, d) => {
     info += d.isTerminal ? "<span style='color:#ff6b6b'>⬤ Terminal State</span><br>" : "";
     if (d.description) info += "<br>" + d.description;
     document.getElementById("details").innerHTML = info;
+
+    // Update definition panel
+    updateDefinitionPanel(d);
     
     // Show transitions - categorized by type
     const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
@@ -653,6 +662,50 @@ node.on("click", (e, d) => {
     }
     document.getElementById("flow-list").innerHTML = flowHtml;
 });
+
+function updateDefinitionPanel(d) {
+    const panel = document.getElementById("definition-panel");
+    let html = "";
+
+    // Show state definition
+    if (d.definition) {
+        html += "<div class='def-label'>State Definition:</div>";
+        html += "<div class='definition-code'>" + escapeHtml(JSON.stringify(d.definition, null, 2)) + "</div>";
+    }
+
+    // Find and show gates referenced by outgoing transitions
+    const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
+    const gateRefs = new Set();
+    outLinks.forEach(l => {
+        if (l.gates) {
+            l.gates.split(", ").forEach(g => gateRefs.add(g.trim()));
+        }
+    });
+
+    if (gateRefs.size > 0) {
+        html += "<div class='def-label' style='margin-top:10px'>Referenced Gates:</div>";
+        gateRefs.forEach(gateId => {
+            const gateDef = gates[gateId];
+            if (gateDef) {
+                html += "<div style='margin:5px 0'><b style='color:#88aaff'>" + gateId + "</b></div>";
+                html += "<div class='definition-code'>" + escapeHtml(JSON.stringify(gateDef, null, 2)) + "</div>";
+            } else {
+                html += "<div style='color:#666'>" + gateId + " (no definition)</div>";
+            }
+        });
+    }
+
+    if (!html) {
+        html = "<div style='color:#666'>No definition available</div>";
+    }
+
+    panel.innerHTML = html;
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 function highlightUpstream(nodeId) {
     const upstreamNodes = new Set([nodeId]);

@@ -39,6 +39,9 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 #details { font-size: 12px; line-height: 1.5; }
 #flow-list { font-size: 11px; max-height: 300px; overflow-y: auto; }
 #flow-list div { padding: 3px 0; border-bottom: 1px solid #333; }
+#definition-panel { font-size: 11px; margin-top: 10px; }
+.definition-code { background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 8px; font-family: 'Consolas', monospace; white-space: pre-wrap; max-height: 200px; overflow-y: auto; color: #b8b8b8; }
+.def-label { color: #888; font-size: 10px; margin-bottom: 3px; }
 </style>
 </head>
 <body>
@@ -69,6 +72,8 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
   <div id="info">
     <h3>Selected Node</h3>
     <div id="details">Click a node to see details</div>
+    <h4>Definition</h4>
+    <div id="definition-panel">Click a state to view its definition</div>
     <h4>Transitions</h4>
     <div id="flow-list"></div>
     <div class="legend">
@@ -91,8 +96,9 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 </div>
 <div id="tooltip"></div>
 <script>
-const nodes = [{"id": "idle", "label": "idle", "description": "Awaiting source file or code input", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0}, {"id": "loading", "label": "loading", "description": "Loading source file from disk", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1}, {"id": "parsing", "label": "parsing", "description": "Parsing Python source into AST", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}, {"id": "detecting", "label": "detecting", "description": "Detecting state machine patterns in code", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3}, {"id": "extracting_states", "label": "extracting_states", "description": "Extracting state definitions from code", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4}, {"id": "extracting_transitions", "label": "extracting_transitions", "description": "Extracting state transitions from methods", "type": "state", "isEntry": false, "isTerminal": false, "layer": 5}, {"id": "extracting_gates", "label": "extracting_gates", "description": "Extracting gate conditions from if statements", "type": "state", "isEntry": false, "isTerminal": false, "layer": 6}, {"id": "extracting_actions", "label": "extracting_actions", "description": "Extracting actions from side effects", "type": "state", "isEntry": false, "isTerminal": false, "layer": 7}, {"id": "analyzing_events", "label": "analyzing_events", "description": "Analyzing event handler patterns", "type": "state", "isEntry": false, "isTerminal": false, "layer": 8}, {"id": "inferring_entry", "label": "inferring_entry", "description": "Inferring entry and terminal states", "type": "state", "isEntry": false, "isTerminal": false, "layer": 9}, {"id": "generating", "label": "generating", "description": "Generating L++ blueprint", "type": "state", "isEntry": false, "isTerminal": false, "layer": 10}, {"id": "mapping", "label": "mapping", "description": "Generating source-to-blueprint mapping", "type": "state", "isEntry": false, "isTerminal": false, "layer": 11}, {"id": "complete", "label": "complete", "description": "Extraction complete, blueprint ready", "type": "state", "isEntry": false, "isTerminal": false, "layer": 12}, {"id": "error", "label": "error", "description": "Extraction failed", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}];
+const nodes = [{"id": "idle", "label": "idle", "description": "Awaiting source file or code input", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0, "definition": {"description": "Awaiting source file or code input"}}, {"id": "loading", "label": "loading", "description": "Loading source file from disk", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1, "definition": {"description": "Loading source file from disk"}}, {"id": "parsing", "label": "parsing", "description": "Parsing Python source into AST", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2, "definition": {"description": "Parsing Python source into AST"}}, {"id": "detecting", "label": "detecting", "description": "Detecting state machine patterns in code", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3, "definition": {"description": "Detecting state machine patterns in code"}}, {"id": "extracting_states", "label": "extracting_states", "description": "Extracting state definitions from code", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4, "definition": {"description": "Extracting state definitions from code"}}, {"id": "extracting_transitions", "label": "extracting_transitions", "description": "Extracting state transitions from methods", "type": "state", "isEntry": false, "isTerminal": false, "layer": 5, "definition": {"description": "Extracting state transitions from methods"}}, {"id": "extracting_gates", "label": "extracting_gates", "description": "Extracting gate conditions from if statements", "type": "state", "isEntry": false, "isTerminal": false, "layer": 6, "definition": {"description": "Extracting gate conditions from if statements"}}, {"id": "extracting_actions", "label": "extracting_actions", "description": "Extracting actions from side effects", "type": "state", "isEntry": false, "isTerminal": false, "layer": 7, "definition": {"description": "Extracting actions from side effects"}}, {"id": "analyzing_events", "label": "analyzing_events", "description": "Analyzing event handler patterns", "type": "state", "isEntry": false, "isTerminal": false, "layer": 8, "definition": {"description": "Analyzing event handler patterns"}}, {"id": "inferring_entry", "label": "inferring_entry", "description": "Inferring entry and terminal states", "type": "state", "isEntry": false, "isTerminal": false, "layer": 9, "definition": {"description": "Inferring entry and terminal states"}}, {"id": "generating", "label": "generating", "description": "Generating L++ blueprint", "type": "state", "isEntry": false, "isTerminal": false, "layer": 10, "definition": {"description": "Generating L++ blueprint"}}, {"id": "mapping", "label": "mapping", "description": "Generating source-to-blueprint mapping", "type": "state", "isEntry": false, "isTerminal": false, "layer": 11, "definition": {"description": "Generating source-to-blueprint mapping"}}, {"id": "complete", "label": "complete", "description": "Extraction complete, blueprint ready", "type": "state", "isEntry": false, "isTerminal": false, "layer": 12, "definition": {"description": "Extraction complete, blueprint ready"}}, {"id": "error", "label": "error", "description": "Extraction failed", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2, "definition": {"description": "Extraction failed"}}];
 const links = [{"source": "idle", "target": "idle", "label": "SET_MODE", "gates": ""}, {"source": "idle", "target": "loading", "label": "EXTRACT", "gates": "hasFilePath"}, {"source": "loading", "target": "error", "label": "AUTO", "gates": "hasError"}, {"source": "loading", "target": "parsing", "label": "AUTO", "gates": "hasSourceCode, noError"}, {"source": "parsing", "target": "error", "label": "AUTO", "gates": "hasError"}, {"source": "parsing", "target": "detecting", "label": "AUTO", "gates": "hasAst, noError"}, {"source": "detecting", "target": "extracting_states", "label": "AUTO", "gates": "hasPatterns"}, {"source": "extracting_states", "target": "extracting_transitions", "label": "AUTO", "gates": "hasStates"}, {"source": "extracting_transitions", "target": "extracting_gates", "label": "AUTO", "gates": "hasTransitions"}, {"source": "extracting_gates", "target": "extracting_actions", "label": "AUTO", "gates": "hasGates"}, {"source": "extracting_actions", "target": "analyzing_events", "label": "AUTO", "gates": "hasActions"}, {"source": "analyzing_events", "target": "inferring_entry", "label": "AUTO", "gates": "hasEvents"}, {"source": "inferring_entry", "target": "generating", "label": "AUTO", "gates": "hasEntryState"}, {"source": "generating", "target": "mapping", "label": "AUTO", "gates": "hasBlueprint"}, {"source": "mapping", "target": "complete", "label": "AUTO", "gates": "hasMapping"}, {"source": "complete", "target": "complete", "label": "EXPORT_BLUEPRINT", "gates": "hasBlueprint"}, {"source": "complete", "target": "complete", "label": "EXPORT_REPORT", "gates": ""}, {"source": "complete", "target": "idle", "label": "RESET", "gates": ""}, {"source": "error", "target": "idle", "label": "RESET", "gates": ""}];
+const gates = {"hasFilePath": {"type": "expression", "expression": "filePath is not None and len(filePath) > 0"}, "hasSourceCode": {"type": "expression", "expression": "sourceCode is not None and len(sourceCode) > 0"}, "hasAst": {"type": "expression", "expression": "ast is not None"}, "hasPatterns": {"type": "expression", "expression": "patterns is not None"}, "hasStates": {"type": "expression", "expression": "extractedStates is not None and len(extractedStates) > 0"}, "hasTransitions": {"type": "expression", "expression": "extractedTransitions is not None"}, "hasGates": {"type": "expression", "expression": "extractedGates is not None"}, "hasActions": {"type": "expression", "expression": "extractedActions is not None"}, "hasEvents": {"type": "expression", "expression": "extractedEvents is not None"}, "hasEntryState": {"type": "expression", "expression": "entryState is not None"}, "hasBlueprint": {"type": "expression", "expression": "blueprint is not None"}, "hasMapping": {"type": "expression", "expression": "sourceMapping is not None"}, "hasError": {"type": "expression", "expression": "error is not None and len(error) > 0"}, "noError": {"type": "expression", "expression": "error is None or len(error) == 0"}};
 
 // Calculate layout dimensions based on layers
 const layerMap = {};
@@ -584,6 +590,9 @@ node.on("click", (e, d) => {
     info += d.isTerminal ? "<span style='color:#ff6b6b'>⬤ Terminal State</span><br>" : "";
     if (d.description) info += "<br>" + d.description;
     document.getElementById("details").innerHTML = info;
+
+    // Update definition panel
+    updateDefinitionPanel(d);
     
     // Show transitions - categorized by type
     const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
@@ -653,6 +662,50 @@ node.on("click", (e, d) => {
     }
     document.getElementById("flow-list").innerHTML = flowHtml;
 });
+
+function updateDefinitionPanel(d) {
+    const panel = document.getElementById("definition-panel");
+    let html = "";
+
+    // Show state definition
+    if (d.definition) {
+        html += "<div class='def-label'>State Definition:</div>";
+        html += "<div class='definition-code'>" + escapeHtml(JSON.stringify(d.definition, null, 2)) + "</div>";
+    }
+
+    // Find and show gates referenced by outgoing transitions
+    const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
+    const gateRefs = new Set();
+    outLinks.forEach(l => {
+        if (l.gates) {
+            l.gates.split(", ").forEach(g => gateRefs.add(g.trim()));
+        }
+    });
+
+    if (gateRefs.size > 0) {
+        html += "<div class='def-label' style='margin-top:10px'>Referenced Gates:</div>";
+        gateRefs.forEach(gateId => {
+            const gateDef = gates[gateId];
+            if (gateDef) {
+                html += "<div style='margin:5px 0'><b style='color:#88aaff'>" + gateId + "</b></div>";
+                html += "<div class='definition-code'>" + escapeHtml(JSON.stringify(gateDef, null, 2)) + "</div>";
+            } else {
+                html += "<div style='color:#666'>" + gateId + " (no definition)</div>";
+            }
+        });
+    }
+
+    if (!html) {
+        html = "<div style='color:#666'>No definition available</div>";
+    }
+
+    panel.innerHTML = html;
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 function highlightUpstream(nodeId) {
     const upstreamNodes = new Set([nodeId]);

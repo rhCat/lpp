@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Function Graph: skill_registry</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #0f0f23; color: #eee; }
+h1 { color: #00d4ff; margin-bottom: 5px; font-size: 24px; }
+.subtitle { color: #888; margin-bottom: 15px; font-size: 14px; }
+#container { display: flex; gap: 20px; height: calc(100vh - 120px); }
+#graph { flex: 1; position: relative; }
+#sidebar { width: 350px; background: #1a1a2e; padding: 15px; border-radius: 8px; overflow-y: auto; }
+svg { background: #16213e; border-radius: 8px; width: 100%; height: 100%; }
+
+/* Node styles */
+.node { cursor: pointer; }
+.node-module { fill: #2a2a4a; stroke-width: 3; }
+.node-function { fill: #3a3a5a; stroke-width: 2; }
+.node-dependency { fill: #1a1a3a; stroke: #666; stroke-width: 1; stroke-dasharray: 4; }
+.node-label { font-size: 11px; fill: #fff; pointer-events: none; font-weight: 500; }
+.node-sublabel { font-size: 9px; fill: #888; pointer-events: none; }
+
+/* Edge styles */
+.edge { fill: none; stroke-opacity: 0.6; }
+.edge-internal { stroke: #4ecdc4; stroke-width: 2; }
+.edge-external { stroke: #f39c12; stroke-width: 1.5; stroke-dasharray: 4; }
+.edge-local { stroke: #9b59b6; stroke-width: 2; }
+.edge-label { font-size: 8px; fill: #666; pointer-events: none; }
+
+/* Highlight styles */
+.highlight { stroke-width: 3 !important; stroke-opacity: 1 !important; }
+.dim { opacity: 0.2; }
+
+/* Controls */
+.controls { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.controls button { background: #3a3a5a; color: #fff; border: 1px solid #555; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.controls button:hover { background: #4a4a6a; }
+.controls button.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
+
+/* Module legend */
+.module-legend { margin-top: 15px; }
+.module-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer; }
+.module-item:hover { background: #2a2a4a; }
+.module-dot { width: 12px; height: 12px; border-radius: 3px; }
+.module-name { font-size: 12px; }
+
+/* Info panel */
+h3 { color: #00d4ff; margin: 15px 0 8px 0; font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+.info-section { font-size: 12px; line-height: 1.6; }
+.info-label { color: #888; }
+.info-value { color: #fff; }
+
+/* Source code panel */
+.source-panel { margin-top: 10px; }
+.source-code { background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 10px; font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; line-height: 1.4; overflow-x: auto; max-height: 300px; overflow-y: auto; white-space: pre; color: #b8b8b8; }
+.source-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.source-toggle { background: #3a3a5a; color: #fff; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; }
+.source-toggle:hover { background: #4a4a6a; }
+.docstring { color: #6a9955; font-style: italic; }
+.metric { display: flex; justify-content: space-between; padding: 3px 0; }
+.metric-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 2px; }
+.metric-fill { height: 100%; border-radius: 2px; }
+
+/* Edge list */
+.edge-list { max-height: 200px; overflow-y: auto; }
+.edge-item { padding: 4px 0; border-bottom: 1px solid #333; font-size: 11px; }
+.edge-item .from { color: #4ecdc4; }
+.edge-item .to { color: #f39c12; }
+.edge-item .type { color: #666; font-size: 10px; }
+
+/* Tooltip */
+#tooltip { position: absolute; background: #1a1a2e; border: 1px solid #00d4ff; padding: 10px; border-radius: 4px; pointer-events: none; display: none; max-width: 300px; z-index: 100; font-size: 11px; }
+</style>
+</head>
+<body>
+<h1>Function Graph: skill_registry</h1>
+<div class="subtitle">Stackable function dependency visualization • Drag nodes to rearrange • Click to inspect</div>
+
+<div class="controls">
+  <button onclick="resetView()">Reset View</button>
+  <button onclick="fitToView()">Fit</button>
+  <button onclick="toggleLayout('force')" id="btn-force" class="active">Force</button>
+  <button onclick="toggleLayout('horizontal')" id="btn-horizontal">Horizontal</button>
+  <button onclick="toggleLayout('vertical')" id="btn-vertical">Vertical</button>
+  <span style="margin-left: 10px; color: #666">|</span>
+  <button onclick="toggleEdgeType('internal')" id="btn-internal" class="active">Internal</button>
+  <button onclick="toggleEdgeType('external')" id="btn-external" class="active">External</button>
+  <button onclick="toggleEdgeType('local')" id="btn-local" class="active">Local</button>
+</div>
+
+<div id="container">
+  <div id="graph"><svg></svg></div>
+  <div id="sidebar">
+    <h3>Modules</h3>
+    <div class="module-legend" id="module-legend"></div>
+
+    <h3>Selected Node</h3>
+    <div class="info-section" id="node-info">Click a node to see details</div>
+
+    <h3>Source Code</h3>
+    <div class="source-panel" id="source-panel">
+      <div id="source-content" style="color:#666;font-size:11px">Click a function to view source</div>
+    </div>
+
+    <h3>Connections</h3>
+    <div class="edge-list" id="edge-list"></div>
+  </div>
+</div>
+<div id="tooltip"></div>
+
+<script>
+const nodes = [{"id": "registry_compute", "type": "module", "label": "registry_compute", "metrics": {"fanIn": 4, "fanOut": 5, "instability": 0.556, "internalEdges": 1, "externalCallCount": 7, "localCallCount": 0, "callsByCategory": {"stdlib": 7}, "localDependencies": []}, "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.scan", "type": "function", "label": "scan", "direction": "inbound", "parent": "registry_compute", "line": 13, "endLine": 57, "signature": "(params) -> Dict[]", "docstring": "Scan directory for L++ skill blueprints.\nInput: basePath\nOutput: skills (list of skill summaries), error", "source": "def scan(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"\n    Scan directory for L++ skill blueprints.\n    Input: basePath\n    Output: skills (list of skill summaries), error\n    \"\"\"\n    basePath = params.get(\"basePath\", \"\")\n    if not basePath:\n        return {\"skills\": None, \"error\": \"No basePath provided\"}\n\n    try:\n        base = Path(basePath)\n        if not base.exists():\n            return {\"skills\": None, \"error\": f\"Path not found: {basePath}\"}\n\n        skills = []\n        for item in base.iterdir():\n            if not item.is_dir():\n                continue\n            # Look for blueprint JSON\n            for f in item.glob(\"*.json\"):\n                if f.name.startswith(\".\") or \"compiled\" in f.name:\n                    continue\n                try:\n                    bp = json.loads(f.read_text())\n                    if bp.get(\"$schema\", \"\").startswith(\"lpp\"):\n                        skills.append({\n                            \"id\": bp.get(\"id\", f.stem),\n                            \"name\": bp.get(\"name\", f.stem),\n                            \"version\": bp.get(\"version\", \"0.0.0\"),\n                            \"description\": bp.get(\"description\", \"\"),\n                            \"path\": str(f),\n                            \"dir\": str(item),\n                            \"stateCount\": len(bp.get(\"states\", {})),\n                            \"transitionCount\": len(bp.get(\"transitions\", [])),\n                            \"gateCount\": len(bp.get(\"gates\", {})),\n                            \"actionCount\": len(bp.get(\"actions\", {}))\n                        })\n                except (json.JSONDecodeError, KeyError):\n                    continue\n\n        return {\"skills\": skills, \"error\": None}\n\n    except Exception as e:\n        return {\"skills\": None, \"error\": f\"Scan error: {e}\"}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.loadDetail", "type": "function", "label": "loadDetail", "direction": "inbound", "parent": "registry_compute", "line": 60, "endLine": 163, "signature": "(params) -> Dict[]", "docstring": "Load full detail for a skill.\nInput: skillId, basePath\nOutput: selectedSkill (full metadata), error", "source": "def loadDetail(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"\n    Load full detail for a skill.\n    Input: skillId, basePath\n    Output: selectedSkill (full metadata), error\n    \"\"\"\n    skillId = params.get(\"skillId\", \"\")\n    basePath = params.get(\"basePath\", \"\")\n\n    if not skillId:\n        return {\"selectedSkill\": None, \"error\": \"No skillId provided\"}\n\n    try:\n        base = Path(basePath)\n        skillDir = base / skillId\n        if not skillDir.exists():\n            # Try finding by ID in any subdir\n            for d in base.iterdir():\n                for f in d.glob(\"*.json\"):\n                    try:\n                        bp = json.loads(f.read_text())\n                        if bp.get(\"id\") == skillId:\n                            skillDir = d\n                            break\n                    except:\n                        continue\n\n        bpFile = None\n        for f in skillDir.glob(\"*.json\"):\n            if not f.name.startswith(\".\") and \"compiled\" not in f.name:\n                try:\n                    bp = json.loads(f.read_text())\n                    if bp.get(\"$schema\", \"\").startswith(\"lpp\"):\n                        bpFile = f\n                        break\n                except:\n                    continue\n\n        if not bpFile:\n            return {\"selectedSkill\": None, \"error\": f\"Blueprint not found: {skillId}\"}\n\n        bp = json.loads(bpFile.read_text())\n\n        # Extract context schema for flange spec\n        ctxSchema = bp.get(\"context_schema\", {}).get(\"properties\", {})\n        flangeSpec = {k: v.get(\"type\", \"any\") for k, v in ctxSchema.items()}\n\n        # Extract compute units from actions\n        computeUnits = []\n        for aName, action in bp.get(\"actions\", {}).items():\n            if action.get(\"type\") == \"compute\":\n                computeUnits.append({\n                    \"action\": aName,\n                    \"unit\": action.get(\"compute_unit\", \"\"),\n                    \"inputs\": list(action.get(\"input_map\", {}).keys()),\n                    \"outputs\": list(action.get(\"output_map\", {}).keys())\n                })\n\n        # Load COMPUTE registry if exists\n        srcDir = skillDir / \"src\"\n        registryFns = []\n        if srcDir.exists():\n            for pyFile in srcDir.glob(\"*_compute.py\"):\n                content = pyFile.read_text()\n                # Parse COMPUTE_REGISTRY\n                if \"COMPUTE_REGISTRY\" in content:\n                    import re\n                    matches = re.findall(\n                        r'\"([^\"]+)\":\\s*(\\w+)',\n                        content.split(\"COMPUTE_REGISTRY\")[1][:500]\n                    )\n                    registryFns = [{\"key\": m[0], \"fn\": m[1]} for m in matches]\n\n        detail = {\n            \"id\": bp.get(\"id\"),\n            \"name\": bp.get(\"name\"),\n            \"version\": bp.get(\"version\"),\n            \"description\": bp.get(\"description\"),\n            \"path\": str(bpFile),\n            \"states\": list(bp.get(\"states\", {}).keys()),\n            \"entryState\": bp.get(\"entry_state\"),\n            \"terminalStates\": bp.get(\"terminal_states\", []),\n            \"gates\": list(bp.get(\"gates\", {}).keys()),\n            \"actions\": list(bp.get(\"actions\", {}).keys()),\n            \"transitions\": [\n                {\n                    \"id\": t.get(\"id\"),\n                    \"from\": t.get(\"from\"),\n                    \"to\": t.get(\"to\"),\n                    \"event\": t.get(\"on_event\"),\n                    \"gates\": t.get(\"gates\", []),\n                    \"actions\": t.get(\"actions\", [])\n                }\n                for t in bp.get(\"transitions\", [])\n            ],\n            \"flangeSpec\": flangeSpec,\n            \"computeUnits\": computeUnits,\n            \"registryFunctions\": registryFns\n        }\n\n        return {\"selectedSkill\": detail, \"error\": None}\n\n    except Exception as e:\n        return {\"selectedSkill\": None, \"error\": f\"Load error: {e}\"}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.export", "type": "function", "label": "export", "direction": "inbound", "parent": "registry_compute", "line": 166, "endLine": 245, "signature": "(params) -> Dict[]", "docstring": "Export full registry as agent context.\nInput: skills, basePath\nOutput: registry (structured context for agent), error", "source": "def export(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"\n    Export full registry as agent context.\n    Input: skills, basePath\n    Output: registry (structured context for agent), error\n    \"\"\"\n    skills = params.get(\"skills\", [])\n    basePath = params.get(\"basePath\", \"\")\n\n    if not skills:\n        return {\"registry\": None, \"error\": \"No skills to export\"}\n\n    try:\n        registry = {\n            \"meta\": {\n                \"basePath\": basePath,\n                \"skillCount\": len(skills),\n                \"generatedAt\": __import__(\"datetime\").datetime.now().isoformat()\n            },\n            \"skills\": {},\n            \"patterns\": {\n                \"commonStates\": {},\n                \"commonGates\": {},\n                \"commonActions\": {}\n            }\n        }\n\n        allStates = {}\n        allGates = {}\n        allActions = {}\n\n        for skill in skills:\n            # Load full detail for each skill\n            detail = loadDetail({\n                \"skillId\": skill[\"id\"],\n                \"basePath\": basePath\n            })[\"selectedSkill\"]\n\n            if not detail:\n                continue\n\n            registry[\"skills\"][skill[\"id\"]] = {\n                \"name\": detail[\"name\"],\n                \"version\": detail[\"version\"],\n                \"description\": detail[\"description\"],\n                \"states\": detail[\"states\"],\n                \"entryState\": detail[\"entryState\"],\n                \"gates\": detail[\"gates\"],\n                \"actions\": detail[\"actions\"],\n                \"flangeSpec\": detail[\"flangeSpec\"],\n                \"computeUnits\": detail[\"computeUnits\"],\n                \"transitionGraph\": [\n                    f\"{t['from']} --[{t['event']}]--> {t['to']}\"\n                    for t in detail[\"transitions\"]\n                ]\n            }\n\n            # Collect patterns\n            for s in detail[\"states\"]:\n                allStates[s] = allStates.get(s, 0) + 1\n            for g in detail[\"gates\"]:\n                allGates[g] = allGates.get(g, 0) + 1\n            for a in detail[\"actions\"]:\n                allActions[a] = allActions.get(a, 0) + 1\n\n        # Find common patterns (appear in > 1 skill)\n        registry[\"patterns\"][\"commonStates\"] = {\n            k: v for k, v in allStates.items() if v > 1\n        }\n        registry[\"patterns\"][\"commonGates\"] = {\n            k: v for k, v in allGates.items() if v > 1\n        }\n        registry[\"patterns\"][\"commonActions\"] = {\n            k: v for k, v in allActions.items() if v > 1\n        }\n\n        return {\"registry\": registry, \"error\": None}\n\n    except Exception as e:\n        return {\"registry\": None, \"error\": f\"Export error: {e}\"}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "registry_compute.formatContext", "type": "function", "label": "formatContext", "direction": "inbound", "parent": "registry_compute", "line": 248, "endLine": 300, "signature": "(params) -> Dict[]", "docstring": "Format registry as markdown for agent context.\nInput: registry\nOutput: markdown, error", "source": "def formatContext(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"\n    Format registry as markdown for agent context.\n    Input: registry\n    Output: markdown, error\n    \"\"\"\n    registry = params.get(\"registry\")\n    if not registry:\n        return {\"markdown\": None, \"error\": \"No registry provided\"}\n\n    try:\n        lines = [\n            \"# L++ Skill Registry\",\n            f\"Generated: {registry['meta']['generatedAt']}\",\n            f\"Skills: {registry['meta']['skillCount']}\",\n            \"\",\n            \"## Available Skills\",\n            \"\"\n        ]\n\n        for sid, skill in registry.get(\"skills\", {}).items():\n            lines.append(f\"### {skill['name']} ({sid})\")\n            lines.append(f\"_{skill['description']}_\")\n            lines.append(\"\")\n            lines.append(f\"**States**: {', '.join(skill['states'])}\")\n            lines.append(f\"**Entry**: {skill['entryState']}\")\n            lines.append(\"\")\n            lines.append(\"**Flange Spec (Context Schema)**:\")\n            for k, v in skill.get(\"flangeSpec\", {}).items():\n                lines.append(f\"  - `{k}`: {v}\")\n            lines.append(\"\")\n            lines.append(\"**COMPUTE Units**:\")\n            for cu in skill.get(\"computeUnits\", []):\n                lines.append(\n                    f\"  - `{cu['unit']}`: {cu['inputs']} -> {cu['outputs']}\")\n            lines.append(\"\")\n            lines.append(\"**Transition Graph**:\")\n            for t in skill.get(\"transitionGraph\", []):\n                lines.append(f\"  - {t}\")\n            lines.append(\"\")\n\n        if registry.get(\"patterns\", {}).get(\"commonStates\"):\n            lines.append(\"## Common Patterns\")\n            lines.append(\"\")\n            lines.append(\"**Reusable States**:\")\n            for s, cnt in registry[\"patterns\"][\"commonStates\"].items():\n                lines.append(f\"  - `{s}` (used in {cnt} skills)\")\n            lines.append(\"\")\n\n        return {\"markdown\": \"\\n\".join(lines), \"error\": None}\n\n    except Exception as e:\n        return {\"markdown\": None, \"error\": f\"Format error: {e}\"}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "json", "type": "dependency", "label": "json", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "os", "type": "dependency", "label": "os", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "pathlib", "type": "dependency", "label": "pathlib", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "typing", "type": "dependency", "label": "typing", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}, {"id": "re", "type": "dependency", "label": "re", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "registry_compute"}];
+const edges = [{"from": "registry_compute.export", "to": "registry_compute.loadDetail", "type": "internal", "line": 199}, {"from": "registry_compute.scan", "to": "pathlib", "type": "external", "category": "stdlib", "line": 24}, {"from": "registry_compute.scan", "to": "json", "type": "external", "category": "stdlib", "line": 37}, {"from": "registry_compute.loadDetail", "to": "pathlib", "type": "external", "category": "stdlib", "line": 73}, {"from": "registry_compute.loadDetail", "to": "json", "type": "external", "category": "stdlib", "line": 80}, {"from": "registry_compute.loadDetail", "to": "json", "type": "external", "category": "stdlib", "line": 91}, {"from": "registry_compute.loadDetail", "to": "json", "type": "external", "category": "stdlib", "line": 101}, {"from": "registry_compute.loadDetail", "to": "re", "type": "external", "category": "stdlib", "line": 127}];
+const moduleColors = {"registry_compute": "#00d4ff"};
+
+// Edge type visibility
+const edgeVisibility = { internal: true, external: true, local: true };
+let currentLayout = 'force';
+
+// Create node lookup
+const nodeById = {};
+nodes.forEach(n => nodeById[n.id] = n);
+
+// Setup SVG
+const container = document.getElementById('graph');
+const width = container.clientWidth;
+const height = container.clientHeight || 600;
+
+const svg = d3.select("svg").attr("viewBox", [0, 0, width, height]);
+const g = svg.append("g");
+
+// Zoom behavior
+const zoom = d3.zoom()
+    .scaleExtent([0.1, 4])
+    .filter(e => !e.target.closest('.node'))
+    .on("zoom", e => g.attr("transform", e.transform));
+svg.call(zoom);
+
+// Arrow markers
+const defs = svg.append("defs");
+["internal", "external", "local"].forEach(type => {
+    const color = type === "internal" ? "#4ecdc4" : type === "external" ? "#f39c12" : "#9b59b6";
+    defs.append("marker")
+        .attr("id", `arrow-${type}`)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 20)
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-4L10,0L0,4")
+        .attr("fill", color);
+});
+
+// Build module legend
+const legendDiv = document.getElementById('module-legend');
+Object.entries(moduleColors).forEach(([mod, color]) => {
+    const item = document.createElement('div');
+    item.className = 'module-item';
+    item.innerHTML = `<div class="module-dot" style="background:${color}"></div><span class="module-name">${mod}</span>`;
+    item.onclick = () => highlightModule(mod);
+    legendDiv.appendChild(item);
+});
+
+// Process edges - resolve node references
+const processedEdges = edges.map(e => ({
+    ...e,
+    source: nodeById[e.from] || { id: e.from, x: 0, y: 0 },
+    target: nodeById[e.to] || { id: e.to, x: 0, y: 0 }
+})).filter(e => e.source && e.target);
+
+// Force simulation
+const simulation = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(processedEdges).id(d => d.id).distance(80).strength(0.5))
+    .force("charge", d3.forceManyBody().strength(-300))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force("collision", d3.forceCollide().radius(40));
+
+// Draw edges
+const edge = g.append("g").selectAll("path")
+    .data(processedEdges)
+    .join("path")
+    .attr("class", d => `edge edge-${d.type || 'internal'}`)
+    .attr("marker-end", d => `url(#arrow-${d.type || 'internal'})`);
+
+// Node size based on type
+function nodeSize(d) {
+    if (d.type === 'module') return { w: 120, h: 40 };
+    if (d.type === 'function' || d.type === 'async_function') return { w: 100, h: 30 };
+    if (d.type === 'class') return { w: 110, h: 35 };
+    return { w: 80, h: 25 };  // dependency
+}
+
+// Draw nodes
+const node = g.append("g").selectAll("g")
+    .data(nodes)
+    .join("g")
+    .attr("class", "node")
+    .call(d3.drag()
+        .on("start", dragStart)
+        .on("drag", dragging)
+        .on("end", dragEnd));
+
+node.append("rect")
+    .attr("class", d => `node-${d.type === 'dependency' ? 'dependency' : d.type === 'module' ? 'module' : 'function'}`)
+    .attr("width", d => nodeSize(d).w)
+    .attr("height", d => nodeSize(d).h)
+    .attr("x", d => -nodeSize(d).w / 2)
+    .attr("y", d => -nodeSize(d).h / 2)
+    .attr("rx", 6)
+    .attr("stroke", d => d.moduleColor || "#666");
+
+node.append("text")
+    .attr("class", "node-label")
+    .attr("text-anchor", "middle")
+    .attr("dy", d => d.signature ? -3 : 4)
+    .text(d => d.label || d.id);
+
+node.filter(d => d.signature).append("text")
+    .attr("class", "node-sublabel")
+    .attr("text-anchor", "middle")
+    .attr("dy", 10)
+    .text(d => d.signature.length > 20 ? d.signature.slice(0, 18) + ".." : d.signature);
+
+// Tooltip
+const tooltip = d3.select("#tooltip");
+node.on("mouseover", (e, d) => {
+    let html = `<b>${d.label || d.id}</b>`;
+    if (d.type) html += `<br><span style="color:#888">${d.type}</span>`;
+    if (d.signature) html += `<br><code>${d.signature}</code>`;
+    if (d.direction) html += `<br>Direction: ${d.direction}`;
+    tooltip.style("display", "block").html(html);
+})
+.on("mousemove", e => {
+    tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 10) + "px");
+})
+.on("mouseout", () => tooltip.style("display", "none"));
+
+// Click to select
+node.on("click", (e, d) => {
+    e.stopPropagation();
+    selectNode(d);
+});
+
+svg.on("click", () => clearSelection());
+
+// Update positions
+simulation.on("tick", () => {
+    edge.attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
+});
+
+// Drag functions
+function dragStart(e, d) {
+    if (!e.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+}
+function dragging(e, d) {
+    d.fx = e.x;
+    d.fy = e.y;
+}
+function dragEnd(e, d) {
+    if (!e.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+}
+
+// Selection functions
+let selectedNode = null;
+
+function selectNode(d) {
+    selectedNode = d;
+    
+    // Highlight node
+    node.classed("dim", n => n.id !== d.id && !isConnected(d, n));
+    node.select("rect").attr("stroke-width", n => n.id === d.id ? 4 : 2);
+    
+    // Highlight edges
+    edge.classed("dim", e => e.source.id !== d.id && e.target.id !== d.id);
+    edge.classed("highlight", e => e.source.id === d.id || e.target.id === d.id);
+    
+    // Update info panel
+    updateNodeInfo(d);
+    updateEdgeList(d);
+}
+
+function clearSelection() {
+    selectedNode = null;
+    node.classed("dim", false);
+    node.select("rect").attr("stroke-width", 2);
+    edge.classed("dim", false).classed("highlight", false);
+    document.getElementById('node-info').innerHTML = 'Click a node to see details';
+    document.getElementById('edge-list').innerHTML = '';
+}
+
+function isConnected(a, b) {
+    return processedEdges.some(e => 
+        (e.source.id === a.id && e.target.id === b.id) ||
+        (e.source.id === b.id && e.target.id === a.id)
+    );
+}
+
+function updateNodeInfo(d) {
+    let html = `<div class="metric"><span class="info-label">ID:</span><span class="info-value">${d.id}</span></div>`;
+    html += `<div class="metric"><span class="info-label">Type:</span><span class="info-value">${d.type}</span></div>`;
+    if (d.moduleName) html += `<div class="metric"><span class="info-label">Module:</span><span class="info-value">${d.moduleName}</span></div>`;
+    if (d.line) html += `<div class="metric"><span class="info-label">Line:</span><span class="info-value">${d.line}${d.endLine ? '-' + d.endLine : ''}</span></div>`;
+    if (d.signature) html += `<div class="metric"><span class="info-label">Signature:</span><span class="info-value" style="font-family:monospace">${d.signature}</span></div>`;
+    if (d.direction) html += `<div class="metric"><span class="info-label">Direction:</span><span class="info-value">${d.direction}</span></div>`;
+    if (d.category) html += `<div class="metric"><span class="info-label">Category:</span><span class="info-value">${d.category}</span></div>`;
+
+    if (d.metrics) {
+        html += `<div style="margin-top:10px"><b>Coupling Metrics</b></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-In:</span><span class="info-value">${d.metrics.fanIn}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-Out:</span><span class="info-value">${d.metrics.fanOut}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Instability:</span><span class="info-value">${(d.metrics.instability * 100).toFixed(1)}%</span></div>`;
+        html += `<div class="metric-bar"><div class="metric-fill" style="width:${d.metrics.instability * 100}%;background:${d.metrics.instability > 0.5 ? '#ff6b6b' : '#4ecdc4'}"></div></div>`;
+        html += `<div class="metric"><span class="info-label">Internal Edges:</span><span class="info-value">${d.metrics.internalEdges}</span></div>`;
+    }
+
+    document.getElementById('node-info').innerHTML = html;
+
+    // Update source code panel
+    updateSourcePanel(d);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function updateSourcePanel(d) {
+    const panel = document.getElementById('source-content');
+
+    if (d.source) {
+        let sourceHtml = '';
+        if (d.docstring) {
+            sourceHtml += `<div class="docstring" style="margin-bottom:8px;padding:5px;background:#1a1a2a;border-radius:3px">${escapeHtml(d.docstring)}</div>`;
+        }
+        sourceHtml += `<div class="source-code">${escapeHtml(d.source)}</div>`;
+        panel.innerHTML = sourceHtml;
+    } else if (d.type === 'module') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">Module: ${d.label}<br>Click a function to view its source code.</div>`;
+    } else if (d.type === 'dependency') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">External dependency: ${d.label}<br>Category: ${d.category || 'unknown'}</div>`;
+    } else {
+        panel.innerHTML = `<div style="color:#666;font-size:11px">No source available for this node</div>`;
+    }
+}
+
+function updateEdgeList(d) {
+    const outgoing = processedEdges.filter(e => e.source.id === d.id);
+    const incoming = processedEdges.filter(e => e.target.id === d.id);
+    
+    let html = '';
+    if (outgoing.length) {
+        html += '<div style="color:#4ecdc4;font-weight:bold;margin-bottom:5px">Outgoing →</div>';
+        outgoing.forEach(e => {
+            html += `<div class="edge-item">→ <span class="to">${e.target.id || e.to}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (incoming.length) {
+        html += '<div style="color:#f39c12;font-weight:bold;margin:10px 0 5px 0">← Incoming</div>';
+        incoming.forEach(e => {
+            html += `<div class="edge-item">← <span class="from">${e.source.id || e.from}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (!outgoing.length && !incoming.length) {
+        html = '<div style="color:#666">No connections</div>';
+    }
+    
+    document.getElementById('edge-list').innerHTML = html;
+}
+
+function highlightModule(modName) {
+    node.classed("dim", n => n.moduleName !== modName && n.type !== 'dependency');
+    edge.classed("dim", e => {
+        const srcMod = nodeById[e.source.id]?.moduleName;
+        const tgtMod = nodeById[e.target.id]?.moduleName;
+        return srcMod !== modName && tgtMod !== modName;
+    });
+}
+
+// Layout functions
+function toggleLayout(layout) {
+    currentLayout = layout;
+    document.querySelectorAll('.controls button').forEach(b => {
+        if (b.id.startsWith('btn-') && ['force', 'horizontal', 'vertical'].includes(b.id.replace('btn-', ''))) {
+            b.classList.toggle('active', b.id === `btn-${layout}`);
+        }
+    });
+    
+    if (layout === 'force') {
+        simulation.alpha(1).restart();
+    } else {
+        simulation.stop();
+        layoutNodes(layout);
+    }
+}
+
+function layoutNodes(layout) {
+    const modules = [...new Set(nodes.filter(n => n.type === 'module').map(n => n.id))];
+    const padding = 50;
+    
+    if (layout === 'horizontal') {
+        // Group by module, spread horizontally
+        modules.forEach((mod, mi) => {
+            const modNodes = nodes.filter(n => n.moduleName === mod || n.id === mod);
+            const x = padding + mi * (width - padding * 2) / Math.max(modules.length - 1, 1);
+            modNodes.forEach((n, ni) => {
+                n.x = x;
+                n.y = padding + ni * 50;
+            });
+        });
+        // Dependencies on the right
+        const deps = nodes.filter(n => n.type === 'dependency');
+        deps.forEach((n, i) => {
+            n.x = width - padding;
+            n.y = padding + i * 40;
+        });
+    } else if (layout === 'vertical') {
+        // Modules at top, functions below, dependencies at bottom
+        const modNodes = nodes.filter(n => n.type === 'module');
+        const funcNodes = nodes.filter(n => n.type === 'function' || n.type === 'async_function' || n.type === 'class');
+        const depNodes = nodes.filter(n => n.type === 'dependency');
+        
+        modNodes.forEach((n, i) => {
+            n.x = padding + i * 150;
+            n.y = padding;
+        });
+        funcNodes.forEach((n, i) => {
+            n.x = padding + (i % 6) * 130;
+            n.y = 120 + Math.floor(i / 6) * 60;
+        });
+        depNodes.forEach((n, i) => {
+            n.x = padding + (i % 8) * 100;
+            n.y = height - padding - 50;
+        });
+    }
+    
+    // Update positions
+    node.transition().duration(500).attr("transform", d => `translate(${d.x},${d.y})`);
+    edge.transition().duration(500).attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+}
+
+// Edge type toggle
+function toggleEdgeType(type) {
+    edgeVisibility[type] = !edgeVisibility[type];
+    document.getElementById(`btn-${type}`).classList.toggle('active', edgeVisibility[type]);
+    edge.style("display", d => edgeVisibility[d.type || 'internal'] ? null : "none");
+}
+
+// View controls
+function resetView() {
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+}
+
+function fitToView() {
+    const bounds = g.node().getBBox();
+    const scale = Math.min(width / bounds.width, height / bounds.height) * 0.9;
+    const tx = (width - bounds.width * scale) / 2 - bounds.x * scale;
+    const ty = (height - bounds.height * scale) / 2 - bounds.y * scale;
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
+// Initial fit
+setTimeout(fitToView, 1000);
+</script>
+</body>
+</html>

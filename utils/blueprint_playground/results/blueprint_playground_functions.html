@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Function Graph: blueprint_playground</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #0f0f23; color: #eee; }
+h1 { color: #00d4ff; margin-bottom: 5px; font-size: 24px; }
+.subtitle { color: #888; margin-bottom: 15px; font-size: 14px; }
+#container { display: flex; gap: 20px; height: calc(100vh - 120px); }
+#graph { flex: 1; position: relative; }
+#sidebar { width: 350px; background: #1a1a2e; padding: 15px; border-radius: 8px; overflow-y: auto; }
+svg { background: #16213e; border-radius: 8px; width: 100%; height: 100%; }
+
+/* Node styles */
+.node { cursor: pointer; }
+.node-module { fill: #2a2a4a; stroke-width: 3; }
+.node-function { fill: #3a3a5a; stroke-width: 2; }
+.node-dependency { fill: #1a1a3a; stroke: #666; stroke-width: 1; stroke-dasharray: 4; }
+.node-label { font-size: 11px; fill: #fff; pointer-events: none; font-weight: 500; }
+.node-sublabel { font-size: 9px; fill: #888; pointer-events: none; }
+
+/* Edge styles */
+.edge { fill: none; stroke-opacity: 0.6; }
+.edge-internal { stroke: #4ecdc4; stroke-width: 2; }
+.edge-external { stroke: #f39c12; stroke-width: 1.5; stroke-dasharray: 4; }
+.edge-local { stroke: #9b59b6; stroke-width: 2; }
+.edge-label { font-size: 8px; fill: #666; pointer-events: none; }
+
+/* Highlight styles */
+.highlight { stroke-width: 3 !important; stroke-opacity: 1 !important; }
+.dim { opacity: 0.2; }
+
+/* Controls */
+.controls { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.controls button { background: #3a3a5a; color: #fff; border: 1px solid #555; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.controls button:hover { background: #4a4a6a; }
+.controls button.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
+
+/* Module legend */
+.module-legend { margin-top: 15px; }
+.module-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer; }
+.module-item:hover { background: #2a2a4a; }
+.module-dot { width: 12px; height: 12px; border-radius: 3px; }
+.module-name { font-size: 12px; }
+
+/* Info panel */
+h3 { color: #00d4ff; margin: 15px 0 8px 0; font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+.info-section { font-size: 12px; line-height: 1.6; }
+.info-label { color: #888; }
+.info-value { color: #fff; }
+
+/* Source code panel */
+.source-panel { margin-top: 10px; }
+.source-code { background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 10px; font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; line-height: 1.4; overflow-x: auto; max-height: 300px; overflow-y: auto; white-space: pre; color: #b8b8b8; }
+.source-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.source-toggle { background: #3a3a5a; color: #fff; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; }
+.source-toggle:hover { background: #4a4a6a; }
+.docstring { color: #6a9955; font-style: italic; }
+.metric { display: flex; justify-content: space-between; padding: 3px 0; }
+.metric-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 2px; }
+.metric-fill { height: 100%; border-radius: 2px; }
+
+/* Edge list */
+.edge-list { max-height: 200px; overflow-y: auto; }
+.edge-item { padding: 4px 0; border-bottom: 1px solid #333; font-size: 11px; }
+.edge-item .from { color: #4ecdc4; }
+.edge-item .to { color: #f39c12; }
+.edge-item .type { color: #666; font-size: 10px; }
+
+/* Tooltip */
+#tooltip { position: absolute; background: #1a1a2e; border: 1px solid #00d4ff; padding: 10px; border-radius: 4px; pointer-events: none; display: none; max-width: 300px; z-index: 100; font-size: 11px; }
+</style>
+</head>
+<body>
+<h1>Function Graph: blueprint_playground</h1>
+<div class="subtitle">Stackable function dependency visualization • Drag nodes to rearrange • Click to inspect</div>
+
+<div class="controls">
+  <button onclick="resetView()">Reset View</button>
+  <button onclick="fitToView()">Fit</button>
+  <button onclick="toggleLayout('force')" id="btn-force" class="active">Force</button>
+  <button onclick="toggleLayout('horizontal')" id="btn-horizontal">Horizontal</button>
+  <button onclick="toggleLayout('vertical')" id="btn-vertical">Vertical</button>
+  <span style="margin-left: 10px; color: #666">|</span>
+  <button onclick="toggleEdgeType('internal')" id="btn-internal" class="active">Internal</button>
+  <button onclick="toggleEdgeType('external')" id="btn-external" class="active">External</button>
+  <button onclick="toggleEdgeType('local')" id="btn-local" class="active">Local</button>
+</div>
+
+<div id="container">
+  <div id="graph"><svg></svg></div>
+  <div id="sidebar">
+    <h3>Modules</h3>
+    <div class="module-legend" id="module-legend"></div>
+
+    <h3>Selected Node</h3>
+    <div class="info-section" id="node-info">Click a node to see details</div>
+
+    <h3>Source Code</h3>
+    <div class="source-panel" id="source-panel">
+      <div id="source-content" style="color:#666;font-size:11px">Click a function to view source</div>
+    </div>
+
+    <h3>Connections</h3>
+    <div class="edge-list" id="edge-list"></div>
+  </div>
+</div>
+<div id="tooltip"></div>
+
+<script>
+const nodes = [{"id": "playground_compute", "type": "module", "label": "playground_compute", "metrics": {"fanIn": 11, "fanOut": 9, "instability": 0.45, "internalEdges": 0, "externalCallCount": 25, "localCallCount": 0, "callsByCategory": {"stdlib": 24, "pip": 1}, "localDependencies": []}, "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "playground_compute.load_blueprint", "type": "function", "label": "load_blueprint", "direction": "inbound", "parent": "playground_compute", "line": 29, "endLine": 82, "signature": "(params) -> Dict[]", "docstring": "Load blueprint from JSON string or file path.", "source": "def load_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Load blueprint from JSON string or file path.\"\"\"\n    json_string = params.get(\"json_string\")\n    file_path = params.get(\"file_path\")\n\n    if file_path:\n        try:\n            path = Path(file_path)\n            if not path.exists():\n                return {\n                    \"blueprint_json\": None,\n                    \"blueprint\": None,\n                    \"blueprint_name\": None,\n                    \"is_valid_json\": False,\n                    \"error\": f\"File not found: {file_path}\"\n                }\n            with open(path) as f:\n                json_string = f.read()\n        except Exception as e:\n            return {\n                \"blueprint_json\": None,\n                \"blueprint\": None,\n                \"blueprint_name\": None,\n                \"is_valid_json\": False,\n                \"error\": str(e)\n            }\n\n    if not json_string:\n        return {\n            \"blueprint_json\": None,\n            \"blueprint\": None,\n            \"blueprint_name\": None,\n            \"is_valid_json\": False,\n            \"error\": \"No JSON string or file path provided\"\n        }\n\n    # Try to parse JSON\n    try:\n        bp_data = json.loads(json_string)\n        return {\n            \"blueprint_json\": json_string,\n            \"blueprint\": bp_data,\n            \"blueprint_name\": bp_data.get(\"name\", bp_data.get(\"id\", \"Untitled\")),\n            \"is_valid_json\": True,\n            \"error\": None\n        }\n    except json.JSONDecodeError as e:\n        return {\n            \"blueprint_json\": json_string,\n            \"blueprint\": None,\n            \"blueprint_name\": None,\n            \"is_valid_json\": False,\n            \"error\": f\"JSON parse error at line {e.lineno}: {e.msg}\"\n        }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "playground_compute.validate_json", "type": "function", "label": "validate_json", "direction": "inbound", "parent": "playground_compute", "line": 89, "endLine": 116, "signature": "(params) -> Dict[]", "docstring": "Validate JSON syntax.", "source": "def validate_json(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Validate JSON syntax.\"\"\"\n    json_string = params.get(\"json_string\", \"\")\n\n    if not json_string:\n        return {\n            \"is_valid\": False,\n            \"result\": {\"errors\": [\"Empty JSON string\"]},\n            \"error\": \"Empty JSON string\"\n        }\n\n    try:\n        json.loads(json_string)\n        return {\n            \"is_valid\": True,\n            \"result\": {\"errors\": [], \"message\": \"Valid JSON syntax\"},\n            \"error\": None\n        }\n    except json.JSONDecodeError as e:\n        return {\n            \"is_valid\": False,\n            \"result\": {\n                \"errors\": [f\"Line {e.lineno}, Column {e.colno}: {e.msg}\"],\n                \"line\": e.lineno,\n                \"column\": e.colno\n            },\n            \"error\": f\"JSON parse error at line {e.lineno}: {e.msg}\"\n        }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "playground_compute.validate_blueprint", "type": "function", "label": "validate_blueprint", "direction": "inbound", "parent": "playground_compute", "line": 119, "endLine": 257, "signature": "(params) -> Dict[]", "docstring": "Validate blueprint structure against L++ schema.", "source": "def validate_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Validate blueprint structure against L++ schema.\"\"\"\n    json_string = params.get(\"blueprint_json\", \"\")\n\n    if not json_string:\n        return {\n            \"is_valid\": False,\n            \"result\": {\"errors\": [\"No blueprint JSON provided\"]},\n            \"error\": \"No blueprint JSON provided\"\n        }\n\n    try:\n        bp = json.loads(json_string)\n    except json.JSONDecodeError as e:\n        return {\n            \"is_valid\": False,\n            \"result\": {\"errors\": [f\"Invalid JSON: {e.msg}\"]},\n            \"error\": f\"Invalid JSON: {e.msg}\"\n        }\n\n    errors = []\n    warnings = []\n\n    # Check required fields\n    required = [\"id\", \"states\", \"transitions\", \"entry_state\"]\n    for field in required:\n        if field not in bp:\n            errors.append(f\"Missing required field: {field}\")\n\n    # Check schema version\n    schema = bp.get(\"$schema\", \"\")\n    if not schema:\n        warnings.append(\"Missing $schema field (recommended: lpp/v0.1.2)\")\n    elif \"lpp\" not in schema:\n        warnings.append(f\"Unrecognized schema: {schema}\")\n\n    # Check states\n    states = bp.get(\"states\", {})\n    if not isinstance(states, dict):\n        errors.append(\"'states' must be an object\")\n    elif len(states) == 0:\n        errors.append(\"At least one state is required\")\n\n    # Check entry_state exists\n    entry = bp.get(\"entry_state\")\n    if entry and entry not in states:\n        errors.append(f\"entry_state '{entry}' not found in states\")\n\n    # Check terminal_states exist\n    terminals = bp.get(\"terminal_states\", [])\n    for t in terminals:\n        if t not in states:\n            errors.append(f\"terminal_state '{t}' not found in states\")\n\n    # Check transitions\n    transitions = bp.get(\"transitions\", [])\n    if not isinstance(transitions, list):\n        errors.append(\"'transitions' must be an array\")\n    else:\n        trans_ids = set()\n        for i, t in enumerate(transitions):\n            if not isinstance(t, dict):\n                errors.append(f\"Transition {i} must be an object\")\n                continue\n\n            # Check required transition fields\n            if \"id\" not in t:\n                errors.append(f\"Transition {i} missing 'id'\")\n            else:\n                if t[\"id\"] in trans_ids:\n                    errors.append(f\"Duplicate transition id: {t['id']}\")\n                trans_ids.add(t[\"id\"])\n\n            if \"from\" not in t:\n                errors.append(f\"Transition {i} missing 'from'\")\n            elif t[\"from\"] != \"*\" and t[\"from\"] not in states:\n                errors.append(f\"Transition {t.get('id', i)}: \"\n                              f\"from state '{t['from']}' not found\")\n\n            if \"to\" not in t:\n                errors.append(f\"Transition {i} missing 'to'\")\n            elif t[\"to\"] != \"*\" and t[\"to\"] not in states:\n                errors.append(f\"Transition {t.get('id', i)}: \"\n                              f\"to state '{t['to']}' not found\")\n\n            if \"on_event\" not in t:\n                errors.append(f\"Transition {t.get('id', i)} missing 'on_event'\")\n\n            # Check gates reference\n            for gate_id in t.get(\"gates\", []):\n                if gate_id not in bp.get(\"gates\", {}):\n                    errors.append(f\"Transition {t.get('id', i)}: \"\n                                  f\"gate '{gate_id}' not found\")\n\n            # Check actions reference\n            for action_id in t.get(\"actions\", []):\n                if action_id not in bp.get(\"actions\", {}):\n                    errors.append(f\"Transition {t.get('id', i)}: \"\n                                  f\"action '{action_id}' not found\")\n\n    # Check gates\n    gates = bp.get(\"gates\", {})\n    for gate_id, gate in gates.items():\n        if not isinstance(gate, dict):\n            errors.append(f\"Gate '{gate_id}' must be an object\")\n            continue\n        gate_type = gate.get(\"type\")\n        if gate_type not in [\"expression\", \"compute\"]:\n            errors.append(f\"Gate '{gate_id}': invalid type '{gate_type}'\")\n        if gate_type == \"expression\" and \"expression\" not in gate:\n            errors.append(f\"Gate '{gate_id}': missing 'expression'\")\n        if gate_type == \"compute\" and \"compute_unit\" not in gate:\n            errors.append(f\"Gate '{gate_id}': missing 'compute_unit'\")\n\n    # Check actions\n    actions = bp.get(\"actions\", {})\n    for action_id, action in actions.items():\n        if not isinstance(action, dict):\n            errors.append(f\"Action '{action_id}' must be an object\")\n            continue\n        action_type = action.get(\"type\")\n        if action_type not in [\"set\", \"compute\", \"emit\"]:\n            errors.append(f\"Action '{action_id}': invalid type '{action_type}'\")\n        if action_type == \"set\" and \"target\" not in action:\n            errors.append(f\"Action '{action_id}': missing 'target'\")\n        if action_type == \"compute\" and \"compute_unit\" not in action:\n            errors.append(f\"Action '{action_id}': missing 'compute_unit'\")\n\n    is_valid = len(errors) == 0\n\n    return {\n        \"is_valid\": is_valid,\n        \"result\": {\n            \"errors\": errors,\n            \"warnings\": warnings,\n            \"message\": \"Valid blueprint\" if is_valid else f\"{len(errors)} error(s)\"\n        },\n        \"error\": errors[0] if errors else None\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "playground_compute.format_blueprint", "type": "function", "label": "format_blueprint", "direction": "inbound", "parent": "playground_compute", "line": 264, "endLine": 285, "signature": "(params) -> Dict[]", "docstring": "Format/prettify JSON with consistent style.", "source": "def format_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Format/prettify JSON with consistent style.\"\"\"\n    json_string = params.get(\"json_string\", \"\")\n\n    if not json_string:\n        return {\n            \"formatted\": \"\",\n            \"output\": \"No JSON to format\"\n        }\n\n    try:\n        bp = json.loads(json_string)\n        formatted = json.dumps(bp, indent=2, ensure_ascii=False)\n        return {\n            \"formatted\": formatted,\n            \"output\": \"Blueprint formatted successfully\"\n        }\n    except json.JSONDecodeError as e:\n        return {\n            \"formatted\": json_string,\n            \"output\": f\"Cannot format invalid JSON: {e.msg}\"\n        }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "playground_compute.generate_diagram", "type": "function", "label": "generate_diagram", "direction": "inbound", "parent": "playground_compute", "line": 292, "endLine": 333, "signature": "(params) -> Dict[]", "docstring": "Generate Mermaid stateDiagram from blueprint.", "source": "def generate_diagram(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Generate Mermaid stateDiagram from blueprint.\"\"\"\n    bp = params.get(\"blueprint\")\n\n    if not bp:\n        return {\"mermaid\": \"\"}\n\n    lines = [\"stateDiagram-v2\"]\n\n    # Entry state\n    entry = bp.get(\"entry_state\")\n    if entry:\n        lines.append(f\"    [*] --> {entry}\")\n\n    # State descriptions as notes\n    states = bp.get(\"states\", {})\n    for sid, state in states.items():\n        if isinstance(state, dict) and state.get(\"description\"):\n            desc = state[\"description\"][:50].replace('\"', \"'\")\n            lines.append(f\"    {sid}: {desc}\")\n\n    # Transitions\n    transitions = bp.get(\"transitions\", [])\n    for t in transitions:\n        from_state = t.get(\"from\", \"?\")\n        to_state = t.get(\"to\", \"?\")\n        event = t.get(\"on_event\", \"?\")\n\n        if from_state == \"*\":\n            # Wildcard: show from all non-target states\n            for sid in states:\n                if sid != to_state:\n                    lines.append(f\"    {sid} --> {to_state}: {event}\")\n        else:\n            lines.append(f\"    {from_state} --> {to_state}: {event}\")\n\n    # Terminal states\n    terminals = bp.get(\"terminal_states\", [])\n    for term in terminals:\n        lines.append(f\"    {term} --> [*]\")\n\n    return {\"mermaid\": \"\\n\".join(lines)}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "playground_compute.init_simulation", "type": "function", "label": "init_simulation", "direction": "inbound", "parent": "playground_compute", "line": 340, "endLine": 387, "signature": "(params) -> Dict[]", "docstring": "Initialize simulation state from blueprint.", "source": "def init_simulation(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Initialize simulation state from blueprint.\"\"\"\n    bp = params.get(\"blueprint\")\n\n    if not bp:\n        return {\n            \"sim_state\": None,\n            \"sim_context\": {},\n            \"available_events\": [],\n            \"trace\": [],\n            \"output\": \"No blueprint provided\"\n        }\n\n    entry = bp.get(\"entry_state\")\n    if not entry:\n        return {\n            \"sim_state\": None,\n            \"sim_context\": {},\n            \"available_events\": [],\n            \"trace\": [],\n            \"output\": \"Blueprint has no entry_state\"\n        }\n\n    # Initialize context from schema\n    ctx = {\"_state\": entry}\n    schema = bp.get(\"context_schema\", {})\n    for prop in schema.get(\"properties\", {}).keys():\n        ctx[prop] = None\n\n    # Get available events\n    events = _get_available_events(bp, entry, ctx)\n\n    # Create initial trace\n    trace = [{\n        \"step\": 0,\n        \"timestamp\": datetime.now().isoformat(),\n        \"state\": entry,\n        \"context\": copy.deepcopy(ctx),\n        \"event\": None\n    }]\n\n    return {\n        \"sim_state\": entry,\n        \"sim_context\": ctx,\n        \"available_events\": events,\n        \"trace\": trace,\n        \"output\": f\"Simulation initialized at state: {entry}\"\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "playground_compute.get_available_events", "type": "function", "label": "get_available_events", "direction": "inbound", "parent": "playground_compute", "line": 440, "endLine": 450, "signature": "(params) -> Dict[]", "docstring": "Get list of valid events in current simulation state.", "source": "def get_available_events(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Get list of valid events in current simulation state.\"\"\"\n    bp = params.get(\"blueprint\")\n    state = params.get(\"sim_state\")\n    ctx = params.get(\"sim_context\", {})\n\n    if not bp or not state:\n        return {\"events\": []}\n\n    events = _get_available_events(bp, state, ctx)\n    return {\"events\": events}", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "playground_compute.dispatch_event", "type": "function", "label": "dispatch_event", "direction": "inbound", "parent": "playground_compute", "line": 496, "endLine": 582, "signature": "(params) -> Dict[]", "docstring": "Dispatch an event and process state transition.", "source": "def dispatch_event(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Dispatch an event and process state transition.\"\"\"\n    bp = params.get(\"blueprint\")\n    state = params.get(\"sim_state\")\n    ctx = params.get(\"sim_context\", {})\n    trace = params.get(\"sim_trace\", [])\n    event_name = params.get(\"event_name\")\n    event_payload = params.get(\"event_payload\", {})\n\n    if not bp or not state or not event_name:\n        return {\n            \"sim_state\": state,\n            \"sim_context\": ctx,\n            \"available_events\": [],\n            \"trace\": trace,\n            \"output\": \"Missing required parameters\",\n            \"error\": \"Missing blueprint, state, or event_name\"\n        }\n\n    # Find matching transition\n    eval_ctx = copy.deepcopy(ctx)\n    eval_ctx[\"_state\"] = state\n\n    matched = None\n    for t in bp.get(\"transitions\", []):\n        if t.get(\"on_event\") != event_name:\n            continue\n        from_state = t.get(\"from\")\n        if from_state != \"*\" and from_state != state:\n            continue\n\n        # Check gates\n        gates_pass = True\n        for gate_id in t.get(\"gates\", []):\n            if not _evaluate_gate(bp, gate_id, eval_ctx):\n                gates_pass = False\n                break\n\n        if gates_pass:\n            matched = t\n            break\n\n    if not matched:\n        return {\n            \"sim_state\": state,\n            \"sim_context\": ctx,\n            \"available_events\": _get_available_events(bp, state, ctx),\n            \"trace\": trace,\n            \"output\": f\"No matching transition for '{event_name}'\",\n            \"error\": f\"No transition for {event_name} from {state}\"\n        }\n\n    # Execute actions\n    new_ctx = copy.deepcopy(ctx)\n    for action_id in matched.get(\"actions\", []):\n        new_ctx = _execute_action(bp, action_id, new_ctx, event_payload)\n\n    # Perform transition\n    new_state = matched.get(\"to\")\n    new_ctx[\"_state\"] = new_state\n\n    # Update trace\n    new_trace = copy.deepcopy(trace)\n    new_trace.append({\n        \"step\": len(trace),\n        \"timestamp\": datetime.now().isoformat(),\n        \"state\": new_state,\n        \"prev_state\": state,\n        \"event\": event_name,\n        \"event_payload\": event_payload,\n        \"transition_id\": matched.get(\"id\"),\n        \"context\": copy.deepcopy(new_ctx)\n    })\n\n    # Get new available events\n    events = _get_available_events(bp, new_state, new_ctx)\n\n    output = f\"{state} --[{event_name}]--> {new_state}\"\n\n    return {\n        \"sim_state\": new_state,\n        \"sim_context\": new_ctx,\n        \"available_events\": events,\n        \"trace\": new_trace,\n        \"output\": output,\n        \"error\": None\n    }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "playground_compute.encode_share_url", "type": "function", "label": "encode_share_url", "direction": "inbound", "parent": "playground_compute", "line": 589, "endLine": 613, "signature": "(params) -> Dict[]", "docstring": "Encode blueprint as base64 URL parameter.", "source": "def encode_share_url(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Encode blueprint as base64 URL parameter.\"\"\"\n    json_string = params.get(\"blueprint_json\", \"\")\n    base_url = params.get(\"base_url\", \"http://localhost:8765\")\n\n    if not json_string:\n        return {\n            \"url\": \"\",\n            \"output\": \"No blueprint to share\"\n        }\n\n    try:\n        # Compress and encode\n        compressed = zlib.compress(json_string.encode(\"utf-8\"))\n        encoded = base64.urlsafe_b64encode(compressed).decode(\"ascii\")\n        url = f\"{base_url}?bp={encoded}\"\n        return {\n            \"url\": url,\n            \"output\": f\"Share URL generated ({len(encoded)} chars)\"\n        }\n    except Exception as e:\n        return {\n            \"url\": \"\",\n            \"output\": f\"Failed to encode: {e}\"\n        }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "playground_compute.decode_share_url", "type": "function", "label": "decode_share_url", "direction": "inbound", "parent": "playground_compute", "line": 616, "endLine": 662, "signature": "(params) -> Dict[]", "docstring": "Decode blueprint from base64 URL parameter.", "source": "def decode_share_url(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Decode blueprint from base64 URL parameter.\"\"\"\n    url = params.get(\"url\", \"\")\n\n    if not url:\n        return {\n            \"blueprint_json\": None,\n            \"blueprint\": None,\n            \"blueprint_name\": None,\n            \"is_valid_json\": False,\n            \"output\": \"No URL provided\",\n            \"error\": \"No URL provided\"\n        }\n\n    try:\n        # Extract bp parameter\n        if \"?bp=\" in url:\n            encoded = url.split(\"?bp=\")[1].split(\"&\")[0]\n        elif \"bp=\" in url:\n            encoded = url.split(\"bp=\")[1].split(\"&\")[0]\n        else:\n            encoded = url\n\n        # Decode and decompress\n        compressed = base64.urlsafe_b64decode(encoded)\n        json_string = zlib.decompress(compressed).decode(\"utf-8\")\n\n        # Parse\n        bp = json.loads(json_string)\n\n        return {\n            \"blueprint_json\": json_string,\n            \"blueprint\": bp,\n            \"blueprint_name\": bp.get(\"name\", bp.get(\"id\", \"Imported\")),\n            \"is_valid_json\": True,\n            \"output\": \"Blueprint imported from URL\",\n            \"error\": None\n        }\n    except Exception as e:\n        return {\n            \"blueprint_json\": None,\n            \"blueprint\": None,\n            \"blueprint_name\": None,\n            \"is_valid_json\": False,\n            \"output\": f\"Failed to decode URL: {e}\",\n            \"error\": str(e)\n        }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "playground_compute.export_blueprint", "type": "function", "label": "export_blueprint", "direction": "inbound", "parent": "playground_compute", "line": 669, "endLine": 708, "signature": "(params) -> Dict[]", "docstring": "Export blueprint to file.", "source": "def export_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"Export blueprint to file.\"\"\"\n    json_string = params.get(\"blueprint_json\", \"\")\n    file_path = params.get(\"file_path\")\n\n    if not json_string:\n        return {\n            \"output\": \"No blueprint to export\",\n            \"error\": \"No blueprint\"\n        }\n\n    if not file_path:\n        # Generate default filename\n        try:\n            bp = json.loads(json_string)\n            name = bp.get(\"id\", \"blueprint\")\n            file_path = f\"./{name}.json\"\n        except:\n            file_path = \"./blueprint.json\"\n\n    try:\n        # Format before writing\n        bp = json.loads(json_string)\n        formatted = json.dumps(bp, indent=2, ensure_ascii=False)\n\n        path = Path(file_path)\n        path.parent.mkdir(parents=True, exist_ok=True)\n\n        with open(path, \"w\", encoding=\"utf-8\") as f:\n            f.write(formatted)\n\n        return {\n            \"output\": f\"Exported to: {file_path}\",\n            \"error\": None\n        }\n    except Exception as e:\n        return {\n            \"output\": f\"Export failed: {e}\",\n            \"error\": str(e)\n        }", "args": ["params"], "returns": "Dict[]", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "json", "type": "dependency", "label": "json", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "copy", "type": "dependency", "label": "copy", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "base64", "type": "dependency", "label": "base64", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "zlib", "type": "dependency", "label": "zlib", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "pathlib", "type": "dependency", "label": "pathlib", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "typing", "type": "dependency", "label": "typing", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "datetime", "type": "dependency", "label": "datetime", "direction": "outbound", "category": "stdlib", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "frame_py.loader", "type": "dependency", "label": "loader", "direction": "outbound", "category": "pip", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}, {"id": "frame_py.safe_eval", "type": "dependency", "label": "safe_eval", "direction": "outbound", "category": "pip", "moduleColor": "#00d4ff", "moduleName": "playground_compute"}];
+const edges = [{"from": "playground_compute.load_blueprint", "to": "pathlib", "type": "external", "category": "stdlib", "line": 36}, {"from": "playground_compute.load_blueprint", "to": "json", "type": "external", "category": "stdlib", "line": 67}, {"from": "playground_compute.validate_json", "to": "json", "type": "external", "category": "stdlib", "line": 101}, {"from": "playground_compute.validate_blueprint", "to": "json", "type": "external", "category": "stdlib", "line": 131}, {"from": "playground_compute.format_blueprint", "to": "json", "type": "external", "category": "stdlib", "line": 275}, {"from": "playground_compute.format_blueprint", "to": "json", "type": "external", "category": "stdlib", "line": 276}, {"from": "playground_compute.init_simulation", "to": "datetime", "type": "external", "category": "stdlib", "line": 375}, {"from": "playground_compute.init_simulation", "to": "copy", "type": "external", "category": "stdlib", "line": 377}, {"from": "playground_compute._evaluate_gate", "to": "frame_py", "type": "external", "category": "pip", "line": 401}, {"from": "playground_compute._get_available_events", "to": "copy", "type": "external", "category": "stdlib", "line": 417}, {"from": "playground_compute._execute_action", "to": "copy", "type": "external", "category": "stdlib", "line": 476}, {"from": "playground_compute.dispatch_event", "to": "copy", "type": "external", "category": "stdlib", "line": 516}, {"from": "playground_compute.dispatch_event", "to": "copy", "type": "external", "category": "stdlib", "line": 549}, {"from": "playground_compute.dispatch_event", "to": "copy", "type": "external", "category": "stdlib", "line": 558}, {"from": "playground_compute.dispatch_event", "to": "datetime", "type": "external", "category": "stdlib", "line": 561}, {"from": "playground_compute.dispatch_event", "to": "copy", "type": "external", "category": "stdlib", "line": 567}, {"from": "playground_compute.encode_share_url", "to": "zlib", "type": "external", "category": "stdlib", "line": 602}, {"from": "playground_compute.encode_share_url", "to": "base64", "type": "external", "category": "stdlib", "line": 603}, {"from": "playground_compute.decode_share_url", "to": "base64", "type": "external", "category": "stdlib", "line": 640}, {"from": "playground_compute.decode_share_url", "to": "zlib", "type": "external", "category": "stdlib", "line": 641}, {"from": "playground_compute.decode_share_url", "to": "json", "type": "external", "category": "stdlib", "line": 644}, {"from": "playground_compute.export_blueprint", "to": "json", "type": "external", "category": "stdlib", "line": 683}, {"from": "playground_compute.export_blueprint", "to": "json", "type": "external", "category": "stdlib", "line": 691}, {"from": "playground_compute.export_blueprint", "to": "json", "type": "external", "category": "stdlib", "line": 692}, {"from": "playground_compute.export_blueprint", "to": "pathlib", "type": "external", "category": "stdlib", "line": 694}];
+const moduleColors = {"playground_compute": "#00d4ff"};
+
+// Edge type visibility
+const edgeVisibility = { internal: true, external: true, local: true };
+let currentLayout = 'force';
+
+// Create node lookup
+const nodeById = {};
+nodes.forEach(n => nodeById[n.id] = n);
+
+// Setup SVG
+const container = document.getElementById('graph');
+const width = container.clientWidth;
+const height = container.clientHeight || 600;
+
+const svg = d3.select("svg").attr("viewBox", [0, 0, width, height]);
+const g = svg.append("g");
+
+// Zoom behavior
+const zoom = d3.zoom()
+    .scaleExtent([0.1, 4])
+    .filter(e => !e.target.closest('.node'))
+    .on("zoom", e => g.attr("transform", e.transform));
+svg.call(zoom);
+
+// Arrow markers
+const defs = svg.append("defs");
+["internal", "external", "local"].forEach(type => {
+    const color = type === "internal" ? "#4ecdc4" : type === "external" ? "#f39c12" : "#9b59b6";
+    defs.append("marker")
+        .attr("id", `arrow-${type}`)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 20)
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-4L10,0L0,4")
+        .attr("fill", color);
+});
+
+// Build module legend
+const legendDiv = document.getElementById('module-legend');
+Object.entries(moduleColors).forEach(([mod, color]) => {
+    const item = document.createElement('div');
+    item.className = 'module-item';
+    item.innerHTML = `<div class="module-dot" style="background:${color}"></div><span class="module-name">${mod}</span>`;
+    item.onclick = () => highlightModule(mod);
+    legendDiv.appendChild(item);
+});
+
+// Process edges - resolve node references
+const processedEdges = edges.map(e => ({
+    ...e,
+    source: nodeById[e.from] || { id: e.from, x: 0, y: 0 },
+    target: nodeById[e.to] || { id: e.to, x: 0, y: 0 }
+})).filter(e => e.source && e.target);
+
+// Force simulation
+const simulation = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(processedEdges).id(d => d.id).distance(80).strength(0.5))
+    .force("charge", d3.forceManyBody().strength(-300))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force("collision", d3.forceCollide().radius(40));
+
+// Draw edges
+const edge = g.append("g").selectAll("path")
+    .data(processedEdges)
+    .join("path")
+    .attr("class", d => `edge edge-${d.type || 'internal'}`)
+    .attr("marker-end", d => `url(#arrow-${d.type || 'internal'})`);
+
+// Node size based on type
+function nodeSize(d) {
+    if (d.type === 'module') return { w: 120, h: 40 };
+    if (d.type === 'function' || d.type === 'async_function') return { w: 100, h: 30 };
+    if (d.type === 'class') return { w: 110, h: 35 };
+    return { w: 80, h: 25 };  // dependency
+}
+
+// Draw nodes
+const node = g.append("g").selectAll("g")
+    .data(nodes)
+    .join("g")
+    .attr("class", "node")
+    .call(d3.drag()
+        .on("start", dragStart)
+        .on("drag", dragging)
+        .on("end", dragEnd));
+
+node.append("rect")
+    .attr("class", d => `node-${d.type === 'dependency' ? 'dependency' : d.type === 'module' ? 'module' : 'function'}`)
+    .attr("width", d => nodeSize(d).w)
+    .attr("height", d => nodeSize(d).h)
+    .attr("x", d => -nodeSize(d).w / 2)
+    .attr("y", d => -nodeSize(d).h / 2)
+    .attr("rx", 6)
+    .attr("stroke", d => d.moduleColor || "#666");
+
+node.append("text")
+    .attr("class", "node-label")
+    .attr("text-anchor", "middle")
+    .attr("dy", d => d.signature ? -3 : 4)
+    .text(d => d.label || d.id);
+
+node.filter(d => d.signature).append("text")
+    .attr("class", "node-sublabel")
+    .attr("text-anchor", "middle")
+    .attr("dy", 10)
+    .text(d => d.signature.length > 20 ? d.signature.slice(0, 18) + ".." : d.signature);
+
+// Tooltip
+const tooltip = d3.select("#tooltip");
+node.on("mouseover", (e, d) => {
+    let html = `<b>${d.label || d.id}</b>`;
+    if (d.type) html += `<br><span style="color:#888">${d.type}</span>`;
+    if (d.signature) html += `<br><code>${d.signature}</code>`;
+    if (d.direction) html += `<br>Direction: ${d.direction}`;
+    tooltip.style("display", "block").html(html);
+})
+.on("mousemove", e => {
+    tooltip.style("left", (e.pageX + 15) + "px").style("top", (e.pageY - 10) + "px");
+})
+.on("mouseout", () => tooltip.style("display", "none"));
+
+// Click to select
+node.on("click", (e, d) => {
+    e.stopPropagation();
+    selectNode(d);
+});
+
+svg.on("click", () => clearSelection());
+
+// Update positions
+simulation.on("tick", () => {
+    edge.attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
+});
+
+// Drag functions
+function dragStart(e, d) {
+    if (!e.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+}
+function dragging(e, d) {
+    d.fx = e.x;
+    d.fy = e.y;
+}
+function dragEnd(e, d) {
+    if (!e.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+}
+
+// Selection functions
+let selectedNode = null;
+
+function selectNode(d) {
+    selectedNode = d;
+    
+    // Highlight node
+    node.classed("dim", n => n.id !== d.id && !isConnected(d, n));
+    node.select("rect").attr("stroke-width", n => n.id === d.id ? 4 : 2);
+    
+    // Highlight edges
+    edge.classed("dim", e => e.source.id !== d.id && e.target.id !== d.id);
+    edge.classed("highlight", e => e.source.id === d.id || e.target.id === d.id);
+    
+    // Update info panel
+    updateNodeInfo(d);
+    updateEdgeList(d);
+}
+
+function clearSelection() {
+    selectedNode = null;
+    node.classed("dim", false);
+    node.select("rect").attr("stroke-width", 2);
+    edge.classed("dim", false).classed("highlight", false);
+    document.getElementById('node-info').innerHTML = 'Click a node to see details';
+    document.getElementById('edge-list').innerHTML = '';
+}
+
+function isConnected(a, b) {
+    return processedEdges.some(e => 
+        (e.source.id === a.id && e.target.id === b.id) ||
+        (e.source.id === b.id && e.target.id === a.id)
+    );
+}
+
+function updateNodeInfo(d) {
+    let html = `<div class="metric"><span class="info-label">ID:</span><span class="info-value">${d.id}</span></div>`;
+    html += `<div class="metric"><span class="info-label">Type:</span><span class="info-value">${d.type}</span></div>`;
+    if (d.moduleName) html += `<div class="metric"><span class="info-label">Module:</span><span class="info-value">${d.moduleName}</span></div>`;
+    if (d.line) html += `<div class="metric"><span class="info-label">Line:</span><span class="info-value">${d.line}${d.endLine ? '-' + d.endLine : ''}</span></div>`;
+    if (d.signature) html += `<div class="metric"><span class="info-label">Signature:</span><span class="info-value" style="font-family:monospace">${d.signature}</span></div>`;
+    if (d.direction) html += `<div class="metric"><span class="info-label">Direction:</span><span class="info-value">${d.direction}</span></div>`;
+    if (d.category) html += `<div class="metric"><span class="info-label">Category:</span><span class="info-value">${d.category}</span></div>`;
+
+    if (d.metrics) {
+        html += `<div style="margin-top:10px"><b>Coupling Metrics</b></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-In:</span><span class="info-value">${d.metrics.fanIn}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Fan-Out:</span><span class="info-value">${d.metrics.fanOut}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Instability:</span><span class="info-value">${(d.metrics.instability * 100).toFixed(1)}%</span></div>`;
+        html += `<div class="metric-bar"><div class="metric-fill" style="width:${d.metrics.instability * 100}%;background:${d.metrics.instability > 0.5 ? '#ff6b6b' : '#4ecdc4'}"></div></div>`;
+        html += `<div class="metric"><span class="info-label">Internal Edges:</span><span class="info-value">${d.metrics.internalEdges}</span></div>`;
+    }
+
+    document.getElementById('node-info').innerHTML = html;
+
+    // Update source code panel
+    updateSourcePanel(d);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function updateSourcePanel(d) {
+    const panel = document.getElementById('source-content');
+
+    if (d.source) {
+        let sourceHtml = '';
+        if (d.docstring) {
+            sourceHtml += `<div class="docstring" style="margin-bottom:8px;padding:5px;background:#1a1a2a;border-radius:3px">${escapeHtml(d.docstring)}</div>`;
+        }
+        sourceHtml += `<div class="source-code">${escapeHtml(d.source)}</div>`;
+        panel.innerHTML = sourceHtml;
+    } else if (d.type === 'module') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">Module: ${d.label}<br>Click a function to view its source code.</div>`;
+    } else if (d.type === 'dependency') {
+        panel.innerHTML = `<div style="color:#888;font-size:11px">External dependency: ${d.label}<br>Category: ${d.category || 'unknown'}</div>`;
+    } else {
+        panel.innerHTML = `<div style="color:#666;font-size:11px">No source available for this node</div>`;
+    }
+}
+
+function updateEdgeList(d) {
+    const outgoing = processedEdges.filter(e => e.source.id === d.id);
+    const incoming = processedEdges.filter(e => e.target.id === d.id);
+    
+    let html = '';
+    if (outgoing.length) {
+        html += '<div style="color:#4ecdc4;font-weight:bold;margin-bottom:5px">Outgoing →</div>';
+        outgoing.forEach(e => {
+            html += `<div class="edge-item">→ <span class="to">${e.target.id || e.to}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (incoming.length) {
+        html += '<div style="color:#f39c12;font-weight:bold;margin:10px 0 5px 0">← Incoming</div>';
+        incoming.forEach(e => {
+            html += `<div class="edge-item">← <span class="from">${e.source.id || e.from}</span> <span class="type">[${e.type}]</span></div>`;
+        });
+    }
+    if (!outgoing.length && !incoming.length) {
+        html = '<div style="color:#666">No connections</div>';
+    }
+    
+    document.getElementById('edge-list').innerHTML = html;
+}
+
+function highlightModule(modName) {
+    node.classed("dim", n => n.moduleName !== modName && n.type !== 'dependency');
+    edge.classed("dim", e => {
+        const srcMod = nodeById[e.source.id]?.moduleName;
+        const tgtMod = nodeById[e.target.id]?.moduleName;
+        return srcMod !== modName && tgtMod !== modName;
+    });
+}
+
+// Layout functions
+function toggleLayout(layout) {
+    currentLayout = layout;
+    document.querySelectorAll('.controls button').forEach(b => {
+        if (b.id.startsWith('btn-') && ['force', 'horizontal', 'vertical'].includes(b.id.replace('btn-', ''))) {
+            b.classList.toggle('active', b.id === `btn-${layout}`);
+        }
+    });
+    
+    if (layout === 'force') {
+        simulation.alpha(1).restart();
+    } else {
+        simulation.stop();
+        layoutNodes(layout);
+    }
+}
+
+function layoutNodes(layout) {
+    const modules = [...new Set(nodes.filter(n => n.type === 'module').map(n => n.id))];
+    const padding = 50;
+    
+    if (layout === 'horizontal') {
+        // Group by module, spread horizontally
+        modules.forEach((mod, mi) => {
+            const modNodes = nodes.filter(n => n.moduleName === mod || n.id === mod);
+            const x = padding + mi * (width - padding * 2) / Math.max(modules.length - 1, 1);
+            modNodes.forEach((n, ni) => {
+                n.x = x;
+                n.y = padding + ni * 50;
+            });
+        });
+        // Dependencies on the right
+        const deps = nodes.filter(n => n.type === 'dependency');
+        deps.forEach((n, i) => {
+            n.x = width - padding;
+            n.y = padding + i * 40;
+        });
+    } else if (layout === 'vertical') {
+        // Modules at top, functions below, dependencies at bottom
+        const modNodes = nodes.filter(n => n.type === 'module');
+        const funcNodes = nodes.filter(n => n.type === 'function' || n.type === 'async_function' || n.type === 'class');
+        const depNodes = nodes.filter(n => n.type === 'dependency');
+        
+        modNodes.forEach((n, i) => {
+            n.x = padding + i * 150;
+            n.y = padding;
+        });
+        funcNodes.forEach((n, i) => {
+            n.x = padding + (i % 6) * 130;
+            n.y = 120 + Math.floor(i / 6) * 60;
+        });
+        depNodes.forEach((n, i) => {
+            n.x = padding + (i % 8) * 100;
+            n.y = height - padding - 50;
+        });
+    }
+    
+    // Update positions
+    node.transition().duration(500).attr("transform", d => `translate(${d.x},${d.y})`);
+    edge.transition().duration(500).attr("d", d => {
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+}
+
+// Edge type toggle
+function toggleEdgeType(type) {
+    edgeVisibility[type] = !edgeVisibility[type];
+    document.getElementById(`btn-${type}`).classList.toggle('active', edgeVisibility[type]);
+    edge.style("display", d => edgeVisibility[d.type || 'internal'] ? null : "none");
+}
+
+// View controls
+function resetView() {
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+}
+
+function fitToView() {
+    const bounds = g.node().getBBox();
+    const scale = Math.min(width / bounds.width, height / bounds.height) * 0.9;
+    const tx = (width - bounds.width * scale) / 2 - bounds.x * scale;
+    const ty = (height - bounds.height * scale) / 2 - bounds.y * scale;
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
+// Initial fit
+setTimeout(fitToView, 1000);
+</script>
+</body>
+</html>

@@ -39,6 +39,9 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 #details { font-size: 12px; line-height: 1.5; }
 #flow-list { font-size: 11px; max-height: 300px; overflow-y: auto; }
 #flow-list div { padding: 3px 0; border-bottom: 1px solid #333; }
+#definition-panel { font-size: 11px; margin-top: 10px; }
+.definition-code { background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 8px; font-family: 'Consolas', monospace; white-space: pre-wrap; max-height: 200px; overflow-y: auto; color: #b8b8b8; }
+.def-label { color: #888; font-size: 10px; margin-bottom: 3px; }
 </style>
 </head>
 <body>
@@ -69,6 +72,8 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
   <div id="info">
     <h3>Selected Node</h3>
     <div id="details">Click a node to see details</div>
+    <h4>Definition</h4>
+    <div id="definition-panel">Click a state to view its definition</div>
     <h4>Transitions</h4>
     <div id="flow-list"></div>
     <div class="legend">
@@ -91,8 +96,9 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 </div>
 <div id="tooltip"></div>
 <script>
-const nodes = [{"id": "idle", "label": "idle", "description": "Awaiting file path", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0}, {"id": "parsing", "label": "parsing", "description": "Parsing Python source into AST", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1}, {"id": "extracting", "label": "extracting", "description": "Extracting exports and imports", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}, {"id": "tracing", "label": "tracing", "description": "Tracing function call graph", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3}, {"id": "computing", "label": "computing", "description": "Computing coupling metrics", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4}, {"id": "complete", "label": "complete", "description": "Module graph generated", "type": "state", "isEntry": false, "isTerminal": false, "layer": 5}, {"id": "error", "label": "error", "description": "Analysis failed", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}];
-const links = [{"source": "idle", "target": "parsing", "label": "DECODE", "gates": "hasFilePath"}, {"source": "parsing", "target": "error", "label": "AUTO", "gates": "hasError"}, {"source": "parsing", "target": "extracting", "label": "AUTO", "gates": "hasAst"}, {"source": "extracting", "target": "error", "label": "AUTO", "gates": "hasError"}, {"source": "extracting", "target": "tracing", "label": "AUTO", "gates": "hasExtracts"}, {"source": "tracing", "target": "error", "label": "AUTO", "gates": "hasError"}, {"source": "tracing", "target": "computing", "label": "AUTO", "gates": "hasCalls"}, {"source": "computing", "target": "error", "label": "AUTO", "gates": "hasError"}, {"source": "computing", "target": "complete", "label": "AUTO", "gates": ""}, {"source": "parsing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "computing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "complete", "target": "idle", "label": "RESET", "gates": ""}, {"source": "error", "target": "idle", "label": "RESET", "gates": ""}, {"source": "extracting", "target": "idle", "label": "RESET", "gates": ""}, {"source": "tracing", "target": "idle", "label": "RESET", "gates": ""}];
+const nodes = [{"id": "idle", "label": "idle", "description": "Awaiting file path", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0, "definition": {"description": "Awaiting file path"}}, {"id": "parsing", "label": "parsing", "description": "Parsing Python source into AST", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1, "definition": {"description": "Parsing Python source into AST"}}, {"id": "extracting", "label": "extracting", "description": "Extracting exports and imports", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2, "definition": {"description": "Extracting exports and imports"}}, {"id": "tracing", "label": "tracing", "description": "Tracing function call graph", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3, "definition": {"description": "Tracing function call graph"}}, {"id": "computing", "label": "computing", "description": "Computing coupling metrics", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4, "definition": {"description": "Computing coupling metrics"}}, {"id": "complete", "label": "complete", "description": "Module graph generated", "type": "state", "isEntry": false, "isTerminal": false, "layer": 5, "definition": {"description": "Module graph generated"}}, {"id": "error", "label": "error", "description": "Analysis failed", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2, "definition": {"description": "Analysis failed"}}];
+const links = [{"source": "idle", "target": "parsing", "label": "DECODE", "gates": "hasFilePath"}, {"source": "parsing", "target": "error", "label": "AUTO", "gates": "hasError"}, {"source": "parsing", "target": "extracting", "label": "AUTO", "gates": "hasAst"}, {"source": "extracting", "target": "error", "label": "AUTO", "gates": "hasError"}, {"source": "extracting", "target": "tracing", "label": "AUTO", "gates": "hasExtracts"}, {"source": "tracing", "target": "error", "label": "AUTO", "gates": "hasError"}, {"source": "tracing", "target": "computing", "label": "AUTO", "gates": "hasCalls"}, {"source": "computing", "target": "error", "label": "AUTO", "gates": "hasError"}, {"source": "computing", "target": "complete", "label": "AUTO", "gates": ""}, {"source": "parsing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "extracting", "target": "idle", "label": "RESET", "gates": ""}, {"source": "error", "target": "idle", "label": "RESET", "gates": ""}, {"source": "complete", "target": "idle", "label": "RESET", "gates": ""}, {"source": "tracing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "computing", "target": "idle", "label": "RESET", "gates": ""}];
+const gates = {"hasFilePath": {"type": "expression", "expression": "filePath is not None and len(filePath) > 0"}, "hasSourceCode": {"type": "expression", "expression": "sourceCode is not None"}, "hasAst": {"type": "expression", "expression": "ast is not None"}, "hasExtracts": {"type": "expression", "expression": "exports is not None and imports is not None"}, "hasCalls": {"type": "expression", "expression": "internalCalls is not None"}, "hasError": {"type": "expression", "expression": "error is not None and len(error) > 0"}};
 
 // Calculate layout dimensions based on layers
 const layerMap = {};
@@ -584,6 +590,9 @@ node.on("click", (e, d) => {
     info += d.isTerminal ? "<span style='color:#ff6b6b'>⬤ Terminal State</span><br>" : "";
     if (d.description) info += "<br>" + d.description;
     document.getElementById("details").innerHTML = info;
+
+    // Update definition panel
+    updateDefinitionPanel(d);
     
     // Show transitions - categorized by type
     const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
@@ -653,6 +662,50 @@ node.on("click", (e, d) => {
     }
     document.getElementById("flow-list").innerHTML = flowHtml;
 });
+
+function updateDefinitionPanel(d) {
+    const panel = document.getElementById("definition-panel");
+    let html = "";
+
+    // Show state definition
+    if (d.definition) {
+        html += "<div class='def-label'>State Definition:</div>";
+        html += "<div class='definition-code'>" + escapeHtml(JSON.stringify(d.definition, null, 2)) + "</div>";
+    }
+
+    // Find and show gates referenced by outgoing transitions
+    const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
+    const gateRefs = new Set();
+    outLinks.forEach(l => {
+        if (l.gates) {
+            l.gates.split(", ").forEach(g => gateRefs.add(g.trim()));
+        }
+    });
+
+    if (gateRefs.size > 0) {
+        html += "<div class='def-label' style='margin-top:10px'>Referenced Gates:</div>";
+        gateRefs.forEach(gateId => {
+            const gateDef = gates[gateId];
+            if (gateDef) {
+                html += "<div style='margin:5px 0'><b style='color:#88aaff'>" + gateId + "</b></div>";
+                html += "<div class='definition-code'>" + escapeHtml(JSON.stringify(gateDef, null, 2)) + "</div>";
+            } else {
+                html += "<div style='color:#666'>" + gateId + " (no definition)</div>";
+            }
+        });
+    }
+
+    if (!html) {
+        html = "<div style='color:#666'>No definition available</div>";
+    }
+
+    panel.innerHTML = html;
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 function highlightUpstream(nodeId) {
     const upstreamNodes = new Set([nodeId]);

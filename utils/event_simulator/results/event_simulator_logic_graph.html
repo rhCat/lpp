@@ -39,6 +39,9 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 #details { font-size: 12px; line-height: 1.5; }
 #flow-list { font-size: 11px; max-height: 300px; overflow-y: auto; }
 #flow-list div { padding: 3px 0; border-bottom: 1px solid #333; }
+#definition-panel { font-size: 11px; margin-top: 10px; }
+.definition-code { background: #0d0d1a; border: 1px solid #333; border-radius: 4px; padding: 8px; font-family: 'Consolas', monospace; white-space: pre-wrap; max-height: 200px; overflow-y: auto; color: #b8b8b8; }
+.def-label { color: #888; font-size: 10px; margin-bottom: 3px; }
 </style>
 </head>
 <body>
@@ -69,6 +72,8 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
   <div id="info">
     <h3>Selected Node</h3>
     <div id="details">Click a node to see details</div>
+    <h4>Definition</h4>
+    <div id="definition-panel">Click a state to view its definition</div>
     <h4>Transitions</h4>
     <div id="flow-list"></div>
     <div class="legend">
@@ -91,8 +96,9 @@ h3, h4 { margin: 10px 0 5px 0; color: #00d4ff; }
 </div>
 <div id="tooltip"></div>
 <script>
-const nodes = [{"id": "idle", "label": "idle", "description": "Initial state", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0}, {"id": "loading", "label": "loading", "description": "From function: load_blueprint", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1}, {"id": "initializing", "label": "initializing", "description": "From function: init_simulation", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2}, {"id": "registering", "label": "registering", "description": "From function: reset_simulation", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3}, {"id": "evaluate-gates", "label": "evaluate-gates", "description": "From function: evaluate_gates", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4}, {"id": "orchestrating", "label": "orchestrating", "description": "From function: dispatch_event", "type": "state", "isEntry": false, "isTerminal": false, "layer": 5}, {"id": "fork-simulation", "label": "fork-simulation", "description": "From function: fork_simulation", "type": "state", "isEntry": false, "isTerminal": false, "layer": 6}, {"id": "switch-fork", "label": "switch-fork", "description": "From function: switch_fork", "type": "state", "isEntry": false, "isTerminal": false, "layer": 7}, {"id": "step-back", "label": "step-back", "description": "From function: step_back", "type": "state", "isEntry": false, "isTerminal": false, "layer": 8}, {"id": "processing", "label": "processing", "description": "From function: run_sequence", "type": "state", "isEntry": false, "isTerminal": false, "layer": 9}, {"id": "explore-state-space", "label": "explore-state-space", "description": "From function: explore_state_space", "type": "state", "isEntry": false, "isTerminal": false, "layer": 10}, {"id": "querying", "label": "querying", "description": "From function: find_path", "type": "state", "isEntry": false, "isTerminal": false, "layer": 11}, {"id": "export-trace", "label": "export-trace", "description": "From function: export_trace", "type": "state", "isEntry": false, "isTerminal": false, "layer": 12}, {"id": "import-trace", "label": "import-trace", "description": "From function: import_trace", "type": "state", "isEntry": false, "isTerminal": false, "layer": 13}, {"id": "explaining", "label": "explaining", "description": "From function: render_status", "type": "state", "isEntry": false, "isTerminal": false, "layer": 14}, {"id": "complete", "label": "complete", "description": "Terminal state", "type": "state", "isEntry": false, "isTerminal": true, "layer": 16}];
-const links = [{"source": "idle", "target": "loading", "label": "IDLE_DONE", "gates": ""}, {"source": "loading", "target": "initializing", "label": "LOADING_DONE", "gates": ""}, {"source": "initializing", "target": "registering", "label": "INITIALIZING_DONE", "gates": ""}, {"source": "registering", "target": "evaluate-gates", "label": "REGISTERING_DONE", "gates": ""}, {"source": "evaluate-gates", "target": "orchestrating", "label": "EVALUATE-GATES_DONE", "gates": ""}, {"source": "orchestrating", "target": "fork-simulation", "label": "ORCHESTRATING_DONE", "gates": ""}, {"source": "fork-simulation", "target": "switch-fork", "label": "FORK-SIMULATION_DONE", "gates": ""}, {"source": "switch-fork", "target": "step-back", "label": "SWITCH-FORK_DONE", "gates": ""}, {"source": "step-back", "target": "processing", "label": "STEP-BACK_DONE", "gates": ""}, {"source": "processing", "target": "explore-state-space", "label": "PROCESSING_DONE", "gates": ""}, {"source": "explore-state-space", "target": "querying", "label": "EXPLORE-STATE-SPACE_DONE", "gates": ""}, {"source": "querying", "target": "export-trace", "label": "QUERYING_DONE", "gates": ""}, {"source": "export-trace", "target": "import-trace", "label": "EXPORT-TRACE_DONE", "gates": ""}, {"source": "import-trace", "target": "explaining", "label": "IMPORT-TRACE_DONE", "gates": ""}, {"source": "explaining", "target": "complete", "label": "EXPLAINING_DONE", "gates": ""}, {"source": "fork-simulation", "target": "idle", "label": "RESET", "gates": ""}, {"source": "initializing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "export-trace", "target": "idle", "label": "RESET", "gates": ""}, {"source": "switch-fork", "target": "idle", "label": "RESET", "gates": ""}, {"source": "processing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "registering", "target": "idle", "label": "RESET", "gates": ""}, {"source": "querying", "target": "idle", "label": "RESET", "gates": ""}, {"source": "loading", "target": "idle", "label": "RESET", "gates": ""}, {"source": "explaining", "target": "idle", "label": "RESET", "gates": ""}, {"source": "orchestrating", "target": "idle", "label": "RESET", "gates": ""}, {"source": "explore-state-space", "target": "idle", "label": "RESET", "gates": ""}, {"source": "complete", "target": "idle", "label": "RESET", "gates": ""}, {"source": "step-back", "target": "idle", "label": "RESET", "gates": ""}, {"source": "evaluate-gates", "target": "idle", "label": "RESET", "gates": ""}, {"source": "import-trace", "target": "idle", "label": "RESET", "gates": ""}];
+const nodes = [{"id": "idle", "label": "idle", "description": "Initial state", "type": "state", "isEntry": true, "isTerminal": false, "layer": 0, "definition": {"name": "Idle", "description": "Initial state"}}, {"id": "loading", "label": "loading", "description": "From function: load_blueprint", "type": "state", "isEntry": false, "isTerminal": false, "layer": 1, "definition": {"name": "Loading", "description": "From function: load_blueprint"}}, {"id": "initializing", "label": "initializing", "description": "From function: init_simulation", "type": "state", "isEntry": false, "isTerminal": false, "layer": 2, "definition": {"name": "Initializing", "description": "From function: init_simulation"}}, {"id": "registering", "label": "registering", "description": "From function: reset_simulation", "type": "state", "isEntry": false, "isTerminal": false, "layer": 3, "definition": {"name": "Registering", "description": "From function: reset_simulation"}}, {"id": "evaluate-gates", "label": "evaluate-gates", "description": "From function: evaluate_gates", "type": "state", "isEntry": false, "isTerminal": false, "layer": 4, "definition": {"name": "Evaluate Gates", "description": "From function: evaluate_gates"}}, {"id": "orchestrating", "label": "orchestrating", "description": "From function: dispatch_event", "type": "state", "isEntry": false, "isTerminal": false, "layer": 5, "definition": {"name": "Orchestrating", "description": "From function: dispatch_event"}}, {"id": "fork-simulation", "label": "fork-simulation", "description": "From function: fork_simulation", "type": "state", "isEntry": false, "isTerminal": false, "layer": 6, "definition": {"name": "Fork Simulation", "description": "From function: fork_simulation"}}, {"id": "switch-fork", "label": "switch-fork", "description": "From function: switch_fork", "type": "state", "isEntry": false, "isTerminal": false, "layer": 7, "definition": {"name": "Switch Fork", "description": "From function: switch_fork"}}, {"id": "step-back", "label": "step-back", "description": "From function: step_back", "type": "state", "isEntry": false, "isTerminal": false, "layer": 8, "definition": {"name": "Step Back", "description": "From function: step_back"}}, {"id": "processing", "label": "processing", "description": "From function: run_sequence", "type": "state", "isEntry": false, "isTerminal": false, "layer": 9, "definition": {"name": "Processing", "description": "From function: run_sequence"}}, {"id": "explore-state-space", "label": "explore-state-space", "description": "From function: explore_state_space", "type": "state", "isEntry": false, "isTerminal": false, "layer": 10, "definition": {"name": "Explore State Space", "description": "From function: explore_state_space"}}, {"id": "querying", "label": "querying", "description": "From function: find_path", "type": "state", "isEntry": false, "isTerminal": false, "layer": 11, "definition": {"name": "Querying", "description": "From function: find_path"}}, {"id": "export-trace", "label": "export-trace", "description": "From function: export_trace", "type": "state", "isEntry": false, "isTerminal": false, "layer": 12, "definition": {"name": "Export Trace", "description": "From function: export_trace"}}, {"id": "import-trace", "label": "import-trace", "description": "From function: import_trace", "type": "state", "isEntry": false, "isTerminal": false, "layer": 13, "definition": {"name": "Import Trace", "description": "From function: import_trace"}}, {"id": "explaining", "label": "explaining", "description": "From function: render_status", "type": "state", "isEntry": false, "isTerminal": false, "layer": 14, "definition": {"name": "Explaining", "description": "From function: render_status"}}, {"id": "complete", "label": "complete", "description": "Terminal state", "type": "state", "isEntry": false, "isTerminal": true, "layer": 16, "definition": {"name": "Complete", "description": "Terminal state"}}];
+const links = [{"source": "idle", "target": "loading", "label": "IDLE_DONE", "gates": ""}, {"source": "loading", "target": "initializing", "label": "LOADING_DONE", "gates": ""}, {"source": "initializing", "target": "registering", "label": "INITIALIZING_DONE", "gates": ""}, {"source": "registering", "target": "evaluate-gates", "label": "REGISTERING_DONE", "gates": ""}, {"source": "evaluate-gates", "target": "orchestrating", "label": "EVALUATE-GATES_DONE", "gates": ""}, {"source": "orchestrating", "target": "fork-simulation", "label": "ORCHESTRATING_DONE", "gates": ""}, {"source": "fork-simulation", "target": "switch-fork", "label": "FORK-SIMULATION_DONE", "gates": ""}, {"source": "switch-fork", "target": "step-back", "label": "SWITCH-FORK_DONE", "gates": ""}, {"source": "step-back", "target": "processing", "label": "STEP-BACK_DONE", "gates": ""}, {"source": "processing", "target": "explore-state-space", "label": "PROCESSING_DONE", "gates": ""}, {"source": "explore-state-space", "target": "querying", "label": "EXPLORE-STATE-SPACE_DONE", "gates": ""}, {"source": "querying", "target": "export-trace", "label": "QUERYING_DONE", "gates": ""}, {"source": "export-trace", "target": "import-trace", "label": "EXPORT-TRACE_DONE", "gates": ""}, {"source": "import-trace", "target": "explaining", "label": "IMPORT-TRACE_DONE", "gates": ""}, {"source": "explaining", "target": "complete", "label": "EXPLAINING_DONE", "gates": ""}, {"source": "registering", "target": "idle", "label": "RESET", "gates": ""}, {"source": "evaluate-gates", "target": "idle", "label": "RESET", "gates": ""}, {"source": "fork-simulation", "target": "idle", "label": "RESET", "gates": ""}, {"source": "explaining", "target": "idle", "label": "RESET", "gates": ""}, {"source": "import-trace", "target": "idle", "label": "RESET", "gates": ""}, {"source": "complete", "target": "idle", "label": "RESET", "gates": ""}, {"source": "orchestrating", "target": "idle", "label": "RESET", "gates": ""}, {"source": "switch-fork", "target": "idle", "label": "RESET", "gates": ""}, {"source": "processing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "querying", "target": "idle", "label": "RESET", "gates": ""}, {"source": "export-trace", "target": "idle", "label": "RESET", "gates": ""}, {"source": "initializing", "target": "idle", "label": "RESET", "gates": ""}, {"source": "loading", "target": "idle", "label": "RESET", "gates": ""}, {"source": "explore-state-space", "target": "idle", "label": "RESET", "gates": ""}, {"source": "step-back", "target": "idle", "label": "RESET", "gates": ""}];
+const gates = {};
 
 // Calculate layout dimensions based on layers
 const layerMap = {};
@@ -584,6 +590,9 @@ node.on("click", (e, d) => {
     info += d.isTerminal ? "<span style='color:#ff6b6b'>⬤ Terminal State</span><br>" : "";
     if (d.description) info += "<br>" + d.description;
     document.getElementById("details").innerHTML = info;
+
+    // Update definition panel
+    updateDefinitionPanel(d);
     
     // Show transitions - categorized by type
     const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
@@ -653,6 +662,50 @@ node.on("click", (e, d) => {
     }
     document.getElementById("flow-list").innerHTML = flowHtml;
 });
+
+function updateDefinitionPanel(d) {
+    const panel = document.getElementById("definition-panel");
+    let html = "";
+
+    // Show state definition
+    if (d.definition) {
+        html += "<div class='def-label'>State Definition:</div>";
+        html += "<div class='definition-code'>" + escapeHtml(JSON.stringify(d.definition, null, 2)) + "</div>";
+    }
+
+    // Find and show gates referenced by outgoing transitions
+    const outLinks = links.filter(l => (l.sourceNode ? l.sourceNode.id : l.source) === d.id);
+    const gateRefs = new Set();
+    outLinks.forEach(l => {
+        if (l.gates) {
+            l.gates.split(", ").forEach(g => gateRefs.add(g.trim()));
+        }
+    });
+
+    if (gateRefs.size > 0) {
+        html += "<div class='def-label' style='margin-top:10px'>Referenced Gates:</div>";
+        gateRefs.forEach(gateId => {
+            const gateDef = gates[gateId];
+            if (gateDef) {
+                html += "<div style='margin:5px 0'><b style='color:#88aaff'>" + gateId + "</b></div>";
+                html += "<div class='definition-code'>" + escapeHtml(JSON.stringify(gateDef, null, 2)) + "</div>";
+            } else {
+                html += "<div style='color:#666'>" + gateId + " (no definition)</div>";
+            }
+        });
+    }
+
+    if (!html) {
+        html = "<div style='color:#666'>No definition available</div>";
+    }
+
+    panel.innerHTML = html;
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 function highlightUpstream(nodeId) {
     const upstreamNodes = new Set([nodeId]);

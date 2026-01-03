@@ -5,11 +5,12 @@ L++ Utils Documentation Regenerator
 Regenerates all documentation artifacts for L++ utility blueprints:
 - Graph visualizations (HTML)
 - Logic graphs (decoded from Python source)
+- Function dependency graphs
 - Mermaid diagrams
 - Analysis report
 
 Usage:
-    python utils/regenerate_docs.py [--graphs] [--logic] [--mermaid] [--report] [--all]
+    python utils/regenerate_docs.py [--graphs] [--logic] [--functions] [--mermaid] [--report] [--all]
 """
 
 import os
@@ -21,6 +22,7 @@ from datetime import datetime
 # Add paths for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'graph_visualizer', 'src'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'logic_decoder', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'function_decoder', 'src'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src', 'frame_py'))
 
 UTILS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -147,10 +149,6 @@ def regenerate_logic_graphs(compute_files, verbose=True):
 
     for cf_info in compute_files:
         try:
-            # Read Python source
-            with open(cf_info['path']) as f:
-                source = f.read()
-
             # Decode Python to blueprint using logic_decoder pipeline
             state = {'filePath': cf_info['path']}
 
@@ -242,6 +240,129 @@ def regenerate_logic_graphs(compute_files, verbose=True):
     return generated, errors
 
 
+def regenerate_function_graphs(compute_files, verbose=True):
+    """Regenerate function dependency graphs using function_decoder."""
+    try:
+        import function_decoder_compute as fd
+    except ImportError as e:
+        print(f"ERROR: Could not import function_decoder_compute: {e}")
+        return 0, [], []
+
+    generated = 0
+    errors = []
+    all_module_graphs = []
+
+    for cf_info in compute_files:
+        try:
+            # Load and parse
+            load_result = fd.loadFile({'filePath': cf_info['path']})
+            if load_result.get('error'):
+                errors.append((cf_info['name'], load_result['error']))
+                continue
+
+            parse_result = fd.parseAst({'sourceCode': load_result['sourceCode']})
+            if parse_result.get('error'):
+                errors.append((cf_info['name'], parse_result['error']))
+                continue
+
+            tree = parse_result['ast']
+            sourceCode = load_result['sourceCode']
+
+            # Extract exports, imports, and trace calls
+            exports_result = fd.extractExports({
+                'ast': tree,
+                'filePath': cf_info['path'],
+                'sourceCode': sourceCode
+            })
+            exports = exports_result.get('exports', [])
+
+            imports_result = fd.extractImports({'ast': tree})
+            imports = imports_result.get('imports', [])
+
+            internal_result = fd.traceInternalCalls({
+                'ast': tree,
+                'exports': exports
+            })
+            internal_calls = internal_result.get('internalCalls', [])
+
+            external_result = fd.traceExternalCalls({
+                'ast': tree,
+                'imports': imports
+            })
+            external_calls = external_result.get('externalCalls', [])
+            local_calls = external_result.get('localCalls', [])
+
+            # Compute coupling metrics
+            coupling_result = fd.computeCoupling({
+                'exports': exports,
+                'imports': imports,
+                'internalCalls': internal_calls,
+                'externalCalls': external_calls,
+                'localCalls': local_calls
+            })
+            coupling = coupling_result.get('coupling', {})
+
+            # Generate module graph
+            graph_result = fd.generateModuleGraph({
+                'filePath': cf_info['path'],
+                'exports': exports,
+                'imports': imports,
+                'internalCalls': internal_calls,
+                'externalCalls': external_calls,
+                'localCalls': local_calls,
+                'coupling': coupling
+            })
+            module_graph = graph_result.get('moduleGraph', {})
+            all_module_graphs.append(module_graph)
+
+            # Generate individual HTML visualization
+            results_dir = os.path.join(cf_info['dir'], 'results')
+            os.makedirs(results_dir, exist_ok=True)
+            html_path = os.path.join(results_dir, f"{cf_info['name']}_functions.html")
+
+            viz_result = fd.visualizeModuleGraph({
+                'moduleGraphs': [module_graph],
+                'outputPath': html_path,
+                'title': f"Function Graph: {cf_info['name']}"
+            })
+
+            if viz_result.get('htmlPath'):
+                generated += 1
+                if verbose:
+                    print(f"  [FUNC] {cf_info['name']}")
+            else:
+                errors.append((cf_info['name'], viz_result.get('error', 'Unknown')))
+
+        except Exception as e:
+            errors.append((cf_info['name'], str(e)))
+
+    return generated, errors, all_module_graphs
+
+
+def regenerate_combined_function_graph(all_module_graphs, verbose=True):
+    """Generate a combined multi-module function dependency graph."""
+    try:
+        import function_decoder_compute as fd
+    except ImportError:
+        return False
+
+    if not all_module_graphs:
+        return False
+
+    output_path = os.path.join(UTILS_DIR, 'function_dependencies.html')
+    viz_result = fd.visualizeModuleGraph({
+        'moduleGraphs': all_module_graphs,
+        'outputPath': output_path,
+        'title': 'L++ Utils - Combined Function Dependencies'
+    })
+
+    if viz_result.get('htmlPath'):
+        if verbose:
+            print("  [COMBINED] function_dependencies.html")
+        return True
+    return False
+
+
 def regenerate_report(verbose=True):
     """Regenerate the analysis report using utils_inspection.py."""
     inspection_script = os.path.join(UTILS_DIR, 'utils_inspection.py')
@@ -277,6 +398,8 @@ def main():
                         help='Regenerate HTML graph visualizations')
     parser.add_argument('--logic', action='store_true',
                         help='Regenerate logic graphs (decoded from Python)')
+    parser.add_argument('--functions', action='store_true',
+                        help='Regenerate function dependency graphs')
     parser.add_argument('--mermaid', action='store_true',
                         help='Regenerate Mermaid diagrams')
     parser.add_argument('--report', action='store_true',
@@ -289,7 +412,7 @@ def main():
     args = parser.parse_args()
 
     # Default to --all if no specific flags
-    if not (args.graphs or args.logic or args.mermaid or args.report):
+    if not (args.graphs or args.logic or args.functions or args.mermaid or args.report):
         args.all = True
 
     verbose = not args.quiet
@@ -322,6 +445,18 @@ def main():
         total_errors.extend(errors)
         print(f"  Generated: {count} logic graphs\n")
 
+    # Regenerate function graphs
+    if args.all or args.functions:
+        print("Generating Function Dependency Graphs...")
+        count, errors, all_graphs = regenerate_function_graphs(compute_files, verbose)
+        total_generated += count
+        total_errors.extend(errors)
+        print(f"  Generated: {count} function graphs")
+        # Also generate combined view
+        if regenerate_combined_function_graph(all_graphs, verbose):
+            total_generated += 1
+        print()
+
     # Regenerate Mermaid
     if args.all or args.mermaid:
         print("Generating Mermaid Diagrams...")
@@ -351,6 +486,8 @@ def main():
     print("\nOutput locations:")
     print("  - Graphs:       utils/<tool>/results/<tool>_graph.html")
     print("  - Logic Graphs: utils/<tool>/results/<tool>_logic_graph.html")
+    print("  - Func Graphs:  utils/<tool>/results/<tool>_functions.html")
+    print("  - Combined:     utils/function_dependencies.html")
     print("  - Mermaid:      utils/<tool>/results/<tool>.mmd")
     print("  - Report:       utils/analysis_report.md")
 
