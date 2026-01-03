@@ -142,7 +142,7 @@ def _build_html(title: str, nodes: list, links: list) -> str:
     """Build the interactive D3.js HTML visualization with hierarchical layout."""
     nodes_json = json.dumps(nodes)
     links_json = json.dumps(links)
-    
+
     return f'''<!DOCTYPE html>
 <html>
 <head>
@@ -157,16 +157,25 @@ h1 {{ color: #00d4ff; margin-bottom: 10px; }}
 #info {{ width: 320px; background: #16213e; padding: 15px; border-radius: 8px; max-height: 90vh; overflow-y: auto; }}
 svg {{ background: #0f0f23; border-radius: 8px; }}
 .node {{ cursor: pointer; }}
-.node-rect {{ rx: 8; ry: 8; }}
+.node-rect {{ rx: 8; ry: 8; transition: stroke 0.2s, stroke-width 0.2s; }}
 .node-label {{ font-size: 12px; fill: #fff; text-anchor: middle; pointer-events: none; font-weight: bold; }}
 .node-desc {{ font-size: 9px; fill: #aaa; text-anchor: middle; pointer-events: none; }}
-.link {{ stroke-opacity: 0.7; fill: none; }}
+.link {{ stroke-opacity: 0.7; fill: none; transition: stroke 0.2s, stroke-width 0.2s; }}
 .link-label {{ font-size: 8px; fill: #888; pointer-events: none; }}
 .gate-label {{ font-size: 7px; fill: #666; pointer-events: none; font-style: italic; }}
 #tooltip {{ position: absolute; background: #16213e; border: 1px solid #00d4ff; padding: 10px; border-radius: 4px; pointer-events: none; display: none; max-width: 350px; z-index: 100; font-size: 12px; }}
 .controls {{ margin-bottom: 10px; }}
-.controls button {{ background: #00d4ff; color: #000; border: none; padding: 8px 16px; margin-right: 5px; cursor: pointer; border-radius: 4px; }}
-.controls button:hover {{ background: #00a8cc; }}
+.controls button {{ background: #4a4a8a; color: #fff; border: none; padding: 8px 16px; margin-right: 5px; margin-bottom: 5px; cursor: pointer; border-radius: 4px; font-size: 12px; }}
+.controls button:hover {{ background: #5a5a9a; }}
+.controls button.active {{ background: #00d4ff; color: #000; }}
+.controls .btn-error {{ background: #8a4a4a; }}
+.controls .btn-error:hover {{ background: #9a5a5a; }}
+.controls .btn-error.active {{ background: #ff6b6b; color: #000; }}
+.controls .btn-happy {{ background: #4a8a4a; }}
+.controls .btn-happy:hover {{ background: #5a9a5a; }}
+.controls .btn-happy.active {{ background: #6bff6b; color: #000; }}
+.control-group {{ display: inline-block; margin-right: 15px; }}
+.control-label {{ color: #888; font-size: 11px; margin-right: 5px; }}
 .legend {{ margin-top: 20px; }}
 .legend-item {{ display: flex; align-items: center; margin: 5px 0; font-size: 12px; }}
 .legend-color {{ width: 20px; height: 20px; border-radius: 4px; margin-right: 10px; }}
@@ -179,15 +188,25 @@ h3, h4 {{ margin: 10px 0 5px 0; color: #00d4ff; }}
 <body>
 <h1>{title}</h1>
 <div class="controls">
-  <button onclick="resetZoom()">Reset View</button>
-  <button onclick="centerGraph()">Center</button>
-  <button onclick="fitToView()">Fit</button>
-  <button id="btn-upstream" onclick="toggleUpstream()" style="background:#00d4ff">Show Upstream</button>
-  <span style="margin-left:20px; color:#888">Layout:</span>
-  <button onclick="setLayout('hierarchical')" id="btn-hierarchical" style="background:#00d4ff">Hierarchical</button>
-  <button onclick="setLayout('horizontal')" id="btn-horizontal">Horizontal</button>
-  <button onclick="setLayout('circular')" id="btn-circular">Circular</button>
-  <button onclick="setLayout('grid')" id="btn-grid">Grid</button>
+  <span class="control-group">
+    <span class="control-label">View:</span>
+    <button onclick="resetZoom()" class="active">Reset</button>
+    <button onclick="centerGraph()">Center</button>
+    <button onclick="fitToView()">Fit</button>
+  </span>
+  <span class="control-group">
+    <span class="control-label">Highlight:</span>
+    <button id="btn-upstream" onclick="toggleUpstream()">Upstream</button>
+    <button id="btn-failure" onclick="toggleFailurePaths()" class="btn-error">Failure Paths</button>
+    <button id="btn-happy" onclick="toggleHappyPaths()" class="btn-happy">Happy Paths</button>
+  </span>
+  <span class="control-group">
+    <span class="control-label">Layout:</span>
+    <button onclick="setLayout('hierarchical')" id="btn-hierarchical" class="active">Hierarchical</button>
+    <button onclick="setLayout('horizontal')" id="btn-horizontal">Horizontal</button>
+    <button onclick="setLayout('circular')" id="btn-circular">Circular</button>
+    <button onclick="setLayout('grid')" id="btn-grid">Grid</button>
+  </span>
 </div>
 <div id="container">
   <div id="graph"><svg></svg></div>
@@ -202,6 +221,10 @@ h3, h4 {{ margin: 10px 0 5px 0; color: #00d4ff; }}
       <div class="legend-item"><div class="legend-color" style="background:#ff6b6b"></div> Terminal State</div>
       <div class="legend-item"><div class="legend-color" style="background:#4a4a8a"></div> Normal State</div>
       <div class="legend-item"><div class="legend-color" style="background:#ffa500"></div> Error State</div>
+      <h4>Path Highlights</h4>
+      <div class="legend-item"><div class="legend-color" style="background:#ff4444"></div> Failure Path (to error)</div>
+      <div class="legend-item"><div class="legend-color" style="background:#44ff44"></div> Happy Path (entry→terminal)</div>
+      <div class="legend-item"><div class="legend-color" style="background:#ff00ff"></div> Upstream Trace</div>
     </div>
   </div>
 </div>
@@ -355,20 +378,55 @@ defs.append("marker")
     .attr("id", "arrow-upstream").attr("viewBox", "0 -5 10 10").attr("refX", 10).attr("refY", 0)
     .attr("markerWidth", 8).attr("markerHeight", 8).attr("orient", "auto")
   .append("path").attr("d", "M0,-4L10,0L0,4").attr("fill", "#ff00ff");
+defs.append("marker")
+    .attr("id", "arrow-failure").attr("viewBox", "0 -5 10 10").attr("refX", 10).attr("refY", 0)
+    .attr("markerWidth", 8).attr("markerHeight", 8).attr("orient", "auto")
+  .append("path").attr("d", "M0,-4L10,0L0,4").attr("fill", "#ff4444");
+defs.append("marker")
+    .attr("id", "arrow-happy").attr("viewBox", "0 -5 10 10").attr("refX", 10).attr("refY", 0)
+    .attr("markerWidth", 8).attr("markerHeight", 8).attr("orient", "auto")
+  .append("path").attr("d", "M0,-4L10,0L0,4").attr("fill", "#44ff44");
+
+// Track self-loop index for offset calculation
+const selfLoopIndex = {{}};
+links.forEach((l, idx) => {{
+    if (l.sourceNode && l.targetNode && l.sourceNode.id === l.targetNode.id) {{
+        const key = l.sourceNode.id;
+        if (!selfLoopIndex[key]) selfLoopIndex[key] = [];
+        selfLoopIndex[key].push(idx);
+    }}
+}});
 
 // Function to update link paths
 function updateLinks() {{
-    link.attr("d", d => {{
+    link.attr("d", (d, i) => {{
         if (!d.sourceNode || !d.targetNode) return "";
-        const sx = d.sourceNode.x, sy = d.sourceNode.y + nodeHeight/2;
-        const tx = d.targetNode.x, ty = d.targetNode.y - nodeHeight/2;
-        // Self-loop
+        const sx = d.sourceNode.x, sy = d.sourceNode.y;
+        const tx = d.targetNode.x, ty = d.targetNode.y;
+
+        // Self-loop - draw on right side with offset for multiple self-loops
         if (d.sourceNode.id === d.targetNode.id) {{
-            return `M${{sx + nodeWidth/2}},${{sy - nodeHeight/2}} C${{sx + nodeWidth/2 + 50}},${{sy - 30}} ${{sx + nodeWidth/2 + 50}},${{sy + 30}} ${{sx + nodeWidth/2}},${{sy + nodeHeight/2 - 10}}`;
+            const loopIdx = selfLoopIndex[d.sourceNode.id]?.indexOf(i) || 0;
+            const loopOffset = loopIdx * 20;  // Offset for multiple self-loops
+            const loopSize = 40 + loopOffset;
+            const startX = sx + nodeWidth/2;
+            const startY = sy - 5;
+            const endX = sx + nodeWidth/2;
+            const endY = sy + 5;
+            // Draw a loop on the right side
+            return `M${{startX}},${{startY}} ` +
+                   `C${{startX + loopSize}},${{startY - loopSize/2}} ` +
+                   `${{startX + loopSize}},${{endY + loopSize/2}} ` +
+                   `${{endX}},${{endY}}`;
         }}
-        // Curved path
-        const midY = (sy + ty) / 2;
-        return `M${{sx}},${{sy}} C${{sx}},${{midY}} ${{tx}},${{midY}} ${{tx}},${{ty}}`;
+
+        // Normal curved path - exit from bottom of source, enter top of target
+        const sourceBottom = {{ x: sx, y: sy + nodeHeight/2 }};
+        const targetTop = {{ x: tx, y: ty - nodeHeight/2 }};
+        const midY = (sourceBottom.y + targetTop.y) / 2;
+
+        return `M${{sourceBottom.x}},${{sourceBottom.y}} ` +
+               `C${{sourceBottom.x}},${{midY}} ${{targetTop.x}},${{midY}} ${{targetTop.x}},${{targetTop.y}}`;
     }});
 }}
 
@@ -380,20 +438,39 @@ const link = g.append("g").selectAll("path").data(links).join("path")
     .attr("marker-end", "url(#arrow)");
 updateLinks();
 
-// Drag behavior for nodes
+// Drag behavior for nodes with click detection
+// Track drag state to distinguish clicks from drags
+let dragStartPos = null;
+let isDragging = false;
+const DRAG_THRESHOLD = 5;  // Minimum pixels to consider it a drag
+
 const drag = d3.drag()
     .on("start", function(e, d) {{
-        e.sourceEvent.stopPropagation();  // Prevent zoom interference
-        d3.select(this).raise().select("rect").attr("stroke", "#ff0").attr("stroke-width", 4);
+        e.sourceEvent.stopPropagation();
+        dragStartPos = {{ x: e.x, y: e.y }};
+        isDragging = false;
     }})
     .on("drag", function(e, d) {{
-        d.x = e.x + nodeWidth/2;
-        d.y = e.y + nodeHeight/2;
-        d3.select(this).attr("transform", `translate(${{e.x}},${{e.y}})`);
-        updateLinks();
+        // Check if we've moved enough to be considered dragging
+        const dx = e.x - dragStartPos.x;
+        const dy = e.y - dragStartPos.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+
+        if (dist > DRAG_THRESHOLD) {{
+            isDragging = true;
+            d3.select(this).raise().select("rect").attr("stroke", "#ff0").attr("stroke-width", 4);
+            d.x = e.x + nodeWidth/2;
+            d.y = e.y + nodeHeight/2;
+            d3.select(this).attr("transform", `translate(${{e.x}},${{e.y}})`);
+            updateLinks();
+        }}
     }})
     .on("end", function(e, d) {{
-        d3.select(this).select("rect").attr("stroke", "#fff").attr("stroke-width", 2);
+        if (isDragging) {{
+            d3.select(this).select("rect").attr("stroke", "#fff").attr("stroke-width", 2);
+        }}
+        dragStartPos = null;
+        isDragging = false;
     }});
 
 // Draw nodes as rounded rectangles
@@ -444,8 +521,11 @@ node.on("mouseover", (e, d) => {{
 let selectedNode = null;
 let showUpstream = false;
 
-// Click to highlight and show transitions
+// Click to highlight and show transitions (only if not dragging)
 node.on("click", (e, d) => {{
+    // Skip if this was a drag operation
+    if (isDragging) return;
+    e.stopPropagation();
     selectedNode = d;
     
     // Highlight selected node
@@ -582,27 +662,177 @@ function fitToView() {{
 }}
 function toggleUpstream() {{
     showUpstream = !showUpstream;
-    document.getElementById("btn-upstream").style.background = showUpstream ? "#ff00ff" : "#00d4ff";
-    document.getElementById("btn-upstream").textContent = showUpstream ? "Upstream: ON" : "Show Upstream";
+    showFailurePaths = false;
+    showHappyPaths = false;
+    updateHighlightButtons();
     if (selectedNode) {{
         if (showUpstream) {{
             highlightUpstream(selectedNode.id);
         }} else {{
-            // Reset to normal highlighting
-            node.select("rect").attr("stroke", n => n.id === selectedNode.id ? "#ff0" : "#fff").attr("stroke-width", n => n.id === selectedNode.id ? 4 : 2);
-            link.attr("stroke", l => {{
-                const src = l.sourceNode ? l.sourceNode.id : l.source;
-                const tgt = l.targetNode ? l.targetNode.id : l.target;
-                if (src === selectedNode.id) return "#00ff00";
-                if (tgt === selectedNode.id) return "#ffaa00";
-                return "#556";
-            }}).attr("stroke-width", l => {{
-                const src = l.sourceNode ? l.sourceNode.id : l.source;
-                const tgt = l.targetNode ? l.targetNode.id : l.target;
-                return (src === selectedNode.id || tgt === selectedNode.id) ? 3 : 2;
-            }}).attr("marker-end", "url(#arrow)");
+            resetHighlighting();
         }}
+    }} else {{
+        resetHighlighting();
     }}
+}}
+
+// Track path highlighting modes
+let showFailurePaths = false;
+let showHappyPaths = false;
+
+// Find all error states (named 'error' or terminal states)
+const errorStates = new Set();
+const terminalStates = new Set();
+const entryState = nodes.find(n => n.isEntry);
+nodes.forEach(n => {{
+    if (n.id === 'error' || n.id.includes('error') || n.id.includes('fail')) {{
+        errorStates.add(n.id);
+    }}
+    if (n.isTerminal) {{
+        terminalStates.add(n.id);
+    }}
+}});
+
+// Find paths leading to a target state set
+function findPathsTo(targetSet) {{
+    const pathLinks = new Set();
+    const pathNodes = new Set(targetSet);
+
+    // BFS backward from target states
+    const queue = [...targetSet];
+    const visited = new Set(targetSet);
+
+    while (queue.length > 0) {{
+        const curr = queue.shift();
+        incoming[curr].forEach(link => {{
+            const srcId = link.sourceNode.id;
+            pathLinks.add(link);
+            if (!visited.has(srcId)) {{
+                visited.add(srcId);
+                pathNodes.add(srcId);
+                queue.push(srcId);
+            }}
+        }});
+    }}
+
+    return {{ nodes: pathNodes, links: pathLinks }};
+}}
+
+// Find happy paths from entry to terminal states
+function findHappyPaths() {{
+    if (!entryState || terminalStates.size === 0) return {{ nodes: new Set(), links: new Set() }};
+
+    const pathLinks = new Set();
+    const pathNodes = new Set();
+
+    // BFS forward from entry, only including paths that reach terminal
+    function dfs(nodeId, visited, path) {{
+        if (visited.has(nodeId)) return false;
+        visited.add(nodeId);
+        path.push(nodeId);
+
+        if (terminalStates.has(nodeId)) {{
+            // Found terminal - add all nodes and links in path
+            path.forEach(n => pathNodes.add(n));
+            for (let i = 0; i < path.length - 1; i++) {{
+                const fromId = path[i];
+                const toId = path[i + 1];
+                links.forEach(l => {{
+                    if (l.sourceNode && l.targetNode &&
+                        l.sourceNode.id === fromId && l.targetNode.id === toId) {{
+                        pathLinks.add(l);
+                    }}
+                }});
+            }}
+            visited.delete(nodeId);
+            path.pop();
+            return true;
+        }}
+
+        let foundPath = false;
+        outgoing[nodeId].forEach(link => {{
+            if (link.targetNode && !errorStates.has(link.targetNode.id)) {{
+                if (dfs(link.targetNode.id, visited, path)) {{
+                    pathLinks.add(link);
+                    foundPath = true;
+                }}
+            }}
+        }});
+
+        visited.delete(nodeId);
+        path.pop();
+        return foundPath;
+    }}
+
+    dfs(entryState.id, new Set(), []);
+    return {{ nodes: pathNodes, links: pathLinks }};
+}}
+
+function toggleFailurePaths() {{
+    showFailurePaths = !showFailurePaths;
+    showUpstream = false;
+    showHappyPaths = false;
+    updateHighlightButtons();
+
+    if (showFailurePaths) {{
+        const paths = findPathsTo(errorStates);
+        highlightPaths(paths, '#ff4444', 'Failure');
+    }} else {{
+        resetHighlighting();
+    }}
+}}
+
+function toggleHappyPaths() {{
+    showHappyPaths = !showHappyPaths;
+    showUpstream = false;
+    showFailurePaths = false;
+    updateHighlightButtons();
+
+    if (showHappyPaths) {{
+        const paths = findHappyPaths();
+        highlightPaths(paths, '#44ff44', 'Happy');
+    }} else {{
+        resetHighlighting();
+    }}
+}}
+
+function highlightPaths(paths, color, label) {{
+    const markerId = label === 'Failure' ? 'arrow-failure' : (label === 'Happy' ? 'arrow-happy' : 'arrow');
+
+    // Highlight nodes on path
+    node.select("rect")
+        .attr("stroke", n => paths.nodes.has(n.id) ? color : "#fff")
+        .attr("stroke-width", n => paths.nodes.has(n.id) ? 4 : 2);
+
+    // Highlight links on path
+    link.attr("stroke", l => paths.links.has(l) ? color : "#556")
+        .attr("stroke-width", l => paths.links.has(l) ? 4 : 2)
+        .attr("marker-end", l => paths.links.has(l) ? `url(#${{markerId}})` : "url(#arrow)");
+
+    // Update info panel
+    document.getElementById("details").innerHTML = `<b>${{label}} Paths</b><br><br>` +
+        `<span style='color:${{color}}'>Nodes: ${{paths.nodes.size}}</span><br>` +
+        `<span style='color:${{color}}'>Links: ${{paths.links.size}}</span>`;
+
+    let flowHtml = `<b style='color:${{color}}'>${{label}} Path Nodes</b><br>`;
+    paths.nodes.forEach(nid => {{
+        const n = nodeById[nid];
+        flowHtml += `<div>${{nid}}${{n && n.isEntry ? ' (entry)' : ''}}${{n && n.isTerminal ? ' (terminal)' : ''}}${{errorStates.has(nid) ? ' (error)' : ''}}</div>`;
+    }});
+    document.getElementById("flow-list").innerHTML = flowHtml;
+}}
+
+function updateHighlightButtons() {{
+    document.getElementById("btn-upstream").className = showUpstream ? 'active' : '';
+    document.getElementById("btn-failure").className = showFailurePaths ? 'btn-error active' : 'btn-error';
+    document.getElementById("btn-happy").className = showHappyPaths ? 'btn-happy active' : 'btn-happy';
+}}
+
+function resetHighlighting() {{
+    node.select("rect").attr("stroke", "#fff").attr("stroke-width", 2);
+    link.attr("stroke", l => l.gates && l.gates.includes("error") ? "#ff6b6b" : "#556")
+        .attr("stroke-width", 2)
+        .attr("marker-end", "url(#arrow)");
 }}
 
 // Auto-fit on load
