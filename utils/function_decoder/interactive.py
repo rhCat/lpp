@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """L++ Function Decoder - Interactive CLI (< 50 lines per build_rules.md)"""
-from src.function_decoder_compute import COMPUTE_REGISTRY
+from src.function_decoder_compute import COMPUTE_REGISTRY, visualizeModuleGraph
 from frame_py.compiler import compile_blueprint
 from pathlib import Path
 import importlib.util
@@ -25,7 +25,7 @@ def load():
 
 def main():
     op = load()
-    print("FuncDecoder: decode <file.py> | show | export [file] | graph | quit")
+    print("FuncDecoder: decode <file.py> | show | export [file] | graph | visualize [files...] | quit")
     while True:
         try:
             cmd = input(f"[{op.state}]> ").strip()
@@ -57,6 +57,8 @@ def main():
         elif verb == "graph":
             mg = op.context.get("moduleGraph", {})
             _print_graph(mg)
+        elif verb == "visualize":
+            _visualize(arg, op.context.get("moduleGraph"))
         elif verb == "export":
             mg = op.context.get("moduleGraph")
             if not mg:
@@ -70,6 +72,49 @@ def main():
             op.dispatch("RESET", {})
         else:
             print("Unknown command")
+
+
+def _visualize(args: str, current_graph):
+    """Visualize one or more module graphs as stackable HTML."""
+    graphs = []
+    files = args.split() if args else []
+    
+    # Load from JSON files
+    for f in files:
+        try:
+            with open(f, "r") as fp:
+                data = json.load(fp)
+                # Handle both raw moduleGraph and wrapped format
+                if "moduleGraph" in data:
+                    graphs.append(data["moduleGraph"])
+                elif "module" in data:
+                    graphs.append(data)
+        except Exception as e:
+            print(f"Error loading {f}: {e}")
+    
+    # Add current graph if available
+    if current_graph and not files:
+        graphs.append(current_graph)
+    
+    if not graphs:
+        print("No graphs to visualize. Decode a file or provide JSON paths.")
+        return
+    
+    output = "results/function_graph.html"
+    Path(output).parent.mkdir(exist_ok=True)
+    
+    title = f"Function Graph ({len(graphs)} modules)" if len(graphs) > 1 else f"Function Graph: {graphs[0].get('module', 'unknown')}"
+    result = visualizeModuleGraph({
+        "moduleGraphs": graphs,
+        "outputPath": output,
+        "title": title
+    })
+    
+    if result.get("error"):
+        print(f"Error: {result['error']}")
+    else:
+        print(f"Generated: {result['htmlPath']}")
+        print(f"Nodes: {sum(len(g.get('nodes', [])) for g in graphs)} | Edges: {sum(len(g.get('edges', [])) for g in graphs)}")
 
 
 def _print_graph(mg):

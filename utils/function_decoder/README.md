@@ -25,6 +25,7 @@ python interactive.py
 | `decode <file.py>` | Analyze a Python file |
 | `show` | Display full module graph JSON |
 | `graph` | Print ASCII summary of inbound/outbound |
+| `visualize [files...]` | Generate stackable HTML visualization |
 | `export [file]` | Export module graph to JSON |
 | `reset` | Clear analysis state |
 | `quit` | Exit |
@@ -94,6 +95,28 @@ Export module graphs from multiple scripts and link them by matching:
 - Script A's `outbound.localCalls` → Script B's `inbound`
 
 This creates a project-wide function dependency graph.
+
+## Stackable Visualization
+
+Generate interactive HTML visualizations that stack multiple modules together:
+
+```bash
+# Visualize current decoded module
+[complete]> visualize
+
+# Stack multiple exported module graphs
+[idle]> visualize module1.json module2.json module3.json
+Generated: results/function_graph.html
+Nodes: 79 | Edges: 131
+```
+
+Features:
+- **Force-directed layout** with drag & drop
+- **Horizontal/Vertical layouts** for structured views
+- **Color-coded modules** for easy differentiation
+- **Edge filtering** by type (internal/external/local)
+- **Coupling metrics** displayed per module
+- **Click to select** nodes and see connections
 
 ## State Machine
 

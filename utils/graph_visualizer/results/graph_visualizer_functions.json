@@ -1,0 +1,137 @@
+{
+  "module": "graph_visualizer_compute",
+  "filePath": "/Users/ruihe/mnt/lpp/lpp/utils/graph_visualizer/src/graph_visualizer_compute.py",
+  "inbound": [
+    {
+      "type": "function",
+      "name": "process",
+      "module": "graph_visualizer_compute",
+      "line": 10,
+      "args": [
+        "params"
+      ],
+      "returns": "dict",
+      "docstring": "Generate an interactive HTML visualization of an L++ blueprint.\n\nArgs:\n    params: dict with 'blueprint' (JSON string) and optional 'html_path'\n    \nReturns:\n    dict with 'has_html', 'html_path', and optional 'error'",
+      "decorators": []
+    }
+  ],
+  "outbound": [
+    {
+      "module": "json",
+      "category": "stdlib",
+      "names": []
+    },
+    {
+      "module": "collections",
+      "category": "stdlib",
+      "names": [
+        {
+          "name": "defaultdict",
+          "alias": "defaultdict"
+        },
+        {
+          "name": "deque",
+          "alias": "deque"
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "graph_visualizer_compute",
+      "type": "module",
+      "label": "graph_visualizer_compute",
+      "metrics": {
+        "fanIn": 1,
+        "fanOut": 2,
+        "instability": 0.667,
+        "internalEdges": 0,
+        "externalCallCount": 6,
+        "localCallCount": 0,
+        "callsByCategory": {
+          "stdlib": 6
+        },
+        "localDependencies": []
+      }
+    },
+    {
+      "id": "graph_visualizer_compute.process",
+      "type": "function",
+      "label": "process",
+      "direction": "inbound",
+      "parent": "graph_visualizer_compute",
+      "line": 10,
+      "signature": "(params) -> dict"
+    },
+    {
+      "id": "json",
+      "type": "dependency",
+      "label": "json",
+      "direction": "outbound",
+      "category": "stdlib"
+    },
+    {
+      "id": "collections",
+      "type": "dependency",
+      "label": "collections",
+      "direction": "outbound",
+      "category": "stdlib"
+    }
+  ],
+  "edges": [
+    {
+      "from": "graph_visualizer_compute.process",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 24
+    },
+    {
+      "from": "graph_visualizer_compute.process",
+      "to": "collections",
+      "type": "external",
+      "category": "stdlib",
+      "line": 40
+    },
+    {
+      "from": "graph_visualizer_compute.process",
+      "to": "collections",
+      "type": "external",
+      "category": "stdlib",
+      "line": 41
+    },
+    {
+      "from": "graph_visualizer_compute._calculate_layers",
+      "to": "collections",
+      "type": "external",
+      "category": "stdlib",
+      "line": 113
+    },
+    {
+      "from": "graph_visualizer_compute._build_html",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 143
+    },
+    {
+      "from": "graph_visualizer_compute._build_html",
+      "to": "json",
+      "type": "external",
+      "category": "stdlib",
+      "line": 144
+    }
+  ],
+  "coupling": {
+    "fanIn": 1,
+    "fanOut": 2,
+    "instability": 0.667,
+    "internalEdges": 0,
+    "externalCallCount": 6,
+    "localCallCount": 0,
+    "callsByCategory": {
+      "stdlib": 6
+    },
+    "localDependencies": []
+  }
+}
