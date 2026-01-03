@@ -1,0 +1,234 @@
+{
+  "$schema": "lpp/v0.1.2",
+  "id": "dashboard",
+  "name": "L++ Tools Dashboard",
+  "version": "1.0.0",
+  "description": "Aggregates and visualizes all L++ utility tools with interactive search, filtering, and quick access to visualizations.",
+
+  "context_schema": {
+    "properties": {
+      "utilsPath": {
+        "type": "string",
+        "description": "Path to the utils directory"
+      },
+      "tools": {
+        "type": "array",
+        "description": "List of discovered tool metadata"
+      },
+      "categories": {
+        "type": "object",
+        "description": "Tools grouped by category"
+      },
+      "statistics": {
+        "type": "object",
+        "description": "Aggregated statistics across all tools"
+      },
+      "htmlPath": {
+        "type": "string",
+        "description": "Path to generated dashboard HTML"
+      },
+      "hasTools": {
+        "type": "boolean",
+        "default": false
+      },
+      "hasHtml": {
+        "type": "boolean",
+        "default": false
+      },
+      "error": {
+        "type": "string"
+      }
+    }
+  },
+
+  "states": {
+    "idle": {
+      "description": "Awaiting utils path input"
+    },
+    "scanning": {
+      "description": "Scanning utils directory for tools"
+    },
+    "analyzing": {
+      "description": "Analyzing tool blueprints and statistics"
+    },
+    "categorizing": {
+      "description": "Grouping tools by category"
+    },
+    "generating": {
+      "description": "Generating dashboard HTML"
+    },
+    "complete": {
+      "description": "Dashboard generation complete"
+    },
+    "error": {
+      "description": "Error during processing"
+    }
+  },
+
+  "entry_state": "idle",
+  "terminal_states": ["complete"],
+
+  "gates": {
+    "hasUtilsPath": {
+      "type": "expression",
+      "expression": "utilsPath is not None and len(utilsPath) > 0"
+    },
+    "hasTools": {
+      "type": "expression",
+      "expression": "tools is not None and len(tools) > 0"
+    },
+    "hasCategories": {
+      "type": "expression",
+      "expression": "categories is not None"
+    },
+    "hasStatistics": {
+      "type": "expression",
+      "expression": "statistics is not None"
+    },
+    "hasError": {
+      "type": "expression",
+      "expression": "error is not None and len(error) > 0"
+    }
+  },
+
+  "actions": {
+    "scanTools": {
+      "type": "compute",
+      "compute_unit": "dashboard:scanTools",
+      "input_map": {
+        "utilsPath": "utilsPath"
+      },
+      "output_map": {
+        "tools": "tools",
+        "hasTools": "hasTools",
+        "error": "error"
+      },
+      "description": "Scan utils directory for L++ tool blueprints"
+    },
+    "analyzeTools": {
+      "type": "compute",
+      "compute_unit": "dashboard:analyzeTools",
+      "input_map": {
+        "tools": "tools"
+      },
+      "output_map": {
+        "tools": "tools",
+        "statistics": "statistics",
+        "error": "error"
+      },
+      "description": "Analyze tool blueprints to extract stats"
+    },
+    "categorizeTools": {
+      "type": "compute",
+      "compute_unit": "dashboard:categorizeTools",
+      "input_map": {
+        "tools": "tools"
+      },
+      "output_map": {
+        "categories": "categories",
+        "error": "error"
+      },
+      "description": "Group tools by naming patterns into categories"
+    },
+    "generateDashboard": {
+      "type": "compute",
+      "compute_unit": "dashboard:generateDashboard",
+      "input_map": {
+        "tools": "tools",
+        "categories": "categories",
+        "statistics": "statistics",
+        "utilsPath": "utilsPath"
+      },
+      "output_map": {
+        "htmlPath": "htmlPath",
+        "hasHtml": "hasHtml",
+        "error": "error"
+      },
+      "description": "Generate interactive dashboard HTML"
+    },
+    "setError": {
+      "type": "set",
+      "target": "error",
+      "value_from": "error"
+    }
+  },
+
+  "transitions": [
+    {
+      "id": "t_start_scan",
+      "from": "idle",
+      "to": "scanning",
+      "on_event": "SCAN",
+      "gates": ["hasUtilsPath"],
+      "actions": ["scanTools"]
+    },
+    {
+      "id": "t_scan_error",
+      "from": "scanning",
+      "to": "error",
+      "on_event": "AUTO",
+      "gates": ["hasError"]
+    },
+    {
+      "id": "t_scan_done",
+      "from": "scanning",
+      "to": "analyzing",
+      "on_event": "AUTO",
+      "gates": ["hasTools"],
+      "actions": ["analyzeTools"]
+    },
+    {
+      "id": "t_analyze_error",
+      "from": "analyzing",
+      "to": "error",
+      "on_event": "AUTO",
+      "gates": ["hasError"]
+    },
+    {
+      "id": "t_analyze_done",
+      "from": "analyzing",
+      "to": "categorizing",
+      "on_event": "AUTO",
+      "gates": ["hasStatistics"],
+      "actions": ["categorizeTools"]
+    },
+    {
+      "id": "t_categorize_error",
+      "from": "categorizing",
+      "to": "error",
+      "on_event": "AUTO",
+      "gates": ["hasError"]
+    },
+    {
+      "id": "t_categorize_done",
+      "from": "categorizing",
+      "to": "generating",
+      "on_event": "AUTO",
+      "gates": ["hasCategories"],
+      "actions": ["generateDashboard"]
+    },
+    {
+      "id": "t_generate_error",
+      "from": "generating",
+      "to": "error",
+      "on_event": "AUTO",
+      "gates": ["hasError"]
+    },
+    {
+      "id": "t_generate_done",
+      "from": "generating",
+      "to": "complete",
+      "on_event": "AUTO"
+    },
+    {
+      "id": "t_reset",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ],
+
+  "display": {
+    "rules": []
+  }
+}
