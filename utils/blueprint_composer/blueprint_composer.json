@@ -128,6 +128,10 @@
     "has_manifest": {
       "type": "expression",
       "expression": "manifest is not None"
+    },
+    "has_valid_data": {
+      "type": "expression",
+      "expression": "parent_blueprint is not None and embeddings is not None"
     }
   },
 
@@ -523,7 +527,7 @@
       "from": "embedding_ready",
       "to": "embedding_ready",
       "on_event": "SAVE_MANIFEST",
-      "gates": ["has_embeddings"],
+      "gates": ["has_embeddings", "has_valid_data"],
       "actions": ["generate_manifest", "export_manifest"]
     },
     {

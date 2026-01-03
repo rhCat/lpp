@@ -142,6 +142,10 @@
     "has_error": {
       "type": "expression",
       "expression": "error is not None"
+    },
+    "has_permission": {
+      "type": "expression",
+      "expression": "True"
     }
   },
 
@@ -410,6 +414,16 @@
       "type": "set",
       "target": "diff_result",
       "value": null
+    },
+    "log_update": {
+      "type": "set",
+      "target": "message",
+      "value": "Blueprint updated"
+    },
+    "log_delete": {
+      "type": "set",
+      "target": "message",
+      "value": "Blueprint deleted"
     }
   },
 
@@ -480,16 +494,16 @@
       "from": "ready",
       "to": "ready",
       "on_event": "UPDATE",
-      "gates": ["has_registry"],
-      "actions": ["update_blueprint", "save_registry"]
+      "gates": ["has_registry", "has_permission"],
+      "actions": ["update_blueprint", "save_registry", "log_update"]
     },
     {
       "id": "t_update_from_viewing",
       "from": "viewing",
       "to": "viewing",
       "on_event": "UPDATE",
-      "gates": ["has_current"],
-      "actions": ["update_blueprint", "save_registry"]
+      "gates": ["has_current", "has_permission"],
+      "actions": ["update_blueprint", "save_registry", "log_update"]
     },
     {
       "id": "t_get",
@@ -597,16 +611,16 @@
       "from": "viewing",
       "to": "ready",
       "on_event": "DELETE",
-      "gates": ["has_current"],
-      "actions": ["delete_blueprint", "save_registry", "clear_current"]
+      "gates": ["has_current", "has_permission"],
+      "actions": ["delete_blueprint", "save_registry", "clear_current", "log_delete"]
     },
     {
       "id": "t_delete_from_ready",
       "from": "ready",
       "to": "ready",
       "on_event": "DELETE",
-      "gates": ["has_registry"],
-      "actions": ["delete_blueprint", "save_registry"]
+      "gates": ["has_registry", "has_permission"],
+      "actions": ["delete_blueprint", "save_registry", "log_delete"]
     },
     {
       "id": "t_export",

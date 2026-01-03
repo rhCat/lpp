@@ -35,8 +35,6 @@
     "loaded": { "description": "Blueprint loaded, ready to debug" },
     "debugging": { "description": "Actively debugging, can step through execution" },
     "paused": { "description": "Paused at a breakpoint" },
-    "inspecting": { "description": "Inspecting state or context" },
-    "time_travel": { "description": "Navigating through history" },
     "error": { "description": "Error state" }
   },
 
@@ -99,14 +97,6 @@
     "is_paused_state": {
       "type": "expression",
       "expression": "_state == 'paused'"
-    },
-    "is_inspecting": {
-      "type": "expression",
-      "expression": "_state == 'inspecting'"
-    },
-    "is_time_travel": {
-      "type": "expression",
-      "expression": "_state == 'time_travel'"
     },
     "is_error": {
       "type": "expression",
@@ -466,8 +456,6 @@
       { "gate": "is_idle", "template": "No blueprint loaded. Use LOAD command." },
       { "gate": "is_paused_state", "template": "[PAUSED] {blueprint_name} @ {debug_state} (step {history_index})" },
       { "gate": "is_debugging", "template": "[DEBUG] {blueprint_name} @ {debug_state} (step {history_index})" },
-      { "gate": "is_inspecting", "template": "[INSPECT] {blueprint_name} @ {debug_state}" },
-      { "gate": "is_time_travel", "template": "[TIME-TRAVEL] {blueprint_name} @ step {history_index}" },
       { "gate": "is_loaded", "template": "Loaded: {blueprint_name} - Ready to debug" },
       { "template": "L++ Blueprint Debugger" }
     ]

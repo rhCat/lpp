@@ -90,9 +90,6 @@
     "complete": {
       "description": "Tests generated, ready to export"
     },
-    "exporting": {
-      "description": "Exporting tests to file"
-    },
     "error": {
       "description": "Error state"
     }

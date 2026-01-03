@@ -29,7 +29,6 @@
     "idle": { "description": "No blueprint loaded, waiting for input" },
     "loaded": { "description": "Blueprint loaded, ready to visualize" },
     "viewing": { "description": "Actively viewing/exploring the blueprint" },
-    "exporting": { "description": "Generating export output" },
     "error": { "description": "Error state" }
   },
 
@@ -290,7 +289,6 @@
       { "gate": "is_viewing", "template": "[{view_mode}] Viewing: {blueprint_name} | Zoom: {zoom_level}x" },
       { "gate": "has_tree", "template": "[tree] {tree_name}" },
       { "gate": "is_loaded", "template": "✅ Loaded: {blueprint_name} ({blueprint_id})" },
-      { "gate": "is_exporting", "template": "📤 Exporting..." },
       { "template": "L++ Visualizer" }
     ]
   },

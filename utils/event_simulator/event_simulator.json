@@ -34,9 +34,6 @@
     "idle": { "description": "No blueprint loaded, waiting for input" },
     "ready": { "description": "Blueprint loaded, ready to simulate" },
     "simulating": { "description": "Actively simulating, can dispatch events" },
-    "sequence_running": { "description": "Executing a pre-defined sequence" },
-    "fuzzing": { "description": "Running random event fuzzing" },
-    "exploring": { "description": "Exploring state space" },
     "error": { "description": "Error state" }
   },
 
@@ -99,6 +96,10 @@
     "is_error": {
       "type": "expression",
       "expression": "_state == 'error'"
+    },
+    "can_import": {
+      "type": "expression",
+      "expression": "blueprint is not None"
     }
   },
 
@@ -575,6 +576,7 @@
       "from": "simulating",
       "to": "simulating",
       "on_event": "IMPORT",
+      "gates": ["can_import"],
       "actions": ["import_trace"]
     },
     {

@@ -32,8 +32,6 @@
     "tracing": { "description": "Actively recording trace events" },
     "paused": { "description": "Tracing paused, can resume" },
     "completed": { "description": "Trace completed, ready for export/analysis" },
-    "analyzing": { "description": "Analyzing trace data" },
-    "exporting": { "description": "Exporting trace data" },
     "error": { "description": "Error state" }
   },
 
@@ -92,14 +90,6 @@
     "is_completed": {
       "type": "expression",
       "expression": "_state == 'completed'"
-    },
-    "is_analyzing": {
-      "type": "expression",
-      "expression": "_state == 'analyzing'"
-    },
-    "is_exporting": {
-      "type": "expression",
-      "expression": "_state == 'exporting'"
     },
     "is_error": {
       "type": "expression",
@@ -458,8 +448,6 @@
       { "gate": "is_tracing", "template": "[TRACING] {blueprint_name} - {trace_id}" },
       { "gate": "is_paused", "template": "[PAUSED] {blueprint_name} - {trace_id}" },
       { "gate": "is_completed", "template": "[DONE] {blueprint_name} - {trace_id}" },
-      { "gate": "is_analyzing", "template": "[ANALYZING] {trace_id}" },
-      { "gate": "is_exporting", "template": "[EXPORTING] {trace_id}" },
       { "template": "L++ Execution Tracer" }
     ]
   },

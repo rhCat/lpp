@@ -217,6 +217,11 @@
       "target": "error",
       "value_from": "event.payload.message"
     },
+    "log_error": {
+      "type": "set",
+      "target": "analysisReport",
+      "value_from": "event.payload.message"
+    },
     "clearError": {
       "type": "set",
       "target": "error",
@@ -291,21 +296,21 @@
       "from": "parsing",
       "to": "error",
       "on_event": "ERROR",
-      "actions": ["setError"]
+      "actions": ["setError", "log_error"]
     },
     {
       "id": "t7_error_analyze",
       "from": "analyzing",
       "to": "error",
       "on_event": "ERROR",
-      "actions": ["setError"]
+      "actions": ["setError", "log_error"]
     },
     {
       "id": "t8_error_infer",
       "from": "inferring",
       "to": "error",
       "on_event": "ERROR",
-      "actions": ["setError"]
+      "actions": ["setError", "log_error"]
     },
     {
       "id": "t9_reset",

@@ -173,6 +173,11 @@
       "type": "set",
       "target": "error",
       "value": null
+    },
+    "log_error": {
+      "type": "set",
+      "target": "query",
+      "value": null
     }
   },
   "transitions": [
@@ -280,6 +285,22 @@
       "actions": [
         "clearError"
       ]
+    },
+    {
+      "id": "t_error_from_idle",
+      "from": "idle",
+      "to": "error",
+      "on_event": "ERROR",
+      "gates": ["hasError"],
+      "actions": ["log_error"]
+    },
+    {
+      "id": "t_error_from_results",
+      "from": "hasResults",
+      "to": "error",
+      "on_event": "ERROR",
+      "gates": ["hasError"],
+      "actions": ["log_error"]
     }
   ],
   "display": {

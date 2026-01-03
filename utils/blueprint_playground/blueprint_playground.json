@@ -77,14 +77,8 @@
     "editing": {
       "description": "Blueprint loaded and being edited"
     },
-    "validating": {
-      "description": "Validating blueprint JSON/structure"
-    },
     "simulating": {
       "description": "Running interactive simulation"
-    },
-    "serving": {
-      "description": "Web server is running"
     },
     "error": {
       "description": "Error state"
@@ -105,15 +99,15 @@
     },
     "is_valid_json": {
       "type": "expression",
-      "expression": "is_valid_json == True"
+      "expression": "is_valid_json is not None and is_valid_json == True"
     },
     "is_invalid_json": {
       "type": "expression",
-      "expression": "is_valid_json == False"
+      "expression": "is_valid_json is None or is_valid_json == False"
     },
     "is_valid_blueprint": {
       "type": "expression",
-      "expression": "is_valid_blueprint == True"
+      "expression": "is_valid_blueprint is not None and is_valid_blueprint == True"
     },
     "has_simulation": {
       "type": "expression",
@@ -130,6 +124,10 @@
     "no_error": {
       "type": "expression",
       "expression": "error is None"
+    },
+    "has_permission": {
+      "type": "expression",
+      "expression": "True"
     }
   },
 
@@ -303,6 +301,11 @@
       "type": "set",
       "target": "error",
       "value": null
+    },
+    "log_update": {
+      "type": "set",
+      "target": "output",
+      "value": "Blueprint updated"
     }
   },
 
@@ -357,7 +360,8 @@
       "from": "editing",
       "to": "editing",
       "on_event": "UPDATE",
-      "actions": ["update_blueprint", "validate_json"]
+      "gates": ["has_permission"],
+      "actions": ["update_blueprint", "validate_json", "log_update"]
     },
     {
       "id": "t_validate",

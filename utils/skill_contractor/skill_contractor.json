@@ -169,11 +169,11 @@
     },
     "lpp_valid": {
       "type": "expression",
-      "expression": "lpp_validated == True"
+      "expression": "lpp_validated is not None and lpp_validated == True"
     },
     "lpp_invalid": {
       "type": "expression",
-      "expression": "is_lpp_target == True and lpp_validated != True"
+      "expression": "is_lpp_target == True and (lpp_validated is None or lpp_validated != True)"
     },
     "lpp_ok": {
       "type": "expression",
@@ -209,11 +209,11 @@
     },
     "blueprint_validated": {
       "type": "expression",
-      "expression": "blueprint_validated == True"
+      "expression": "blueprint_validated is not None and blueprint_validated == True"
     },
     "blueprint_not_validated": {
       "type": "expression",
-      "expression": "blueprint_validated != True"
+      "expression": "blueprint_validated is None or blueprint_validated != True"
     },
     "has_corrections": {
       "type": "expression",
@@ -229,11 +229,15 @@
     },
     "interactive_valid": {
       "type": "expression",
-      "expression": "interactive_valid == True"
+      "expression": "interactive_valid is not None and interactive_valid == True"
     },
     "interactive_invalid": {
       "type": "expression",
-      "expression": "interactive_valid != True"
+      "expression": "interactive_valid is None or interactive_valid != True"
+    },
+    "can_submit": {
+      "type": "expression",
+      "expression": "target is not None and len(target) > 0"
     }
   },
 
@@ -637,7 +641,7 @@
       "from": "idle",
       "to": "planning",
       "on_event": "SUBMIT",
-      "gates": [],
+      "gates": ["can_submit"],
       "actions": ["set_target", "detect_lpp_target", "decompose"]
     },
     {

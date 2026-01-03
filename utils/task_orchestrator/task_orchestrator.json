@@ -107,6 +107,10 @@
     "no_error": {
       "type": "expression",
       "expression": "error is None"
+    },
+    "can_submit": {
+      "type": "expression",
+      "expression": "True"
     }
   },
 
@@ -324,6 +328,7 @@
       "from": "idle",
       "to": "analyzing",
       "on_event": "SUBMIT",
+      "gates": ["can_submit"],
       "actions": ["set_task", "analyze_root"]
     },
     {

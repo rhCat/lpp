@@ -232,6 +232,11 @@
       "target": "error",
       "value": null
     },
+    "log_error": {
+      "type": "set",
+      "target": "sealStatus",
+      "value": "rejected"
+    },
     "resetContext": {
       "type": "compute",
       "compute_unit": "seal:resetContext",
@@ -342,7 +347,8 @@
       "from": "*",
       "to": "error",
       "on_event": "ERROR",
-      "gates": ["hasError"]
+      "gates": ["hasError"],
+      "actions": ["log_error"]
     },
     {
       "id": "t13_reset",
