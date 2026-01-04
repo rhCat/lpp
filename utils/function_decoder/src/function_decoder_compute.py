@@ -615,9 +615,13 @@ def _build_function_html(title: str, nodes: list, edges: list, module_colors: di
     """Build collapsible D3.js HTML for function visualization."""
     import json as json_mod
 
-    nodes_json = json_mod.dumps(nodes)
-    edges_json = json_mod.dumps(edges)
-    colors_json = json_mod.dumps(module_colors)
+    # Escape </script> in JSON to prevent HTML parsing issues
+    def safe_json(data):
+        return json_mod.dumps(data).replace('</script>', '<\\/script>').replace('</Script>', '<\\/Script>')
+
+    nodes_json = safe_json(nodes)
+    edges_json = safe_json(edges)
+    colors_json = safe_json(module_colors)
 
     return f'''<!DOCTYPE html>
 <html>
@@ -747,6 +751,8 @@ h3 {{ color: #00d4ff; margin: 15px 0 8px 0; font-size: 15px; border-bottom: 1px 
   <button onclick="toggleEdgeType('internal')" id="btn-internal" class="active">Internal</button>
   <button onclick="toggleEdgeType('external')" id="btn-external" class="active">External</button>
   <button onclick="toggleEdgeType('local')" id="btn-local" class="active">Local</button>
+  <span class="separator">|</span>
+  <button onclick="toggleTableView()" id="btn-table" style="background:#00d4ff;color:#000">📊 Table View</button>
 </div>
 
 <div id="container">
@@ -784,6 +790,35 @@ h3 {{ color: #00d4ff; margin: 15px 0 8px 0; font-size: 15px; border-bottom: 1px 
     <div class="edge-list" id="edge-list"></div>
   </div>
 </div>
+
+<!-- Table View (hidden by default) -->
+<div id="table-view" style="display:none;margin-top:20px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <h3 style="margin:0;color:#00d4ff">Module Analysis Table</h3>
+    <button onclick="toggleTableView()" style="padding:6px 12px;background:#3a3a5a;color:#fff;border:1px solid #555;border-radius:4px;cursor:pointer">← Back to Graph</button>
+  </div>
+  <div style="margin-bottom:10px">
+    <input type="text" id="table-search" placeholder="Filter modules..." oninput="filterTable(this.value)" style="width:300px;padding:8px;background:#1a1a2e;border:1px solid #333;border-radius:4px;color:#fff">
+  </div>
+  <div style="overflow-x:auto;max-height:calc(100vh - 200px);overflow-y:auto">
+    <table id="metrics-table" style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead style="position:sticky;top:0;background:#1a1a2e">
+        <tr style="border-bottom:2px solid #00d4ff">
+          <th onclick="sortTable(0)" style="padding:10px;text-align:left;cursor:pointer;color:#00d4ff">Module ⇅</th>
+          <th onclick="sortTable(1)" style="padding:10px;text-align:center;cursor:pointer;color:#4ecdc4">Funcs ⇅</th>
+          <th onclick="sortTable(2)" style="padding:10px;text-align:center;cursor:pointer;color:#4ecdc4">Fan-In ⇅</th>
+          <th onclick="sortTable(3)" style="padding:10px;text-align:center;cursor:pointer;color:#f39c12">Fan-Out ⇅</th>
+          <th onclick="sortTable(4)" style="padding:10px;text-align:center;cursor:pointer;color:#ff6b6b">Instability ⇅</th>
+          <th onclick="sortTable(5)" style="padding:10px;text-align:center;cursor:pointer;color:#f39c12">Direct Deps ⇅</th>
+          <th onclick="sortTable(6)" style="padding:10px;text-align:center;cursor:pointer;color:#ff6b6b">Total Impact ⇅</th>
+          <th onclick="sortTable(7)" style="padding:10px;text-align:center;cursor:pointer;color:#4ecdc4">Upstream ⇅</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+</div>
+
 <div id="tooltip"></div>
 
 <script>
@@ -817,6 +852,38 @@ Object.keys(moduleColors).forEach(mod => {{
     if (!categoryGroups[category]) categoryGroups[category] = [];
     categoryGroups[category].push(mod);
 }});
+
+// Build dependency graph for transitive impact analysis
+const dependsOn = {{}};  // module -> Set of modules it depends on
+const dependedBy = {{}};  // module -> Set of modules that depend on it
+edges.forEach(e => {{
+    const fromMod = e.from.split('.')[0];
+    const toMod = e.to.split('.')[0];
+    if (fromMod !== toMod) {{
+        if (!dependsOn[fromMod]) dependsOn[fromMod] = new Set();
+        if (!dependedBy[toMod]) dependedBy[toMod] = new Set();
+        dependsOn[fromMod].add(toMod);
+        dependedBy[toMod].add(fromMod);
+    }}
+}});
+
+// Compute transitive closure (all downstream modules affected by changes)
+function getTransitiveImpact(modName, visited = new Set()) {{
+    if (visited.has(modName)) return visited;
+    visited.add(modName);
+    const dependents = dependedBy[modName] || new Set();
+    dependents.forEach(dep => getTransitiveImpact(dep, visited));
+    return visited;
+}}
+
+// Compute transitive dependencies (all upstream modules this depends on)
+function getTransitiveDeps(modName, visited = new Set()) {{
+    if (visited.has(modName)) return visited;
+    visited.add(modName);
+    const deps = dependsOn[modName] || new Set();
+    deps.forEach(dep => getTransitiveDeps(dep, visited));
+    return visited;
+}}
 
 // Setup SVG - use explicit width/height like working graph_visualizer
 const container = document.getElementById('graph');
@@ -879,11 +946,12 @@ Object.entries(categoryGroups).sort().forEach(([category, mods]) => {{
         item.id = `mod-item-${{mod}}`;
         item.innerHTML = `
             <div class="module-dot" style="background:${{moduleColors[mod]}}"></div>
-            <span class="module-name" title="${{mod}}">${{mod}}</span>
+            <span class="module-name" title="${{mod}}" style="cursor:pointer">${{mod}}</span>
             <span class="module-metrics">${{funcCount}}fn</span>
+            <span class="module-select" onclick="event.stopPropagation(); selectModuleFromSidebar('${{mod}}')" title="Select & Focus" style="font-size:10px;color:#00d4ff;padding:2px 6px;background:#1a1a2e;border-radius:3px;cursor:pointer;margin-right:4px">⎯⬤</span>
             <span class="module-expand" onclick="event.stopPropagation(); toggleModule('${{mod}}')" title="Collapse/Expand">▼</span>
         `;
-        item.onclick = () => highlightModule(mod);
+        item.onclick = () => selectModuleFromSidebar(mod);
         item.ondblclick = () => focusModule(mod);
         content.appendChild(item);
     }});
@@ -1449,6 +1517,17 @@ function selectNodeById(id) {{
     }}
 }}
 
+function selectModuleFromSidebar(modName) {{
+    // Find the module node
+    const modNode = nodes.find(n => n.id === modName && n.type === 'module');
+    if (modNode) {{
+        selectedNodes.clear();
+        selectedNodes.add(modName);
+        updateSelectionDisplay();
+        focusOnNode(modNode);
+    }}
+}}
+
 function focusOnNode(d) {{
     if (d.x && d.y) {{
         svg.transition().duration(300).call(
@@ -1467,43 +1546,55 @@ function updateNodeInfo(d) {{
     if (d.direction) html += `<div class="metric"><span class="info-label">Direction:</span><span class="info-value">${{d.direction}}</span></div>`;
     if (d.category) html += `<div class="metric"><span class="info-label">Category:</span><span class="info-value">${{d.category}}</span></div>`;
 
-    if (d.metrics) {{
-        const fanIn = d.metrics.fanIn || 0;
-        const fanOut = d.metrics.fanOut || 0;
-        const instability = d.metrics.instability || 0;
-        const internalEdges = d.metrics.internalEdges || 0;
+    if (d.metrics || d.type === 'module') {{
+        const modName = d.type === 'module' ? d.id : d.moduleName;
+        const fanIn = d.metrics?.fanIn || 0;
+        const fanOut = d.metrics?.fanOut || 0;
+        const instability = d.metrics?.instability || 0;
+        const internalEdges = d.metrics?.internalEdges || 0;
         const total = fanIn + fanOut;
 
+        // Compute transitive impact
+        const directDependents = dependedBy[modName] ? dependedBy[modName].size : 0;
+        const directDeps = dependsOn[modName] ? dependsOn[modName].size : 0;
+        const transitiveImpact = getTransitiveImpact(modName);
+        const transitiveDeps = getTransitiveDeps(modName);
+        const totalImpacted = transitiveImpact.size - 1;  // Exclude self
+        const totalDeps = transitiveDeps.size - 1;  // Exclude self
+
         html += `<div style="margin-top:10px;padding:8px;background:#1a1a2e;border-radius:4px;border:1px solid #333">`;
-        html += `<div style="font-weight:bold;color:#00d4ff;margin-bottom:8px">Coupling Metrics</div>`;
+        html += `<div style="font-weight:bold;color:#00d4ff;margin-bottom:8px">Dependency Analysis</div>`;
 
-        html += `<div class="metric"><span class="info-label">Fan-In:</span><span class="info-value">${{fanIn}}</span></div>`;
-        html += `<div style="font-size:10px;color:#666;margin-bottom:6px">↳ Modules that depend on this one</div>`;
+        // Impact section (who depends on this)
+        html += `<div style="background:#2a2a3a;padding:6px;border-radius:3px;margin-bottom:8px">`;
+        html += `<div style="font-size:11px;color:#f39c12;font-weight:bold;margin-bottom:4px">⬆ IMPACT (if this changes)</div>`;
+        html += `<div class="metric"><span class="info-label">Direct dependents:</span><span class="info-value">${{directDependents}}</span></div>`;
+        html += `<div class="metric"><span class="info-label" style="color:#ff6b6b">Total affected:</span><span class="info-value" style="color:#ff6b6b;font-weight:bold">${{totalImpacted}}</span></div>`;
+        if (totalImpacted > directDependents) {{
+            html += `<div style="font-size:10px;color:#888">↳ ${{totalImpacted - directDependents}} modules indirectly affected</div>`;
+        }}
+        html += `</div>`;
 
-        html += `<div class="metric"><span class="info-label">Fan-Out:</span><span class="info-value">${{fanOut}}</span></div>`;
-        html += `<div style="font-size:10px;color:#666;margin-bottom:6px">↳ Modules this depends on</div>`;
+        // Dependencies section (what this depends on)
+        html += `<div style="background:#2a3a2a;padding:6px;border-radius:3px;margin-bottom:8px">`;
+        html += `<div style="font-size:11px;color:#4ecdc4;font-weight:bold;margin-bottom:4px">⬇ DEPENDENCIES (what this needs)</div>`;
+        html += `<div class="metric"><span class="info-label">Direct imports:</span><span class="info-value">${{directDeps}}</span></div>`;
+        html += `<div class="metric"><span class="info-label">Total chain:</span><span class="info-value">${{totalDeps}}</span></div>`;
+        if (totalDeps > directDeps) {{
+            html += `<div style="font-size:10px;color:#888">↳ ${{totalDeps - directDeps}} transitive dependencies</div>`;
+        }}
+        html += `</div>`;
 
-        html += `<div class="metric"><span class="info-label">Internal Edges:</span><span class="info-value">${{internalEdges}}</span></div>`;
-        html += `<div style="font-size:10px;color:#666;margin-bottom:8px">↳ Function calls within module</div>`;
+        // Internal complexity
+        html += `<div class="metric"><span class="info-label">Internal calls:</span><span class="info-value">${{internalEdges}}</span></div>`;
 
         // Instability with formula
         const instColor = instability > 0.5 ? '#ff6b6b' : '#4ecdc4';
-        html += `<div style="border-top:1px solid #333;padding-top:8px;margin-top:4px">`;
+        html += `<div style="border-top:1px solid #333;padding-top:8px;margin-top:8px">`;
         html += `<div class="metric"><span class="info-label">Instability:</span><span class="info-value" style="color:${{instColor}};font-weight:bold">${{(instability * 100).toFixed(1)}}%</span></div>`;
         html += `<div class="metric-bar"><div class="metric-fill" style="width:${{instability * 100}}%;background:${{instColor}}"></div></div>`;
-        html += `<div style="font-size:10px;color:#888;margin-top:4px;font-family:monospace">= Fan-Out / (Fan-In + Fan-Out)</div>`;
-        html += `<div style="font-size:10px;color:#888;font-family:monospace">= ${{fanOut}} / (${{fanIn}} + ${{fanOut}}) = ${{fanOut}}/${{total || 1}}</div>`;
-        html += `<div style="font-size:10px;margin-top:6px;color:${{instColor}}">`;
-        if (instability > 0.7) {{
-            html += `⚠ High instability - changes may cascade`;
-        }} else if (instability > 0.5) {{
-            html += `△ Moderate instability`;
-        }} else if (instability > 0.3) {{
-            html += `○ Balanced stability`;
-        }} else {{
-            html += `✓ Stable - many depend on this`;
-        }}
-        html += `</div></div></div>`;
+        html += `<div style="font-size:10px;color:#888;margin-top:4px;font-family:monospace">= FanOut/(FanIn+FanOut) = ${{fanOut}}/${{total || 1}}</div>`;
+        html += `</div></div>`;
     }}
 
     document.getElementById('node-info').innerHTML = html;
@@ -1662,6 +1753,124 @@ function fitToView() {{
 // Initialize
 updateStats();
 setTimeout(fitToView, 1000);
+
+// === TABLE VIEW FUNCTIONS ===
+let tableData = [];
+let sortCol = 0;
+let sortAsc = true;
+
+function buildTableData() {{
+    tableData = [];
+    const moduleNodes = nodes.filter(n => n.type === 'module');
+
+    moduleNodes.forEach(mod => {{
+        const modName = mod.id;
+        const funcs = (moduleGroups[modName] || []).filter(n => n.type === 'function' || n.type === 'async_function');
+        const metrics = mod.metrics || {{}};
+
+        const directDeps = dependedBy[modName] ? dependedBy[modName].size : 0;
+        const transitiveImpact = getTransitiveImpact(modName);
+        const transitiveDeps = getTransitiveDeps(modName);
+        const totalImpact = transitiveImpact.size - 1;
+        const totalUpstream = transitiveDeps.size - 1;
+
+        tableData.push({{
+            name: modName,
+            funcs: funcs.length,
+            fanIn: metrics.fanIn || 0,
+            fanOut: metrics.fanOut || 0,
+            instability: metrics.instability || 0,
+            directDeps: directDeps,
+            totalImpact: totalImpact,
+            upstream: totalUpstream,
+            color: moduleColors[modName] || '#666'
+        }});
+    }});
+}}
+
+function renderTable() {{
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = '';
+
+    tableData.forEach(row => {{
+        const tr = document.createElement('tr');
+        tr.style.cssText = 'border-bottom:1px solid #333;cursor:pointer;';
+        tr.onmouseover = () => tr.style.background = '#2a2a4a';
+        tr.onmouseout = () => tr.style.background = '';
+        tr.onclick = () => {{ toggleTableView(); selectModuleFromSidebar(row.name); }};
+
+        const instColor = row.instability > 0.5 ? '#ff6b6b' : '#4ecdc4';
+        const impactColor = row.totalImpact > 5 ? '#ff6b6b' : row.totalImpact > 2 ? '#f39c12' : '#4ecdc4';
+
+        tr.innerHTML = `
+            <td style="padding:8px"><span style="display:inline-block;width:10px;height:10px;background:${{row.color}};border-radius:2px;margin-right:8px"></span>${{row.name}}</td>
+            <td style="padding:8px;text-align:center">${{row.funcs}}</td>
+            <td style="padding:8px;text-align:center;color:#4ecdc4">${{row.fanIn}}</td>
+            <td style="padding:8px;text-align:center;color:#f39c12">${{row.fanOut}}</td>
+            <td style="padding:8px;text-align:center;color:${{instColor}}">${{(row.instability * 100).toFixed(0)}}%</td>
+            <td style="padding:8px;text-align:center">${{row.directDeps}}</td>
+            <td style="padding:8px;text-align:center;color:${{impactColor}};font-weight:bold">${{row.totalImpact}}</td>
+            <td style="padding:8px;text-align:center">${{row.upstream}}</td>
+        `;
+        tbody.appendChild(tr);
+    }});
+}}
+
+function sortTable(col) {{
+    if (sortCol === col) {{
+        sortAsc = !sortAsc;
+    }} else {{
+        sortCol = col;
+        sortAsc = true;
+    }}
+
+    const keys = ['name', 'funcs', 'fanIn', 'fanOut', 'instability', 'directDeps', 'totalImpact', 'upstream'];
+    const key = keys[col];
+
+    tableData.sort((a, b) => {{
+        let cmp = 0;
+        if (typeof a[key] === 'string') {{
+            cmp = a[key].localeCompare(b[key]);
+        }} else {{
+            cmp = a[key] - b[key];
+        }}
+        return sortAsc ? cmp : -cmp;
+    }});
+
+    renderTable();
+}}
+
+function filterTable(query) {{
+    const q = query.toLowerCase();
+    const rows = document.querySelectorAll('#table-body tr');
+    rows.forEach(row => {{
+        const name = row.cells[0].textContent.toLowerCase();
+        row.style.display = name.includes(q) ? '' : 'none';
+    }});
+}}
+
+function toggleTableView() {{
+    const container = document.getElementById('container');
+    const tableView = document.getElementById('table-view');
+    const statsBar = document.querySelector('.stats-bar');
+    const controls = document.querySelector('.controls');
+
+    if (tableView.style.display === 'none') {{
+        // Show table
+        container.style.display = 'none';
+        statsBar.style.display = 'none';
+        controls.style.display = 'none';
+        tableView.style.display = 'block';
+        buildTableData();
+        sortTable(6);  // Sort by total impact by default
+    }} else {{
+        // Show graph
+        container.style.display = 'flex';
+        statsBar.style.display = 'flex';
+        controls.style.display = 'flex';
+        tableView.style.display = 'none';
+    }}
+}}
 </script>
 </body>
 </html>'''

@@ -753,6 +753,10 @@ body {{
 <div class="header">
     <h1>L++ Tools Dashboard</h1>
     <div class="subtitle">Interactive overview of all L++ utility blueprints and visualizations</div>
+    <div style="margin-top:12px">
+        <a href="function_graph.html" style="display:inline-block;padding:8px 16px;background:#00d4ff;color:#000;text-decoration:none;border-radius:4px;font-weight:bold;margin-right:10px">📊 Overall Function Graph</a>
+        <a href="refactor_summary.json" style="display:inline-block;padding:8px 16px;background:#3a3a5a;color:#fff;text-decoration:none;border-radius:4px;font-size:12px">📄 Summary JSON</a>
+    </div>
 </div>
 
 <div class="stats-bar" id="stats-bar"></div>
