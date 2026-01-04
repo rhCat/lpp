@@ -78,7 +78,7 @@ Examples:
     print()
 
     # Step 1: Initialize
-    print("[1/8] Initializing...")
+    print("[1/9] Initializing...")
     result = COMPUTE_REGISTRY["py2lpp:init"]({
         "projectPath": projectPath,
         "outputPath": outputPath,
@@ -91,7 +91,7 @@ Examples:
         print(f"    - {util}: {status}")
 
     # Step 2: Scan project
-    print("\n[2/8] Scanning project...")
+    print("\n[2/9] Scanning project...")
     result = COMPUTE_REGISTRY["py2lpp:scanProject"](
         {"projectPath": projectPath})
     if result.get("error"):
@@ -105,7 +105,7 @@ Examples:
             print(f"    ... and {len(result['files']) - 10} more")
 
     # Step 3: Extract patterns
-    print("\n[3/8] Extracting patterns...")
+    print("\n[3/9] Extracting patterns...")
     result = COMPUTE_REGISTRY["py2lpp:extractPatterns"]({})
     print(f"  Extracted {result['count']} modules")
     if args.verbose and result.get("modules"):
@@ -120,37 +120,47 @@ Examples:
         return 1
 
     # Step 4: Decode logic
-    print("\n[4/8] Decoding logic...")
+    print("\n[4/9] Decoding logic...")
     result = COMPUTE_REGISTRY["py2lpp:decodeLogic"]({})
     print(f"  Decoded {result['count']} modules")
 
     # Step 5: Generate blueprints
-    print("\n[5/8] Generating L++ blueprints...")
+    print("\n[5/9] Generating L++ blueprints...")
     result = COMPUTE_REGISTRY["py2lpp:generateBlueprints"]({})
     print(f"  Generated {result['count']} blueprints")
     if args.verbose and result.get("blueprints"):
         for bp in result["blueprints"]:
             print(f"    - {bp['id']}: {len(bp['states'])} states")
 
-    # Step 6: Generate compute stubs
-    print("\n[6/8] Generating compute functions...")
+    # Step 6: Generate function graphs
+    print("\n[6/9] Generating function dependency graphs...")
+    result = COMPUTE_REGISTRY["py2lpp:generateFunctionGraphs"]({})
+    print(f"  Generated {result['generated']} module graphs")
+    if args.verbose and result.get("graphs"):
+        for g in result["graphs"][:10]:
+            print(f"    - {g}")
+        if len(result["graphs"]) > 10:
+            print(f"    ... and {len(result['graphs']) - 10} more")
+
+    # Step 7: Generate compute stubs
+    print("\n[7/9] Generating compute functions...")
     result = COMPUTE_REGISTRY["py2lpp:generateCompute"]({})
     print(f"  Generated {result['generated']} compute files")
 
-    # Step 7: Generate documentation (using doc_generator util)
+    # Step 8: Generate documentation (using doc_generator util)
     if not args.no_docs:
-        print("\n[7/8] Generating documentation (via doc_generator)...")
+        print("\n[8/9] Generating documentation (via doc_generator)...")
         result = COMPUTE_REGISTRY["py2lpp:generateDocs"]({})
         print(f"  Generated {result['generated']} documentation files")
 
         # Generate dashboard
-        print("\n[8/8] Generating dashboard (via dashboard util)...")
+        print("\n[9/9] Generating dashboard (via dashboard util)...")
         result = COMPUTE_REGISTRY["py2lpp:generateDashboard"]({})
         print(
             f"  Dashboard: {'Generated' if result['generated'] else 'Skipped'}")
     else:
-        print("\n[7/8] Skipping documentation (--no-docs)")
-        print("\n[8/8] Skipping dashboard")
+        print("\n[8/9] Skipping documentation (--no-docs)")
+        print("\n[9/9] Skipping dashboard")
 
     # Validate
     print("\nValidating...")
@@ -176,6 +186,7 @@ Examples:
     print(f"Output:               {summary['outputPath']}")
     print(f"Modules Found:        {summary['modulesFound']}")
     print(f"Blueprints Generated: {summary['blueprintsGenerated']}")
+    print(f"Function Graphs:      {summary['functionGraphsGenerated']}")
     print(f"Docs Generated:       {summary['docsGenerated']}")
 
     if summary.get("errors"):
@@ -183,14 +194,16 @@ Examples:
         for name, err in summary["errors"][:5]:
             print(f"  - {name}: {err}")
 
-    print(f"\nGenerated blueprints:")
-    for bp in summary["blueprints"]:
-        print(f"  - {bp}")
+    print(f"\nGenerated outputs:")
+    print(f"  - function_graph.html  (interactive dependency visualization)")
+    print(f"  - function_graphs.json (raw graph data)")
+    print(f"  - dashboard.html       (project dashboard)")
+    print(f"  - {len(summary['blueprints'])} L++ blueprints")
 
     print(f"\nNext steps:")
-    print(f"  1. Review blueprints in {summary['outputPath']}/")
-    print(f"  2. Implement TODO stubs in *_compute.py files")
-    print(f"  3. Run: ./deploy.sh -p {summary['outputPath']} docs")
+    print(f"  1. Open {summary['outputPath']}/function_graph.html")
+    print(f"  2. Review blueprints in {summary['outputPath']}/")
+    print(f"  3. Implement TODO stubs in *_compute.py files")
 
     return 0
 

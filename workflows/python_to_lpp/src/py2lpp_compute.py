@@ -370,6 +370,109 @@ def generateBlueprints(params: dict) -> dict:
     return {"blueprints": blueprints, "count": len(blueprints)}
 
 
+def generateFunctionGraphs(params: dict) -> dict:
+    """Generate function dependency graphs using function_decoder."""
+    pythonFiles = _state.get("pythonFiles", [])
+    outputPath = _state.get("outputPath", "")
+
+    if not _FUNCDEC_REGISTRY:
+        return {"error": "function_decoder not available", "generated": 0}
+
+    moduleGraphs = []
+    for fileInfo in pythonFiles:
+        try:
+            # Load and parse
+            result = _FUNCDEC_REGISTRY["funcdec:loadFile"](
+                {"filePath": fileInfo["path"]})
+            if result.get("error"):
+                continue
+            sourceCode = result["sourceCode"]
+
+            result = _FUNCDEC_REGISTRY["funcdec:parseAst"](
+                {"sourceCode": sourceCode})
+            if result.get("error"):
+                continue
+            tree = result["ast"]
+
+            # Extract exports and imports
+            exports = _FUNCDEC_REGISTRY["funcdec:extractExports"]({
+                "ast": tree,
+                "filePath": fileInfo["path"],
+                "sourceCode": sourceCode
+            }).get("exports", [])
+
+            imports = _FUNCDEC_REGISTRY["funcdec:extractImports"](
+                {"ast": tree}).get("imports", [])
+
+            # Skip files with no exports
+            if not exports:
+                continue
+
+            # Trace call graphs
+            internalCalls = _FUNCDEC_REGISTRY["funcdec:traceInternalCalls"]({
+                "ast": tree, "exports": exports
+            }).get("internalCalls", [])
+
+            extResult = _FUNCDEC_REGISTRY["funcdec:traceExternalCalls"]({
+                "ast": tree, "imports": imports
+            })
+            externalCalls = extResult.get("externalCalls", [])
+            localCalls = extResult.get("localCalls", [])
+
+            # Compute coupling metrics
+            coupling = _FUNCDEC_REGISTRY["funcdec:computeCoupling"]({
+                "exports": exports,
+                "imports": imports,
+                "internalCalls": internalCalls,
+                "externalCalls": externalCalls,
+                "localCalls": localCalls
+            }).get("coupling", {})
+
+            # Generate module graph
+            graph = _FUNCDEC_REGISTRY["funcdec:generateModuleGraph"]({
+                "filePath": fileInfo["path"],
+                "exports": exports,
+                "imports": imports,
+                "internalCalls": internalCalls,
+                "externalCalls": externalCalls,
+                "localCalls": localCalls,
+                "coupling": coupling
+            }).get("moduleGraph")
+
+            if graph:
+                graph["relpath"] = fileInfo["relpath"]
+                moduleGraphs.append(graph)
+
+        except Exception as e:
+            _state["results"]["errors"].append(
+                (fileInfo["relpath"], f"graph: {e}"))
+
+    _state["moduleGraphs"] = moduleGraphs
+
+    # Generate combined visualization
+    if outputPath and moduleGraphs:
+        try:
+            graphPath = os.path.join(outputPath, "function_graph.html")
+            _FUNCDEC_REGISTRY["funcdec:visualizeModuleGraph"]({
+                "moduleGraphs": moduleGraphs,
+                "outputPath": graphPath,
+                "title": f"{_state.get('projectName', 'Project')} - Function Graph"
+            })
+
+            # Also save raw graph data as JSON
+            graphJsonPath = os.path.join(outputPath, "function_graphs.json")
+            with open(graphJsonPath, "w") as f:
+                json.dump(moduleGraphs, f, indent=2)
+
+        except Exception as e:
+            _state["results"]["errors"].append(("function_graph", str(e)))
+
+    return {
+        "generated": len(moduleGraphs),
+        "graphs": [g.get("module") for g in moduleGraphs]
+    }
+
+
 def generateCompute(params: dict) -> dict:
     """Generate compute function stubs for blueprints."""
     blueprints = _state.get("blueprints", [])
@@ -484,19 +587,24 @@ def finalize(params: dict) -> dict:
     blueprints = _state.get("blueprints", [])
     results = _state.get("results", {})
 
+    moduleGraphs = _state.get("moduleGraphs", [])
+
     summary = {
         "projectName": _state.get("projectName", ""),
         "outputPath": outputPath,
         "modulesFound": results.get("modulesFound", 0),
         "blueprintsGenerated": results.get("blueprintsGenerated", 0),
+        "functionGraphsGenerated": len(moduleGraphs),
         "docsGenerated": results.get("docsGenerated", 0),
         "errors": results.get("errors", []),
         "blueprints": [bp["id"] for bp in blueprints],
+        "functionGraphs": [g.get("module") for g in moduleGraphs],
         "utilsUsed": {
             "blueprint_builder": _BLUEPRINT_REGISTRY is not None,
             "doc_generator": _DOC_REGISTRY is not None,
             "legacy_extractor": _LEGACY_REGISTRY is not None,
             "logic_decoder": _LOGIC_REGISTRY is not None,
+            "function_decoder": _FUNCDEC_REGISTRY is not None,
             "dashboard": _DASHBOARD_REGISTRY is not None
         }
     }
@@ -505,9 +613,15 @@ def finalize(params: dict) -> dict:
         with open(os.path.join(outputPath, "refactor_summary.json"), "w") as f:
             json.dump(summary, f, indent=2)
         with open(os.path.join(outputPath, "README.md"), "w") as f:
-            f.write(f"# {summary['projectName']} - L++ Refactored\n\n"
-                    f"Modules: {summary['modulesFound']} | "
-                    f"Blueprints: {summary['blueprintsGenerated']}\n")
+            f.write(f"# {summary['projectName']} - L++ Refactored\n\n")
+            f.write(f"| Metric | Count |\n|--------|-------|\n")
+            f.write(f"| Modules | {summary['modulesFound']} |\n")
+            f.write(f"| Blueprints | {summary['blueprintsGenerated']} |\n")
+            f.write(f"| Function Graphs | {summary['functionGraphsGenerated']} |\n")
+            f.write(f"| Docs | {summary['docsGenerated']} |\n\n")
+            f.write(f"## Outputs\n\n")
+            f.write(f"- [Function Graph](function_graph.html)\n")
+            f.write(f"- [Dashboard](dashboard.html)\n")
 
     return summary
 
@@ -518,6 +632,7 @@ COMPUTE_REGISTRY = {
     "py2lpp:extractPatterns": extractPatterns,
     "py2lpp:decodeLogic": decodeLogic,
     "py2lpp:generateBlueprints": generateBlueprints,
+    "py2lpp:generateFunctionGraphs": generateFunctionGraphs,
     "py2lpp:generateCompute": generateCompute,
     "py2lpp:generateDocs": generateDocs,
     "py2lpp:generateDashboard": generateDashboard,
