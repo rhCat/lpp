@@ -31,44 +31,35 @@ def _load_utils():
     """Lazy load utils to avoid import errors if utils don't exist."""
     global _utils_loaded, _DOC_REGISTRY, _LEGACY_REGISTRY
     global _LOGIC_REGISTRY, _DASHBOARD_REGISTRY, _BLUEPRINT_REGISTRY
+    import importlib.util
 
     if _utils_loaded:
         return
 
-    utils = ["doc_generator", "legacy_extractor", "logic_decoder",
-             "dashboard", "blueprint_builder"]
-    for util in utils:
-        sys.path.insert(0, str(_UTILS_DIR / util))
+    def load_module(util_name, module_file, registry_name):
+        """Load a module by file path and extract registry."""
+        module_path = _UTILS_DIR / util_name / "src" / module_file
+        if not module_path.exists():
+            return None
+        try:
+            spec = importlib.util.spec_from_file_location(
+                f"{util_name}_{module_file}", module_path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            return getattr(module, registry_name, None)
+        except Exception:
+            return None
 
-    try:
-        from src.docgen_compute import COMPUTE_REGISTRY as reg
-        _DOC_REGISTRY = reg
-    except ImportError:
-        _DOC_REGISTRY = None
-
-    try:
-        from src.legacy_compute import COMPUTE_REGISTRY as reg
-        _LEGACY_REGISTRY = reg
-    except ImportError:
-        _LEGACY_REGISTRY = None
-
-    try:
-        from src.logic_compute import COMPUTE_REGISTRY as reg
-        _LOGIC_REGISTRY = reg
-    except ImportError:
-        _LOGIC_REGISTRY = None
-
-    try:
-        from src.dashboard_compute import COMPUTE_REGISTRY as reg
-        _DASHBOARD_REGISTRY = reg
-    except ImportError:
-        _DASHBOARD_REGISTRY = None
-
-    try:
-        from src.blueprint_compute import COMPUTE_REGISTRY as reg
-        _BLUEPRINT_REGISTRY = reg
-    except ImportError:
-        _BLUEPRINT_REGISTRY = None
+    _DOC_REGISTRY = load_module("doc_generator", "docgen_compute.py",
+                                 "COMPUTE_REGISTRY")
+    _LEGACY_REGISTRY = load_module("legacy_extractor", "extractor_compute.py",
+                                    "EXTRACT_REGISTRY")
+    _LOGIC_REGISTRY = load_module("logic_decoder", "logic_compute.py",
+                                   "COMPUTE_REGISTRY")
+    _DASHBOARD_REGISTRY = load_module("dashboard", "dashboard_compute.py",
+                                       "COMPUTE_REGISTRY")
+    _BLUEPRINT_REGISTRY = load_module("blueprint_builder", "blueprint_compute.py",
+                                       "COMPUTE_REGISTRY")
 
     _utils_loaded = True
 
@@ -145,13 +136,40 @@ def extractPatterns(params: dict) -> dict:
     extractedModules = []
     for fileInfo in pythonFiles:
         try:
-            result = _LEGACY_REGISTRY["legacy:extract"](
+            # Use existing extractor pipeline
+            result = _LEGACY_REGISTRY["extract:loadSource"](
                 {"filePath": fileInfo["path"]})
-            if result.get("patterns"):
-                extractedModules.append({
-                    "file": fileInfo, "patterns": result["patterns"],
-                    "source": "legacy_extractor"
-                })
+            if result.get("error"):
+                continue
+            source = result["sourceCode"]
+
+            result = _LEGACY_REGISTRY["extract:parseAst"]({"sourceCode": source})
+            if result.get("error"):
+                continue
+            astDict = result["ast"]
+
+            result = _LEGACY_REGISTRY["extract:findStatePatterns"](
+                {"ast": astDict, "sourceCode": source})
+            patterns = result.get("patterns", {})
+
+            # Check if we found meaningful patterns
+            if patterns.get("stateClasses") or patterns.get("eventHandlers"):
+                # Extract states for module info
+                stateResult = _LEGACY_REGISTRY["extract:extractStates"](
+                    {"ast": astDict, "patterns": patterns})
+                states = stateResult.get("states", [])
+
+                # Build module from class info
+                for cls in patterns.get("stateClasses", []):
+                    extractedModules.append({
+                        "name": cls["name"],
+                        "file": fileInfo,
+                        "methods": cls.get("methods", []),
+                        "states": [s["id"] for s in states],
+                        "patterns": patterns,
+                        "docstring": "",
+                        "source": "legacy_extractor"
+                    })
         except Exception as e:
             _state["results"]["errors"].append((fileInfo["relpath"], str(e)))
 
