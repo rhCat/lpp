@@ -822,10 +822,10 @@ const height = container.clientHeight || 600;
 const svg = d3.select("svg").attr("width", width).attr("height", height);
 const g = svg.append("g");
 
-// Zoom behavior - filter prevents zoom when clicking nodes
+// Zoom behavior - filter to prevent zoom when clicking on nodes (matches working graph_visualizer)
 const zoom = d3.zoom()
     .scaleExtent([0.1, 4])
-    .filter(e => !e.target.closest('.node'))
+    .filter(e => !e.target.closest('.node'))  // Prevent zoom/pan when clicking on nodes
     .on("zoom", e => g.attr("transform", e.transform));
 svg.call(zoom);
 
@@ -901,7 +901,7 @@ const processedEdges = edges
         target: nodeById[e.to]
     }}));
 
-// Force simulation - with proper decay settings for dynamic movement
+// Force simulation - run to compute initial layout, then stop
 const simulation = d3.forceSimulation(nodes)
     .force("link", d3.forceLink(processedEdges).id(d => d.id).distance(120).strength(0.4))
     .force("charge", d3.forceManyBody().strength(-500).distanceMax(400))
@@ -909,9 +909,13 @@ const simulation = d3.forceSimulation(nodes)
     .force("collision", d3.forceCollide().radius(d => nodeSize(d).w / 2 + 15))
     .force("x", d3.forceX(width / 2).strength(0.03))
     .force("y", d3.forceY(height / 2).strength(0.03))
-    .alphaDecay(0.01)
-    .velocityDecay(0.3)
-    .alpha(1);
+    .alphaDecay(0.05)
+    .velocityDecay(0.5);
+
+// Run simulation synchronously to completion for initial layout (prevents jump)
+simulation.stop();
+for (let i = 0; i < 300; i++) simulation.tick();
+// Now simulation is stopped - only restarts on drag
 
 // Draw edges
 const edge = g.append("g").selectAll("path")
@@ -964,6 +968,7 @@ const drag = d3.drag()
             d.fx = null;
             d.fy = null;
         }}
+        // Selection is handled by pointerup event
         dragStartPos = null;
         isDragging = false;
     }});
@@ -1003,7 +1008,7 @@ node.filter(d => d.signature).append("text")
 node.filter(d => d.type === 'module').append("text")
     .attr("class", "node-badge collapse-indicator")
     .attr("x", d => nodeSize(d).w / 2 - 15)
-    .attr("y", -nodeSize(d).h / 2 + 12)
+    .attr("y", d => -nodeSize(d).h / 2 + 12)
     .attr("font-size", "10px")
     .attr("fill", "#888")
     .text("▼")
@@ -1023,15 +1028,21 @@ node.on("mouseover", (e, d) => {{
 }})
 .on("mouseout", () => tooltip.style("display", "none"));
 
-// Click to select (Ctrl/Cmd for multi-select), double-click to collapse
-node.on("click", (e, d) => {{
-    if (isDragging) return;  // Skip if this was a drag
-    e.stopPropagation();
-    selectNode(d, e);
+// Use pointerup as backup for click detection (D3 drag can consume click events)
+node.on("pointerup", function(event) {{
+    // Get datum from the element
+    const datum = d3.select(this).datum();
+    // Only handle if this wasn't a drag (check if node moved significantly)
+    if (!isDragging && dragStartPos && datum) {{
+        console.log("Pointerup detected on node:", datum.id);
+        event.stopPropagation();
+        selectNode(datum, event);
+    }}
 }});
 
+// Double-click to collapse modules
 node.on("dblclick", (e, d) => {{
-    if (isDragging) return;
+    e.stopPropagation();
     if (d.type === 'module') {{
         toggleModule(d.id);
     }} else if (d.moduleName) {{
@@ -1039,10 +1050,15 @@ node.on("dblclick", (e, d) => {{
     }}
 }});
 
-svg.on("click", () => clearSelection());
+// Click on svg background to clear selection
+svg.on("click", (e) => {{
+    if (e.target.tagName === 'svg') {{
+        clearSelection();
+    }}
+}});
 
-// Update positions
-simulation.on("tick", () => {{
+// Function to update positions (used for both initial layout and tick)
+function updatePositions() {{
     edge.attr("d", d => {{
         if (!d.source || !d.target) return "";
         const dx = d.target.x - d.source.x;
@@ -1051,7 +1067,13 @@ simulation.on("tick", () => {{
         return `M${{d.source.x}},${{d.source.y}}A${{dr}},${{dr}} 0 0,1 ${{d.target.x}},${{d.target.y}}`;
     }});
     node.attr("transform", d => `translate(${{d.x}},${{d.y}})`);
-}});
+}}
+
+// Apply initial positions after synchronous simulation
+updatePositions();
+
+// Tick handler for when simulation is restarted during drag
+simulation.on("tick", updatePositions);
 
 
 // === COLLAPSE/EXPAND FUNCTIONS ===
