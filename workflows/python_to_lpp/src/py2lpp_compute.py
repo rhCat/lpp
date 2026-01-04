@@ -23,6 +23,7 @@ _utils_loaded = False
 _DOC_REGISTRY = None
 _LEGACY_REGISTRY = None
 _LOGIC_REGISTRY = None
+_FUNCDEC_REGISTRY = None
 _DASHBOARD_REGISTRY = None
 _BLUEPRINT_REGISTRY = None
 
@@ -30,7 +31,8 @@ _BLUEPRINT_REGISTRY = None
 def _load_utils():
     """Lazy load utils to avoid import errors if utils don't exist."""
     global _utils_loaded, _DOC_REGISTRY, _LEGACY_REGISTRY
-    global _LOGIC_REGISTRY, _DASHBOARD_REGISTRY, _BLUEPRINT_REGISTRY
+    global _LOGIC_REGISTRY, _FUNCDEC_REGISTRY
+    global _DASHBOARD_REGISTRY, _BLUEPRINT_REGISTRY
     import importlib.util
 
     if _utils_loaded:
@@ -50,16 +52,18 @@ def _load_utils():
         except Exception:
             return None
 
-    _DOC_REGISTRY = load_module("doc_generator", "docgen_compute.py",
-                                 "COMPUTE_REGISTRY")
-    _LEGACY_REGISTRY = load_module("legacy_extractor", "extractor_compute.py",
-                                    "EXTRACT_REGISTRY")
-    _LOGIC_REGISTRY = load_module("logic_decoder", "logic_compute.py",
-                                   "COMPUTE_REGISTRY")
-    _DASHBOARD_REGISTRY = load_module("dashboard", "dashboard_compute.py",
-                                       "COMPUTE_REGISTRY")
-    _BLUEPRINT_REGISTRY = load_module("blueprint_builder", "blueprint_compute.py",
-                                       "COMPUTE_REGISTRY")
+    _DOC_REGISTRY = load_module(
+        "doc_generator", "docgen_compute.py", "COMPUTE_REGISTRY")
+    _LEGACY_REGISTRY = load_module(
+        "legacy_extractor", "extractor_compute.py", "EXTRACT_REGISTRY")
+    _LOGIC_REGISTRY = load_module(
+        "logic_decoder", "decoder_compute.py", "COMPUTE_REGISTRY")
+    _FUNCDEC_REGISTRY = load_module(
+        "function_decoder", "function_decoder_compute.py", "COMPUTE_REGISTRY")
+    _DASHBOARD_REGISTRY = load_module(
+        "dashboard", "dashboard_compute.py", "COMPUTE_REGISTRY")
+    _BLUEPRINT_REGISTRY = load_module(
+        "blueprint_builder", "blueprint_compute.py", "COMPUTE_REGISTRY")
 
     _utils_loaded = True
 
@@ -86,6 +90,7 @@ def init(params: dict) -> dict:
             "doc_generator": _DOC_REGISTRY is not None,
             "legacy_extractor": _LEGACY_REGISTRY is not None,
             "logic_decoder": _LOGIC_REGISTRY is not None,
+            "function_decoder": _FUNCDEC_REGISTRY is not None,
             "dashboard": _DASHBOARD_REGISTRY is not None,
             "blueprint_builder": _BLUEPRINT_REGISTRY is not None
         }
@@ -127,51 +132,109 @@ def scanProject(params: dict) -> dict:
 
 
 def extractPatterns(params: dict) -> dict:
-    """Extract patterns using legacy_extractor util."""
+    """Extract patterns using logic_decoder (primary) or legacy_extractor."""
     pythonFiles = _state.get("pythonFiles", [])
-
-    if not _LEGACY_REGISTRY:
-        return {"error": "legacy_extractor util not available", "count": 0}
-
     extractedModules = []
-    for fileInfo in pythonFiles:
-        try:
-            # Use existing extractor pipeline
-            result = _LEGACY_REGISTRY["extract:loadSource"](
-                {"filePath": fileInfo["path"]})
-            if result.get("error"):
-                continue
-            source = result["sourceCode"]
 
-            result = _LEGACY_REGISTRY["extract:parseAst"]({"sourceCode": source})
-            if result.get("error"):
-                continue
-            astDict = result["ast"]
+    # Primary: Use logic_decoder for all files (handles any Python code)
+    if _LOGIC_REGISTRY:
+        for fileInfo in pythonFiles:
+            try:
+                # Load and parse
+                result = _LOGIC_REGISTRY["decoder:loadFile"](
+                    {"filePath": fileInfo["path"]})
+                if result.get("error"):
+                    continue
+                source = result["sourceCode"]
 
-            result = _LEGACY_REGISTRY["extract:findStatePatterns"](
-                {"ast": astDict, "sourceCode": source})
-            patterns = result.get("patterns", {})
+                result = _LOGIC_REGISTRY["decoder:parseAst"](
+                    {"sourceCode": source})
+                if result.get("error"):
+                    continue
+                astDict = result["ast"]
 
-            # Check if we found meaningful patterns
-            if patterns.get("stateClasses") or patterns.get("eventHandlers"):
-                # Extract states for module info
-                stateResult = _LEGACY_REGISTRY["extract:extractStates"](
-                    {"ast": astDict, "patterns": patterns})
-                states = stateResult.get("states", [])
+                # Analyze imports, functions, control flow
+                imports = _LOGIC_REGISTRY["decoder:analyzeImports"](
+                    {"ast": astDict}).get("imports", [])
+                funcs = _LOGIC_REGISTRY["decoder:analyzeFunctions"](
+                    {"ast": astDict, "imports": imports})
+                functions = funcs.get("functions", [])
+                classes = funcs.get("classes", [])
 
-                # Build module from class info
-                for cls in patterns.get("stateClasses", []):
+                # Skip files with no classes/functions
+                if not classes and not functions:
+                    continue
+
+                # Build module for each class
+                for cls in classes:
                     extractedModules.append({
                         "name": cls["name"],
                         "file": fileInfo,
                         "methods": cls.get("methods", []),
-                        "states": [s["id"] for s in states],
-                        "patterns": patterns,
-                        "docstring": "",
-                        "source": "legacy_extractor"
+                        "functions": functions,
+                        "imports": imports,
+                        "docstring": cls.get("docstring", ""),
+                        "source": "logic_decoder"
                     })
-        except Exception as e:
-            _state["results"]["errors"].append((fileInfo["relpath"], str(e)))
+
+                # Also extract standalone functions as modules
+                if functions and not classes:
+                    modName = fileInfo["name"].replace(".py", "")
+                    extractedModules.append({
+                        "name": modName,
+                        "file": fileInfo,
+                        "methods": [],
+                        "functions": functions,
+                        "imports": imports,
+                        "docstring": "",
+                        "source": "logic_decoder"
+                    })
+
+            except Exception as e:
+                _state["results"]["errors"].append(
+                    (fileInfo["relpath"], str(e)))
+
+    # Fallback: Use legacy_extractor if logic_decoder not available
+    elif _LEGACY_REGISTRY:
+        for fileInfo in pythonFiles:
+            try:
+                result = _LEGACY_REGISTRY["extract:loadSource"](
+                    {"filePath": fileInfo["path"]})
+                if result.get("error"):
+                    continue
+                source = result["sourceCode"]
+
+                result = _LEGACY_REGISTRY["extract:parseAst"](
+                    {"sourceCode": source})
+                if result.get("error"):
+                    continue
+                astDict = result["ast"]
+
+                result = _LEGACY_REGISTRY["extract:findStatePatterns"](
+                    {"ast": astDict, "sourceCode": source})
+                patterns = result.get("patterns", {})
+
+                if patterns.get("stateClasses") or \
+                        patterns.get("eventHandlers"):
+                    stateResult = _LEGACY_REGISTRY["extract:extractStates"](
+                        {"ast": astDict, "patterns": patterns})
+                    states = stateResult.get("states", [])
+
+                    for cls in patterns.get("stateClasses", []):
+                        extractedModules.append({
+                            "name": cls["name"],
+                            "file": fileInfo,
+                            "methods": cls.get("methods", []),
+                            "states": [s["id"] for s in states],
+                            "patterns": patterns,
+                            "docstring": "",
+                            "source": "legacy_extractor"
+                        })
+            except Exception as e:
+                _state["results"]["errors"].append(
+                    (fileInfo["relpath"], str(e)))
+    else:
+        return {"error": "No extractor available", "count": 0}
 
     _state["extractedModules"] = extractedModules
     _state["results"]["modulesFound"] = len(extractedModules)
@@ -189,14 +252,63 @@ def decodeLogic(params: dict) -> dict:
     decodedLogic = []
     for module in modules:
         try:
-            result = _LOGIC_REGISTRY["logic:decode"]({
-                "module": module, "filePath": module["file"]["path"]
+            filePath = module["file"]["path"]
+
+            # Load and parse file
+            result = _LOGIC_REGISTRY["decoder:loadFile"](
+                {"filePath": filePath})
+            if result.get("error"):
+                decodedLogic.append(module)
+                continue
+            source = result["sourceCode"]
+
+            result = _LOGIC_REGISTRY["decoder:parseAst"](
+                {"sourceCode": source})
+            if result.get("error"):
+                decodedLogic.append(module)
+                continue
+            astDict = result["ast"]
+
+            # Analyze control flow
+            imports = module.get("imports", [])
+            functions = module.get("functions", [])
+            controlFlow = _LOGIC_REGISTRY["decoder:analyzeControlFlow"](
+                {"ast": astDict, "functions": functions}
+            ).get("controlFlow", {})
+
+            # Infer states from code structure
+            classes = [{"name": module["name"],
+                        "methods": module.get("methods", [])}]
+            inferredStates = _LOGIC_REGISTRY["decoder:inferStates"]({
+                "functions": functions,
+                "classes": classes,
+                "controlFlow": controlFlow,
+                "imports": imports
+            }).get("states", [])
+
+            # Infer transitions and gates
+            transResult = _LOGIC_REGISTRY["decoder:inferTransitions"]({
+                "controlFlow": controlFlow,
+                "inferredStates": inferredStates,
+                "functions": functions
             })
+            inferredTransitions = transResult.get("transitions", [])
+            inferredGates = transResult.get("gates", [])
+
+            # Infer actions
+            inferredActions = _LOGIC_REGISTRY["decoder:inferActions"]({
+                "functions": functions,
+                "imports": imports,
+                "controlFlow": controlFlow
+            }).get("actions", [])
+
             decodedLogic.append({
                 **module,
-                "gates": result.get("gates", []),
-                "actions": result.get("actions", []),
-                "controlFlow": result.get("controlFlow", {})
+                "controlFlow": controlFlow,
+                "inferredStates": inferredStates,
+                "inferredTransitions": inferredTransitions,
+                "inferredGates": inferredGates,
+                "inferredActions": inferredActions
             })
         except Exception as e:
             _state["results"]["errors"].append(
@@ -208,31 +320,47 @@ def decodeLogic(params: dict) -> dict:
 
 
 def generateBlueprints(params: dict) -> dict:
-    """Generate L++ blueprints using blueprint_builder util."""
+    """Generate L++ blueprints using logic_decoder or blueprint_builder."""
     modules = _state.get("decodedLogic") or _state.get("extractedModules", [])
     outputPath = _state.get("outputPath", "")
-
-    if not _BLUEPRINT_REGISTRY:
-        return {"error": "blueprint_builder util not available", "count": 0}
-
-    _BLUEPRINT_REGISTRY["blueprint:init"]({})
     blueprints = []
 
     for module in modules:
         try:
-            # Build blueprint using the util
-            result = _BLUEPRINT_REGISTRY["blueprint:buildFromClass"](
-                {"module": module})
-            bp = result.get("blueprint")
+            bp = None
+
+            # If module has inferred data from logic_decoder, use it
+            if module.get("inferredStates") and _LOGIC_REGISTRY:
+                result = _LOGIC_REGISTRY["decoder:generateBlueprint"]({
+                    "filePath": module["file"]["path"],
+                    "inferredStates": module.get("inferredStates", []),
+                    "inferredTransitions": module.get("inferredTransitions", []),
+                    "inferredGates": module.get("inferredGates", []),
+                    "inferredActions": module.get("inferredActions", []),
+                    "imports": module.get("imports", [])
+                })
+                bp = result.get("blueprint")
+
+            # Fallback to blueprint_builder
+            elif _BLUEPRINT_REGISTRY:
+                _BLUEPRINT_REGISTRY["blueprint:init"]({})
+                result = _BLUEPRINT_REGISTRY["blueprint:buildFromClass"](
+                    {"module": module})
+                bp = result.get("blueprint")
 
             if bp:
+                # Add source file reference
+                bp["_source"] = module["file"]["relpath"]
                 blueprints.append(bp)
+
                 # Write to output
                 if outputPath:
                     bpDir = os.path.join(outputPath, bp["id"])
                     os.makedirs(bpDir, exist_ok=True)
-                    with open(os.path.join(bpDir, f"{bp['id']}.json"), "w") as f:
+                    bpPath = os.path.join(bpDir, f"{bp['id']}.json")
+                    with open(bpPath, "w") as f:
                         json.dump(bp, f, indent=2)
+
         except Exception as e:
             _state["results"]["errors"].append(
                 (module.get("name", "unknown"), str(e)))
