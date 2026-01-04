@@ -80,9 +80,9 @@ def generateGraphs(params: dict) -> dict:
     sys.path.insert(0, graphVizPath)
 
     try:
-        from graph_compute import generateGraph
+        from graph_visualizer_compute import process as generateGraph
     except ImportError:
-        return {"generated": 0, "errors": [("import", "Could not import graph_compute")]}
+        return {"generated": 0, "errors": [("import", "Could not import graph_visualizer_compute")]}
 
     generated = 0
     errors = []
@@ -96,16 +96,15 @@ def generateGraphs(params: dict) -> dict:
             os.makedirs(resultsDir, exist_ok=True)
 
             result = generateGraph({
-                "blueprint": bp,
-                "outputPath": os.path.join(resultsDir, f"{bp_info['name']}_graph.html"),
-                "title": bp.get("name", bp_info['name'])
+                "blueprint": json.dumps(bp),
+                "html_path": os.path.join(resultsDir, f"{bp_info['name']}_graph.html")
             })
 
-            if result.get("success"):
+            if result.get("has_html"):
                 generated += 1
                 if verbose:
                     print(f"  [GRAPH] {bp_info['name']}")
-            else:
+            elif result.get("error"):
                 errors.append(
                     (bp_info['name'], result.get('error', 'Unknown')))
         except Exception as e:
@@ -148,15 +147,42 @@ def generateLogicGraphs(params: dict) -> dict:
             os.makedirs(resultsDir, exist_ok=True)
 
             # Decode Python to blueprint
-            DECODER_REGISTRY["decoder:init"]({"filePath": computePath})
-            DECODER_REGISTRY["decoder:parseFile"]({})
-            DECODER_REGISTRY["decoder:analyzeImports"]({})
-            DECODER_REGISTRY["decoder:analyzeFunctions"]({})
-            DECODER_REGISTRY["decoder:analyzeControlFlow"]({})
-            DECODER_REGISTRY["decoder:inferStates"]({})
-            DECODER_REGISTRY["decoder:inferTransitions"]({})
-            DECODER_REGISTRY["decoder:inferActions"]({})
-            result = DECODER_REGISTRY["decoder:generateBlueprint"]({})
+            loadResult = DECODER_REGISTRY["decoder:loadFile"]({"filePath": computePath})
+            if loadResult.get("error"):
+                continue
+            sourceCode = loadResult["sourceCode"]
+
+            parseResult = DECODER_REGISTRY["decoder:parseAst"]({"sourceCode": sourceCode})
+            if parseResult.get("error"):
+                continue
+            astDict = parseResult["ast"]
+
+            imports = DECODER_REGISTRY["decoder:analyzeImports"]({"ast": astDict}).get("imports", [])
+            funcs = DECODER_REGISTRY["decoder:analyzeFunctions"]({"ast": astDict, "imports": imports})
+            functions = funcs.get("functions", [])
+            classes = funcs.get("classes", [])
+
+            controlFlow = DECODER_REGISTRY["decoder:analyzeControlFlow"](
+                {"ast": astDict, "functions": functions}).get("controlFlow", {})
+            inferredStates = DECODER_REGISTRY["decoder:inferStates"]({
+                "functions": functions, "classes": classes,
+                "controlFlow": controlFlow, "imports": imports
+            }).get("states", [])
+            transResult = DECODER_REGISTRY["decoder:inferTransitions"]({
+                "controlFlow": controlFlow, "inferredStates": inferredStates, "functions": functions
+            })
+            inferredActions = DECODER_REGISTRY["decoder:inferActions"]({
+                "functions": functions, "imports": imports, "controlFlow": controlFlow
+            }).get("actions", [])
+
+            result = DECODER_REGISTRY["decoder:generateBlueprint"]({
+                "filePath": computePath,
+                "inferredStates": inferredStates,
+                "inferredTransitions": transResult.get("transitions", []),
+                "inferredGates": transResult.get("gates", []),
+                "inferredActions": inferredActions,
+                "imports": imports
+            })
 
             if result.get("blueprint"):
                 # Generate logic graph HTML
@@ -169,13 +195,13 @@ def generateLogicGraphs(params: dict) -> dict:
                     'graph_visualizer', 'src'
                 )
                 sys.path.insert(0, graphVizPath)
-                from graph_compute import generateGraph
-                generateGraph({
-                    "blueprint": result["blueprint"],
-                    "outputPath": outputPath,
-                    "title": f"{bp_info['name']} (Decoded Logic)"
+                from graph_visualizer_compute import process as generateGraph
+                graphResult = generateGraph({
+                    "blueprint": json.dumps(result["blueprint"]),
+                    "html_path": outputPath
                 })
-                generated += 1
+                if graphResult.get("has_html"):
+                    generated += 1
                 if verbose:
                     print(f"  [LOGIC] {bp_info['name']}")
         except Exception as e:
@@ -217,15 +243,55 @@ def generateFunctionGraphs(params: dict) -> dict:
             resultsDir = os.path.join(bp_info['dir'], 'results')
             os.makedirs(resultsDir, exist_ok=True)
 
-            FUNC_REGISTRY["funcdec:init"]({"filePath": computePath})
-            FUNC_REGISTRY["funcdec:parseFile"]({})
-            FUNC_REGISTRY["funcdec:analyzeFunctions"]({})
-            FUNC_REGISTRY["funcdec:buildDependencies"]({})
-            result = FUNC_REGISTRY["funcdec:generateVisualization"]({
-                "outputPath": os.path.join(resultsDir, f"{bp_info['name']}_functions.html")
-            })
+            # Load and parse
+            loadResult = FUNC_REGISTRY["funcdec:loadFile"]({"filePath": computePath})
+            if loadResult.get("error"):
+                continue
+            sourceCode = loadResult["sourceCode"]
 
-            if result.get("success"):
+            parseResult = FUNC_REGISTRY["funcdec:parseAst"]({"sourceCode": sourceCode})
+            if parseResult.get("error"):
+                continue
+            tree = parseResult["ast"]
+
+            # Extract exports and imports
+            exports = FUNC_REGISTRY["funcdec:extractExports"]({
+                "ast": tree, "filePath": computePath, "sourceCode": sourceCode
+            }).get("exports", [])
+            imports = FUNC_REGISTRY["funcdec:extractImports"]({"ast": tree}).get("imports", [])
+
+            if not exports:
+                continue
+
+            # Trace calls and compute coupling
+            internalCalls = FUNC_REGISTRY["funcdec:traceInternalCalls"]({
+                "ast": tree, "exports": exports
+            }).get("internalCalls", [])
+            extResult = FUNC_REGISTRY["funcdec:traceExternalCalls"]({"ast": tree, "imports": imports})
+            externalCalls = extResult.get("externalCalls", [])
+            localCalls = extResult.get("localCalls", [])
+
+            coupling = FUNC_REGISTRY["funcdec:computeCoupling"]({
+                "exports": exports, "imports": imports,
+                "internalCalls": internalCalls, "externalCalls": externalCalls, "localCalls": localCalls
+            }).get("coupling", {})
+
+            # Generate module graph
+            graph = FUNC_REGISTRY["funcdec:generateModuleGraph"]({
+                "filePath": computePath, "exports": exports, "imports": imports,
+                "internalCalls": internalCalls, "externalCalls": externalCalls,
+                "localCalls": localCalls, "coupling": coupling
+            }).get("moduleGraph")
+
+            if graph:
+                # Generate visualization
+                result = FUNC_REGISTRY["funcdec:visualizeModuleGraph"]({
+                    "moduleGraphs": [graph],
+                    "outputPath": os.path.join(resultsDir, f"{bp_info['name']}_functions.html"),
+                    "title": f"{bp_info['name']} - Function Dependencies"
+                })
+
+            if graph:
                 generated += 1
                 if verbose:
                     print(f"  [FUNC] {bp_info['name']}")

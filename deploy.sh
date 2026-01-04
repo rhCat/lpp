@@ -34,6 +34,8 @@ print_usage() {
     echo "Commands:"
     echo "  docs      Generate all documentation (default)"
     echo "  graphs    Generate only HTML graph visualizations"
+    echo "  logic     Generate only logic flow graphs from Python"
+    echo "  functions Generate only function dependency graphs"
     echo "  mermaid   Generate only Mermaid diagrams"
     echo "  readme    Update only README files"
     echo "  dashboard Generate only dashboard"

@@ -62,8 +62,8 @@ stateDiagram-v2
     certified --> idle : RESET
     tlaps_proving --> idle : RESET
     certified --> certified : VIEW [tlapsResult is not None and...]
-    certified --> [*]
     rejected --> [*]
+    certified --> [*]
 ```
 > **Interactive View:** [Open zoomable diagram](results/tlaps_seal_diagram.html) for pan/zoom controls
 

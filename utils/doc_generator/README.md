@@ -44,18 +44,39 @@ python interactive.py --readme       # Only update READMEs
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: Documentation Generator
     [*] --> idle
+    idle --> idle : START
     idle --> discovering : GENERATE
-    discovering --> generating_graphs : DONE [has_blueprints]
-    discovering --> error : DONE [no_blueprints]
-    generating_graphs --> generating_logic : DONE
-    generating_logic --> generating_functions : DONE
-    generating_functions --> generating_mermaid : DONE
-    generating_mermaid --> updating_readmes : DONE
-    updating_readmes --> generating_report : DONE
-    generating_report --> generating_dashboard : DONE
-    generating_dashboard --> complete : DONE
+    discovering --> generating_graphs : DONE [blueprints is not None and ... && options.get('graphs') or op... && error is None]
+    discovering --> generating_mermaid : DONE [blueprints is not None and ... && options.get('mermaid') or o... && error is None]
+    discovering --> error : DONE [blueprints is None or len(b...]
+    generating_graphs --> generating_logic : DONE [options.get('logic') or opt... && error is None]
+    generating_graphs --> generating_mermaid : DONE [options.get('mermaid') or o... && error is None]
+    generating_logic --> generating_functions : DONE [options.get('functions') or... && error is None]
+    generating_logic --> generating_mermaid : DONE [options.get('mermaid') or o... && error is None]
+    generating_functions --> generating_mermaid : DONE [options.get('mermaid') or o... && error is None]
+    generating_mermaid --> updating_readmes : DONE [options.get('readme') or op... && error is None]
+    generating_mermaid --> generating_report : DONE [options.get('report') or op... && error is None]
+    updating_readmes --> generating_report : DONE [options.get('report') or op... && error is None]
+    updating_readmes --> generating_dashboard : DONE [options.get('dashboard') or... && error is None]
+    generating_report --> generating_dashboard : DONE [options.get('dashboard') or... && error is None]
+    generating_report --> complete : DONE [error is None]
+    generating_dashboard --> complete : DONE [error is None]
+    idle --> error : ERROR [error is not None]
+    discovering --> error : ERROR [error is not None]
+    generating_graphs --> error : ERROR [error is not None]
+    generating_mermaid --> error : ERROR [error is not None]
+    generating_logic --> error : ERROR [error is not None]
+    generating_report --> error : ERROR [error is not None]
+    updating_readmes --> error : ERROR [error is not None]
+    generating_functions --> error : ERROR [error is not None]
+    complete --> error : ERROR [error is not None]
+    generating_dashboard --> error : ERROR [error is not None]
+    error --> idle : RESET
+    complete --> idle : RESET
     complete --> [*]
+    error --> [*]
 ```
 
 ## Compute Units

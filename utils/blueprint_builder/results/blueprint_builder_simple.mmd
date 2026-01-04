@@ -1,0 +1,10 @@
+stateDiagram-v2
+    %% L++ State Diagram: Blueprint Builder
+    [*] --> idle
+    idle --> building : BUILD
+    building --> complete : DONE
+    idle --> error : ERROR
+    building --> error : ERROR
+    complete --> error : ERROR
+    complete --> [*]
+    error --> [*]

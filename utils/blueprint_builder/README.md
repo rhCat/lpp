@@ -61,3 +61,13 @@ json_result = COMPUTE_REGISTRY["blueprint:toJson"]({"indent": 2})
 ## Integration
 
 Used by workflows like `python_to_lpp` to build blueprints from extracted code patterns.
+
+## State Machine Visualization
+
+Interactive state machine diagram: [blueprint_builder_graph.html](results/blueprint_builder_graph.html)
+
+Open the HTML file in a browser for:
+- Zoom/pan navigation
+- Click nodes to highlight connections
+- Hover for gate conditions
+- Multiple layout options (hierarchical, horizontal, circular, grid)

@@ -34,31 +34,23 @@ The dashboard is generated at `utils/dashboard.html`.
 
 ```mermaid
 stateDiagram-v2
+    %% L++ State Diagram: L++ Tools Dashboard
     [*] --> idle
-
-    idle: idle
-    scanning: scanning
-    analyzing: analyzing
-    categorizing: categorizing
-    generating: generating
-    complete: complete
-    error: error
-
-    idle --> scanning: SCAN
-    scanning --> error: AUTO
-    scanning --> analyzing: AUTO
-    analyzing --> error: AUTO
-    analyzing --> categorizing: AUTO
-    categorizing --> error: AUTO
-    categorizing --> generating: AUTO
-    generating --> error: AUTO
-    generating --> complete: AUTO
-    scanning --> idle: RESET
-    analyzing --> idle: RESET
-    categorizing --> idle: RESET
-    generating --> idle: RESET
-    complete --> idle: RESET
-    error --> idle: RESET
+    idle --> scanning : SCAN [utilsPath is not None and l...]
+    scanning --> error : AUTO [error is not None and len(e...]
+    scanning --> analyzing : AUTO [tools is not None and len(t...]
+    analyzing --> error : AUTO [error is not None and len(e...]
+    analyzing --> categorizing : AUTO [statistics is not None]
+    categorizing --> error : AUTO [error is not None and len(e...]
+    categorizing --> generating : AUTO [categories is not None]
+    generating --> error : AUTO [error is not None and len(e...]
+    generating --> complete : AUTO
+    scanning --> idle : RESET
+    analyzing --> idle : RESET
+    error --> idle : RESET
+    categorizing --> idle : RESET
+    generating --> idle : RESET
+    complete --> idle : RESET
     complete --> [*]
 ```
 

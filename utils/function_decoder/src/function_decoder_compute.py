@@ -631,7 +631,7 @@ h1 {{ color: #00d4ff; margin-bottom: 5px; font-size: 24px; }}
 .subtitle {{ color: #888; margin-bottom: 15px; font-size: 14px; }}
 #container {{ display: flex; gap: 20px; height: calc(100vh - 120px); }}
 #graph {{ flex: 1; position: relative; }}
-#sidebar {{ width: 380px; background: #1a1a2e; padding: 15px; border-radius: 8px; overflow-y: auto; }}
+#sidebar {{ width: 420px; background: #1a1a2e; padding: 15px; border-radius: 8px; overflow-y: auto; }}
 svg {{ background: #16213e; border-radius: 8px; width: 100%; height: 100%; }}
 
 /* Search box */
@@ -644,11 +644,11 @@ svg {{ background: #16213e; border-radius: 8px; width: 100%; height: 100%; }}
 .node {{ cursor: pointer; }}
 .node-module {{ fill: #2a2a4a; stroke-width: 3; }}
 .node-function {{ fill: #3a3a5a; stroke-width: 2; }}
-.node-dependency {{ fill: #1a1a3a; stroke: #666; stroke-width: 1; stroke-dasharray: 4; }}
+.node-dependency {{ fill: #2a2a4a; stroke: #f39c12; stroke-width: 2; stroke-dasharray: 5,3; }}
 .node-collapsed {{ fill: #4a4a7a; stroke-width: 3; }}
-.node-label {{ font-size: 11px; fill: #fff; pointer-events: none; font-weight: 500; }}
-.node-sublabel {{ font-size: 9px; fill: #888; pointer-events: none; }}
-.node-badge {{ font-size: 9px; fill: #fff; pointer-events: none; }}
+.node-label {{ font-size: 13px; fill: #fff; pointer-events: none; font-weight: 500; }}
+.node-sublabel {{ font-size: 10px; fill: #888; pointer-events: none; }}
+.node-badge {{ font-size: 10px; fill: #fff; pointer-events: none; }}
 .node-hidden {{ display: none; }}
 
 /* Edge styles */
@@ -674,10 +674,10 @@ svg {{ background: #16213e; border-radius: 8px; width: 100%; height: 100%; }}
 .category-group {{ margin-bottom: 8px; border: 1px solid #333; border-radius: 6px; overflow: hidden; }}
 .category-header {{ display: flex; align-items: center; padding: 8px 10px; background: #252540; cursor: pointer; user-select: none; }}
 .category-header:hover {{ background: #2a2a4a; }}
-.category-toggle {{ margin-right: 8px; font-size: 10px; color: #888; transition: transform 0.2s; }}
+.category-toggle {{ margin-right: 8px; font-size: 11px; color: #888; transition: transform 0.2s; }}
 .category-toggle.collapsed {{ transform: rotate(-90deg); }}
-.category-name {{ font-size: 12px; font-weight: 600; color: #00d4ff; flex: 1; }}
-.category-count {{ font-size: 10px; color: #666; background: #1a1a2e; padding: 2px 6px; border-radius: 10px; }}
+.category-name {{ font-size: 14px; font-weight: 600; color: #00d4ff; flex: 1; }}
+.category-count {{ font-size: 11px; color: #666; background: #1a1a2e; padding: 2px 8px; border-radius: 10px; }}
 .category-content {{ max-height: 500px; overflow: hidden; transition: max-height 0.3s ease; }}
 .category-content.collapsed {{ max-height: 0; }}
 
@@ -686,15 +686,15 @@ svg {{ background: #16213e; border-radius: 8px; width: 100%; height: 100%; }}
 .module-item:hover {{ background: #2a2a4a; }}
 .module-item.hidden {{ display: none; }}
 .module-dot {{ width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }}
-.module-name {{ font-size: 11px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
-.module-expand {{ font-size: 10px; color: #888; padding: 2px 6px; background: #1a1a2e; border-radius: 3px; cursor: pointer; }}
+.module-name {{ font-size: 13px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+.module-expand {{ font-size: 11px; color: #888; padding: 3px 8px; background: #1a1a2e; border-radius: 3px; cursor: pointer; }}
 .module-expand:hover {{ background: #3a3a5a; color: #fff; }}
 .module-expand.collapsed {{ color: #f39c12; }}
-.module-metrics {{ font-size: 9px; color: #666; }}
+.module-metrics {{ font-size: 10px; color: #666; }}
 
 /* Info panel */
-h3 {{ color: #00d4ff; margin: 15px 0 8px 0; font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 5px; }}
-.info-section {{ font-size: 12px; line-height: 1.6; }}
+h3 {{ color: #00d4ff; margin: 15px 0 8px 0; font-size: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; }}
+.info-section {{ font-size: 13px; line-height: 1.6; }}
 .info-label {{ color: #888; }}
 .info-value {{ color: #fff; }}
 
@@ -717,7 +717,7 @@ h3 {{ color: #00d4ff; margin: 15px 0 8px 0; font-size: 14px; border-bottom: 1px 
 #tooltip {{ position: absolute; background: #1a1a2e; border: 1px solid #00d4ff; padding: 10px; border-radius: 4px; pointer-events: none; display: none; max-width: 300px; z-index: 100; font-size: 11px; }}
 
 /* Stats bar */
-.stats-bar {{ display: flex; gap: 15px; padding: 8px 12px; background: #1a1a2e; border-radius: 4px; margin-bottom: 10px; font-size: 11px; }}
+.stats-bar {{ display: flex; gap: 18px; padding: 10px 15px; background: #1a1a2e; border-radius: 4px; margin-bottom: 10px; font-size: 13px; }}
 .stat {{ color: #888; }}
 .stat span {{ color: #00d4ff; font-weight: 600; }}
 </style>
@@ -754,20 +754,29 @@ h3 {{ color: #00d4ff; margin: 15px 0 8px 0; font-size: 14px; border-bottom: 1px 
   <div id="sidebar">
     <div class="search-box">
       <input type="text" id="search-input" placeholder="Search modules, functions..." oninput="filterModules(this.value)">
+      <div style="display:flex;gap:5px;margin-top:5px">
+        <button onclick="selectSearchResults()" style="flex:1;font-size:10px;padding:4px 8px;background:#3a3a5a;border:1px solid #555;color:#fff;border-radius:3px;cursor:pointer">Select Matches</button>
+        <button onclick="addSearchToSelection()" style="flex:1;font-size:10px;padding:4px 8px;background:#3a3a5a;border:1px solid #555;color:#fff;border-radius:3px;cursor:pointer">Add to Selection</button>
+      </div>
     </div>
 
     <h3>Modules <span style="font-weight:normal;font-size:11px;color:#666" id="module-count"></span></h3>
     <div id="module-legend"></div>
 
-    <h3>Selected Node</h3>
+    <h3>Selected <span id="selection-count" style="font-weight:normal;color:#888">(0)</span> <button onclick="clearSelection()" style="float:right;font-size:10px;padding:2px 8px;background:#3a3a5a;border:1px solid #555;color:#fff;border-radius:3px;cursor:pointer">Clear</button></h3>
+    <div style="font-size:11px;color:#666;margin-bottom:8px">Click to select • Ctrl+click for multi-select</div>
     <div class="info-section" id="node-info">Click a node to see details</div>
 
     <h3>Source Code</h3>
     <div class="source-panel" id="source-panel">
-      <div id="source-content" style="color:#666;font-size:11px">Click a function to view source</div>
+      <div id="source-content" style="color:#666;font-size:13px">Click a function to view source</div>
     </div>
 
-    <h3>Connections</h3>
+    <h3>Connections <span id="connection-summary" style="font-weight:normal;color:#888"></span></h3>
+    <div style="display:flex;gap:5px;margin-bottom:8px">
+      <button onclick="selectAllIncoming()" style="flex:1;font-size:10px;padding:4px;background:#2a4a4a;border:1px solid #4ecdc4;color:#4ecdc4;border-radius:3px;cursor:pointer">+ Incoming</button>
+      <button onclick="selectAllOutgoing()" style="flex:1;font-size:10px;padding:4px;background:#4a3a2a;border:1px solid #f39c12;color:#f39c12;border-radius:3px;cursor:pointer">+ Outgoing</button>
+    </div>
     <div class="edge-list" id="edge-list"></div>
   </div>
 </div>
@@ -805,15 +814,15 @@ Object.keys(moduleColors).forEach(mod => {{
     categoryGroups[category].push(mod);
 }});
 
-// Setup SVG
+// Setup SVG - use explicit width/height like working graph_visualizer
 const container = document.getElementById('graph');
-const width = container.clientWidth;
+const width = container.clientWidth || 1200;
 const height = container.clientHeight || 600;
 
-const svg = d3.select("svg").attr("viewBox", [0, 0, width, height]);
+const svg = d3.select("svg").attr("width", width).attr("height", height);
 const g = svg.append("g");
 
-// Zoom behavior
+// Zoom behavior - filter prevents zoom when clicking nodes
 const zoom = d3.zoom()
     .scaleExtent([0.1, 4])
     .filter(e => !e.target.closest('.node'))
@@ -883,19 +892,26 @@ Object.entries(categoryGroups).sort().forEach(([category, mods]) => {{
 // Update module count
 document.getElementById('module-count').textContent = `(${{Object.keys(moduleColors).length}})`;
 
-// Process edges
-const processedEdges = edges.map(e => ({{
-    ...e,
-    source: nodeById[e.from] || {{ id: e.from, x: 0, y: 0 }},
-    target: nodeById[e.to] || {{ id: e.to, x: 0, y: 0 }}
-}})).filter(e => e.source && e.target);
+// Process edges - ONLY include edges where both source and target exist
+const processedEdges = edges
+    .filter(e => nodeById[e.from] && nodeById[e.to])  // Filter out edges with missing nodes
+    .map(e => ({{
+        ...e,
+        source: nodeById[e.from],
+        target: nodeById[e.to]
+    }}));
 
-// Force simulation
+// Force simulation - with proper decay settings for dynamic movement
 const simulation = d3.forceSimulation(nodes)
-    .force("link", d3.forceLink(processedEdges).id(d => d.id).distance(100).strength(0.3))
-    .force("charge", d3.forceManyBody().strength(-400))
+    .force("link", d3.forceLink(processedEdges).id(d => d.id).distance(120).strength(0.4))
+    .force("charge", d3.forceManyBody().strength(-500).distanceMax(400))
     .force("center", d3.forceCenter(width / 2, height / 2))
-    .force("collision", d3.forceCollide().radius(50));
+    .force("collision", d3.forceCollide().radius(d => nodeSize(d).w / 2 + 15))
+    .force("x", d3.forceX(width / 2).strength(0.03))
+    .force("y", d3.forceY(height / 2).strength(0.03))
+    .alphaDecay(0.01)
+    .velocityDecay(0.3)
+    .alpha(1);
 
 // Draw edges
 const edge = g.append("g").selectAll("path")
@@ -908,22 +924,56 @@ const edge = g.append("g").selectAll("path")
 function nodeSize(d) {{
     if (d.type === 'module') {{
         const isCollapsed = collapsedModules.has(d.id);
-        return isCollapsed ? {{ w: 140, h: 50 }} : {{ w: 120, h: 40 }};
+        return isCollapsed ? {{ w: 160, h: 55 }} : {{ w: 140, h: 45 }};
     }}
-    if (d.type === 'function' || d.type === 'async_function') return {{ w: 100, h: 30 }};
-    if (d.type === 'class') return {{ w: 110, h: 35 }};
-    return {{ w: 80, h: 25 }};
+    if (d.type === 'function' || d.type === 'async_function') return {{ w: 120, h: 35 }};
+    if (d.type === 'class') return {{ w: 130, h: 40 }};
+    if (d.type === 'dependency') return {{ w: 140, h: 40 }};  // Larger for packages/imports
+    return {{ w: 100, h: 30 }};
 }}
+
+// Drag behavior - matches working graph_visualizer pattern
+let dragStartPos = null;
+let isDragging = false;
+const DRAG_THRESHOLD = 5;
+
+const drag = d3.drag()
+    .on("start", function(e, d) {{
+        e.sourceEvent.stopPropagation();
+        dragStartPos = {{ x: e.x, y: e.y }};
+        isDragging = false;
+    }})
+    .on("drag", function(e, d) {{
+        const dx = e.x - dragStartPos.x;
+        const dy = e.y - dragStartPos.y;
+        if (Math.sqrt(dx*dx + dy*dy) > DRAG_THRESHOLD) {{
+            isDragging = true;
+            d3.select(this).raise().select("rect").attr("stroke", "#ff0").attr("stroke-width", 4);
+            d.x = e.x;
+            d.y = e.y;
+            d.fx = e.x;
+            d.fy = e.y;
+            d3.select(this).attr("transform", `translate(${{e.x}},${{e.y}})`);
+            if (!e.active) simulation.alphaTarget(0.3).restart();
+        }}
+    }})
+    .on("end", function(e, d) {{
+        if (isDragging) {{
+            d3.select(this).select("rect").attr("stroke", d.moduleColor || "#666").attr("stroke-width", d.type === 'module' ? 3 : 2);
+            if (!e.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }}
+        dragStartPos = null;
+        isDragging = false;
+    }});
 
 // Draw nodes
 const node = g.append("g").selectAll("g")
     .data(nodes)
     .join("g")
     .attr("class", "node")
-    .call(d3.drag()
-        .on("start", dragStart)
-        .on("drag", dragging)
-        .on("end", dragEnd));
+    .call(drag);
 
 node.append("rect")
     .attr("class", d => `node-${{d.type === 'dependency' ? 'dependency' : d.type === 'module' ? 'module' : 'function'}}`)
@@ -937,10 +987,10 @@ node.append("rect")
 node.append("text")
     .attr("class", "node-label")
     .attr("text-anchor", "middle")
-    .attr("dy", d => d.signature ? -3 : 4)
+    .attr("dy", d => d.signature ? -3 : 5)
     .text(d => {{
         const label = d.label || d.id;
-        return label.length > 15 ? label.slice(0, 13) + '..' : label;
+        return label.length > 18 ? label.slice(0, 16) + '..' : label;
     }});
 
 node.filter(d => d.signature).append("text")
@@ -973,14 +1023,15 @@ node.on("mouseover", (e, d) => {{
 }})
 .on("mouseout", () => tooltip.style("display", "none"));
 
-// Click to select, double-click to collapse
+// Click to select (Ctrl/Cmd for multi-select), double-click to collapse
 node.on("click", (e, d) => {{
+    if (isDragging) return;  // Skip if this was a drag
     e.stopPropagation();
-    selectNode(d);
+    selectNode(d, e);
 }});
 
 node.on("dblclick", (e, d) => {{
-    e.stopPropagation();
+    if (isDragging) return;
     if (d.type === 'module') {{
         toggleModule(d.id);
     }} else if (d.moduleName) {{
@@ -1002,21 +1053,6 @@ simulation.on("tick", () => {{
     node.attr("transform", d => `translate(${{d.x}},${{d.y}})`);
 }});
 
-// Drag functions
-function dragStart(e, d) {{
-    if (!e.active) simulation.alphaTarget(0.3).restart();
-    d.fx = d.x;
-    d.fy = d.y;
-}}
-function dragging(e, d) {{
-    d.fx = e.x;
-    d.fy = e.y;
-}}
-function dragEnd(e, d) {{
-    if (!e.active) simulation.alphaTarget(0);
-    d.fx = null;
-    d.fy = null;
-}}
 
 // === COLLAPSE/EXPAND FUNCTIONS ===
 
@@ -1063,9 +1099,9 @@ function updateVisibility() {{
 
     updateStats();
 
-    // Restart simulation to reposition
+    // Restart simulation to reposition with higher alpha for visible movement
     if (currentLayout === 'force') {{
-        simulation.alpha(0.3).restart();
+        simulation.alpha(0.8).restart();
     }}
 }}
 
@@ -1132,6 +1168,52 @@ function filterModules(query) {{
     }}
 }}
 
+function getSearchMatches() {{
+    if (!searchQuery) return [];
+    return nodes.filter(d => {{
+        const label = (d.label || d.id || '').toLowerCase();
+        const modName = (d.moduleName || '').toLowerCase();
+        return label.includes(searchQuery) || modName.includes(searchQuery);
+    }});
+}}
+
+function selectSearchResults() {{
+    const matches = getSearchMatches();
+    if (matches.length === 0) return;
+    selectedNodes.clear();
+    matches.forEach(d => selectedNodes.add(d.id));
+    updateSelectionDisplay();
+}}
+
+function addSearchToSelection() {{
+    const matches = getSearchMatches();
+    if (matches.length === 0) return;
+    matches.forEach(d => selectedNodes.add(d.id));
+    updateSelectionDisplay();
+}}
+
+function selectAllIncoming() {{
+    if (selectedNodes.size === 0) return;
+    const currentSelected = [...selectedNodes];
+    processedEdges.forEach(e => {{
+        if (currentSelected.includes(e.target.id)) {{
+            selectedNodes.add(e.source.id);
+        }}
+    }});
+    updateSelectionDisplay();
+}}
+
+function selectAllOutgoing() {{
+    if (selectedNodes.size === 0) return;
+    const currentSelected = [...selectedNodes];
+    processedEdges.forEach(e => {{
+        if (currentSelected.includes(e.source.id)) {{
+            selectedNodes.add(e.target.id);
+        }}
+    }});
+    updateSelectionDisplay();
+}}
+
 // === FOCUS MODULE ===
 
 function focusModule(modName) {{
@@ -1155,32 +1237,71 @@ function focusModule(modName) {{
     highlightModule(modName);
 }}
 
-// Selection functions
-let selectedNode = null;
+// Selection functions - Multi-select support
+const selectedNodes = new Set();
 
-function selectNode(d) {{
-    selectedNode = d;
+function selectNode(d, event) {{
+    const isMultiSelect = event && (event.ctrlKey || event.metaKey || event.shiftKey);
 
-    // Highlight node
-    node.classed("dim", n => n.id !== d.id && !isConnected(d, n));
-    node.select("rect").attr("stroke-width", n => n.id === d.id ? 4 : 2);
+    if (isMultiSelect) {{
+        // Toggle selection
+        if (selectedNodes.has(d.id)) {{
+            selectedNodes.delete(d.id);
+        }} else {{
+            selectedNodes.add(d.id);
+        }}
+    }} else {{
+        // Single select - clear others
+        selectedNodes.clear();
+        selectedNodes.add(d.id);
+    }}
 
-    // Highlight edges
-    edge.classed("dim", e => e.source.id !== d.id && e.target.id !== d.id);
-    edge.classed("highlight", e => e.source.id === d.id || e.target.id === d.id);
+    updateSelectionDisplay();
+}}
 
-    // Update info panel
-    updateNodeInfo(d);
-    updateEdgeList(d);
+function updateSelectionDisplay() {{
+    const selectedIds = [...selectedNodes];
+    const selectedData = selectedIds.map(id => nodeById[id]).filter(Boolean);
+
+    // Update selection count
+    document.getElementById('selection-count').textContent = `(${{selectedNodes.size}})`;
+
+    if (selectedNodes.size === 0) {{
+        node.classed("dim", false);
+        node.select("rect").attr("stroke-width", d => d.type === 'module' ? 3 : 2);
+        edge.classed("dim", false).classed("highlight", false);
+        document.getElementById('node-info').innerHTML = 'Click a node to see details';
+        document.getElementById('edge-list').innerHTML = '';
+        document.getElementById('connection-summary').textContent = '';
+        return;
+    }}
+
+    // Highlight selected nodes and their connections
+    const connectedIds = new Set(selectedIds);
+    processedEdges.forEach(e => {{
+        if (selectedNodes.has(e.source.id)) connectedIds.add(e.target.id);
+        if (selectedNodes.has(e.target.id)) connectedIds.add(e.source.id);
+    }});
+
+    node.classed("dim", n => !connectedIds.has(n.id));
+    node.select("rect").attr("stroke-width", n => selectedNodes.has(n.id) ? 4 : 2);
+
+    // Highlight edges connected to any selected node
+    edge.classed("dim", e => !selectedNodes.has(e.source.id) && !selectedNodes.has(e.target.id));
+    edge.classed("highlight", e => selectedNodes.has(e.source.id) || selectedNodes.has(e.target.id));
+
+    // Update info panel for single or multiple selection
+    if (selectedNodes.size === 1) {{
+        updateNodeInfo(selectedData[0]);
+    }} else {{
+        updateMultiNodeInfo(selectedData);
+    }}
+    updateCombinedEdgeList(selectedData);
 }}
 
 function clearSelection() {{
-    selectedNode = null;
-    node.classed("dim", false);
-    node.select("rect").attr("stroke-width", 2);
-    edge.classed("dim", false).classed("highlight", false);
-    document.getElementById('node-info').innerHTML = 'Click a node to see details';
-    document.getElementById('edge-list').innerHTML = '';
+    selectedNodes.clear();
+    updateSelectionDisplay();
 }}
 
 function isConnected(a, b) {{
@@ -1188,6 +1309,94 @@ function isConnected(a, b) {{
         (e.source.id === a.id && e.target.id === b.id) ||
         (e.source.id === b.id && e.target.id === a.id)
     );
+}}
+
+function updateMultiNodeInfo(nodes) {{
+    let html = `<div style="color:#00d4ff;font-weight:bold;margin-bottom:10px">${{nodes.length}} items selected</div>`;
+    html += '<div style="max-height:150px;overflow-y:auto">';
+    nodes.forEach(d => {{
+        const color = d.moduleColor || moduleColors[d.moduleName] || '#666';
+        html += `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid #333">`;
+        html += `<span style="width:8px;height:8px;background:${{color}};border-radius:2px"></span>`;
+        html += `<span style="flex:1">${{d.label || d.id}}</span>`;
+        html += `<span style="color:#666;font-size:10px">${{d.type}}</span>`;
+        html += `</div>`;
+    }});
+    html += '</div>';
+    document.getElementById('node-info').innerHTML = html;
+    document.getElementById('source-content').innerHTML = '<div style="color:#666;font-size:13px">Select a single node to view source</div>';
+}}
+
+function updateCombinedEdgeList(selectedData) {{
+    const selectedIds = new Set(selectedData.map(d => d.id));
+
+    // Collect all outgoing and incoming edges for selected nodes
+    const outgoing = [];
+    const incoming = [];
+
+    processedEdges.forEach(e => {{
+        if (selectedIds.has(e.source.id) && !selectedIds.has(e.target.id)) {{
+            outgoing.push(e);
+        }}
+        if (selectedIds.has(e.target.id) && !selectedIds.has(e.source.id)) {{
+            incoming.push(e);
+        }}
+    }});
+
+    // Deduplicate by target/source
+    const uniqueOutgoing = [...new Map(outgoing.map(e => [e.target.id, e])).values()];
+    const uniqueIncoming = [...new Map(incoming.map(e => [e.source.id, e])).values()];
+
+    // Update summary
+    document.getElementById('connection-summary').textContent = `(${{uniqueIncoming.length}} in, ${{uniqueOutgoing.length}} out)`;
+
+    let html = '';
+    if (uniqueOutgoing.length) {{
+        html += `<div style="color:#4ecdc4;font-weight:bold;margin-bottom:5px">Outgoing (${{uniqueOutgoing.length}}) →</div>`;
+        uniqueOutgoing.slice(0, 20).forEach(e => {{
+            const fromLabel = e.source.label || e.source.id;
+            html += `<div class="edge-item" style="cursor:pointer" onclick="selectNodeById('${{e.target.id}}')">`;
+            html += `<span style="color:#666;font-size:10px">from ${{fromLabel.slice(0,15)}}</span> → `;
+            html += `<span class="to">${{e.target.label || e.target.id}}</span>`;
+            html += `</div>`;
+        }});
+        if (uniqueOutgoing.length > 20) html += `<div style="color:#666;font-size:10px">...and ${{uniqueOutgoing.length - 20}} more</div>`;
+    }}
+    if (uniqueIncoming.length) {{
+        html += `<div style="color:#f39c12;font-weight:bold;margin:10px 0 5px 0">← Incoming (${{uniqueIncoming.length}})</div>`;
+        uniqueIncoming.slice(0, 20).forEach(e => {{
+            const toLabel = e.target.label || e.target.id;
+            html += `<div class="edge-item" style="cursor:pointer" onclick="selectNodeById('${{e.source.id}}')">`;
+            html += `<span class="from">${{e.source.label || e.source.id}}</span>`;
+            html += ` → <span style="color:#666;font-size:10px">to ${{toLabel.slice(0,15)}}</span>`;
+            html += `</div>`;
+        }});
+        if (uniqueIncoming.length > 20) html += `<div style="color:#666;font-size:10px">...and ${{uniqueIncoming.length - 20}} more</div>`;
+    }}
+    if (!uniqueOutgoing.length && !uniqueIncoming.length) {{
+        html = '<div style="color:#666">No external connections</div>';
+    }}
+
+    document.getElementById('edge-list').innerHTML = html;
+}}
+
+function selectNodeById(id) {{
+    const d = nodeById[id];
+    if (d) {{
+        selectedNodes.clear();
+        selectedNodes.add(id);
+        updateSelectionDisplay();
+        focusOnNode(d);
+    }}
+}}
+
+function focusOnNode(d) {{
+    if (d.x && d.y) {{
+        svg.transition().duration(300).call(
+            zoom.transform,
+            d3.zoomIdentity.translate(width / 2 - d.x, height / 2 - d.y).scale(1.2)
+        );
+    }}
 }}
 
 function updateNodeInfo(d) {{
@@ -1235,32 +1444,6 @@ function updateSourcePanel(d) {{
     }} else {{
         panel.innerHTML = `<div style="color:#666;font-size:11px">No source available</div>`;
     }}
-}}
-
-function updateEdgeList(d) {{
-    const outgoing = processedEdges.filter(e => e.source.id === d.id);
-    const incoming = processedEdges.filter(e => e.target.id === d.id);
-
-    let html = '';
-    if (outgoing.length) {{
-        html += `<div style="color:#4ecdc4;font-weight:bold;margin-bottom:5px">Outgoing (${{outgoing.length}}) →</div>`;
-        outgoing.slice(0, 10).forEach(e => {{
-            html += `<div class="edge-item">→ <span class="to">${{e.target.label || e.target.id}}</span> <span class="type">[${{e.type}}]</span></div>`;
-        }});
-        if (outgoing.length > 10) html += `<div style="color:#666;font-size:10px">...and ${{outgoing.length - 10}} more</div>`;
-    }}
-    if (incoming.length) {{
-        html += `<div style="color:#f39c12;font-weight:bold;margin:10px 0 5px 0">← Incoming (${{incoming.length}})</div>`;
-        incoming.slice(0, 10).forEach(e => {{
-            html += `<div class="edge-item">← <span class="from">${{e.source.label || e.source.id}}</span> <span class="type">[${{e.type}}]</span></div>`;
-        }});
-        if (incoming.length > 10) html += `<div style="color:#666;font-size:10px">...and ${{incoming.length - 10}} more</div>`;
-    }}
-    if (!outgoing.length && !incoming.length) {{
-        html = '<div style="color:#666">No connections</div>';
-    }}
-
-    document.getElementById('edge-list').innerHTML = html;
 }}
 
 function highlightModule(modName) {{
