@@ -1,14 +1,14 @@
 flowchart TD
     %% L++ Logic CAD: Python Logic Decoder
-        state_idle(["idle\nAwaiting file path or source code"]):::entry
+        state_idle(["idle<br>Awaiting file path or source code"]):::entry
     subgraph Processing
-        state_parsing(["parsing\nParsing Python source into AST"])
-        state_analyzing(["analyzing\nAnalyzing imports, functions, and contro"])
-        state_inferring(["inferring\nInferring states, transitions, gates fro"])
-        state_generating(["generating\nAssembling final L++ blueprint"])
+        state_parsing(["parsing<br>Parsing Python source into AST"]):::state
+        state_analyzing(["analyzing<br>Analyzing imports, functions, and contro"]):::state
+        state_inferring(["inferring<br>Inferring states, transitions, gates fro"]):::state
+        state_generating(["generating<br>Assembling final L++ blueprint"]):::state
     end
-        state_complete(["complete\nBlueprint generated successfully"])
-        state_error[["error\nDecoding failed"]]:::errorState
+        state_complete(["complete<br>Blueprint generated successfully"]):::state
+        state_error[["error<br>Decoding failed"]]:::errorState
 
     %% Transitions
     act_t0s0[["loadFile"]]:::action
@@ -42,9 +42,10 @@ flowchart TD
     state_error -- "RESET" --> act_t9s0
     act_t9s0 --> state_idle
 
-    %% Styling
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
-    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
-    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+    %% Styling - ALL shapes have explicit fill and black text
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000

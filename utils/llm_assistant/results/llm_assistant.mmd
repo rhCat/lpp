@@ -1,11 +1,11 @@
 flowchart TD
     %% L++ Logic CAD: L++ LLM Schema Assistant
-        state_init(["init\nInitial state, checking API configuratio"]):::entry
+        state_init(["init<br>Initial state, checking API configuratio"]):::entry
     subgraph Processing
-        state_ready(["ready\nConfigured and ready for queries"])
-        state_querying(["querying\nSending query to LLM API"])
+        state_ready(["ready<br>Configured and ready for queries"]):::state
+        state_querying(["querying<br>Sending query to LLM API"]):::state
     end
-        state_error[["error\nError state - recoverable"]]:::errorState
+        state_error[["error<br>Error state - recoverable"]]:::errorState
 
     %% Transitions
     gate_t0s0{{"api_key is not None?"}}:::gate
@@ -64,9 +64,10 @@ flowchart TD
     gate_t12s0 -- ✓ --> act_t12s0
     act_t12s0 --> state_ready
 
-    %% Styling
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
-    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
-    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+    %% Styling - ALL shapes have explicit fill and black text
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000

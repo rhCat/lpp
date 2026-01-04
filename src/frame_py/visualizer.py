@@ -152,11 +152,11 @@ class LppVisualizer:
                 # Escape quotes and truncate description
                 if desc:
                     desc = desc.replace('"', "'")[:40]
-                    label = f"{s_id}\\n{desc}"
+                    label = f"{s_id}<br>{desc}"
                 else:
                     label = s_id
 
-                # Different shapes for different state types
+                # Different shapes for different state types - ALL have explicit fill
                 if s_id == self.entry:
                     shape = f'state_{s_id}(["{label}"]):::entry'
                 elif s_id in self.terminal:
@@ -164,7 +164,7 @@ class LppVisualizer:
                 elif "error" in s_id.lower():
                     shape = f'state_{s_id}[["{label}"]]:::errorState'
                 else:
-                    shape = f'state_{s_id}(["{label}"])'
+                    shape = f'state_{s_id}(["{label}"]):::state'
                 lines.append(f"        {shape}")
 
             if len(state_ids) > 1 and phase != "error":
@@ -248,15 +248,15 @@ class LppVisualizer:
                 lines.append(f"    {curr}{link}state_{to}")
 
         lines.append("")
-        lines.append("    %% Styling")
-        # State styles
-        lines.append("    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px")
-        lines.append("    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px")
-        lines.append("    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px")
+        lines.append("    %% Styling - ALL shapes have explicit fill and black text")
+        # State styles - all with color:#000 for black text
+        lines.append("    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000")
+        lines.append("    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000")
+        lines.append("    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000")
+        lines.append("    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000")
         # Gate and action styles
-        lines.append("    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px")
-        lines.append("    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px")
-        # Link styles (note: linkStyle requires indices, using class instead)
+        lines.append("    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000")
+        lines.append("    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000")
 
         return "\n".join(lines)
 

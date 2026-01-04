@@ -1,18 +1,18 @@
 flowchart TD
     %% L++ Logic CAD: L++ Blueprint Diff & Merge
-        state_idle(["idle\nNo blueprints loaded, waiting for input"]):::entry
+        state_idle(["idle<br>No blueprints loaded, waiting for input"]):::entry
     subgraph Processing
-        state_left_loaded(["left_loaded\nLeft blueprint loaded, waiting for right"])
-        state_ready(["ready\nBoth blueprints loaded, ready to diff/me"])
-        state_diffing(["diffing\nComputing semantic diff"])
-        state_merging(["merging\nPerforming merge operation"])
-        state_conflict(["conflict\nMerge conflicts detected, awaiting resol"])
+        state_left_loaded(["left_loaded<br>Left blueprint loaded, waiting for right"]):::state
+        state_ready(["ready<br>Both blueprints loaded, ready to diff/me"]):::state
+        state_diffing(["diffing<br>Computing semantic diff"]):::state
+        state_merging(["merging<br>Performing merge operation"]):::state
+        state_conflict(["conflict<br>Merge conflicts detected, awaiting resol"]):::state
     end
     subgraph Completion
-        state_diff_complete(["diff_complete\nDiff computed, results available"])
-        state_merge_complete(["merge_complete\nMerge complete, result available"])
+        state_diff_complete(["diff_complete<br>Diff computed, results available"]):::state
+        state_merge_complete(["merge_complete<br>Merge complete, result available"]):::state
     end
-        state_error[["error\nError state"]]:::errorState
+        state_error[["error<br>Error state"]]:::errorState
 
     %% Transitions
     act_t0s0[["load_left"]]:::action
@@ -143,9 +143,10 @@ flowchart TD
     state_conflict -- "LOAD_FAILED" --> act_t27s7
     act_t27s7 --> state_error
 
-    %% Styling
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
-    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
-    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+    %% Styling - ALL shapes have explicit fill and black text
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000

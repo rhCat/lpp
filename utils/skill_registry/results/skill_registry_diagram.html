@@ -6,42 +6,48 @@
 <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: system-ui, -apple-system, sans-serif; background: #1a1a2e; color: #eee; }
+body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
 .header { background: #16213e; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
 .header h1 { font-size: 18px; color: #00d4ff; }
-.controls { display: flex; gap: 8px; }
-.controls button { background: #4a4a8a; color: #fff; border: none; padding: 8px 16px; cursor: pointer; border-radius: 4px; font-size: 12px; }
+.controls { display: flex; gap: 8px; align-items: center; }
+.controls button { background: #4a4a8a; color: #fff; border: none; padding: 8px 16px; cursor: pointer; border-radius: 4px; }
 .controls button:hover { background: #5a5a9a; }
 .zoom-info { color: #888; font-size: 12px; margin-left: 15px; }
-.container { position: relative; width: 100%; height: calc(100vh - 60px); overflow: hidden; background: #0f0f23; }
+.container { position: relative; width: 100%; height: calc(100vh - 110px); overflow: hidden; background: #0f0f23; }
 #diagram { position: absolute; transform-origin: 0 0; cursor: grab; }
 #diagram:active { cursor: grabbing; }
-#diagram svg { max-width: none !important; }
-.mermaid { background: transparent; }
+/* Legend styling */
+.legend { background: #16213e; padding: 10px 20px; display: flex; gap: 20px; flex-wrap: wrap; border-top: 1px solid #2a2a4e; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #ccc; }
+.legend-icon { width: 20px; height: 14px; border-radius: 3px; border: 2px solid; }
+.legend-icon.entry { background: #e1f5fe; border-color: #01579b; }
+.legend-icon.terminal { background: #c8e6c9; border-color: #2e7d32; }
+.legend-icon.error { background: #ffcdd2; border-color: #c62828; }
+.legend-icon.gate { background: #fff3e0; border-color: #e65100; border-radius: 2px; transform: rotate(45deg); width: 12px; height: 12px; }
+.legend-icon.action { background: #e3f2fd; border-color: #1565c0; }
+.legend-icon.state { background: #ffffff; border-color: #6a6aaa; }
 </style>
 </head>
 <body>
 <div class="header">
     <h1>Skill Registry</h1>
     <div class="controls">
-        <button onclick="zoomIn()">Zoom In (+)</button>
-        <button onclick="zoomOut()">Zoom Out (-)</button>
-        <button onclick="resetView()">Reset View</button>
-        <button onclick="fitToScreen()">Fit to Screen</button>
+        <button onclick="zoomIn()">+</button>
+        <button onclick="zoomOut()">-</button>
+        <button onclick="resetView()">Reset</button>
+        <button onclick="fitToScreen()">Fit</button>
         <span class="zoom-info" id="zoom-level">100%</span>
     </div>
 </div>
 <div class="container" id="container">
-    <div id="diagram">
-        <pre class="mermaid">
-flowchart TD
+    <div id="diagram"><pre class="mermaid">flowchart TD
     %% L++ Logic CAD: Skill Registry
-        state_idle(["idle\nReady to scan"]):::entry
+        state_idle(["idle<br>Ready to scan"]):::entry
     subgraph Processing
-        state_scanned(["scanned\nSkills discovered"])
-        state_viewing(["viewing\nViewing skill detail"])
+        state_scanned(["scanned<br>Skills discovered"]):::state
+        state_viewing(["viewing<br>Viewing skill detail"]):::state
     end
-        state_error[["error\nError occurred"]]:::errorState
+        state_error[["error<br>Error occurred"]]:::errorState
 
     %% Transitions
     act_t0s0[["setBasePath, scanSkills"]]:::action
@@ -82,109 +88,209 @@ flowchart TD
     gate_t10s0 -- ✓ --> act_t10s0
     act_t10s0 --> state_error
 
-    %% Styling
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
-    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
-    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
-        </pre>
-    </div>
+    %% Styling - ALL shapes have explicit fill and black text
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000</pre></div>
+</div>
+<div class="legend">
+    <div class="legend-item"><span class="legend-icon entry"></span> Entry State</div>
+    <div class="legend-item"><span class="legend-icon terminal"></span> Terminal State</div>
+    <div class="legend-item"><span class="legend-icon error"></span> Error State</div>
+    <div class="legend-item"><span class="legend-icon gate"></span> Gate (Condition)</div>
+    <div class="legend-item"><span class="legend-icon action"></span> Action</div>
+    <div class="legend-item"><span class="legend-icon state"></span> State</div>
 </div>
 <script>
-mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel: 'loose' });
+mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    securityLevel: 'loose',
+    themeVariables: {
+        primaryColor: '#2d2d5a',
+        primaryTextColor: '#000000',
+        primaryBorderColor: '#6a6aaa',
+        lineColor: '#8888aa',
+        secondaryColor: '#1a1a3e',
+        tertiaryColor: '#0f0f23',
+        background: 'transparent',
+        mainBkg: 'transparent',
+        nodeBorder: '#6a6aaa',
+        clusterBkg: 'transparent',
+        clusterBorder: '#4a4a8a',
+        titleColor: '#ccc',
+        edgeLabelBackground: 'transparent',
+        fontFamily: 'system-ui, sans-serif'
+    },
+    flowchart: {
+        htmlLabels: true,
+        curve: 'basis'
+    }
+});
 
-let scale = 1;
-let translateX = 50;
-let translateY = 50;
-let isDragging = false;
-let startX, startY;
+// Post-render fix for text colors and backgrounds
+function fixMermaidStyles() {
+    const svg = document.querySelector('.mermaid svg');
+    if (!svg) return;
 
+    // Fix all text in nodes to be black (high contrast on colored backgrounds)
+    svg.querySelectorAll('.nodeLabel, .label').forEach(el => {
+        el.style.color = '#000';
+        el.style.fill = '#000';
+    });
+    svg.querySelectorAll('foreignObject span, foreignObject div, foreignObject p').forEach(el => {
+        el.style.color = '#000';
+    });
+    svg.querySelectorAll('text').forEach(el => {
+        // Skip edge labels (keep them light for dark background)
+        if (el.closest('.edgeLabel')) {
+            el.setAttribute('fill', '#ccc');
+        }
+    });
+    // Fix edge labels (HTML mode) - make them visible on dark background
+    svg.querySelectorAll('.edgeLabel span, .edgeLabel p, .edgeLabel div').forEach(el => {
+        el.style.color = '#ccc';
+    });
+
+    // Fix cluster/subgraph backgrounds - make them nearly invisible
+    svg.querySelectorAll('.cluster rect, .cluster polygon').forEach(el => {
+        el.setAttribute('fill', 'rgba(74, 74, 138, 0.08)');
+        el.setAttribute('stroke', '#3a3a6a');
+        el.setAttribute('stroke-width', '1');
+    });
+
+    // Fix cluster/subgraph labels - target .cluster-label specifically
+    // Mermaid uses: .cluster > .cluster-label > foreignObject > div > span.nodeLabel
+    svg.querySelectorAll('.cluster-label').forEach(labelGroup => {
+        // Style the foreignObject and its contents
+        const fo = labelGroup.querySelector('foreignObject');
+        if (fo) {
+            fo.style.overflow = 'visible';
+            const div = fo.querySelector('div');
+            if (div) {
+                div.style.background = '#000';
+                div.style.padding = '4px 10px';
+                div.style.borderRadius = '4px';
+                div.style.display = 'inline-block';
+            }
+            fo.querySelectorAll('span, p, .nodeLabel').forEach(el => {
+                el.style.color = '#fff';
+                el.style.fontWeight = 'bold';
+            });
+        }
+        // Also handle SVG text elements if present
+        labelGroup.querySelectorAll('text').forEach(text => {
+            text.setAttribute('fill', '#fff');
+            text.setAttribute('font-weight', 'bold');
+            text.style.textShadow = '0 0 4px #000, 0 0 4px #000';
+            try {
+                const bbox = text.getBBox();
+                if (bbox.width > 0) {
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', bbox.x - 6);
+                    rect.setAttribute('y', bbox.y - 4);
+                    rect.setAttribute('width', bbox.width + 12);
+                    rect.setAttribute('height', bbox.height + 8);
+                    rect.setAttribute('fill', '#000');
+                    rect.setAttribute('rx', '4');
+                    text.parentNode.insertBefore(rect, text);
+                }
+            } catch(e) {}
+        });
+    });
+    // Fallback: Also target g.cluster > text directly (older Mermaid)
+    svg.querySelectorAll('g.cluster > text').forEach(text => {
+        text.setAttribute('fill', '#fff');
+        text.setAttribute('font-weight', 'bold');
+        try {
+            const bbox = text.getBBox();
+            if (bbox.width > 0 && !text.previousElementSibling?.matches?.('rect[fill="#000"]')) {
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', bbox.x - 6);
+                rect.setAttribute('y', bbox.y - 4);
+                rect.setAttribute('width', bbox.width + 12);
+                rect.setAttribute('height', bbox.height + 8);
+                rect.setAttribute('fill', '#000');
+                rect.setAttribute('rx', '4');
+                text.parentNode.insertBefore(rect, text);
+            }
+        } catch(e) {}
+    });
+
+    // Fix SVG background
+    svg.style.background = 'transparent';
+
+    // Fix edge label backgrounds
+    svg.querySelectorAll('.edgeLabel rect').forEach(el => {
+        el.setAttribute('fill', 'transparent');
+    });
+
+    // Make ALL lines/edges more visible - use broad selectors
+    svg.querySelectorAll('path').forEach(el => {
+        const stroke = el.getAttribute('stroke');
+        // Skip filled shapes (nodes), only style line paths
+        if (!el.classList.contains('node') && stroke && stroke !== 'none') {
+            el.setAttribute('stroke', '#88aadd');
+            el.setAttribute('stroke-width', '2.5');
+        }
+    });
+    svg.querySelectorAll('.edgePath path, .flowchart-link, [class*="edge"] path').forEach(el => {
+        el.setAttribute('stroke', '#88aadd');
+        el.setAttribute('stroke-width', '2.5');
+    });
+    svg.querySelectorAll('line').forEach(el => {
+        el.setAttribute('stroke', '#88aadd');
+        el.setAttribute('stroke-width', '2.5');
+    });
+    // Fix marker/arrow colors - target all markers
+    svg.querySelectorAll('marker path, marker polygon').forEach(el => {
+        el.setAttribute('fill', '#88aadd');
+        el.setAttribute('stroke', '#88aadd');
+    });
+    svg.querySelectorAll('defs marker').forEach(marker => {
+        marker.querySelectorAll('path, polygon').forEach(el => {
+            el.setAttribute('fill', '#88aadd');
+        });
+    });
+}
+
+let scale = 1, translateX = 50, translateY = 50, isDragging = false, startX, startY;
 const container = document.getElementById('container');
 const diagram = document.getElementById('diagram');
-
 function updateTransform() {
     diagram.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
     document.getElementById('zoom-level').textContent = Math.round(scale * 100) + '%';
 }
-
-function zoomIn() {
-    scale = Math.min(scale * 1.2, 5);
-    updateTransform();
-}
-
-function zoomOut() {
-    scale = Math.max(scale / 1.2, 0.1);
-    updateTransform();
-}
-
-function resetView() {
-    scale = 1;
-    translateX = 50;
-    translateY = 50;
-    updateTransform();
-}
-
+function zoomIn() { scale = Math.min(scale * 1.2, 5); updateTransform(); }
+function zoomOut() { scale = Math.max(scale / 1.2, 0.1); updateTransform(); }
+function resetView() { scale = 1; translateX = 50; translateY = 50; updateTransform(); }
 function fitToScreen() {
     const svg = diagram.querySelector('svg');
     if (!svg) return;
     const svgRect = svg.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
-    const scaleX = (containerRect.width - 100) / svgRect.width * scale;
-    const scaleY = (containerRect.height - 100) / svgRect.height * scale;
-    scale = Math.min(scaleX, scaleY, 1.5);
-    translateX = 50;
-    translateY = 50;
-    updateTransform();
+    scale = Math.min((containerRect.width - 100) / svgRect.width * scale, (containerRect.height - 100) / svgRect.height * scale, 1.5);
+    translateX = 50; translateY = 50; updateTransform();
 }
-
-// Mouse wheel zoom
 container.addEventListener('wheel', (e) => {
     e.preventDefault();
     const rect = container.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
+    const mouseX = e.clientX - rect.left, mouseY = e.clientY - rect.top;
     const prevScale = scale;
-    if (e.deltaY < 0) scale = Math.min(scale * 1.1, 5);
-    else scale = Math.max(scale / 1.1, 0.1);
-
-    // Zoom toward mouse position
+    scale = e.deltaY < 0 ? Math.min(scale * 1.1, 5) : Math.max(scale / 1.1, 0.1);
     translateX = mouseX - (mouseX - translateX) * (scale / prevScale);
     translateY = mouseY - (mouseY - translateY) * (scale / prevScale);
     updateTransform();
 });
+container.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX - translateX; startY = e.clientY - translateY; });
+document.addEventListener('mousemove', (e) => { if (!isDragging) return; translateX = e.clientX - startX; translateY = e.clientY - startY; updateTransform(); });
+document.addEventListener('mouseup', () => { isDragging = false; });
 
-// Pan with mouse drag
-container.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    startX = e.clientX - translateX;
-    startY = e.clientY - translateY;
-    diagram.style.cursor = 'grabbing';
-});
-
-document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    translateX = e.clientX - startX;
-    translateY = e.clientY - startY;
-    updateTransform();
-});
-
-document.addEventListener('mouseup', () => {
-    isDragging = false;
-    diagram.style.cursor = 'grab';
-});
-
-// Keyboard shortcuts
-document.addEventListener('keydown', (e) => {
-    if (e.key === '+' || e.key === '=') zoomIn();
-    else if (e.key === '-') zoomOut();
-    else if (e.key === '0') resetView();
-    else if (e.key === 'f') fitToScreen();
-});
-
-// Initial fit after render
-setTimeout(fitToScreen, 500);
+// Run fixes after Mermaid renders
+setTimeout(() => { fixMermaidStyles(); fitToScreen(); }, 500);
 </script>
 </body>
 </html>

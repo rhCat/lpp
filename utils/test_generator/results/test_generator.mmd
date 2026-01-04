@@ -1,13 +1,13 @@
 flowchart TD
     %% L++ Logic CAD: L++ Test Case Generator
-        state_idle(["idle\nNo blueprint loaded, waiting for input"]):::entry
+        state_idle(["idle<br>No blueprint loaded, waiting for input"]):::entry
     subgraph Processing
-        state_loaded(["loaded\nBlueprint loaded, ready to analyze"])
-        state_analyzing(["analyzing\nAnalyzing blueprint structure"])
-        state_generating(["generating\nGenerating test cases"])
+        state_loaded(["loaded<br>Blueprint loaded, ready to analyze"]):::state
+        state_analyzing(["analyzing<br>Analyzing blueprint structure"]):::state
+        state_generating(["generating<br>Generating test cases"]):::state
     end
-        state_complete(["complete\nTests generated, ready to export"])
-        state_error[["error\nError state"]]:::errorState
+        state_complete(["complete<br>Tests generated, ready to export"]):::state
+        state_error[["error<br>Error state"]]:::errorState
 
     %% Transitions
     gate_t0s0{{"blueprint is None?"}}:::gate
@@ -82,9 +82,10 @@ flowchart TD
     state_analyzing -- "BACK" --> state_loaded
     state_complete -- "BACK" --> state_loaded
 
-    %% Styling
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
-    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
-    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+    %% Styling - ALL shapes have explicit fill and black text
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000

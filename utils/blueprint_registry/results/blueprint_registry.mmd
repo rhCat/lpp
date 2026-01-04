@@ -1,13 +1,13 @@
 flowchart TD
     %% L++ Logic CAD: L++ Blueprint Registry
-        state_idle(["idle\nNo registry loaded, waiting for initiali"]):::entry
+        state_idle(["idle<br>No registry loaded, waiting for initiali"]):::entry
     subgraph Processing
-        state_ready(["ready\nRegistry loaded and ready for operations"])
-        state_searching(["searching\nDisplaying search results"])
-        state_viewing(["viewing\nViewing a specific blueprint"])
-        state_comparing(["comparing\nComparing two versions"])
+        state_ready(["ready<br>Registry loaded and ready for operations"]):::state
+        state_searching(["searching<br>Displaying search results"]):::state
+        state_viewing(["viewing<br>Viewing a specific blueprint"]):::state
+        state_comparing(["comparing<br>Comparing two versions"]):::state
     end
-        state_error[["error\nError state"]]:::errorState
+        state_error[["error<br>Error state"]]:::errorState
 
     %% Transitions
     act_t0s0[["init_registry, save_registry"]]:::action
@@ -144,9 +144,10 @@ flowchart TD
     state_comparing -- "LOAD_FAILED" --> act_t28s4
     act_t28s4 --> state_error
 
-    %% Styling
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
-    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
-    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+    %% Styling - ALL shapes have explicit fill and black text
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000

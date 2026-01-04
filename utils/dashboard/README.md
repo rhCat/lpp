@@ -4,7 +4,7 @@ Aggregates and visualizes all L++ utility tools with interactive search, filteri
 
 ## Overview
 
-The Dashboard tool scans the `utils/` directory to discover all L++ blueprints and generates an interactive HTML dashboard that provides:
+The Dashboard tool scans the `utils/` directory to discover all L++ tool blueprints and generates an interactive HTML dashboard that provides:
 
 - **Tool Overview**: Quick stats for each tool (states, transitions, gates, actions)
 - **Category Grouping**: Automatic categorization based on naming patterns
@@ -69,7 +69,7 @@ Tools are automatically grouped into these categories based on naming patterns:
 | Category | Pattern |
 |----------|---------|
 | Blueprint Tools | `blueprint_*` |
-| Visualization | `visualizer`, `graph_`, `diagram` |
+| Visualization | `graph_`, `diagram` |
 | Code Analysis | `decoder`, `extractor`, `analyzer` |
 | Testing & Quality | `test_`, `coverage_`, `linter`, `compliance` |
 | Documentation | `doc_`, `readme_` |
@@ -77,7 +77,7 @@ Tools are automatically grouped into these categories based on naming patterns:
 | Orchestration | `orchestrator`, `simulator`, `tracer` |
 | Research | `research_`, `scholar_` |
 | LLM Integration | `llm_` |
-| Migration & Schema | `schema_`, `migrator` |
+| Migration & Schema | `migrator` |
 | Verification | `tlaps_`, `seal` |
 
 ## Dashboard Features

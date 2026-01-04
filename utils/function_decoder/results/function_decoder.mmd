@@ -1,14 +1,14 @@
 flowchart TD
     %% L++ Logic CAD: Python Function Decoder
-        state_idle(["idle\nAwaiting file path"]):::entry
+        state_idle(["idle<br>Awaiting file path"]):::entry
     subgraph Processing
-        state_parsing(["parsing\nParsing Python source into AST"])
-        state_extracting(["extracting\nExtracting exports and imports"])
-        state_tracing(["tracing\nTracing function call graph"])
-        state_computing(["computing\nComputing coupling metrics"])
+        state_parsing(["parsing<br>Parsing Python source into AST"]):::state
+        state_extracting(["extracting<br>Extracting exports and imports"]):::state
+        state_tracing(["tracing<br>Tracing function call graph"]):::state
+        state_computing(["computing<br>Computing coupling metrics"]):::state
     end
-        state_complete(["complete\nModule graph generated"])
-        state_error[["error\nAnalysis failed"]]:::errorState
+        state_complete(["complete<br>Module graph generated"]):::state
+        state_error[["error<br>Analysis failed"]]:::errorState
 
     %% Transitions
     gate_t0s0{{"filePath is not None and le...?"}}:::gate
@@ -53,9 +53,10 @@ flowchart TD
     state_computing -- "RESET" --> state_idle
     state_complete -- "RESET" --> state_idle
 
-    %% Styling
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
-    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
-    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+    %% Styling - ALL shapes have explicit fill and black text
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000

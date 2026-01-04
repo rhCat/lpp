@@ -1,15 +1,15 @@
 flowchart TD
     %% L++ Logic CAD: L++ Blueprint Composer
-        state_idle(["idle\nNo blueprints loaded, waiting for input"]):::entry
-        state_validated(["validated\nValidation complete, results available"])
+        state_idle(["idle<br>No blueprints loaded, waiting for input"]):::entry
+        state_validated(["validated<br>Validation complete, results available"]):::state
     subgraph Processing
-        state_composed(["composed\nComposition complete, ready to validate "])
-        state_parent_loaded(["parent_loaded\nParent blueprint loaded, waiting for chi"])
-        state_embedding_ready(["embedding_ready\nEmbedding defined, ready to compose or a"])
-        state_child_loaded(["child_loaded\nBoth parent and child loaded, ready to d"])
-        state_defining_embedding(["defining_embedding\nDefining embedding parameters (target st"])
+        state_composed(["composed<br>Composition complete, ready to validate "]):::state
+        state_parent_loaded(["parent_loaded<br>Parent blueprint loaded, waiting for chi"]):::state
+        state_embedding_ready(["embedding_ready<br>Embedding defined, ready to compose or a"]):::state
+        state_child_loaded(["child_loaded<br>Both parent and child loaded, ready to d"]):::state
+        state_defining_embedding(["defining_embedding<br>Defining embedding parameters (target st"]):::state
     end
-        state_error[["error\nError state"]]:::errorState
+        state_error[["error<br>Error state"]]:::errorState
 
     %% Transitions
     act_t0s0[["load_parent"]]:::action
@@ -139,9 +139,10 @@ flowchart TD
     state_defining_embedding -- "LOAD_FAILED" --> act_t27s6
     act_t27s6 --> state_error
 
-    %% Styling
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
-    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
-    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+    %% Styling - ALL shapes have explicit fill and black text
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000

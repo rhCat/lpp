@@ -1,13 +1,13 @@
 flowchart TD
     %% L++ Logic CAD: Scholar Chatbot
-        state_idle(["idle\nReady for research query"]):::entry
+        state_idle(["idle<br>Ready for research query"]):::entry
     subgraph Processing
-        state_searching(["searching\nSearching academic sources"])
-        state_reviewing(["reviewing\nReviewing search results"])
-        state_analyzing(["analyzing\nLLM analyzing selected papers"])
-        state_chatting(["chatting\nInteractive Q&A about research"])
+        state_searching(["searching<br>Searching academic sources"]):::state
+        state_reviewing(["reviewing<br>Reviewing search results"]):::state
+        state_analyzing(["analyzing<br>LLM analyzing selected papers"]):::state
+        state_chatting(["chatting<br>Interactive Q&A about research"]):::state
     end
-        state_error[["error\nError occurred"]]:::errorState
+        state_error[["error<br>Error occurred"]]:::errorState
 
     %% Transitions
     act_t0s0[["initConfig"]]:::action
@@ -50,9 +50,10 @@ flowchart TD
     state_error -- "RETRY" --> act_t12s0
     act_t12s0 --> state_idle
 
-    %% Styling
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
-    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
-    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+    %% Styling - ALL shapes have explicit fill and black text
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000

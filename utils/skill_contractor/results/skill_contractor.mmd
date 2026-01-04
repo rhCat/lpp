@@ -1,20 +1,20 @@
 flowchart TD
     %% L++ Logic CAD: Skill Contractor
-        state_idle(["idle\nAwaiting target assignment"]):::entry
-        state_validating(["validating\nValidating L++ artifacts with build_skil"])
+        state_idle(["idle<br>Awaiting target assignment"]):::entry
+        state_validating(["validating<br>Validating L++ artifacts with build_skil"]):::state
     subgraph Processing
-        state_planning(["planning\nDecomposing target into steps (L++ workf"])
-        state_executing(["executing\nLLM generating step output"])
-        state_refining(["refining\nRefining plan based on feedback"])
-        state_reviewing(["reviewing\nReviewing failed step - skip or replan"])
-        state_parsing(["parsing\nParsing LLM output and applying auto-cor"])
-        state_evaluating(["evaluating\nSelf-evaluating progress (includes L++ c"])
-        state_stepping(["stepping\nAdvancing to next step"])
-        state_correcting(["correcting\nAuto-corrections applied - logging for r"])
-        state_eval_interactive(["eval_interactive\nEvaluating generated interactive.py with"])
+        state_planning(["planning<br>Decomposing target into steps (L++ workf"]):::state
+        state_executing(["executing<br>LLM generating step output"]):::state
+        state_refining(["refining<br>Refining plan based on feedback"]):::state
+        state_reviewing(["reviewing<br>Reviewing failed step - skip or replan"]):::state
+        state_parsing(["parsing<br>Parsing LLM output and applying auto-cor"]):::state
+        state_evaluating(["evaluating<br>Self-evaluating progress (includes L++ c"]):::state
+        state_stepping(["stepping<br>Advancing to next step"]):::state
+        state_correcting(["correcting<br>Auto-corrections applied - logging for r"]):::state
+        state_eval_interactive(["eval_interactive<br>Evaluating generated interactive.py with"]):::state
     end
-        state_complete[["complete\nTarget achieved"]]:::terminal
-        state_error[["error\nError occurred"]]:::errorState
+        state_complete[["complete<br>Target achieved"]]:::terminal
+        state_error[["error<br>Error occurred"]]:::errorState
 
     %% Transitions
     act_t0s0[["init"]]:::action
@@ -224,9 +224,10 @@ flowchart TD
     state_validating -- "RESET" --> state_idle
     state_eval_interactive -- "RESET" --> state_idle
 
-    %% Styling
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
-    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
-    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+    %% Styling - ALL shapes have explicit fill and black text
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000

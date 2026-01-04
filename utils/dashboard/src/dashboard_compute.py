@@ -11,7 +11,7 @@ from collections import defaultdict
 # Tool category patterns for automatic grouping
 CATEGORY_PATTERNS = {
     "Blueprint Tools": ["blueprint_"],
-    "Visualization": ["visualizer", "graph_", "diagram"],
+    "Visualization": ["graph_", "diagram"],
     "Code Analysis": ["decoder", "extractor", "analyzer"],
     "Testing & Quality": ["test_", "coverage_", "linter", "compliance"],
     "Documentation": ["doc_", "readme_"],
@@ -19,18 +19,51 @@ CATEGORY_PATTERNS = {
     "Orchestration": ["orchestrator", "simulator", "tracer"],
     "Research": ["research_", "scholar_"],
     "LLM Integration": ["llm_"],
-    "Migration & Schema": ["schema_", "migrator"],
+    "Migration & Schema": ["migrator"],
     "Verification": ["tlaps_", "seal"]
 }
 
 
 def scanTools(params: dict) -> dict:
-    """Scan utils directory for L++ tool blueprints."""
+    """Scan directories for L++ tool blueprints.
+
+    Supports scanning:
+    - utils/ directory: standard tool structure (tool_name/tool_name.json)
+    - src/ directory: core blueprints in src/blueprints/core_jsons/
+    """
+    scanPaths = params.get("scanPaths", [])
     utilsPath = params.get("utilsPath", "")
-    if not utilsPath or not os.path.isdir(utilsPath):
-        return {"tools": [], "hasTools": False, "error": f"Invalid utils path: {utilsPath}"}
+
+    # Backwards compatibility: single utilsPath converts to scanPaths
+    if utilsPath and not scanPaths:
+        scanPaths = [{"path": utilsPath, "type": "utils"}]
+
+    if not scanPaths:
+        return {"tools": [], "hasTools": False, "error": "No scan paths provided"}
 
     tools = []
+
+    for scanConfig in scanPaths:
+        scanPath = scanConfig.get("path", "")
+        scanType = scanConfig.get("type", "utils")
+
+        if not scanPath or not os.path.isdir(scanPath):
+            continue
+
+        if scanType == "src":
+            # Scan src/ directory - blueprints in core_jsons/
+            tools.extend(_scanSrcDirectory(scanPath))
+        else:
+            # Scan utils/ directory - standard tool structure
+            tools.extend(_scanUtilsDirectory(scanPath))
+
+    return {"tools": tools, "hasTools": len(tools) > 0, "error": None}
+
+
+def _scanUtilsDirectory(utilsPath: str) -> list:
+    """Scan utils/ directory for tool blueprints."""
+    tools = []
+
     for item in sorted(os.listdir(utilsPath)):
         toolDir = os.path.join(utilsPath, item)
         if not os.path.isdir(toolDir):
@@ -57,11 +90,90 @@ def scanTools(params: dict) -> dict:
             "dir": toolDir,
             "blueprintPath": blueprintPath,
             "visualizations": _findVisualizations(toolDir, item),
-            "simpleMmd": _findSimpleMmd(toolDir, item)
+            "simpleMmd": _findSimpleMmd(toolDir, item),
+            "sourceType": "utils"
         }
         tools.append(toolMeta)
 
-    return {"tools": tools, "hasTools": len(tools) > 0, "error": None}
+    return tools
+
+
+def _scanSrcDirectory(srcPath: str) -> list:
+    """Scan src/ directory for core framework blueprints."""
+    tools = []
+
+    # Core blueprints are in src/blueprints/core_jsons/
+    coreJsonsPath = os.path.join(srcPath, "blueprints", "core_jsons")
+    framePyPath = os.path.join(srcPath, "frame_py")
+
+    if not os.path.isdir(coreJsonsPath):
+        return tools
+
+    for item in sorted(os.listdir(coreJsonsPath)):
+        if not item.endswith("_blueprint.json"):
+            continue
+
+        blueprintPath = os.path.join(coreJsonsPath, item)
+        # Extract tool ID from filename (e.g., "compiler_blueprint.json" -> "compiler")
+        toolId = item.replace("_blueprint.json", "")
+
+        # Build tool metadata
+        toolMeta = {
+            "id": toolId,
+            "dir": framePyPath,  # Python implementation directory
+            "blueprintPath": blueprintPath,
+            "visualizations": _findSrcVisualizations(srcPath, toolId),
+            "simpleMmd": _findSrcSimpleMmd(srcPath, toolId),
+            "sourceType": "src"
+        }
+        tools.append(toolMeta)
+
+    return tools
+
+
+def _findSrcVisualizations(srcPath: str, toolId: str) -> dict:
+    """Find visualization files for a src/ core module."""
+    resultsDir = os.path.join(srcPath, "frame_py", "results")
+    vizs = {
+        "stateGraph": None,
+        "logicGraph": None,
+        "functionsGraph": None,
+        "mermaidDiagram": None
+    }
+
+    if not os.path.isdir(resultsDir):
+        return vizs
+
+    # Pattern matching for visualization files
+    patterns = {
+        "stateGraph": [f"{toolId}_graph.html", "graph.html"],
+        "logicGraph": [f"{toolId}_logic_graph.html", "logic_graph.html"],
+        "functionsGraph": [f"{toolId}_functions.html", "functions.html"],
+        "mermaidDiagram": [f"{toolId}_diagram.html", "diagram.html"]
+    }
+
+    for vizType, filePatterns in patterns.items():
+        for pattern in filePatterns:
+            candidate = os.path.join(resultsDir, pattern)
+            if os.path.exists(candidate):
+                vizs[vizType] = candidate
+                break
+
+    return vizs
+
+
+def _findSrcSimpleMmd(srcPath: str, toolId: str) -> str:
+    """Find the simplified mermaid diagram file for src/ modules."""
+    resultsDir = os.path.join(srcPath, "frame_py", "results")
+    if not os.path.isdir(resultsDir):
+        return None
+
+    for pattern in [f"{toolId}_simple.mmd", "simple.mmd"]:
+        candidate = os.path.join(resultsDir, pattern)
+        if os.path.exists(candidate):
+            return candidate
+
+    return None
 
 
 def _findVisualizations(toolDir: str, toolId: str) -> dict:
@@ -233,12 +345,21 @@ def generateDashboard(params: dict) -> dict:
     categories = params.get("categories", {})
     statistics = params.get("statistics", {})
     utilsPath = params.get("utilsPath", "")
+    outputPath = params.get("outputPath", "")
+    basePath = params.get("basePath", "")
 
     if not tools:
         return {"htmlPath": None, "hasHtml": False, "error": "No tools to display"}
 
-    htmlPath = os.path.join(utilsPath, "dashboard.html")
-    html = _buildDashboardHtml(tools, categories, statistics, utilsPath)
+    # Determine output path
+    if outputPath:
+        htmlPath = outputPath
+    elif utilsPath:
+        htmlPath = os.path.join(utilsPath, "dashboard.html")
+    else:
+        return {"htmlPath": None, "hasHtml": False, "error": "No output path specified"}
+
+    html = _buildDashboardHtml(tools, categories, statistics, basePath or utilsPath)
 
     try:
         with open(htmlPath, "w", encoding="utf-8") as f:
@@ -248,7 +369,7 @@ def generateDashboard(params: dict) -> dict:
         return {"htmlPath": None, "hasHtml": False, "error": str(e)}
 
 
-def _buildDashboardHtml(tools: list, categories: dict, stats: dict, utilsPath: str) -> str:
+def _buildDashboardHtml(tools: list, categories: dict, stats: dict, basePath: str) -> str:
     """Build the dashboard HTML with dark theme."""
     # Prepare tools JSON for client-side filtering
     toolsJson = json.dumps([
@@ -260,12 +381,13 @@ def _buildDashboardHtml(tools: list, categories: dict, stats: dict, utilsPath: s
             "stats": t.get("stats", {}),
             "states": t.get("states", []),
             "visualizations": {
-                k: os.path.relpath(v, utilsPath) if v else None
+                k: os.path.relpath(v, basePath) if v else None
                 for k, v in t.get("visualizations", {}).items()
             },
             "mermaidContent": t.get("mermaidContent"),
-            "blueprintPath": os.path.relpath(t["blueprintPath"], utilsPath),
-            "dir": os.path.relpath(t["dir"], utilsPath)
+            "blueprintPath": os.path.relpath(t["blueprintPath"], basePath),
+            "dir": os.path.relpath(t["dir"], basePath),
+            "sourceType": t.get("sourceType", "utils")
         }
         for t in tools
     ])

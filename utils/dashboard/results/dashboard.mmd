@@ -1,14 +1,14 @@
 flowchart TD
     %% L++ Logic CAD: L++ Tools Dashboard
-        state_idle(["idle\nAwaiting utils path input"]):::entry
+        state_idle(["idle<br>Awaiting utils path input"]):::entry
     subgraph Processing
-        state_scanning(["scanning\nScanning utils directory for tools"])
-        state_analyzing(["analyzing\nAnalyzing tool blueprints and statistics"])
-        state_categorizing(["categorizing\nGrouping tools by category"])
-        state_generating(["generating\nGenerating dashboard HTML"])
+        state_scanning(["scanning<br>Scanning utils directory for tools"]):::state
+        state_analyzing(["analyzing<br>Analyzing tool blueprints and statistics"]):::state
+        state_categorizing(["categorizing<br>Grouping tools by category"]):::state
+        state_generating(["generating<br>Generating dashboard HTML"]):::state
     end
-        state_complete[["complete\nDashboard generation complete"]]:::terminal
-        state_error[["error\nError during processing"]]:::errorState
+        state_complete[["complete<br>Dashboard generation complete"]]:::terminal
+        state_error[["error<br>Error during processing"]]:::errorState
 
     %% Transitions
     gate_t0s0{{"utilsPath is not None and l...?"}}:::gate
@@ -50,9 +50,10 @@ flowchart TD
     state_categorizing -- "RESET" --> state_idle
     state_generating -- "RESET" --> state_idle
 
-    %% Styling
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
-    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
-    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+    %% Styling - ALL shapes have explicit fill and black text
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000

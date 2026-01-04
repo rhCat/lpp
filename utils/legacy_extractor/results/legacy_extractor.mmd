@@ -1,21 +1,21 @@
 flowchart TD
     %% L++ Logic CAD: Legacy Code State Machine Extractor
-        state_idle(["idle\nAwaiting source file or code input"]):::entry
+        state_idle(["idle<br>Awaiting source file or code input"]):::entry
     subgraph Processing
-        state_loading(["loading\nLoading source file from disk"])
-        state_parsing(["parsing\nParsing Python source into AST"])
-        state_detecting(["detecting\nDetecting state machine patterns in code"])
-        state_extracting_states(["extracting_states\nExtracting state definitions from code"])
-        state_extracting_transitions(["extracting_transitions\nExtracting state transitions from method"])
-        state_extracting_gates(["extracting_gates\nExtracting gate conditions from if state"])
-        state_extracting_actions(["extracting_actions\nExtracting actions from side effects"])
-        state_analyzing_events(["analyzing_events\nAnalyzing event handler patterns"])
-        state_inferring_entry(["inferring_entry\nInferring entry and terminal states"])
-        state_generating(["generating\nGenerating L++ blueprint"])
-        state_mapping(["mapping\nGenerating source-to-blueprint mapping"])
+        state_loading(["loading<br>Loading source file from disk"]):::state
+        state_parsing(["parsing<br>Parsing Python source into AST"]):::state
+        state_detecting(["detecting<br>Detecting state machine patterns in code"]):::state
+        state_extracting_states(["extracting_states<br>Extracting state definitions from code"]):::state
+        state_extracting_transitions(["extracting_transitions<br>Extracting state transitions from method"]):::state
+        state_extracting_gates(["extracting_gates<br>Extracting gate conditions from if state"]):::state
+        state_extracting_actions(["extracting_actions<br>Extracting actions from side effects"]):::state
+        state_analyzing_events(["analyzing_events<br>Analyzing event handler patterns"]):::state
+        state_inferring_entry(["inferring_entry<br>Inferring entry and terminal states"]):::state
+        state_generating(["generating<br>Generating L++ blueprint"]):::state
+        state_mapping(["mapping<br>Generating source-to-blueprint mapping"]):::state
     end
-        state_complete(["complete\nExtraction complete, blueprint ready"])
-        state_error[["error\nExtraction failed"]]:::errorState
+        state_complete(["complete<br>Extraction complete, blueprint ready"]):::state
+        state_error[["error<br>Extraction failed"]]:::errorState
 
     %% Transitions
     act_t0s0[["setMode"]]:::action
@@ -100,9 +100,10 @@ flowchart TD
     state_error -- "RESET" --> act_t18s0
     act_t18s0 --> state_idle
 
-    %% Styling
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
-    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
-    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+    %% Styling - ALL shapes have explicit fill and black text
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000

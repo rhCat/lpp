@@ -1,8 +1,8 @@
 flowchart TD
     %% L++ Logic CAD: Research Scraper
-        state_idle(["idle\nReady for search query"]):::entry
-        state_hasResults(["hasResults\nResults available"])
-        state_error[["error\nError occurred"]]:::errorState
+        state_idle(["idle<br>Ready for search query"]):::entry
+        state_hasResults(["hasResults<br>Results available"]):::state
+        state_error[["error<br>Error occurred"]]:::errorState
 
     %% Transitions
     act_t0s0[["setQuery, setMaxResults, setSourceArxiv +1"]]:::action
@@ -43,9 +43,10 @@ flowchart TD
     gate_t10s0 -- ✓ --> act_t10s0
     act_t10s0 --> state_error
 
-    %% Styling
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
-    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
-    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+    %% Styling - ALL shapes have explicit fill and black text
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000

@@ -1,19 +1,19 @@
 flowchart TD
     %% L++ Logic CAD: TLAPS Seal Certifier
-        state_idle(["idle\nReady to receive blueprint for certifica"]):::entry
-        state_tlc_verifying(["tlc_verifying\nRunning TLC model checker (empirical)"])
+        state_idle(["idle<br>Ready to receive blueprint for certifica"]):::entry
+        state_tlc_verifying(["tlc_verifying<br>Running TLC model checker (empirical)"]):::state
     subgraph Processing
-        state_loading(["loading\nLoading and parsing blueprint"])
-        state_auditing(["auditing\nAuditing Trinity and Flange structure"])
-        state_generating_tla(["generating_tla\nGenerating TLA+ specification"])
-        state_tlc_verified(["tlc_verified\nTLC verification passed"])
-        state_tlaps_proving(["tlaps_proving\nRunning TLAPS theorem prover (axiomatic)"])
+        state_loading(["loading<br>Loading and parsing blueprint"]):::state
+        state_auditing(["auditing<br>Auditing Trinity and Flange structure"]):::state
+        state_generating_tla(["generating_tla<br>Generating TLA+ specification"]):::state
+        state_tlc_verified(["tlc_verified<br>TLC verification passed"]):::state
+        state_tlaps_proving(["tlaps_proving<br>Running TLAPS theorem prover (axiomatic)"]):::state
     end
     subgraph Completion
-        state_rejected[["rejected\nBlueprint failed verification"]]:::terminal
-        state_certified[["certified\nTLAPS certification complete - Seal gran"]]:::terminal
+        state_rejected[["rejected<br>Blueprint failed verification"]]:::terminal
+        state_certified[["certified<br>TLAPS certification complete - Seal gran"]]:::terminal
     end
-        state_error[["error\nError during certification process"]]:::errorState
+        state_error[["error<br>Error during certification process"]]:::errorState
 
     %% Transitions
     act_t0s0[["setPath"]]:::action
@@ -127,9 +127,10 @@ flowchart TD
     state_certified -- "VIEW" --> gate_t13s0
     gate_t13s0 -- ✓ --> state_certified
 
-    %% Styling
-    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px
-    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
-    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+    %% Styling - ALL shapes have explicit fill and black text
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000
