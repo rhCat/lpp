@@ -233,7 +233,8 @@ def chat(params: Dict[str, Any]) -> Dict[str, Any]:
 
     # Add paper context reminder if needed
     if len(conversation) < 3 and papers:
-        titles = [f"[{i+1}] {p.get('title','')}" for i, p in enumerate(papers)]
+        titles = [f"[{i+1}] {p.get('title', '')}" for i,
+                  p in enumerate(papers)]
         conversation.append({
             "role": "system",
             "content": f"Papers in context: {'; '.join(titles)}"

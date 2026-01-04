@@ -52,7 +52,7 @@ def main():
             op.dispatch("EXPORT", {})
             reg = op.context.get("registry")
             if reg:
-                print(f"  Exported {len(reg.get('skills',{}))} skills")
+                print(f"  Exported {len(reg.get('skills', {}))} skills")
         elif cmd == "context":
             reg = op.context.get("registry")
             if reg:

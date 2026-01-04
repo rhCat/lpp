@@ -88,7 +88,8 @@ class PlaygroundHandler(SimpleHTTPRequestHandler):
 
         # Read body
         content_length = int(self.headers.get("Content-Length", 0))
-        body = self.rfile.read(content_length).decode("utf-8") if content_length else "{}"
+        body = self.rfile.read(content_length).decode(
+            "utf-8") if content_length else "{}"
 
         try:
             params = json.loads(body)

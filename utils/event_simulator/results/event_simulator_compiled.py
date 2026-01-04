@@ -55,7 +55,8 @@ GATES = {
 DISPLAY_RULES = [
     {'gate': 'is_error', 'template': 'ERROR: {error}'},
     {'gate': 'is_idle', 'template': 'No blueprint loaded. Use LOAD command.'},
-    {'gate': 'is_simulating', 'template': '[{mode}] {blueprint_name} @ {sim_state}'},
+    {'gate': 'is_simulating',
+        'template': '[{mode}] {blueprint_name} @ {sim_state}'},
     {'gate': 'is_ready', 'template': 'Loaded: {blueprint_name} - Ready to simulate'},
     {'template': 'L++ Event Simulator'},
 ]
@@ -456,7 +457,8 @@ class Operator:
     """
 
     def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_path': None, 'blueprint_name': None, 'blueprint_id': None, 'sim_state': None, 'sim_context': None, 'available_events': None, 'available_transitions': None, 'trace': None, 'forks': None, 'current_fork': None, 'state_space': None, 'path_result': None, 'fuzz_config': None, 'fuzz_result': None, 'sequence': None, 'sequence_index': None, 'mode': None, 'output': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_path': None, 'blueprint_name': None, 'blueprint_id': None, 'sim_state': None, 'sim_context': None, 'available_events': None, 'available_transitions': None,
+                        'trace': None, 'forks': None, 'current_fork': None, 'state_space': None, 'path_result': None, 'fuzz_config': None, 'fuzz_result': None, 'sequence': None, 'sequence_index': None, 'mode': None, 'output': None, 'error': None}
         self.traces: list[TransitionTrace] = []
         self.compute_registry = compute_registry or {}
 
@@ -548,7 +550,8 @@ class Operator:
                             self.context, _ = atom_MUTATE(
                                 self.context, ctx_path, result[res_key]
                             )
-                    scope.update(self.context)  # Sync scope for chained actions
+                    # Sync scope for chained actions
+                    scope.update(self.context)
 
         # TRANSITION
         (new_state, trace), _ = atom_TRANSITION(current, trans['to'])
@@ -584,7 +587,8 @@ class Operator:
 
     def reset(self):
         """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_path': None, 'blueprint_name': None, 'blueprint_id': None, 'sim_state': None, 'sim_context': None, 'available_events': None, 'available_transitions': None, 'trace': None, 'forks': None, 'current_fork': None, 'state_space': None, 'path_result': None, 'fuzz_config': None, 'fuzz_result': None, 'sequence': None, 'sequence_index': None, 'mode': None, 'output': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_path': None, 'blueprint_name': None, 'blueprint_id': None, 'sim_state': None, 'sim_context': None, 'available_events': None, 'available_transitions': None,
+                        'trace': None, 'forks': None, 'current_fork': None, 'state_space': None, 'path_result': None, 'fuzz_config': None, 'fuzz_result': None, 'sequence': None, 'sequence_index': None, 'mode': None, 'output': None, 'error': None}
         self.traces = []
 
     def save_state(self, path: str = None):
@@ -655,7 +659,8 @@ class Operator:
 
             # Validate blueprint ID matches
             if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
+                print(
+                    f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
                 return False
 
             self.context = state_data.get('context', {})

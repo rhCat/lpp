@@ -115,7 +115,8 @@ def main():
         elif action == "load" and arg:
             migrator.dispatch("LOAD", {"path": arg})
         elif action == "self":
-            migrator.dispatch("LOAD", {"path": str(HERE / "schema_migrator.json")})
+            migrator.dispatch(
+                "LOAD", {"path": str(HERE / "schema_migrator.json")})
         elif action == "detect":
             if ctx.get("blueprint"):
                 print(f"  Detected version: {ctx.get('source_version', '?')}")
@@ -171,7 +172,8 @@ def main():
             if changes:
                 print("  Planned Changes:")
                 for ch in changes:
-                    print(f"    [{ch.get('type', '?')}] {ch.get('description', '')}")
+                    print(
+                        f"    [{ch.get('type', '?')}] {ch.get('description', '')}")
             else:
                 print("  No changes planned")
         elif action == "state":

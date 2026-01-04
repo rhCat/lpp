@@ -51,7 +51,8 @@ GATES = {
 
 DISPLAY_RULES = [
     {'gate': 'has_metrics', 'template': 'Coverage: {metrics.overall_percentage}% - States: {metrics.state_percentage}% | Trans: {metrics.transition_percentage}%'},
-    {'gate': 'has_blueprint', 'template': 'Loaded: {blueprint.name} (tracking)'},
+    {'gate': 'has_blueprint',
+        'template': 'Loaded: {blueprint.name} (tracking)'},
     {'template': 'L++ Coverage Analyzer'},
 ]
 
@@ -490,7 +491,8 @@ class Operator:
     """
 
     def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_path': None, 'coverage_data': None, 'state_hits': None, 'transition_hits': None, 'gate_hits': None, 'action_hits': None, 'event_hits': None, 'metrics': None, 'summary_report': None, 'detailed_report': None, 'gap_report': None, 'html_report': None, 'json_report': None, 'export_path': None, 'trace_data': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_path': None, 'coverage_data': None, 'state_hits': None, 'transition_hits': None, 'gate_hits': None, 'action_hits': None,
+                        'event_hits': None, 'metrics': None, 'summary_report': None, 'detailed_report': None, 'gap_report': None, 'html_report': None, 'json_report': None, 'export_path': None, 'trace_data': None, 'error': None}
         self.traces: list[TransitionTrace] = []
         self.compute_registry = compute_registry or {}
 
@@ -582,7 +584,8 @@ class Operator:
                             self.context, _ = atom_MUTATE(
                                 self.context, ctx_path, result[res_key]
                             )
-                    scope.update(self.context)  # Sync scope for chained actions
+                    # Sync scope for chained actions
+                    scope.update(self.context)
 
         # TRANSITION
         (new_state, trace), _ = atom_TRANSITION(current, trans['to'])
@@ -618,7 +621,8 @@ class Operator:
 
     def reset(self):
         """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_path': None, 'coverage_data': None, 'state_hits': None, 'transition_hits': None, 'gate_hits': None, 'action_hits': None, 'event_hits': None, 'metrics': None, 'summary_report': None, 'detailed_report': None, 'gap_report': None, 'html_report': None, 'json_report': None, 'export_path': None, 'trace_data': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_path': None, 'coverage_data': None, 'state_hits': None, 'transition_hits': None, 'gate_hits': None, 'action_hits': None,
+                        'event_hits': None, 'metrics': None, 'summary_report': None, 'detailed_report': None, 'gap_report': None, 'html_report': None, 'json_report': None, 'export_path': None, 'trace_data': None, 'error': None}
         self.traces = []
 
     def save_state(self, path: str = None):
@@ -689,7 +693,8 @@ class Operator:
 
             # Validate blueprint ID matches
             if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
+                print(
+                    f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
                 return False
 
             self.context = state_data.get('context', {})

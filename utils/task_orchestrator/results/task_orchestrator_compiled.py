@@ -401,7 +401,8 @@ class Operator:
     """
 
     def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'api_key': None, 'api_base': None, 'model': None, 'task': None, 'feature_tree': None, 'current_path': None, 'current_feature': None, 'depth': None, 'max_depth': None, 'is_leaf': None, 'leaf_queue': None, 'leaf_count': None, 'exec_count': None, 'tools_needed': None, 'tools_pending': None, 'tools_built': None, 'exec_log': None, 'reflection': None, 'evaluation': None, 'is_complete': None, 'iteration': None, 'max_iterations': None, 'workspace_path': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'api_key': None, 'api_base': None, 'model': None, 'task': None, 'feature_tree': None, 'current_path': None, 'current_feature': None, 'depth': None, 'max_depth': None, 'is_leaf': None, 'leaf_queue': None, 'leaf_count': None,
+                        'exec_count': None, 'tools_needed': None, 'tools_pending': None, 'tools_built': None, 'exec_log': None, 'reflection': None, 'evaluation': None, 'is_complete': None, 'iteration': None, 'max_iterations': None, 'workspace_path': None, 'error': None}
         self.traces: list[TransitionTrace] = []
         self.compute_registry = compute_registry or {}
 
@@ -493,7 +494,8 @@ class Operator:
                             self.context, _ = atom_MUTATE(
                                 self.context, ctx_path, result[res_key]
                             )
-                    scope.update(self.context)  # Sync scope for chained actions
+                    # Sync scope for chained actions
+                    scope.update(self.context)
 
         # TRANSITION
         (new_state, trace), _ = atom_TRANSITION(current, trans['to'])
@@ -529,7 +531,8 @@ class Operator:
 
     def reset(self):
         """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'api_key': None, 'api_base': None, 'model': None, 'task': None, 'feature_tree': None, 'current_path': None, 'current_feature': None, 'depth': None, 'max_depth': None, 'is_leaf': None, 'leaf_queue': None, 'leaf_count': None, 'exec_count': None, 'tools_needed': None, 'tools_pending': None, 'tools_built': None, 'exec_log': None, 'reflection': None, 'evaluation': None, 'is_complete': None, 'iteration': None, 'max_iterations': None, 'workspace_path': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'api_key': None, 'api_base': None, 'model': None, 'task': None, 'feature_tree': None, 'current_path': None, 'current_feature': None, 'depth': None, 'max_depth': None, 'is_leaf': None, 'leaf_queue': None, 'leaf_count': None,
+                        'exec_count': None, 'tools_needed': None, 'tools_pending': None, 'tools_built': None, 'exec_log': None, 'reflection': None, 'evaluation': None, 'is_complete': None, 'iteration': None, 'max_iterations': None, 'workspace_path': None, 'error': None}
         self.traces = []
 
     def save_state(self, path: str = None):
@@ -600,7 +603,8 @@ class Operator:
 
             # Validate blueprint ID matches
             if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
+                print(
+                    f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
                 return False
 
             self.context = state_data.get('context', {})

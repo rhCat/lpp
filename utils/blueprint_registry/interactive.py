@@ -78,7 +78,8 @@ def print_blueprint(bp: dict):
     print(f"  Created:     {meta.get('created_at', 'N/A')}")
     print(f"  Updated:     {meta.get('updated_at', 'N/A')}")
     print(f"  Versions:    {', '.join(meta.get('versions', []))}")
-    print(f"  Dependencies: {', '.join(meta.get('dependencies', [])) or 'None'}")
+    print(
+        f"  Dependencies: {', '.join(meta.get('dependencies', [])) or 'None'}")
 
     if data:
         print("\n  Blueprint Content:")
@@ -154,7 +155,8 @@ def main():
     print("\n=== L++ Blueprint Registry ===\n")
 
     # Compile and load operator
-    op = compile_and_load(str(HERE / "blueprint_registry.json"), BPREG_REGISTRY)
+    op = compile_and_load(
+        str(HERE / "blueprint_registry.json"), BPREG_REGISTRY)
 
     # Auto-load default registry if it exists
     default_index = DEFAULT_REGISTRY / "index.json"
@@ -178,9 +180,11 @@ def main():
         # Status line
         if op.state == "ready" and ctx.get("stats"):
             stats = ctx["stats"]
-            print(f"\n  {state_icon} {op.state} | {stats.get('total', 0)} blueprints")
+            print(
+                f"\n  {state_icon} {op.state} | {stats.get('total', 0)} blueprints")
         elif op.state == "viewing" and ctx.get("current_id"):
-            print(f"\n  {state_icon} {ctx['current_id']} v{ctx.get('current_version', '?')}")
+            print(
+                f"\n  {state_icon} {ctx['current_id']} v{ctx.get('current_version', '?')}")
         elif ctx.get("message"):
             print(f"\n  {state_icon} {ctx['message']}")
         elif ctx.get("error"):
@@ -271,7 +275,8 @@ def main():
                         "bump": bump
                     })
                 else:
-                    print("  Usage: update <blueprint_id> <path> [major|minor|patch]")
+                    print(
+                        "  Usage: update <blueprint_id> <path> [major|minor|patch]")
             elif ctx.get("current_id"):
                 # Update current blueprint
                 source = ctx.get("current_blueprint", {}).get(

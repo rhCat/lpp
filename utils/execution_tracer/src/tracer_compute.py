@@ -209,7 +209,7 @@ def end_trace(params: Dict[str, Any]) -> Dict[str, Any]:
         "active_spans": {},
         "end_time": end_time,
         "output": f"Trace ended: {trace_id} ({total_duration:.2f}ms, "
-                  f"{len(new_spans)} spans)"
+        f"{len(new_spans)} spans)"
     }
 
 
@@ -1159,7 +1159,7 @@ def analyze_trace(params: Dict[str, Any]) -> Dict[str, Any]:
     ])
 
     for state, count in sorted(state_visits.items(),
-                                key=lambda x: x[1], reverse=True):
+                               key=lambda x: x[1], reverse=True):
         lines.append(f"    {state:30} {count:4} visits")
 
     lines.extend([
@@ -1173,7 +1173,7 @@ def analyze_trace(params: Dict[str, Any]) -> Dict[str, Any]:
     ])
 
     for evt_type, count in sorted(event_types.items(),
-                                   key=lambda x: x[1], reverse=True):
+                                  key=lambda x: x[1], reverse=True):
         lines.append(f"    {evt_type:30} {count:4}")
 
     lines.append("=" * 60)

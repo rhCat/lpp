@@ -342,7 +342,8 @@ def compute_metrics(params: Dict[str, Any]) -> Dict[str, Any]:
     # Gate branch coverage (both true and false branches)
     branchTotal = totalGates * 2  # Each gate has 2 branches
     branchCovered = sum(
-        (1 if g.get("true", 0) > 0 else 0) + (1 if g.get("false", 0) > 0 else 0)
+        (1 if g.get("true", 0) > 0 else 0) +
+        (1 if g.get("false", 0) > 0 else 0)
         for g in gateHits.values()
     )
     branchPct = (branchCovered / branchTotal * 100) if branchTotal else 0
@@ -355,7 +356,8 @@ def compute_metrics(params: Dict[str, Any]) -> Dict[str, Any]:
     # Event coverage
     allEvents = set(t["on_event"] for t in bp["transitions"])
     totalEvents = len(allEvents)
-    coveredEvents = sum(1 for e, h in eventHits.items() if h > 0 and e in allEvents)
+    coveredEvents = sum(1 for e, h in eventHits.items()
+                        if h > 0 and e in allEvents)
     eventPct = (coveredEvents / totalEvents * 100) if totalEvents else 0
 
     # Overall coverage (weighted average)
@@ -568,10 +570,10 @@ def generate_gap_report(params: Dict[str, Any]) -> Dict[str, Any]:
         for sid in uncoveredStates:
             # Find how to reach this state
             incomingTrans = [t for t in bp["transitions"]
-                            if t["to"] == sid and t["from"] != "*"]
+                             if t["to"] == sid and t["from"] != "*"]
             if incomingTrans:
                 suggestion = (f"Try: dispatch('{incomingTrans[0]['on_event']}') "
-                            f"from state '{incomingTrans[0]['from']}'")
+                              f"from state '{incomingTrans[0]['from']}'")
             else:
                 suggestion = "No incoming transitions found"
             lines.append(f"    - {sid}")
@@ -584,15 +586,17 @@ def generate_gap_report(params: Dict[str, Any]) -> Dict[str, Any]:
         lines.append("  UNCOVERED TRANSITIONS")
         lines.append("  " + "-" * 66)
         for tid in uncoveredTrans:
-            trans = next((t for t in bp["transitions"] if t["id"] == tid), None)
+            trans = next(
+                (t for t in bp["transitions"] if t["id"] == tid), None)
             if trans:
                 gates = trans.get("gates", [])
                 gateInfo = f" (gates: {', '.join(gates)})" if gates else ""
                 lines.append(f"    - {tid}")
                 lines.append(f"      Path: {trans['from']} --[{trans['on_event']}]--> "
-                           f"{trans['to']}{gateInfo}")
+                             f"{trans['to']}{gateInfo}")
                 if gates:
-                    lines.append(f"      Suggestion: Ensure gates pass: {gates}")
+                    lines.append(
+                        f"      Suggestion: Ensure gates pass: {gates}")
         lines.append("")
 
     # Gates missing branch coverage
@@ -621,12 +625,13 @@ def generate_gap_report(params: Dict[str, Any]) -> Dict[str, Any]:
         for aid in uncoveredActions:
             # Find which transitions use this action
             usingTrans = [t["id"] for t in bp["transitions"]
-                         if aid in t.get("actions", [])]
+                          if aid in t.get("actions", [])]
             lines.append(f"    - {aid}")
             if usingTrans:
                 lines.append(f"      Used by: {', '.join(usingTrans[:3])}")
             else:
-                lines.append("      Warning: Action not used by any transition")
+                lines.append(
+                    "      Warning: Action not used by any transition")
         lines.append("")
 
     if not any([uncoveredStates, uncoveredTrans, missingTrue, missingFalse,

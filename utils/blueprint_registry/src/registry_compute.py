@@ -210,7 +210,8 @@ def update_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:
         entry["current_version"] = new_version
         entry["versions"].append(new_version)
         entry["updated_at"] = datetime.utcnow().isoformat() + "Z"
-        entry["description"] = blueprint.get("description", entry["description"])
+        entry["description"] = blueprint.get(
+            "description", entry["description"])
         entry["name"] = blueprint.get("name", entry["name"])
         entry["dependencies"] = _extract_dependencies(blueprint)
         entry["source_path"] = str(bp_path.absolute())
@@ -261,7 +262,8 @@ def get_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         reg_path = Path(registry_path)
-        bp_file = reg_path / "versions" / blueprint_id / f"{target_version}.json"
+        bp_file = reg_path / "versions" / \
+            blueprint_id / f"{target_version}.json"
 
         if bp_file.exists():
             with open(bp_file) as f:
@@ -473,8 +475,10 @@ def rollback_version(params: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         reg_path = Path(registry_path)
-        source_file = reg_path / "versions" / blueprint_id / f"{target_version}.json"
-        target_file = reg_path / "versions" / blueprint_id / f"{new_version}.json"
+        source_file = reg_path / "versions" / \
+            blueprint_id / f"{target_version}.json"
+        target_file = reg_path / "versions" / \
+            blueprint_id / f"{new_version}.json"
 
         if source_file.exists():
             shutil.copy(source_file, target_file)
@@ -648,7 +652,7 @@ def delete_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:
     if dependents:
         return {
             "error": f"Cannot delete: {blueprint_id} is depended on by: "
-                     f"{', '.join(dependents)}"
+            f"{', '.join(dependents)}"
         }
 
     del blueprints[blueprint_id]
@@ -713,7 +717,8 @@ def export_registry(params: Dict[str, Any]) -> Dict[str, Any]:
         md_lines.append("|---|---|---|---|")
         for bp_id, bp in export_data["blueprints"].items():
             tags = ", ".join(bp["tags"][:3])
-            md_lines.append(f"| {bp_id} | {bp['name']} | {bp['current_version']} | {tags} |")
+            md_lines.append(
+                f"| {bp_id} | {bp['name']} | {bp['current_version']} | {tags} |")
 
         return {"data": {"format": "markdown", "content": "\n".join(md_lines)}, "error": None}
 
@@ -737,7 +742,8 @@ def get_stats(params: Dict[str, Any]) -> Dict[str, Any]:
 def _compute_stats(blueprints: Dict) -> Dict[str, Any]:
     """Compute registry statistics."""
     total = len(blueprints)
-    deprecated = sum(1 for b in blueprints.values() if b.get("deprecated", False))
+    deprecated = sum(1 for b in blueprints.values()
+                     if b.get("deprecated", False))
     active = total - deprecated
 
     # Tag counts

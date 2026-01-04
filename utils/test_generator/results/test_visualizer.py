@@ -168,4 +168,3 @@ def test_path_6(operator):
 
     # Verify final state
     assert operator.state == 'loaded'
-

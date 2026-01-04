@@ -5,16 +5,6 @@ Unit tests for L++ Schema Migrator.
 Tests migration detection, planning, and application.
 """
 
-import json
-import sys
-import tempfile
-from pathlib import Path
-
-# Add parent paths for imports
-HERE = Path(__file__).parent.parent
-sys.path.insert(0, str(HERE))
-sys.path.insert(0, str(HERE.parent.parent / "src"))
-
 from src.migrator_compute import (
     load_blueprint,
     detect_version,
@@ -28,6 +18,15 @@ from src.migrator_compute import (
     SCHEMA_VERSIONS,
     LATEST_VERSION,
 )
+import json
+import sys
+import tempfile
+from pathlib import Path
+
+# Add parent paths for imports
+HERE = Path(__file__).parent.parent
+sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE.parent.parent / "src"))
 
 
 # =============================================================================
@@ -214,7 +213,8 @@ def test_detect_version_heuristic():
     bp = {
         "states": {"idle": {}, "active": {}},
         "transitions": [
-            {"id": "t1", "from": "idle", "to": "active", "on_event": "GO", "guard": "g1"}
+            {"id": "t1", "from": "idle", "to": "active",
+                "on_event": "GO", "guard": "g1"}
         ],
         "context_schema": {"properties": {}}
     }
@@ -225,7 +225,8 @@ def test_detect_version_heuristic():
     bp = {
         "states": {"idle": {}, "active": {}},
         "transitions": [
-            {"id": "t1", "from": "idle", "to": "active", "on_event": "GO", "gates": ["g1"]}
+            {"id": "t1", "from": "idle", "to": "active",
+                "on_event": "GO", "gates": ["g1"]}
         ],
         "context_schema": {"properties": {}},
         "display": {"rules": []}

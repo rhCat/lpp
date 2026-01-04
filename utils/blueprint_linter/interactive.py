@@ -37,7 +37,8 @@ def main():
     print("\n  L++ Blueprint Linter\n")
 
     # Load compiled linter operator
-    linter = compile_and_load(str(HERE / "blueprint_linter.json"), LINT_REGISTRY)
+    linter = compile_and_load(
+        str(HERE / "blueprint_linter.json"), LINT_REGISTRY)
 
     # CLI arg - auto load and lint
     if len(sys.argv) > 1:
@@ -105,7 +106,8 @@ def main():
         elif action == "load" and arg:
             linter.dispatch("LOAD", {"path": arg})
         elif action == "self":
-            linter.dispatch("LOAD", {"path": str(HERE / "blueprint_linter.json")})
+            linter.dispatch("LOAD", {"path": str(
+                HERE / "blueprint_linter.json")})
             if linter.state == "loaded":
                 linter.dispatch("LINT_ALL")
         elif action == "lint":

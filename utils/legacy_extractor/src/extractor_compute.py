@@ -207,8 +207,8 @@ def findStatePatterns(params: dict) -> dict:
                     pattern = case.get("pattern", {})
                     cases.append({
                         "pattern": _getPatternValue(pattern),
-                        "line": case.get("lineno") if hasattr(case, "lineno") else \
-                            node.get("lineno")
+                        "line": case.get("lineno") if hasattr(case, "lineno") else
+                        node.get("lineno")
                     })
                 patterns["matchStatements"].append({
                     "subject": subject,

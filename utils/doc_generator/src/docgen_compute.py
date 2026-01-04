@@ -73,7 +73,8 @@ def generateGraphs(params: dict) -> dict:
 
     # Import graph visualizer
     graphVizPath = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+        os.path.dirname(os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)))),
         'graph_visualizer', 'src'
     )
     sys.path.insert(0, graphVizPath)
@@ -105,7 +106,8 @@ def generateGraphs(params: dict) -> dict:
                 if verbose:
                     print(f"  [GRAPH] {bp_info['name']}")
             else:
-                errors.append((bp_info['name'], result.get('error', 'Unknown')))
+                errors.append(
+                    (bp_info['name'], result.get('error', 'Unknown')))
         except Exception as e:
             errors.append((bp_info['name'], str(e)))
 
@@ -121,7 +123,8 @@ def generateLogicGraphs(params: dict) -> dict:
 
     # Import logic decoder
     decoderPath = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+        os.path.dirname(os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)))),
         'logic_decoder', 'src'
     )
     sys.path.insert(0, decoderPath)
@@ -136,7 +139,8 @@ def generateLogicGraphs(params: dict) -> dict:
 
     for bp_info in blueprints:
         try:
-            computePath = os.path.join(bp_info['dir'], 'src', f"{bp_info['name']}_compute.py")
+            computePath = os.path.join(
+                bp_info['dir'], 'src', f"{bp_info['name']}_compute.py")
             if not os.path.exists(computePath):
                 continue
 
@@ -156,10 +160,12 @@ def generateLogicGraphs(params: dict) -> dict:
 
             if result.get("blueprint"):
                 # Generate logic graph HTML
-                outputPath = os.path.join(resultsDir, f"{bp_info['name']}_logic_graph.html")
+                outputPath = os.path.join(
+                    resultsDir, f"{bp_info['name']}_logic_graph.html")
                 # Use graph visualizer for rendering
                 graphVizPath = os.path.join(
-                    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                    os.path.dirname(os.path.dirname(
+                        os.path.dirname(os.path.abspath(__file__)))),
                     'graph_visualizer', 'src'
                 )
                 sys.path.insert(0, graphVizPath)
@@ -187,7 +193,8 @@ def generateFunctionGraphs(params: dict) -> dict:
 
     # Import function decoder
     funcDecoderPath = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+        os.path.dirname(os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)))),
         'function_decoder', 'src'
     )
     sys.path.insert(0, funcDecoderPath)
@@ -202,7 +209,8 @@ def generateFunctionGraphs(params: dict) -> dict:
 
     for bp_info in blueprints:
         try:
-            computePath = os.path.join(bp_info['dir'], 'src', f"{bp_info['name']}_compute.py")
+            computePath = os.path.join(
+                bp_info['dir'], 'src', f"{bp_info['name']}_compute.py")
             if not os.path.exists(computePath):
                 continue
 
@@ -516,7 +524,8 @@ def generateMermaid(params: dict) -> dict:
                 f.write(mermaidSimple)
 
             # Interactive HTML viewer
-            htmlContent = _buildMermaidHtml(bp.get('name', bp_info['name']), mermaidDetailed)
+            htmlContent = _buildMermaidHtml(
+                bp.get('name', bp_info['name']), mermaidDetailed)
             with open(os.path.join(resultsDir, f"{bp_info['name']}_diagram.html"), 'w') as f:
                 f.write(htmlContent)
 
@@ -542,7 +551,8 @@ def updateReadmes(params: dict) -> dict:
     for bp_info in blueprints:
         try:
             readmePath = os.path.join(bp_info['dir'], 'README.md')
-            mermaidPath = os.path.join(bp_info['dir'], 'results', f"{bp_info['name']}_simple.mmd")
+            mermaidPath = os.path.join(
+                bp_info['dir'], 'results', f"{bp_info['name']}_simple.mmd")
 
             if not os.path.exists(readmePath) or not os.path.exists(mermaidPath):
                 continue
@@ -554,20 +564,25 @@ def updateReadmes(params: dict) -> dict:
                 readmeContent = f.read()
 
             # Replace mermaid block
-            pattern = re.compile(r'(## State Diagram\s*\n+```mermaid\n)(.*?)(```)', re.DOTALL)
+            pattern = re.compile(
+                r'(## State Diagram\s*\n+```mermaid\n)(.*?)(```)', re.DOTALL)
             if pattern.search(readmeContent):
-                newReadme = pattern.sub(r'\g<1>' + mermaidContent + r'\n\g<3>', readmeContent)
+                newReadme = pattern.sub(
+                    r'\g<1>' + mermaidContent + r'\n\g<3>', readmeContent)
             else:
-                simplePattern = re.compile(r'(```mermaid\n)(.*?)(```)', re.DOTALL)
+                simplePattern = re.compile(
+                    r'(```mermaid\n)(.*?)(```)', re.DOTALL)
                 if simplePattern.search(readmeContent):
-                    newReadme = simplePattern.sub(r'\g<1>' + mermaidContent + r'\n\g<3>', readmeContent, count=1)
+                    newReadme = simplePattern.sub(
+                        r'\g<1>' + mermaidContent + r'\n\g<3>', readmeContent, count=1)
                 else:
                     continue
 
             # Add viewer link if not present
             viewerLink = f"\n> **Interactive View:** [Open zoomable diagram](results/{bp_info['name']}_diagram.html) for pan/zoom controls\n"
             if '_diagram.html' not in newReadme:
-                newReadme = re.sub(r'(```mermaid\n.*?```)', r'\1' + viewerLink, newReadme, count=1, flags=re.DOTALL)
+                newReadme = re.sub(r'(```mermaid\n.*?```)', r'\1' +
+                                   viewerLink, newReadme, count=1, flags=re.DOTALL)
 
             if newReadme != readmeContent:
                 with open(readmePath, 'w') as f:
@@ -587,13 +602,15 @@ def generateReport(params: dict) -> dict:
     """Generate analysis report."""
     utilsPath = params.get("utilsPath", "")
     if not utilsPath:
-        utilsPath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        utilsPath = os.path.dirname(os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__))))
 
     verbose = params.get("verbose", True)
 
     try:
         result = subprocess.run(
-            [sys.executable, os.path.join(utilsPath, 'blueprint_analyzer', 'interactive.py')],
+            [sys.executable, os.path.join(
+                utilsPath, 'blueprint_analyzer', 'interactive.py')],
             capture_output=True, text=True, cwd=utilsPath
         )
         if result.returncode == 0:
@@ -611,13 +628,15 @@ def generateDashboard(params: dict) -> dict:
     """Generate dashboard HTML."""
     utilsPath = params.get("utilsPath", "")
     if not utilsPath:
-        utilsPath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        utilsPath = os.path.dirname(os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__))))
 
     verbose = params.get("verbose", True)
 
     try:
         result = subprocess.run(
-            [sys.executable, os.path.join(utilsPath, 'dashboard', 'interactive.py')],
+            [sys.executable, os.path.join(
+                utilsPath, 'dashboard', 'interactive.py')],
             capture_output=True, text=True, cwd=utilsPath
         )
         if result.returncode == 0:

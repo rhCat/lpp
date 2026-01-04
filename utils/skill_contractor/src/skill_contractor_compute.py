@@ -32,6 +32,7 @@ try:
     HAS_SANITIZER = True
 except ImportError:
     HAS_SANITIZER = False
+
     def sanitize_python_code(code, filename="code.py", verbose=False):
         return code, []  # No-op fallback
 
@@ -991,9 +992,11 @@ def write_output(params: Dict[str, Any]) -> Dict[str, Any]:
         if output and filename and (isLppStep or stepType in ("code", "file") or isJsonFile):
             # Sanitize Python files to fix common LLM errors (literal newlines in strings)
             if isPythonFile and HAS_SANITIZER:
-                sanitized_output, fixes = sanitize_python_code(output, filename, verbose=True)
+                sanitized_output, fixes = sanitize_python_code(
+                    output, filename, verbose=True)
                 if fixes:
-                    _logStep(runDir, stepIdx, "SANITIZED", f"{filename}: {', '.join(fixes)}")
+                    _logStep(runDir, stepIdx, "SANITIZED",
+                             f"{filename}: {', '.join(fixes)}")
                     print(f"  [SANITIZED] {filename}: {', '.join(fixes)}")
                 output = sanitized_output
             fp = outputDir / filename

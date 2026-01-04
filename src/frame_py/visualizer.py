@@ -148,7 +148,8 @@ class LppVisualizer:
 
             for s_id in state_ids:
                 state_info = self.states.get(s_id, {})
-                desc = state_info.get("description", "") if isinstance(state_info, dict) else ""
+                desc = state_info.get("description", "") if isinstance(
+                    state_info, dict) else ""
                 # Escape quotes and truncate description
                 if desc:
                     desc = desc.replace('"', "'")[:40]
@@ -222,7 +223,8 @@ class LppVisualizer:
                 if gate_ids:
                     g_node = f"gate_{path_id}"
                     # Get actual gate expressions
-                    gate_exprs = [self._get_gate_expression(g) for g in gate_ids]
+                    gate_exprs = [self._get_gate_expression(
+                        g) for g in gate_ids]
                     gate_label = " && ".join(gate_exprs)
                     # Escape for mermaid
                     gate_label = gate_label.replace('"', "'")
@@ -248,15 +250,22 @@ class LppVisualizer:
                 lines.append(f"    {curr}{link}state_{to}")
 
         lines.append("")
-        lines.append("    %% Styling - ALL shapes have explicit fill and black text")
+        lines.append(
+            "    %% Styling - ALL shapes have explicit fill and black text")
         # State styles - all with color:#000 for black text
-        lines.append("    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000")
-        lines.append("    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000")
-        lines.append("    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000")
-        lines.append("    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000")
+        lines.append(
+            "    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000")
+        lines.append(
+            "    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000")
+        lines.append(
+            "    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000")
+        lines.append(
+            "    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000")
         # Gate and action styles
-        lines.append("    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000")
-        lines.append("    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000")
+        lines.append(
+            "    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000")
+        lines.append(
+            "    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000")
 
         return "\n".join(lines)
 
@@ -280,7 +289,8 @@ class LppVisualizer:
             if to not in self.states:
                 continue
 
-            sources = [s for s in self.sorted_state_ids if s != to] if f == "*" else [f]
+            sources = [s for s in self.sorted_state_ids if s !=
+                       to] if f == "*" else [f]
 
             for src in sources:
                 if src not in self.states:
@@ -288,7 +298,8 @@ class LppVisualizer:
 
                 label = event
                 if gate_ids:
-                    gate_exprs = [self._get_gate_expression(g) for g in gate_ids]
+                    gate_exprs = [self._get_gate_expression(
+                        g) for g in gate_ids]
                     label += f" [{' && '.join(gate_exprs)}]"
 
                 lines.append(f"    {src} --> {to} : {label}")

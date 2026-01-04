@@ -332,7 +332,8 @@ def computeCoupling(params: dict) -> dict:
     localCalls = params.get("localCalls", [])
 
     # Fan-out: number of external dependencies
-    fanOut = len(set(imp["module"] for imp in imports if imp["category"] != "local"))
+    fanOut = len(set(imp["module"]
+                 for imp in imports if imp["category"] != "local"))
 
     # Fan-in: number of exports (potential inbound callers)
     fanIn = len(exports)
@@ -463,7 +464,8 @@ def generateModuleGraph(params: dict) -> dict:
             "filePath": filePath,
             "inbound": [e for e in exports],
             "outbound": [
-                {"module": imp["module"], "category": imp["category"], "names": imp["names"]}
+                {"module": imp["module"],
+                    "category": imp["category"], "names": imp["names"]}
                 for imp in imports
             ],
             "nodes": nodes,
@@ -544,26 +546,26 @@ def _build_signature(exp: dict) -> str:
 
 def visualizeModuleGraph(params: dict) -> dict:
     """Generate stackable HTML visualization for module graph(s).
-    
+
     Args:
         params: dict with 'moduleGraphs' (list of moduleGraph dicts or single),
                 'outputPath' (HTML file path), 'title' (optional)
-    
+
     Returns:
         dict with 'htmlPath', 'error'
     """
     import json as json_mod
-    
+
     graphs = params.get("moduleGraphs", [])
     if not isinstance(graphs, list):
         graphs = [graphs]
-    
+
     outputPath = params.get("outputPath", "function_graph.html")
     title = params.get("title", "Function Module Graph")
-    
+
     if not graphs:
         return {"htmlPath": None, "error": "No module graphs provided"}
-    
+
     # Merge all graphs into combined nodes/edges
     all_nodes = []
     all_edges = []
@@ -572,22 +574,22 @@ def visualizeModuleGraph(params: dict) -> dict:
         "#00d4ff", "#ff6b6b", "#4ecdc4", "#f39c12", "#9b59b6",
         "#1abc9c", "#e74c3c", "#3498db", "#2ecc71", "#e67e22"
     ]
-    
+
     for idx, graph in enumerate(graphs):
         if not graph:
             continue
         mod_name = graph.get("module", f"module_{idx}")
         module_colors[mod_name] = color_palette[idx % len(color_palette)]
-        
+
         for node in graph.get("nodes", []):
             node_copy = dict(node)
             node_copy["moduleColor"] = module_colors[mod_name]
             node_copy["moduleName"] = mod_name
             all_nodes.append(node_copy)
-        
+
         for edge in graph.get("edges", []):
             all_edges.append(edge)
-    
+
     # Deduplicate dependency nodes
     seen_deps = set()
     deduped_nodes = []
@@ -598,9 +600,9 @@ def visualizeModuleGraph(params: dict) -> dict:
                 deduped_nodes.append(node)
         else:
             deduped_nodes.append(node)
-    
+
     html = _build_function_html(title, deduped_nodes, all_edges, module_colors)
-    
+
     try:
         with open(outputPath, "w", encoding="utf-8") as f:
             f.write(html)
@@ -612,11 +614,11 @@ def visualizeModuleGraph(params: dict) -> dict:
 def _build_function_html(title: str, nodes: list, edges: list, module_colors: dict) -> str:
     """Build stackable D3.js HTML for function visualization."""
     import json as json_mod
-    
+
     nodes_json = json_mod.dumps(nodes)
     edges_json = json_mod.dumps(edges)
     colors_json = json_mod.dumps(module_colors)
-    
+
     return f'''<!DOCTYPE html>
 <html>
 <head>

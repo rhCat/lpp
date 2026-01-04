@@ -25,7 +25,8 @@ def load():
 
 def main():
     op = load()
-    print("FuncDecoder: decode <file.py> | show | export [file] | graph | visualize [files...] | quit")
+    print(
+        "FuncDecoder: decode <file.py> | show | export [file] | graph | visualize [files...] | quit")
     while True:
         try:
             cmd = input(f"[{op.state}]> ").strip()
@@ -47,7 +48,8 @@ def main():
             for _ in range(5):
                 op.dispatch("AUTO", {})
             c = op.context.get("coupling", {})
-            print(f"Exports: {c.get('fanIn', 0)} | Imports: {c.get('fanOut', 0)}")
+            print(
+                f"Exports: {c.get('fanIn', 0)} | Imports: {c.get('fanOut', 0)}")
             print(f"Internal edges: {c.get('internalEdges', 0)}")
             if op.context.get("error"):
                 print(f"Error: {op.context['error']}")
@@ -78,7 +80,7 @@ def _visualize(args: str, current_graph):
     """Visualize one or more module graphs as stackable HTML."""
     graphs = []
     files = args.split() if args else []
-    
+
     # Load from JSON files
     for f in files:
         try:
@@ -91,30 +93,32 @@ def _visualize(args: str, current_graph):
                     graphs.append(data)
         except Exception as e:
             print(f"Error loading {f}: {e}")
-    
+
     # Add current graph if available
     if current_graph and not files:
         graphs.append(current_graph)
-    
+
     if not graphs:
         print("No graphs to visualize. Decode a file or provide JSON paths.")
         return
-    
+
     output = "results/function_graph.html"
     Path(output).parent.mkdir(exist_ok=True)
-    
-    title = f"Function Graph ({len(graphs)} modules)" if len(graphs) > 1 else f"Function Graph: {graphs[0].get('module', 'unknown')}"
+
+    title = f"Function Graph ({len(graphs)} modules)" if len(
+        graphs) > 1 else f"Function Graph: {graphs[0].get('module', 'unknown')}"
     result = visualizeModuleGraph({
         "moduleGraphs": graphs,
         "outputPath": output,
         "title": title
     })
-    
+
     if result.get("error"):
         print(f"Error: {result['error']}")
     else:
         print(f"Generated: {result['htmlPath']}")
-        print(f"Nodes: {sum(len(g.get('nodes', [])) for g in graphs)} | Edges: {sum(len(g.get('edges', [])) for g in graphs)}")
+        print(
+            f"Nodes: {sum(len(g.get('nodes', [])) for g in graphs)} | Edges: {sum(len(g.get('edges', [])) for g in graphs)}")
 
 
 def _print_graph(mg):

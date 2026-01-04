@@ -44,7 +44,8 @@ GATES = {
 DISPLAY_RULES = [
     {'gate': 'is_error', 'template': 'ERROR: {error}'},
     {'gate': 'is_idle', 'template': 'No blueprint loaded. Use LOAD command.'},
-    {'gate': 'is_complete', 'template': 'Lint complete: {summary.error} errors, {summary.warning} warnings'},
+    {'gate': 'is_complete',
+        'template': 'Lint complete: {summary.error} errors, {summary.warning} warnings'},
     {'gate': 'is_linting', 'template': 'Linting in progress...'},
     {'gate': 'is_loaded', 'template': 'Loaded: {blueprint_path}'},
     {'template': 'L++ Blueprint Linter'},
@@ -389,7 +390,8 @@ class Operator:
     """
 
     def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_path': None, 'findings': None, 'summary': None, 'metrics': None, 'report': None, 'error': None, 'lint_config': None}
+        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_path': None, 'findings': None,
+                        'summary': None, 'metrics': None, 'report': None, 'error': None, 'lint_config': None}
         self.traces: list[TransitionTrace] = []
         self.compute_registry = compute_registry or {}
 
@@ -481,7 +483,8 @@ class Operator:
                             self.context, _ = atom_MUTATE(
                                 self.context, ctx_path, result[res_key]
                             )
-                    scope.update(self.context)  # Sync scope for chained actions
+                    # Sync scope for chained actions
+                    scope.update(self.context)
 
         # TRANSITION
         (new_state, trace), _ = atom_TRANSITION(current, trans['to'])
@@ -517,7 +520,8 @@ class Operator:
 
     def reset(self):
         """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_path': None, 'findings': None, 'summary': None, 'metrics': None, 'report': None, 'error': None, 'lint_config': None}
+        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_path': None, 'findings': None,
+                        'summary': None, 'metrics': None, 'report': None, 'error': None, 'lint_config': None}
         self.traces = []
 
     def save_state(self, path: str = None):
@@ -588,7 +592,8 @@ class Operator:
 
             # Validate blueprint ID matches
             if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
+                print(
+                    f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
                 return False
 
             self.context = state_data.get('context', {})

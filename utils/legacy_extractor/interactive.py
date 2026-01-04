@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """L++ Legacy Code Extractor - Interactive CLI (< 50 lines per build_rules.md)"""
+from frame_py.compiler import compile_blueprint
 from src.extractor_compute import EXTRACT_REGISTRY
 from pathlib import Path
 import importlib.util
@@ -7,7 +8,6 @@ import json
 import os
 import sys
 sys.path.insert(0, "../../src")
-from frame_py.compiler import compile_blueprint
 
 HERE = Path(__file__).parent
 

@@ -359,7 +359,8 @@ def generateDashboard(params: dict) -> dict:
     else:
         return {"htmlPath": None, "hasHtml": False, "error": "No output path specified"}
 
-    html = _buildDashboardHtml(tools, categories, statistics, basePath or utilsPath)
+    html = _buildDashboardHtml(
+        tools, categories, statistics, basePath or utilsPath)
 
     try:
         with open(htmlPath, "w", encoding="utf-8") as f:

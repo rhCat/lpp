@@ -49,8 +49,10 @@ GATES = {
 DISPLAY_RULES = [
     {'gate': 'has_error', 'template': 'ERROR: {error}'},
     {'gate': 'no_blueprint', 'template': 'No blueprint loaded. Use LOAD or paste JSON.'},
-    {'gate': 'has_simulation', 'template': '[SIM] {blueprint_name} | State: {sim_state}'},
-    {'gate': 'has_blueprint', 'template': '[EDIT] {blueprint_name} | Valid: {is_valid_blueprint}'},
+    {'gate': 'has_simulation',
+        'template': '[SIM] {blueprint_name} | State: {sim_state}'},
+    {'gate': 'has_blueprint',
+        'template': '[EDIT] {blueprint_name} | Valid: {is_valid_blueprint}'},
     {'template': 'L++ Blueprint Playground'},
 ]
 
@@ -345,7 +347,8 @@ class Operator:
     """
 
     def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'blueprint_json': None, 'blueprint': None, 'blueprint_name': None, 'validation_result': None, 'is_valid_json': None, 'is_valid_blueprint': None, 'mermaid_diagram': None, 'sim_state': None, 'sim_context': None, 'available_events': None, 'sim_trace': None, 'share_url': None, 'server_port': None, 'output': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'blueprint_json': None, 'blueprint': None, 'blueprint_name': None, 'validation_result': None, 'is_valid_json': None, 'is_valid_blueprint': None,
+                        'mermaid_diagram': None, 'sim_state': None, 'sim_context': None, 'available_events': None, 'sim_trace': None, 'share_url': None, 'server_port': None, 'output': None, 'error': None}
         self.traces: list[TransitionTrace] = []
         self.compute_registry = compute_registry or {}
 
@@ -437,7 +440,8 @@ class Operator:
                             self.context, _ = atom_MUTATE(
                                 self.context, ctx_path, result[res_key]
                             )
-                    scope.update(self.context)  # Sync scope for chained actions
+                    # Sync scope for chained actions
+                    scope.update(self.context)
 
         # TRANSITION
         (new_state, trace), _ = atom_TRANSITION(current, trans['to'])
@@ -473,7 +477,8 @@ class Operator:
 
     def reset(self):
         """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'blueprint_json': None, 'blueprint': None, 'blueprint_name': None, 'validation_result': None, 'is_valid_json': None, 'is_valid_blueprint': None, 'mermaid_diagram': None, 'sim_state': None, 'sim_context': None, 'available_events': None, 'sim_trace': None, 'share_url': None, 'server_port': None, 'output': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'blueprint_json': None, 'blueprint': None, 'blueprint_name': None, 'validation_result': None, 'is_valid_json': None, 'is_valid_blueprint': None,
+                        'mermaid_diagram': None, 'sim_state': None, 'sim_context': None, 'available_events': None, 'sim_trace': None, 'share_url': None, 'server_port': None, 'output': None, 'error': None}
         self.traces = []
 
     def save_state(self, path: str = None):
@@ -544,7 +549,8 @@ class Operator:
 
             # Validate blueprint ID matches
             if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
+                print(
+                    f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
                 return False
 
             self.context = state_data.get('context', {})

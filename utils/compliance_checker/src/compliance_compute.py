@@ -57,7 +57,8 @@ def load_policy(params: Dict[str, Any]) -> Dict[str, Any]:
             return {"policies": existing, "error": "Invalid policy: missing policy_id"}
 
         # Add to existing policies (avoid duplicates)
-        policies = [p for p in existing if p.get("policy_id") != policy.get("policy_id")]
+        policies = [p for p in existing if p.get(
+            "policy_id") != policy.get("policy_id")]
         policies.append(policy)
 
         return {"policies": policies, "error": None}
@@ -200,11 +201,11 @@ def _check_transition_requires_gate(bp: dict, rule: dict, policy: dict) -> List[
                 "rule_type": "transition_requires_gate",
                 "severity": policy.get("severity", "error"),
                 "message": f"Transition '{trans.get('id')}' ({event}) missing "
-                           f"required gate matching '{reqGatePattern}'",
+                f"required gate matching '{reqGatePattern}'",
                 "element": {"type": "transition", "id": trans.get("id")},
                 "passed": False,
                 "remediation": f"Add a gate matching '{reqGatePattern}' to "
-                               f"transition '{trans.get('id')}'"
+                f"transition '{trans.get('id')}'"
             })
         else:
             findings.append({
@@ -245,11 +246,11 @@ def _check_transition_requires_action(bp: dict, rule: dict, policy: dict) -> Lis
                 "rule_type": "transition_requires_action",
                 "severity": policy.get("severity", "error"),
                 "message": f"Transition '{trans.get('id')}' ({event}) missing "
-                           f"required action matching '{reqActionPattern}'",
+                f"required action matching '{reqActionPattern}'",
                 "element": {"type": "transition", "id": trans.get("id")},
                 "passed": False,
                 "remediation": f"Add an action matching '{reqActionPattern}' to "
-                               f"transition '{trans.get('id')}'"
+                f"transition '{trans.get('id')}'"
             })
         else:
             findings.append({
@@ -286,11 +287,11 @@ def _check_gate_expression(bp: dict, rule: dict, policy: dict) -> List[dict]:
                 "rule_type": "gate_expression_check",
                 "severity": policy.get("severity", "warning"),
                 "message": f"Gate '{gid}' expression missing required pattern "
-                           f"'{reqExprPattern}'",
+                f"'{reqExprPattern}'",
                 "element": {"type": "gate", "id": gid},
                 "passed": False,
                 "remediation": f"Update gate '{gid}' expression to include "
-                               f"pattern matching '{reqExprPattern}'"
+                f"pattern matching '{reqExprPattern}'"
             })
         else:
             findings.append({
@@ -392,11 +393,11 @@ def _check_no_direct_transition(bp: dict, rule: dict, policy: dict) -> List[dict
                 "rule_type": "no_direct_transition",
                 "severity": policy.get("severity", "error"),
                 "message": f"Direct transition '{trans.get('id')}' from "
-                           f"'{fromS}' to '{toS}' is not allowed",
+                f"'{fromS}' to '{toS}' is not allowed",
                 "element": {"type": "transition", "id": trans.get("id")},
                 "passed": False,
                 "remediation": f"Add intermediate approval state between "
-                               f"'{fromS}' and '{toS}'"
+                f"'{fromS}' and '{toS}'"
             })
 
     if not findings:

@@ -216,7 +216,7 @@ def renderQuizzing(ctx: Dict[str, Any]) -> str:
         for o in q.get("options", [])
     )
     return f'''<div class="card">
-        <h2>Q{idx+1}/{len(qs)}: {q.get("text","")}</h2>
+        <h2>Q{idx+1}/{len(qs)}: {q.get("text", "")}</h2>
         <form method="POST">
         {_hidden("event", "ANSWER")}
         {_hidden("question_id", q.get("id", ""))}
@@ -330,11 +330,11 @@ def renderDetail(ctx: Dict[str, Any]) -> str:
     return f'''<div class="card">
         <h2>{prod.get("name", pid)}</h2>
         <p><strong>Price:</strong>
-           <span class="price">${prod.get("price",0):.2f}</span></p>
-        <p><strong>Rating:</strong> *{prod.get("rating",0):.1f}/5</p>
+           <span class="price">${prod.get("price", 0):.2f}</span></p>
+        <p><strong>Rating:</strong> *{prod.get("rating", 0):.1f}/5</p>
         {snippetHtml}
-        <p><strong>Pros:</strong> {", ".join(rev.get("pros",[])) or "N/A"}</p>
-        <p><strong>Cons:</strong> {", ".join(rev.get("cons",[])) or "N/A"}</p>
+        <p><strong>Pros:</strong> {", ".join(rev.get("pros", [])) or "N/A"}</p>
+        <p><strong>Cons:</strong> {", ".join(rev.get("cons", [])) or "N/A"}</p>
         {sourcesHtml}
         {linkHtml}</div>
         <div class="card">

@@ -39,7 +39,7 @@ def main():
         elif cmd in cmds:
             op.dispatch(cmds[cmd], {"query": arg})
             for i, p in enumerate((op.context.get("results") or [])[:10]):
-                print(f"  [{i}] {p.get('title','')[:55]} ({p.get('source')})")
+                print(f"  [{i}] {p.get('title', '')[:55]} ({p.get('source')})")
         elif cmd == "select":
             results = op.context.get("results") or []
             idx = int(arg) if arg else 0

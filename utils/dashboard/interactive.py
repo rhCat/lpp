@@ -6,12 +6,12 @@ Generates an interactive HTML dashboard for all L++ utility tools.
 Note: Only scans utils/ directory. Core framework (src/) is foundational
 infrastructure, not utility tools.
 """
+from src.dashboard_compute import COMPUTE_REGISTRY
 import sys
 import os
 
 # Add parent to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from src.dashboard_compute import COMPUTE_REGISTRY
 
 
 def main():

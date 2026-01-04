@@ -96,7 +96,8 @@ def main():
     print("\n[L++ Blueprint Debugger]")
     print("Type 'help' for commands\n")
 
-    dbg = compile_and_load(str(HERE / "blueprint_debugger.json"), DEBUG_REGISTRY)
+    dbg = compile_and_load(
+        str(HERE / "blueprint_debugger.json"), DEBUG_REGISTRY)
 
     # CLI arg for auto-load
     if len(sys.argv) > 1:
@@ -165,7 +166,8 @@ def main():
                 print(f"Loaded: {dbg.context.get('blueprint_name')}")
 
         elif action == "self":
-            dbg.dispatch("LOAD", {"path": str(HERE / "blueprint_debugger.json")})
+            dbg.dispatch("LOAD", {"path": str(
+                HERE / "blueprint_debugger.json")})
             if dbg.context.get("blueprint"):
                 dbg.dispatch("START")
 
@@ -315,7 +317,8 @@ def main():
                 })
             else:
                 print(f"Unknown command or event: {action}")
-                print(f"Available events: {avail[:5]}{'...' if len(avail) > 5 else ''}")
+                print(
+                    f"Available events: {avail[:5]}{'...' if len(avail) > 5 else ''}")
 
         else:
             print(f"Unknown command: {action}")

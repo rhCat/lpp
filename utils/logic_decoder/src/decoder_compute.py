@@ -499,13 +499,13 @@ def inferStates(params: dict) -> dict:
         name = fn.get("name", "")
         if name.startswith("_"):
             continue  # Skip private
-        
+
         # Convert function name to readable state name
         def to_state_name(fn_name):
             """Convert snake_case to Title Case"""
             words = fn_name.replace("_", " ").split()
             return " ".join(w.capitalize() for w in words)
-        
+
         # Common patterns -> grouped states
         if any(kw in name.lower() for kw in ["init", "setup", "start"]):
             states.append({

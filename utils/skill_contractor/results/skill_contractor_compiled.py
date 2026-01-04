@@ -27,14 +27,19 @@ TERMINAL_STATES = {'complete'}
 
 STATES = {
     'idle': 'idle',  # Awaiting target assignment
-    'planning': 'planning',  # Decomposing target into steps (L++ workflow if is_lpp_target)
+    # Decomposing target into steps (L++ workflow if is_lpp_target)
+    'planning': 'planning',
     'executing': 'executing',  # LLM generating step output
-    'parsing': 'parsing',  # Parsing LLM output and applying auto-corrections for schema compliance
-    'correcting': 'correcting',  # Auto-corrections applied - logging for review (auto-approved unless critical)
+    # Parsing LLM output and applying auto-corrections for schema compliance
+    'parsing': 'parsing',
+    # Auto-corrections applied - logging for review (auto-approved unless critical)
+    'correcting': 'correcting',
     'stepping': 'stepping',  # Advancing to next step
     'validating': 'validating',  # Validating L++ artifacts with build_skill.sh
-    'eval_interactive': 'eval_interactive',  # Evaluating generated interactive.py with syntax and import checks
-    'evaluating': 'evaluating',  # Self-evaluating progress (includes L++ compliance check)
+    # Evaluating generated interactive.py with syntax and import checks
+    'eval_interactive': 'eval_interactive',
+    # Self-evaluating progress (includes L++ compliance check)
+    'evaluating': 'evaluating',
     'refining': 'refining',  # Refining plan based on feedback
     'reviewing': 'reviewing',  # Reviewing failed step - skip or replan
     'complete': 'complete',  # Target achieved
@@ -86,15 +91,22 @@ GATES = {
 }
 
 DISPLAY_RULES = [
-    {'gate': 'has_corrections', 'template': '📝 AUTO-CORRECTED: {corrections} schema issues fixed - approved for validation'},
-    {'gate': 'output_invalid', 'template': '⚠️ PARSE ERROR (repair {repair_attempts}/{max_repairs}): {parse_error}'},
-    {'gate': 'lpp_invalid', 'template': 'L++ VALIDATION FAILED - refining to fix schema/build issues'},
+    {'gate': 'has_corrections',
+        'template': '📝 AUTO-CORRECTED: {corrections} schema issues fixed - approved for validation'},
+    {'gate': 'output_invalid',
+        'template': '⚠️ PARSE ERROR (repair {repair_attempts}/{max_repairs}): {parse_error}'},
+    {'gate': 'lpp_invalid',
+        'template': 'L++ VALIDATION FAILED - refining to fix schema/build issues'},
     {'gate': 'lpp_valid', 'template': 'L++ VALIDATED: Schema v0.1.2 compliant, TLC passed'},
-    {'gate': 'too_many_failed_steps', 'template': 'WARNING: {failed_steps} steps failed - evaluating partial'},
-    {'gate': 'step_max_errors', 'template': 'REVIEWING: Step {step_index} failed {step_error_count}x - {review_decision}'},
-    {'gate': 'has_error', 'template': 'ERROR ({step_error_count}/{max_errors}): {error} - retrying step...'},
+    {'gate': 'too_many_failed_steps',
+        'template': 'WARNING: {failed_steps} steps failed - evaluating partial'},
+    {'gate': 'step_max_errors',
+        'template': 'REVIEWING: Step {step_index} failed {step_error_count}x - {review_decision}'},
+    {'gate': 'has_error',
+        'template': 'ERROR ({step_error_count}/{max_errors}): {error} - retrying step...'},
     {'gate': 'is_satisfied', 'template': 'COMPLETE: Score {score}/100'},
-    {'gate': 'is_lpp_target', 'template': 'L++ Mode | Step {step_index}/{step_count} | Iter {iteration}'},
+    {'gate': 'is_lpp_target',
+        'template': 'L++ Mode | Step {step_index}/{step_count} | Iter {iteration}'},
     {'gate': 'has_plan', 'template': 'Step {step_index}/{step_count} | Iter {iteration} | Failed {failed_steps}'},
     {'template': 'Ready - submit a coding target'},
 ]
@@ -773,7 +785,8 @@ class Operator:
     """
 
     def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'api_key': None, 'api_base': None, 'model': None, 'target': None, 'workspace_path': None, 'run_id': None, 'run_dir': None, 'phase': None, 'blueprint_validated': None, 'plan': None, 'current_step': None, 'step_index': None, 'step_count': None, 'execution_log': None, 'artifacts': None, 'evaluation': None, 'score': None, 'threshold': None, 'feedback': None, 'iteration': None, 'max_iterations': None, 'is_satisfied': None, 'error': None, 'error_count': None, 'max_errors': None, 'last_error': None, 'step_error_count': None, 'failed_steps': None, 'review_decision': None, 'is_lpp_target': None, 'lpp_validated': None, 'lpp_root': None, 'raw_output': None, 'parsed_output': None, 'parse_error': None, 'corrections': None, 'corrections_approved': None, 'repair_attempts': None, 'max_repairs': None, 'interactive_valid': None, 'interactive_feedback': None}
+        self.context = {'_state': ENTRY_STATE, 'api_key': None, 'api_base': None, 'model': None, 'target': None, 'workspace_path': None, 'run_id': None, 'run_dir': None, 'phase': None, 'blueprint_validated': None, 'plan': None, 'current_step': None, 'step_index': None, 'step_count': None, 'execution_log': None, 'artifacts': None, 'evaluation': None, 'score': None, 'threshold': None, 'feedback': None, 'iteration': None, 'max_iterations': None,
+                        'is_satisfied': None, 'error': None, 'error_count': None, 'max_errors': None, 'last_error': None, 'step_error_count': None, 'failed_steps': None, 'review_decision': None, 'is_lpp_target': None, 'lpp_validated': None, 'lpp_root': None, 'raw_output': None, 'parsed_output': None, 'parse_error': None, 'corrections': None, 'corrections_approved': None, 'repair_attempts': None, 'max_repairs': None, 'interactive_valid': None, 'interactive_feedback': None}
         self.traces: list[TransitionTrace] = []
         self.compute_registry = compute_registry or {}
 
@@ -865,7 +878,8 @@ class Operator:
                             self.context, _ = atom_MUTATE(
                                 self.context, ctx_path, result[res_key]
                             )
-                    scope.update(self.context)  # Sync scope for chained actions
+                    # Sync scope for chained actions
+                    scope.update(self.context)
 
         # TRANSITION
         (new_state, trace), _ = atom_TRANSITION(current, trans['to'])
@@ -901,7 +915,8 @@ class Operator:
 
     def reset(self):
         """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'api_key': None, 'api_base': None, 'model': None, 'target': None, 'workspace_path': None, 'run_id': None, 'run_dir': None, 'phase': None, 'blueprint_validated': None, 'plan': None, 'current_step': None, 'step_index': None, 'step_count': None, 'execution_log': None, 'artifacts': None, 'evaluation': None, 'score': None, 'threshold': None, 'feedback': None, 'iteration': None, 'max_iterations': None, 'is_satisfied': None, 'error': None, 'error_count': None, 'max_errors': None, 'last_error': None, 'step_error_count': None, 'failed_steps': None, 'review_decision': None, 'is_lpp_target': None, 'lpp_validated': None, 'lpp_root': None, 'raw_output': None, 'parsed_output': None, 'parse_error': None, 'corrections': None, 'corrections_approved': None, 'repair_attempts': None, 'max_repairs': None, 'interactive_valid': None, 'interactive_feedback': None}
+        self.context = {'_state': ENTRY_STATE, 'api_key': None, 'api_base': None, 'model': None, 'target': None, 'workspace_path': None, 'run_id': None, 'run_dir': None, 'phase': None, 'blueprint_validated': None, 'plan': None, 'current_step': None, 'step_index': None, 'step_count': None, 'execution_log': None, 'artifacts': None, 'evaluation': None, 'score': None, 'threshold': None, 'feedback': None, 'iteration': None, 'max_iterations': None,
+                        'is_satisfied': None, 'error': None, 'error_count': None, 'max_errors': None, 'last_error': None, 'step_error_count': None, 'failed_steps': None, 'review_decision': None, 'is_lpp_target': None, 'lpp_validated': None, 'lpp_root': None, 'raw_output': None, 'parsed_output': None, 'parse_error': None, 'corrections': None, 'corrections_approved': None, 'repair_attempts': None, 'max_repairs': None, 'interactive_valid': None, 'interactive_feedback': None}
         self.traces = []
 
     def save_state(self, path: str = None):
@@ -972,7 +987,8 @@ class Operator:
 
             # Validate blueprint ID matches
             if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
+                print(
+                    f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
                 return False
 
             self.context = state_data.get('context', {})

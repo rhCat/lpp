@@ -202,7 +202,8 @@ def validate_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:
                               f"to state '{t['to']}' not found")
 
             if "on_event" not in t:
-                errors.append(f"Transition {t.get('id', i)} missing 'on_event'")
+                errors.append(
+                    f"Transition {t.get('id', i)} missing 'on_event'")
 
             # Check gates reference
             for gate_id in t.get("gates", []):
@@ -238,7 +239,8 @@ def validate_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:
             continue
         action_type = action.get("type")
         if action_type not in ["set", "compute", "emit"]:
-            errors.append(f"Action '{action_id}': invalid type '{action_type}'")
+            errors.append(
+                f"Action '{action_id}': invalid type '{action_type}'")
         if action_type == "set" and "target" not in action:
             errors.append(f"Action '{action_id}': missing 'target'")
         if action_type == "compute" and "compute_unit" not in action:

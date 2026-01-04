@@ -121,7 +121,8 @@ def build_graph(params: Dict[str, Any]) -> Dict[str, Any]:
     for sid, edges in adj.items():
         for edge in edges:
             if edge["to"] in reverseAdj:
-                reverseAdj[edge["to"]].append({"from": sid, "event": edge["event"]})
+                reverseAdj[edge["to"]].append(
+                    {"from": sid, "event": edge["event"]})
 
     return {
         "graph": {
@@ -185,7 +186,8 @@ def analyze_paths(params: Dict[str, Any]) -> Dict[str, Any]:
     uncovered = allTransitions - coveredTransitions
     for transId in uncovered:
         # Find the transition details
-        trans = next((t for t in bp["transitions"] if t["id"] == transId), None)
+        trans = next((t for t in bp["transitions"]
+                     if t["id"] == transId), None)
         if not trans:
             continue
 
@@ -759,19 +761,19 @@ def combine_tests(params: Dict[str, Any]) -> Dict[str, Any]:
             "total": len(allStates),
             "covered": len(coveredStates),
             "percentage": (len(coveredStates) / len(allStates) * 100
-                          if allStates else 0)
+                           if allStates else 0)
         },
         "transition_coverage": {
             "total": len(allTransitions),
             "covered": len(coveredTransitions),
             "percentage": (len(coveredTransitions) / len(allTransitions) * 100
-                          if allTransitions else 0)
+                           if allTransitions else 0)
         },
         "gate_coverage": {
             "total": len(allGates),
             "covered": len(coveredGates),
             "percentage": (len(coveredGates) / len(allGates) * 100
-                          if allGates else 0)
+                           if allGates else 0)
         }
     }
 
@@ -877,7 +879,8 @@ def format_pytest(params: Dict[str, Any]) -> Dict[str, Any]:
             lines.append("    # Dispatch events")
             for evt in test["events"]:
                 payload = evt.get("payload", {})
-                lines.append(f"    operator.dispatch('{evt['event']}', {payload})")
+                lines.append(
+                    f"    operator.dispatch('{evt['event']}', {payload})")
             lines.append("")
 
         # Assertions

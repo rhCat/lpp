@@ -35,7 +35,8 @@ def compile_and_load(blueprint_json: str, registry: dict):
 def print_report_summary(report: dict):
     """Print a formatted report summary to console."""
     print("\n" + "=" * 60)
-    print(f"  COMPLIANCE REPORT: {report.get('blueprint', {}).get('name', 'N/A')}")
+    print(
+        f"  COMPLIANCE REPORT: {report.get('blueprint', {}).get('name', 'N/A')}")
     print("=" * 60)
 
     score = report.get("score", 0)
@@ -76,7 +77,8 @@ def print_report_summary(report: dict):
 def main():
     print("\n  L++ Compliance Checker\n")
 
-    cc = compile_and_load(str(HERE / "compliance_checker.json"), COMPLIANCE_REGISTRY)
+    cc = compile_and_load(
+        str(HERE / "compliance_checker.json"), COMPLIANCE_REGISTRY)
 
     # Default policies directory
     defaultPolicies = HERE / "policies"
@@ -191,7 +193,8 @@ def main():
                 for f in findings:
                     icon = "[+]" if f.get("passed") else "[-]"
                     sev = f.get("severity", "info")[0].upper()
-                    print(f"  {icon}[{sev}] {f.get('policy_id')}: {f.get('message')}")
+                    print(
+                        f"  {icon}[{sev}] {f.get('policy_id')}: {f.get('message')}")
 
         elif action == "score":
             score = ctx.get("score")

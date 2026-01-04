@@ -382,7 +382,8 @@ def inspect_all(output_path: str = None, verbose: bool = False
     # Process each blueprint
     for i, bp_info in enumerate(blueprints, 1):
         if verbose:
-            print(f"\n  [{i+1}/{len(blueprints)+1}] Analyzing {bp_info['tool_name']}...")
+            print(
+                f"\n  [{i+1}/{len(blueprints)+1}] Analyzing {bp_info['tool_name']}...")
 
         # Calculate complexity
         complexity = calculate_complexity(bp_info)
@@ -434,7 +435,8 @@ def inspect_all(output_path: str = None, verbose: bool = False
 
     # Calculate average complexity
     if complexities:
-        totals["avg_complexity"] = round(sum(complexities) / len(complexities), 2)
+        totals["avg_complexity"] = round(
+            sum(complexities) / len(complexities), 2)
 
     # Generate report
     if verbose:
@@ -475,7 +477,8 @@ def generate_report(results: List[Dict[str, Any]],
     # Header
     lines.append("# L++ Blueprint Analysis Report")
     lines.append("")
-    lines.append(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    lines.append(
+        f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     lines.append("")
 
     # Summary Statistics
@@ -502,7 +505,8 @@ def generate_report(results: List[Dict[str, Any]],
     lines.append("")
 
     # Compliance Summary
-    total_compliance = totals['compliance_passed'] + totals['compliance_failed']
+    total_compliance = totals['compliance_passed'] + \
+        totals['compliance_failed']
     if total_compliance > 0:
         compliance_rate = round(
             (totals['compliance_passed'] / total_compliance) * 100, 1)
@@ -663,7 +667,8 @@ Examples:
 
         # Print final summary if not verbose (verbose already prints it)
         if not args.verbose:
-            print(f"\nAnalysis complete. Report written to: {result['report_path']}")
+            print(
+                f"\nAnalysis complete. Report written to: {result['report_path']}")
             print(f"  Blueprints: {result['totals']['blueprints']}")
             print(f"  Lint Errors: {result['totals']['lint_errors']}")
             print(f"  Lint Warnings: {result['totals']['lint_warnings']}")

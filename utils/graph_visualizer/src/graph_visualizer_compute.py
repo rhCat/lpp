@@ -10,21 +10,21 @@ from collections import defaultdict, deque
 def process(params: dict) -> dict:
     """
     Generate an interactive HTML visualization of an L++ blueprint.
-    
+
     Args:
         params: dict with 'blueprint' (JSON string) and optional 'html_path'
-        
+
     Returns:
         dict with 'has_html', 'html_path', and optional 'error'
     """
     blueprint_str = params.get("blueprint", "")
     html_path = params.get("html_path", "graph_visualizer.html")
-    
+
     try:
         blueprint = json.loads(blueprint_str)
     except Exception as e:
         return {"has_html": False, "error": f"Invalid JSON: {e}"}
-    
+
     # L++ schema: states is a dict {name: {description: ...}}
     states_dict = blueprint.get("states", {})
     transitions = blueprint.get("transitions", [])
@@ -32,14 +32,14 @@ def process(params: dict) -> dict:
     entry_state = blueprint.get("entry_state", "")
     terminal_states = blueprint.get("terminal_states", [])
     skill_name = blueprint.get("name", blueprint.get("id", "L++ Skill"))
-    
+
     # Collect valid node IDs
     valid_node_ids = set(states_dict.keys())
-    
+
     # Build adjacency for layer calculation
     adjacency = defaultdict(set)
     back_adjacency = defaultdict(set)
-    
+
     links = []
     for t in transitions:
         if isinstance(t, dict):
@@ -48,11 +48,11 @@ def process(params: dict) -> dict:
             event = t.get("on_event", "")
             gate_list = t.get("gates", [])
             gate_str = ", ".join(gate_list) if gate_list else ""
-            
+
             # Skip invalid to_state
             if to_state == "*" or to_state not in valid_node_ids:
                 continue
-            
+
             # Expand wildcard from_state to all valid states
             if from_state == "*":
                 source_states = [s for s in valid_node_ids if s != to_state]
@@ -60,28 +60,31 @@ def process(params: dict) -> dict:
                 continue
             else:
                 source_states = [from_state]
-            
+
             for src in source_states:
                 adjacency[src].add(to_state)
                 back_adjacency[to_state].add(src)
                 links.append({
-                    "source": src, 
-                    "target": to_state, 
+                    "source": src,
+                    "target": to_state,
                     "label": event,
                     "gates": gate_str
                 })
-    
+
     # Calculate layers using BFS from entry state
-    layers = _calculate_layers(entry_state, adjacency, valid_node_ids, terminal_states)
-    
+    layers = _calculate_layers(
+        entry_state, adjacency, valid_node_ids, terminal_states)
+
     nodes = []
     for state_id, state_info in states_dict.items():
-        desc = state_info.get("description", "") if isinstance(state_info, dict) else str(state_info)
+        desc = state_info.get("description", "") if isinstance(
+            state_info, dict) else str(state_info)
         is_entry = state_id == entry_state
         is_terminal = state_id in terminal_states
         layer = layers.get(state_id, 5)  # Default middle layer
         # Include full state definition for click-to-view
-        state_def = state_info if isinstance(state_info, dict) else {"value": state_info}
+        state_def = state_info if isinstance(state_info, dict) else {
+            "value": state_info}
         nodes.append({
             "id": state_id,
             "label": state_id,
@@ -95,13 +98,13 @@ def process(params: dict) -> dict:
 
     # Build the HTML with gates for click-to-view
     html_content = _build_html(skill_name, nodes, links, gates_dict)
-    
+
     try:
         with open(html_path, "w", encoding="utf-8") as f:
             f.write(html_content)
     except Exception as e:
         return {"has_html": False, "error": f"Failed to write HTML: {e}"}
-    
+
     return {"has_html": True, "html_path": html_path}
 
 
@@ -111,12 +114,12 @@ def _calculate_layers(entry_state: str, adjacency: dict, all_states: set, termin
     if not entry_state or entry_state not in all_states:
         # Fallback: assign all to layer 0
         return {s: 0 for s in all_states}
-    
+
     # BFS from entry
     queue = deque([(entry_state, 0)])
     visited = {entry_state}
     layers[entry_state] = 0
-    
+
     while queue:
         state, layer = queue.popleft()
         for next_state in adjacency.get(state, []):
@@ -124,20 +127,20 @@ def _calculate_layers(entry_state: str, adjacency: dict, all_states: set, termin
                 visited.add(next_state)
                 layers[next_state] = layer + 1
                 queue.append((next_state, layer + 1))
-    
+
     # Assign unvisited states to a middle layer
     max_layer = max(layers.values()) if layers else 0
     for s in all_states:
         if s not in layers:
             layers[s] = max_layer // 2 + 1
-    
+
     # Push terminal states to last layer
     if terminal_states:
         max_layer = max(layers.values())
         for ts in terminal_states:
             if ts in layers:
                 layers[ts] = max_layer + 1
-    
+
     return layers
 
 

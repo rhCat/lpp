@@ -27,10 +27,14 @@ TERMINAL_STATES = set()
 
 STATES = {
     'idle': 'idle',  # No blueprints loaded, waiting for input
-    'parent_loaded': 'parent_loaded',  # Parent blueprint loaded, waiting for child or embedding
-    'child_loaded': 'child_loaded',  # Both parent and child loaded, ready to define embedding
-    'defining_embedding': 'defining_embedding',  # Defining embedding parameters (target state, contract, event map)
-    'embedding_ready': 'embedding_ready',  # Embedding defined, ready to compose or add more
+    # Parent blueprint loaded, waiting for child or embedding
+    'parent_loaded': 'parent_loaded',
+    # Both parent and child loaded, ready to define embedding
+    'child_loaded': 'child_loaded',
+    # Defining embedding parameters (target state, contract, event map)
+    'defining_embedding': 'defining_embedding',
+    # Embedding defined, ready to compose or add more
+    'embedding_ready': 'embedding_ready',
     'composed': 'composed',  # Composition complete, ready to validate or export
     'validated': 'validated',  # Validation complete, results available
     'error': 'error',  # Error state
@@ -52,9 +56,12 @@ GATES = {
 DISPLAY_RULES = [
     {'gate': 'is_error', 'template': 'ERROR: {error}'},
     {'gate': 'is_idle', 'template': 'No blueprints loaded. Use LOAD_PARENT to start.'},
-    {'gate': 'is_parent_loaded', 'template': 'Parent: {parent_path} | Use LOAD_CHILD to add child.'},
-    {'gate': 'is_child_loaded', 'template': 'Parent: {parent_path} | Child: {child_path} | Use DEFINE to start embedding.'},
-    {'gate': 'is_embedding_ready', 'template': 'Embedding defined. Use COMPOSE or ADD_MORE.'},
+    {'gate': 'is_parent_loaded',
+        'template': 'Parent: {parent_path} | Use LOAD_CHILD to add child.'},
+    {'gate': 'is_child_loaded',
+        'template': 'Parent: {parent_path} | Child: {child_path} | Use DEFINE to start embedding.'},
+    {'gate': 'is_embedding_ready',
+        'template': 'Embedding defined. Use COMPOSE or ADD_MORE.'},
     {'gate': 'is_composed', 'template': 'Composition complete. Use VALIDATE or EXPORT.'},
     {'gate': 'is_validated', 'template': 'Validation: {validation_result}'},
     {'template': 'L++ Blueprint Composer'},
@@ -435,7 +442,8 @@ class Operator:
     """
 
     def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'parent_blueprint': None, 'parent_path': None, 'child_blueprint': None, 'child_path': None, 'embeddings': None, 'current_embedding': None, 'composed_blueprint': None, 'validation_result': None, 'manifest': None, 'export_path': None, 'error': None, 'namespace_prefix': None}
+        self.context = {'_state': ENTRY_STATE, 'parent_blueprint': None, 'parent_path': None, 'child_blueprint': None, 'child_path': None, 'embeddings': None,
+                        'current_embedding': None, 'composed_blueprint': None, 'validation_result': None, 'manifest': None, 'export_path': None, 'error': None, 'namespace_prefix': None}
         self.traces: list[TransitionTrace] = []
         self.compute_registry = compute_registry or {}
 
@@ -527,7 +535,8 @@ class Operator:
                             self.context, _ = atom_MUTATE(
                                 self.context, ctx_path, result[res_key]
                             )
-                    scope.update(self.context)  # Sync scope for chained actions
+                    # Sync scope for chained actions
+                    scope.update(self.context)
 
         # TRANSITION
         (new_state, trace), _ = atom_TRANSITION(current, trans['to'])
@@ -563,7 +572,8 @@ class Operator:
 
     def reset(self):
         """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'parent_blueprint': None, 'parent_path': None, 'child_blueprint': None, 'child_path': None, 'embeddings': None, 'current_embedding': None, 'composed_blueprint': None, 'validation_result': None, 'manifest': None, 'export_path': None, 'error': None, 'namespace_prefix': None}
+        self.context = {'_state': ENTRY_STATE, 'parent_blueprint': None, 'parent_path': None, 'child_blueprint': None, 'child_path': None, 'embeddings': None,
+                        'current_embedding': None, 'composed_blueprint': None, 'validation_result': None, 'manifest': None, 'export_path': None, 'error': None, 'namespace_prefix': None}
         self.traces = []
 
     def save_state(self, path: str = None):
@@ -634,7 +644,8 @@ class Operator:
 
             # Validate blueprint ID matches
             if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
+                print(
+                    f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
                 return False
 
             self.context = state_data.get('context', {})

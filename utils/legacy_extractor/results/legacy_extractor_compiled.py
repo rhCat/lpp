@@ -30,10 +30,14 @@ STATES = {
     'loading': 'loading',  # Loading source file from disk
     'parsing': 'parsing',  # Parsing Python source into AST
     'detecting': 'detecting',  # Detecting state machine patterns in code
-    'extracting_states': 'extracting_states',  # Extracting state definitions from code
-    'extracting_transitions': 'extracting_transitions',  # Extracting state transitions from methods
-    'extracting_gates': 'extracting_gates',  # Extracting gate conditions from if statements
-    'extracting_actions': 'extracting_actions',  # Extracting actions from side effects
+    # Extracting state definitions from code
+    'extracting_states': 'extracting_states',
+    # Extracting state transitions from methods
+    'extracting_transitions': 'extracting_transitions',
+    # Extracting gate conditions from if statements
+    'extracting_gates': 'extracting_gates',
+    # Extracting actions from side effects
+    'extracting_actions': 'extracting_actions',
     'analyzing_events': 'analyzing_events',  # Analyzing event handler patterns
     'inferring_entry': 'inferring_entry',  # Inferring entry and terminal states
     'generating': 'generating',  # Generating L++ blueprint
@@ -349,7 +353,8 @@ class Operator:
     """
 
     def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'filePath': None, 'sourceCode': None, 'ast': None, 'analysisMode': None, 'patterns': None, 'extractedStates': None, 'extractedTransitions': None, 'extractedGates': None, 'extractedActions': None, 'extractedEvents': None, 'entryState': None, 'terminalStates': None, 'blueprint': None, 'blueprintJson': None, 'sourceMapping': None, 'uncertainties': None, 'extractionReport': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'filePath': None, 'sourceCode': None, 'ast': None, 'analysisMode': None, 'patterns': None, 'extractedStates': None, 'extractedTransitions': None, 'extractedGates': None,
+                        'extractedActions': None, 'extractedEvents': None, 'entryState': None, 'terminalStates': None, 'blueprint': None, 'blueprintJson': None, 'sourceMapping': None, 'uncertainties': None, 'extractionReport': None, 'error': None}
         self.traces: list[TransitionTrace] = []
         self.compute_registry = compute_registry or {}
 
@@ -441,7 +446,8 @@ class Operator:
                             self.context, _ = atom_MUTATE(
                                 self.context, ctx_path, result[res_key]
                             )
-                    scope.update(self.context)  # Sync scope for chained actions
+                    # Sync scope for chained actions
+                    scope.update(self.context)
 
         # TRANSITION
         (new_state, trace), _ = atom_TRANSITION(current, trans['to'])
@@ -477,7 +483,8 @@ class Operator:
 
     def reset(self):
         """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'filePath': None, 'sourceCode': None, 'ast': None, 'analysisMode': None, 'patterns': None, 'extractedStates': None, 'extractedTransitions': None, 'extractedGates': None, 'extractedActions': None, 'extractedEvents': None, 'entryState': None, 'terminalStates': None, 'blueprint': None, 'blueprintJson': None, 'sourceMapping': None, 'uncertainties': None, 'extractionReport': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'filePath': None, 'sourceCode': None, 'ast': None, 'analysisMode': None, 'patterns': None, 'extractedStates': None, 'extractedTransitions': None, 'extractedGates': None,
+                        'extractedActions': None, 'extractedEvents': None, 'entryState': None, 'terminalStates': None, 'blueprint': None, 'blueprintJson': None, 'sourceMapping': None, 'uncertainties': None, 'extractionReport': None, 'error': None}
         self.traces = []
 
     def save_state(self, path: str = None):
@@ -548,7 +555,8 @@ class Operator:
 
             # Validate blueprint ID matches
             if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
+                print(
+                    f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
                 return False
 
             self.context = state_data.get('context', {})

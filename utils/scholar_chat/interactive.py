@@ -38,7 +38,7 @@ def main():
             op.dispatch("SEARCH", {"query": arg})
             op.dispatch("DONE", {})
             for i, p in enumerate((op.context.get("searchResults") or [])[:10]):
-                print(f"  [{i}] {p.get('title','')[:55]} ({p.get('source')})")
+                print(f"  [{i}] {p.get('title', '')[:55]} ({p.get('source')})")
         elif cmd == "select":
             indices = [int(x.strip())
                        for x in arg.split(",")] if arg else [0, 1, 2]
@@ -46,7 +46,7 @@ def main():
             op.dispatch("DONE", {})
             syn = op.context.get("synthesis", "")
             if syn:
-                print(f"\n{syn[:1500]}{'...' if len(syn)>1500 else ''}\n")
+                print(f"\n{syn[:1500]}{'...' if len(syn) > 1500 else ''}\n")
             for q in (op.context.get("followUpQuestions") or []):
                 print(f"  Q: {q}")
         elif cmd == "ask":

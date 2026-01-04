@@ -62,7 +62,8 @@ DISPLAY_RULES = [
     {'gate': 'is_exporting', 'template': 'Exporting {output_format}...'},
     {'gate': 'is_assembling', 'template': 'Assembling {output_format} document...'},
     {'gate': 'is_generating', 'template': 'Generating sections for: {blueprint_name}'},
-    {'gate': 'is_loaded', 'template': 'Loaded: {blueprint_name} [{output_format}]'},
+    {'gate': 'is_loaded',
+        'template': 'Loaded: {blueprint_name} [{output_format}]'},
     {'template': 'L++ Documentation Generator'},
 ]
 
@@ -445,7 +446,8 @@ class Operator:
     """
 
     def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_path': None, 'blueprint_name': None, 'blueprint_id': None, 'output_format': None, 'output_path': None, 'metadata': None, 'overview_section': None, 'mermaid_section': None, 'states_section': None, 'transitions_section': None, 'gates_section': None, 'actions_section': None, 'context_section': None, 'events_section': None, 'quickstart_section': None, 'assembled_doc': None, 'include_mermaid': None, 'include_tables': None, 'include_quickstart': None, 'include_context': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_path': None, 'blueprint_name': None, 'blueprint_id': None, 'output_format': None, 'output_path': None, 'metadata': None, 'overview_section': None, 'mermaid_section': None, 'states_section': None, 'transitions_section': None,
+                        'gates_section': None, 'actions_section': None, 'context_section': None, 'events_section': None, 'quickstart_section': None, 'assembled_doc': None, 'include_mermaid': None, 'include_tables': None, 'include_quickstart': None, 'include_context': None, 'error': None}
         self.traces: list[TransitionTrace] = []
         self.compute_registry = compute_registry or {}
 
@@ -537,7 +539,8 @@ class Operator:
                             self.context, _ = atom_MUTATE(
                                 self.context, ctx_path, result[res_key]
                             )
-                    scope.update(self.context)  # Sync scope for chained actions
+                    # Sync scope for chained actions
+                    scope.update(self.context)
 
         # TRANSITION
         (new_state, trace), _ = atom_TRANSITION(current, trans['to'])
@@ -573,7 +576,8 @@ class Operator:
 
     def reset(self):
         """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_path': None, 'blueprint_name': None, 'blueprint_id': None, 'output_format': None, 'output_path': None, 'metadata': None, 'overview_section': None, 'mermaid_section': None, 'states_section': None, 'transitions_section': None, 'gates_section': None, 'actions_section': None, 'context_section': None, 'events_section': None, 'quickstart_section': None, 'assembled_doc': None, 'include_mermaid': None, 'include_tables': None, 'include_quickstart': None, 'include_context': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'blueprint': None, 'blueprint_path': None, 'blueprint_name': None, 'blueprint_id': None, 'output_format': None, 'output_path': None, 'metadata': None, 'overview_section': None, 'mermaid_section': None, 'states_section': None, 'transitions_section': None,
+                        'gates_section': None, 'actions_section': None, 'context_section': None, 'events_section': None, 'quickstart_section': None, 'assembled_doc': None, 'include_mermaid': None, 'include_tables': None, 'include_quickstart': None, 'include_context': None, 'error': None}
         self.traces = []
 
     def save_state(self, path: str = None):
@@ -644,7 +648,8 @@ class Operator:
 
             # Validate blueprint ID matches
             if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
+                print(
+                    f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
                 return False
 
             self.context = state_data.get('context', {})

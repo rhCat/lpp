@@ -340,7 +340,7 @@ def _analyze_single_change(bp: Dict[str, Any], change: Dict[str, Any]
                     return {
                         "type": changeType,
                         "description": f"Rename '{oldField}' to '{newField}' "
-                                      f"in {matches} items at {basePath}",
+                        f"in {matches} items at {basePath}",
                         "affected_count": matches
                     }
         else:
@@ -350,7 +350,7 @@ def _analyze_single_change(bp: Dict[str, Any], change: Dict[str, Any]
                 return {
                     "type": changeType,
                     "description": f"Rename '{oldField}' to '{newField}' "
-                                  f"at {path or 'root'}",
+                    f"at {path or 'root'}",
                     "affected_count": 1
                 }
 
@@ -514,7 +514,8 @@ def _apply_rename(bp: Dict[str, Any], path: str,
     if path.endswith("[*]"):
         # Array iteration
         basePath = path[:-3]
-        arr = _get_nested(bp, basePath) if basePath else bp.get(basePath.split(".")[-1] if basePath else None)
+        arr = _get_nested(bp, basePath) if basePath else bp.get(
+            basePath.split(".")[-1] if basePath else None)
         if basePath:
             arr = _get_nested(bp, basePath)
         else:
@@ -664,7 +665,8 @@ def dry_run(params: Dict[str, Any]) -> Dict[str, Any]:
     plan = params.get("migration_plan", [])
 
     # Analyze changes
-    analysis = analyze_changes({"blueprint": blueprint, "migration_plan": plan})
+    analysis = analyze_changes(
+        {"blueprint": blueprint, "migration_plan": plan})
     changes = analysis.get("changes", [])
 
     # Apply to a copy for preview
@@ -741,17 +743,17 @@ def validate_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:
             toState = t.get("to")
             if fromState != "*" and fromState not in states:
                 errors.append(f"Transition {t.get('id', i)}: "
-                             f"unknown from state '{fromState}'")
+                              f"unknown from state '{fromState}'")
             if toState != "*" and toState not in states:
                 errors.append(f"Transition {t.get('id', i)}: "
-                             f"unknown to state '{toState}'")
+                              f"unknown to state '{toState}'")
 
             # v0.1.2 check: gates should be array
             if targetVer == "lpp/v0.1.2":
                 gates = t.get("gates")
                 if gates is not None and not isinstance(gates, list):
                     errors.append(f"Transition {t.get('id', i)}: "
-                                 "gates should be array")
+                                  "gates should be array")
 
     # Gates validation
     gates = blueprint.get("gates", {})
@@ -816,7 +818,8 @@ def generate_report(params: Dict[str, Any]) -> Dict[str, Any]:
     else:
         for i, step in enumerate(plan, 1):
             lines.append(f"  Step {i}: {step['from']} -> {step['to']}")
-            lines.append(f"          {step.get('description', 'No description')}")
+            lines.append(
+                f"          {step.get('description', 'No description')}")
     lines.append("")
 
     # Changes
@@ -866,7 +869,8 @@ def generate_report(params: Dict[str, Any]) -> Dict[str, Any]:
     lines.append(f"  Migration Steps: {len(plan)}")
     lines.append(f"  Total Changes: {len(changes)}")
     if validation:
-        lines.append(f"  Validation: {'PASSED' if validation.get('valid') else 'FAILED'}")
+        lines.append(
+            f"  Validation: {'PASSED' if validation.get('valid') else 'FAILED'}")
     if dryRun:
         lines.append("  Note: This was a dry run. No changes were written.")
     lines.append("")

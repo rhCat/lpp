@@ -391,7 +391,8 @@ def generate_events_list(params: Dict[str, Any]) -> Dict[str, Any]:
         if event:
             if event not in events:
                 events[event] = []
-            events[event].append(f"`{t.get('from', '?')}` -> `{t.get('to', '?')}`")
+            events[event].append(
+                f"`{t.get('from', '?')}` -> `{t.get('to', '?')}`")
 
     if not events:
         return {"section": "## Events\n\n_No events defined._\n"}

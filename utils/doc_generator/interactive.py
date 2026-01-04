@@ -12,13 +12,13 @@ Examples:
     python interactive.py                    # Generate docs for L++ utils
     python interactive.py --project /my/app  # Generate docs for external project
 """
+from src.docgen_compute import COMPUTE_REGISTRY
 import sys
 import os
 import argparse
 from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from src.docgen_compute import COMPUTE_REGISTRY
 
 
 def main():
@@ -27,15 +27,24 @@ def main():
     )
     parser.add_argument('--project', '-p', metavar='PATH',
                         help='Path to L++ project (default: L++ utils directory)')
-    parser.add_argument('--all', action='store_true', help='Generate all docs (default)')
-    parser.add_argument('--graphs', action='store_true', help='Generate HTML graph visualizations')
-    parser.add_argument('--logic', action='store_true', help='Generate logic graphs from Python')
-    parser.add_argument('--functions', action='store_true', help='Generate function dependency graphs')
-    parser.add_argument('--mermaid', action='store_true', help='Generate Mermaid diagrams')
-    parser.add_argument('--readme', action='store_true', help='Update README files')
-    parser.add_argument('--report', action='store_true', help='Generate analysis report')
-    parser.add_argument('--dashboard', action='store_true', help='Generate dashboard HTML')
-    parser.add_argument('-q', '--quiet', action='store_true', help='Suppress verbose output')
+    parser.add_argument('--all', action='store_true',
+                        help='Generate all docs (default)')
+    parser.add_argument('--graphs', action='store_true',
+                        help='Generate HTML graph visualizations')
+    parser.add_argument('--logic', action='store_true',
+                        help='Generate logic graphs from Python')
+    parser.add_argument('--functions', action='store_true',
+                        help='Generate function dependency graphs')
+    parser.add_argument('--mermaid', action='store_true',
+                        help='Generate Mermaid diagrams')
+    parser.add_argument('--readme', action='store_true',
+                        help='Update README files')
+    parser.add_argument('--report', action='store_true',
+                        help='Generate analysis report')
+    parser.add_argument('--dashboard', action='store_true',
+                        help='Generate dashboard HTML')
+    parser.add_argument('-q', '--quiet', action='store_true',
+                        help='Suppress verbose output')
 
     args = parser.parse_args()
 
@@ -54,7 +63,8 @@ def main():
             return 1
     else:
         # Default to L++ utils directory
-        projectPath = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        projectPath = os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)))
 
     print("=" * 60)
     print("L++ Documentation Generator")
@@ -77,7 +87,8 @@ def main():
 
     # Discover blueprints
     print("\nDiscovering blueprints...")
-    result = COMPUTE_REGISTRY["docgen:discoverBlueprints"]({"utilsPath": projectPath})
+    result = COMPUTE_REGISTRY["docgen:discoverBlueprints"](
+        {"utilsPath": projectPath})
     print(f"Found {result['count']} blueprints")
 
     if result['count'] == 0:
@@ -90,7 +101,8 @@ def main():
     # Generate graphs
     if args.all or args.graphs:
         print("\nGenerating HTML Graph Visualizations...")
-        result = COMPUTE_REGISTRY["docgen:generateGraphs"]({"verbose": verbose})
+        result = COMPUTE_REGISTRY["docgen:generateGraphs"](
+            {"verbose": verbose})
         totalGenerated += result['generated']
         totalErrors.extend(result['errors'])
         print(f"  Generated: {result['generated']}")
@@ -98,7 +110,8 @@ def main():
     # Generate logic graphs
     if args.all or args.logic:
         print("\nGenerating Logic Graphs...")
-        result = COMPUTE_REGISTRY["docgen:generateLogicGraphs"]({"verbose": verbose})
+        result = COMPUTE_REGISTRY["docgen:generateLogicGraphs"](
+            {"verbose": verbose})
         totalGenerated += result['generated']
         totalErrors.extend(result['errors'])
         print(f"  Generated: {result['generated']}")
@@ -106,7 +119,8 @@ def main():
     # Generate function graphs
     if args.all or args.functions:
         print("\nGenerating Function Dependency Graphs...")
-        result = COMPUTE_REGISTRY["docgen:generateFunctionGraphs"]({"verbose": verbose})
+        result = COMPUTE_REGISTRY["docgen:generateFunctionGraphs"](
+            {"verbose": verbose})
         totalGenerated += result['generated']
         totalErrors.extend(result['errors'])
         print(f"  Generated: {result['generated']}")
@@ -114,7 +128,8 @@ def main():
     # Generate Mermaid diagrams
     if args.all or args.mermaid:
         print("\nGenerating Mermaid Diagrams...")
-        result = COMPUTE_REGISTRY["docgen:generateMermaid"]({"verbose": verbose})
+        result = COMPUTE_REGISTRY["docgen:generateMermaid"](
+            {"verbose": verbose})
         totalGenerated += result['generated']
         totalErrors.extend(result['errors'])
         print(f"  Generated: {result['generated']}")
@@ -130,14 +145,16 @@ def main():
     # Generate report
     if args.all or args.report:
         print("\nGenerating Analysis Report...")
-        result = COMPUTE_REGISTRY["docgen:generateReport"]({"utilsPath": projectPath, "verbose": verbose})
+        result = COMPUTE_REGISTRY["docgen:generateReport"](
+            {"utilsPath": projectPath, "verbose": verbose})
         if result.get('success'):
             totalGenerated += 1
 
     # Generate dashboard
     if args.all or args.dashboard:
         print("\nGenerating Dashboard...")
-        result = COMPUTE_REGISTRY["docgen:generateDashboard"]({"utilsPath": projectPath, "verbose": verbose})
+        result = COMPUTE_REGISTRY["docgen:generateDashboard"](
+            {"utilsPath": projectPath, "verbose": verbose})
         if result.get('success'):
             totalGenerated += 1
 

@@ -2,6 +2,7 @@ from src.graph_visualizer_compute import COMPUTE_UNITS
 import json
 import sys
 
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python interactive.py <blueprint.json>")
@@ -17,6 +18,7 @@ def main():
     result = COMPUTE_UNITS["process"](params)
     print("Result:")
     print(json.dumps(result, indent=2))
+
 
 if __name__ == "__main__":
     main()

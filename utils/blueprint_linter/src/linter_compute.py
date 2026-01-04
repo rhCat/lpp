@@ -353,7 +353,7 @@ def check_orphaned_transitions(params: Dict[str, Any]) -> Dict[str, Any]:
                 code=RuleCode.ORPHANED_TRANSITION,
                 severity=Severity.ERROR,
                 message=f"Transition '{tid}' references non-existent "
-                        f"from state '{fromState}'",
+                f"from state '{fromState}'",
                 location=f"transitions.{tid}.from",
                 suggestion=f"Create state '{fromState}' or fix the reference"
             ))
@@ -364,7 +364,7 @@ def check_orphaned_transitions(params: Dict[str, Any]) -> Dict[str, Any]:
                 code=RuleCode.ORPHANED_TRANSITION,
                 severity=Severity.ERROR,
                 message=f"Transition '{tid}' references non-existent "
-                        f"to state '{toState}'",
+                f"to state '{toState}'",
                 location=f"transitions.{tid}.to",
                 suggestion=f"Create state '{toState}' or fix the reference"
             ))
@@ -392,7 +392,7 @@ def check_missing_gate_refs(params: Dict[str, Any]) -> Dict[str, Any]:
                 code=RuleCode.MISSING_GATE_REF,
                 severity=Severity.ERROR,
                 message=f"Transition '{tid}' references non-existent "
-                        f"gate '{gate}'",
+                f"gate '{gate}'",
                 location=f"transitions.{tid}.gate",
                 suggestion=f"Create gate '{gate}' or fix the reference"
             ))
@@ -404,7 +404,7 @@ def check_missing_gate_refs(params: Dict[str, Any]) -> Dict[str, Any]:
                     code=RuleCode.MISSING_GATE_REF,
                     severity=Severity.ERROR,
                     message=f"Transition '{tid}' references non-existent "
-                            f"gate '{g}'",
+                    f"gate '{g}'",
                     location=f"transitions.{tid}.gates",
                     suggestion=f"Create gate '{g}' or fix the reference"
                 ))
@@ -432,7 +432,7 @@ def check_missing_action_refs(params: Dict[str, Any]) -> Dict[str, Any]:
                     code=RuleCode.MISSING_ACTION_REF,
                     severity=Severity.ERROR,
                     message=f"Transition '{tid}' references non-existent "
-                            f"action '{a}'",
+                    f"action '{a}'",
                     location=f"transitions.{tid}.actions",
                     suggestion=f"Create action '{a}' or fix the reference"
                 ))
@@ -458,7 +458,7 @@ def check_duplicate_ids(params: Dict[str, Any]) -> Dict[str, Any]:
                     code=RuleCode.DUPLICATE_TRANSITION_ID,
                     severity=Severity.ERROR,
                     message=f"Duplicate transition ID '{tid}' "
-                            f"(first at index {seenIds[tid]}, again at {i})",
+                    f"(first at index {seenIds[tid]}, again at {i})",
                     location=f"transitions[{i}]",
                     suggestion=f"Rename one of the transitions with ID '{tid}'"
                 ))
@@ -614,7 +614,8 @@ def generate_report(params: Dict[str, Any]) -> Dict[str, Any]:
     lines.append(f"  L++ Blueprint Linter Report")
     lines.append("=" * 70)
     lines.append("")
-    lines.append(f"  Blueprint: {bp.get('name', 'Unknown')} (v{bp.get('version', '?')})")
+    lines.append(
+        f"  Blueprint: {bp.get('name', 'Unknown')} (v{bp.get('version', '?')})")
     lines.append(f"  ID: {bp.get('id', 'unknown')}")
     lines.append(f"  Path: {bpPath}")
     lines.append("")
@@ -646,8 +647,10 @@ def generate_report(params: Dict[str, Any]) -> Dict[str, Any]:
     lines.append(f"  Gates:       {metrics.get('gate_count', 0)}")
     lines.append(f"  Actions:     {metrics.get('action_count', 0)}")
     lines.append(f"  Events:      {metrics.get('event_count', 0)}")
-    lines.append(f"  Context Props: {metrics.get('context_property_count', 0)}")
-    lines.append(f"  Cyclomatic Complexity: {metrics.get('cyclomatic_complexity', 1)}")
+    lines.append(
+        f"  Context Props: {metrics.get('context_property_count', 0)}")
+    lines.append(
+        f"  Cyclomatic Complexity: {metrics.get('cyclomatic_complexity', 1)}")
     lines.append("")
 
     # Findings
@@ -658,7 +661,8 @@ def generate_report(params: Dict[str, Any]) -> Dict[str, Any]:
 
         # Group by severity
         for severity in [Severity.ERROR, Severity.WARNING, Severity.INFO]:
-            sevFindings = [f for f in findings if f.get("severity") == severity]
+            sevFindings = [f for f in findings if f.get(
+                "severity") == severity]
             if sevFindings:
                 icon = {"error": "[E]", "warning": "[W]", "info": "[I]"}
                 lines.append("")

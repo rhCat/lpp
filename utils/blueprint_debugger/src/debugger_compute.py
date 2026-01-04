@@ -509,7 +509,8 @@ def step(params: Dict[str, Any]) -> Dict[str, Any]:
     new_ctx = copy.deepcopy(ctx)
     action_results = []
     for action_id in matched.get("actions", []):
-        new_ctx, details = _execute_action(bp, action_id, new_ctx, event_payload)
+        new_ctx, details = _execute_action(
+            bp, action_id, new_ctx, event_payload)
         action_results.append(details)
 
     # Transition to new state
@@ -931,7 +932,8 @@ def get_history(params: Dict[str, Any]) -> Dict[str, Any]:
         marker = " <--" if step_num == history_index else ""
 
         if event:
-            lines.append(f"  [{step_num}] {prev} --[{event}]--> {state}{marker}")
+            lines.append(
+                f"  [{step_num}] {prev} --[{event}]--> {state}{marker}")
         else:
             lines.append(f"  [{step_num}] Initial: {state}{marker}")
 

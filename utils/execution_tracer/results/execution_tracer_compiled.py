@@ -58,10 +58,14 @@ GATES = {
 DISPLAY_RULES = [
     {'gate': 'is_error', 'template': 'ERROR: {error}'},
     {'gate': 'is_idle', 'template': '[IDLE] No tracer configured'},
-    {'gate': 'is_configured', 'template': '[READY] Tracer configured, format: {output_format}'},
-    {'gate': 'is_tracing', 'template': '[TRACING] {blueprint_name} - {trace_id}'},
-    {'gate': 'is_paused', 'template': '[PAUSED] {blueprint_name} - {trace_id}'},
-    {'gate': 'is_completed', 'template': '[DONE] {blueprint_name} - {trace_id}'},
+    {'gate': 'is_configured',
+        'template': '[READY] Tracer configured, format: {output_format}'},
+    {'gate': 'is_tracing',
+        'template': '[TRACING] {blueprint_name} - {trace_id}'},
+    {'gate': 'is_paused',
+        'template': '[PAUSED] {blueprint_name} - {trace_id}'},
+    {'gate': 'is_completed',
+        'template': '[DONE] {blueprint_name} - {trace_id}'},
     {'gate': 'is_analyzing', 'template': '[ANALYZING] {trace_id}'},
     {'gate': 'is_exporting', 'template': '[EXPORTING] {trace_id}'},
     {'template': 'L++ Execution Tracer'},
@@ -501,7 +505,8 @@ class Operator:
     """
 
     def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'config': None, 'trace_id': None, 'root_span_id': None, 'spans': None, 'active_spans': None, 'events': None, 'blueprint_id': None, 'blueprint_name': None, 'start_time': None, 'end_time': None, 'output_format': None, 'export_path': None, 'analysis_result': None, 'formatted_output': None, 'output': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'config': None, 'trace_id': None, 'root_span_id': None, 'spans': None, 'active_spans': None, 'events': None, 'blueprint_id': None,
+                        'blueprint_name': None, 'start_time': None, 'end_time': None, 'output_format': None, 'export_path': None, 'analysis_result': None, 'formatted_output': None, 'output': None, 'error': None}
         self.traces: list[TransitionTrace] = []
         self.compute_registry = compute_registry or {}
 
@@ -593,7 +598,8 @@ class Operator:
                             self.context, _ = atom_MUTATE(
                                 self.context, ctx_path, result[res_key]
                             )
-                    scope.update(self.context)  # Sync scope for chained actions
+                    # Sync scope for chained actions
+                    scope.update(self.context)
 
         # TRANSITION
         (new_state, trace), _ = atom_TRANSITION(current, trans['to'])
@@ -629,7 +635,8 @@ class Operator:
 
     def reset(self):
         """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'config': None, 'trace_id': None, 'root_span_id': None, 'spans': None, 'active_spans': None, 'events': None, 'blueprint_id': None, 'blueprint_name': None, 'start_time': None, 'end_time': None, 'output_format': None, 'export_path': None, 'analysis_result': None, 'formatted_output': None, 'output': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'config': None, 'trace_id': None, 'root_span_id': None, 'spans': None, 'active_spans': None, 'events': None, 'blueprint_id': None,
+                        'blueprint_name': None, 'start_time': None, 'end_time': None, 'output_format': None, 'export_path': None, 'analysis_result': None, 'formatted_output': None, 'output': None, 'error': None}
         self.traces = []
 
     def save_state(self, path: str = None):
@@ -700,7 +707,8 @@ class Operator:
 
             # Validate blueprint ID matches
             if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
+                print(
+                    f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
                 return False
 
             self.context = state_data.get('context', {})

@@ -434,8 +434,10 @@ def format_diff(params: Dict[str, Any]) -> Dict[str, Any]:
                     if c.get("details"):
                         lines.append(f"      {c['details']}")
                     elif "left" in c and "right" in c:
-                        lines.append(f"      left:  {_format_value_inline(c['left'])}")
-                        lines.append(f"      right: {_format_value_inline(c['right'])}")
+                        lines.append(
+                            f"      left:  {_format_value_inline(c['left'])}")
+                        lines.append(
+                            f"      right: {_format_value_inline(c['right'])}")
             lines.append("")
 
         lines.append("=" * 70)

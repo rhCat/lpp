@@ -52,9 +52,11 @@ DISPLAY_RULES = [
     {'gate': 'has_error', 'template': 'ERROR: {error}'},
     {'gate': 'is_idle', 'template': 'No registry loaded. Use INIT or LOAD to start.'},
     {'gate': 'is_viewing', 'template': 'Viewing: {current_id} v{current_version}'},
-    {'gate': 'is_searching', 'template': "Search: '{search_query}' - {search_results.length} results"},
+    {'gate': 'is_searching',
+        'template': "Search: '{search_query}' - {search_results.length} results"},
     {'gate': 'is_comparing', 'template': 'Comparing versions of {current_id}'},
-    {'gate': 'is_ready', 'template': 'Registry: {stats.total} blueprints | {stats.active} active'},
+    {'gate': 'is_ready',
+        'template': 'Registry: {stats.total} blueprints | {stats.active} active'},
     {'template': 'L++ Blueprint Registry'},
 ]
 
@@ -448,7 +450,8 @@ class Operator:
     """
 
     def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'registry_path': None, 'index': None, 'blueprints': None, 'current_blueprint': None, 'current_id': None, 'current_version': None, 'version_history': None, 'dependency_graph': None, 'search_results': None, 'search_query': None, 'diff_result': None, 'validation_result': None, 'export_data': None, 'stats': None, 'error': None, 'message': None}
+        self.context = {'_state': ENTRY_STATE, 'registry_path': None, 'index': None, 'blueprints': None, 'current_blueprint': None, 'current_id': None, 'current_version': None, 'version_history': None,
+                        'dependency_graph': None, 'search_results': None, 'search_query': None, 'diff_result': None, 'validation_result': None, 'export_data': None, 'stats': None, 'error': None, 'message': None}
         self.traces: list[TransitionTrace] = []
         self.compute_registry = compute_registry or {}
 
@@ -540,7 +543,8 @@ class Operator:
                             self.context, _ = atom_MUTATE(
                                 self.context, ctx_path, result[res_key]
                             )
-                    scope.update(self.context)  # Sync scope for chained actions
+                    # Sync scope for chained actions
+                    scope.update(self.context)
 
         # TRANSITION
         (new_state, trace), _ = atom_TRANSITION(current, trans['to'])
@@ -576,7 +580,8 @@ class Operator:
 
     def reset(self):
         """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'registry_path': None, 'index': None, 'blueprints': None, 'current_blueprint': None, 'current_id': None, 'current_version': None, 'version_history': None, 'dependency_graph': None, 'search_results': None, 'search_query': None, 'diff_result': None, 'validation_result': None, 'export_data': None, 'stats': None, 'error': None, 'message': None}
+        self.context = {'_state': ENTRY_STATE, 'registry_path': None, 'index': None, 'blueprints': None, 'current_blueprint': None, 'current_id': None, 'current_version': None, 'version_history': None,
+                        'dependency_graph': None, 'search_results': None, 'search_query': None, 'diff_result': None, 'validation_result': None, 'export_data': None, 'stats': None, 'error': None, 'message': None}
         self.traces = []
 
     def save_state(self, path: str = None):
@@ -647,7 +652,8 @@ class Operator:
 
             # Validate blueprint ID matches
             if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
+                print(
+                    f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
                 return False
 
             self.context = state_data.get('context', {})

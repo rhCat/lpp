@@ -93,7 +93,8 @@ def print_metrics(ctx: dict):
 def main():
     print("\n  L++ Coverage Analyzer\n")
 
-    op = compile_and_load(str(HERE / "coverage_analyzer.json"), COVERAGE_REGISTRY)
+    op = compile_and_load(
+        str(HERE / "coverage_analyzer.json"), COVERAGE_REGISTRY)
 
     # CLI arg for initial blueprint
     if len(sys.argv) > 1:
@@ -224,7 +225,7 @@ def main():
         elif action in ("ctx", "context", "state"):
             ctx = {k: v for k, v in op.context.items()
                    if k not in ("blueprint", "html_report", "json_report",
-                               "summary_report", "detailed_report", "gap_report")}
+                                "summary_report", "detailed_report", "gap_report")}
             print(json.dumps(ctx, indent=2, default=str))
         elif action == "hits":
             print("\n  State Hits:", op.context.get("state_hits", {}))
