@@ -761,6 +761,10 @@ h3 {{ color: #00d4ff; margin: 15px 0 8px 0; font-size: 15px; border-bottom: 1px 
     </div>
 
     <h3>Modules <span style="font-weight:normal;font-size:11px;color:#666" id="module-count"></span></h3>
+    <div style="display:flex;gap:5px;margin-bottom:8px">
+      <button onclick="foldAllCategories()" style="flex:1;font-size:10px;padding:4px 8px;background:#3a3a5a;border:1px solid #555;color:#fff;border-radius:3px;cursor:pointer">▶ Fold All</button>
+      <button onclick="unfoldAllCategories()" style="flex:1;font-size:10px;padding:4px 8px;background:#3a3a5a;border:1px solid #555;color:#fff;border-radius:3px;cursor:pointer">▼ Unfold All</button>
+    </div>
     <div id="module-legend"></div>
 
     <h3>Selected <span id="selection-count" style="font-weight:normal;color:#888">(0)</span> <button onclick="clearSelection()" style="float:right;font-size:10px;padding:2px 8px;background:#3a3a5a;border:1px solid #555;color:#fff;border-radius:3px;cursor:pointer">Clear</button></h3>
@@ -941,6 +945,17 @@ let dragStartPos = null;
 let isDragging = false;
 const DRAG_THRESHOLD = 5;
 
+// Function to update edge positions
+function updateEdges() {{
+    edge.attr("d", d => {{
+        if (!d.source || !d.target) return "";
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return `M${{d.source.x}},${{d.source.y}}A${{dr}},${{dr}} 0 0,1 ${{d.target.x}},${{d.target.y}}`;
+    }});
+}}
+
 const drag = d3.drag()
     .on("start", function(e, d) {{
         e.sourceEvent.stopPropagation();
@@ -958,17 +973,17 @@ const drag = d3.drag()
             d.fx = e.x;
             d.fy = e.y;
             d3.select(this).attr("transform", `translate(${{e.x}},${{e.y}})`);
-            if (!e.active) simulation.alphaTarget(0.3).restart();
+            // Update edges immediately during drag
+            updateEdges();
         }}
     }})
     .on("end", function(e, d) {{
         if (isDragging) {{
             d3.select(this).select("rect").attr("stroke", d.moduleColor || "#666").attr("stroke-width", d.type === 'module' ? 3 : 2);
-            if (!e.active) simulation.alphaTarget(0);
             d.fx = null;
             d.fy = null;
+            updateEdges();
         }}
-        // Selection is handled by pointerup event
         dragStartPos = null;
         isDragging = false;
     }});
@@ -1167,6 +1182,28 @@ function toggleCategory(category) {{
         content.classList.toggle('collapsed');
         toggle.classList.toggle('collapsed');
     }}
+}}
+
+function foldAllCategories() {{
+    Object.keys(categoryGroups).forEach(category => {{
+        const content = document.getElementById(`cat-content-${{category}}`);
+        const toggle = document.querySelector(`#cat-${{category}} .category-toggle`);
+        if (content && toggle) {{
+            content.classList.add('collapsed');
+            toggle.classList.add('collapsed');
+        }}
+    }});
+}}
+
+function unfoldAllCategories() {{
+    Object.keys(categoryGroups).forEach(category => {{
+        const content = document.getElementById(`cat-content-${{category}}`);
+        const toggle = document.querySelector(`#cat-${{category}} .category-toggle`);
+        if (content && toggle) {{
+            content.classList.remove('collapsed');
+            toggle.classList.remove('collapsed');
+        }}
+    }});
 }}
 
 // === SEARCH/FILTER ===
@@ -1431,12 +1468,42 @@ function updateNodeInfo(d) {{
     if (d.category) html += `<div class="metric"><span class="info-label">Category:</span><span class="info-value">${{d.category}}</span></div>`;
 
     if (d.metrics) {{
-        html += `<div style="margin-top:10px"><b>Coupling Metrics</b></div>`;
-        html += `<div class="metric"><span class="info-label">Fan-In:</span><span class="info-value">${{d.metrics.fanIn}}</span></div>`;
-        html += `<div class="metric"><span class="info-label">Fan-Out:</span><span class="info-value">${{d.metrics.fanOut}}</span></div>`;
-        html += `<div class="metric"><span class="info-label">Instability:</span><span class="info-value">${{(d.metrics.instability * 100).toFixed(1)}}%</span></div>`;
-        html += `<div class="metric-bar"><div class="metric-fill" style="width:${{d.metrics.instability * 100}}%;background:${{d.metrics.instability > 0.5 ? '#ff6b6b' : '#4ecdc4'}}"></div></div>`;
-        html += `<div class="metric"><span class="info-label">Internal Edges:</span><span class="info-value">${{d.metrics.internalEdges}}</span></div>`;
+        const fanIn = d.metrics.fanIn || 0;
+        const fanOut = d.metrics.fanOut || 0;
+        const instability = d.metrics.instability || 0;
+        const internalEdges = d.metrics.internalEdges || 0;
+        const total = fanIn + fanOut;
+
+        html += `<div style="margin-top:10px;padding:8px;background:#1a1a2e;border-radius:4px;border:1px solid #333">`;
+        html += `<div style="font-weight:bold;color:#00d4ff;margin-bottom:8px">Coupling Metrics</div>`;
+
+        html += `<div class="metric"><span class="info-label">Fan-In:</span><span class="info-value">${{fanIn}}</span></div>`;
+        html += `<div style="font-size:10px;color:#666;margin-bottom:6px">↳ Modules that depend on this one</div>`;
+
+        html += `<div class="metric"><span class="info-label">Fan-Out:</span><span class="info-value">${{fanOut}}</span></div>`;
+        html += `<div style="font-size:10px;color:#666;margin-bottom:6px">↳ Modules this depends on</div>`;
+
+        html += `<div class="metric"><span class="info-label">Internal Edges:</span><span class="info-value">${{internalEdges}}</span></div>`;
+        html += `<div style="font-size:10px;color:#666;margin-bottom:8px">↳ Function calls within module</div>`;
+
+        // Instability with formula
+        const instColor = instability > 0.5 ? '#ff6b6b' : '#4ecdc4';
+        html += `<div style="border-top:1px solid #333;padding-top:8px;margin-top:4px">`;
+        html += `<div class="metric"><span class="info-label">Instability:</span><span class="info-value" style="color:${{instColor}};font-weight:bold">${{(instability * 100).toFixed(1)}}%</span></div>`;
+        html += `<div class="metric-bar"><div class="metric-fill" style="width:${{instability * 100}}%;background:${{instColor}}"></div></div>`;
+        html += `<div style="font-size:10px;color:#888;margin-top:4px;font-family:monospace">= Fan-Out / (Fan-In + Fan-Out)</div>`;
+        html += `<div style="font-size:10px;color:#888;font-family:monospace">= ${{fanOut}} / (${{fanIn}} + ${{fanOut}}) = ${{fanOut}}/${{total || 1}}</div>`;
+        html += `<div style="font-size:10px;margin-top:6px;color:${{instColor}}">`;
+        if (instability > 0.7) {{
+            html += `⚠ High instability - changes may cascade`;
+        }} else if (instability > 0.5) {{
+            html += `△ Moderate instability`;
+        }} else if (instability > 0.3) {{
+            html += `○ Balanced stability`;
+        }} else {{
+            html += `✓ Stable - many depend on this`;
+        }}
+        html += `</div></div></div>`;
     }}
 
     document.getElementById('node-info').innerHTML = html;
