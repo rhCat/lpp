@@ -302,13 +302,31 @@ def decodeLogic(params: dict) -> dict:
                 "controlFlow": controlFlow
             }).get("actions", [])
 
+            # Extract module-level constants
+            constants = []
+            if "decoder:extractConstants" in _LOGIC_REGISTRY:
+                constants = _LOGIC_REGISTRY["decoder:extractConstants"](
+                    {"ast": astDict}
+                ).get("constants", [])
+
+            # Get class info with dataclass detection
+            classesWithMeta = module.get("classes", [])
+            if not classesWithMeta:
+                # Re-analyze to get full class metadata including decorators
+                funcResult = _LOGIC_REGISTRY["decoder:analyzeFunctions"](
+                    {"ast": astDict, "imports": imports}
+                )
+                classesWithMeta = funcResult.get("classes", [])
+
             decodedLogic.append({
                 **module,
                 "controlFlow": controlFlow,
                 "inferredStates": inferredStates,
                 "inferredTransitions": inferredTransitions,
                 "inferredGates": inferredGates,
-                "inferredActions": inferredActions
+                "inferredActions": inferredActions,
+                "constants": constants,
+                "classesWithMeta": classesWithMeta
             })
         except Exception as e:
             _state["results"]["errors"].append(
@@ -337,7 +355,9 @@ def generateBlueprints(params: dict) -> dict:
                     "inferredTransitions": module.get("inferredTransitions", []),
                     "inferredGates": module.get("inferredGates", []),
                     "inferredActions": module.get("inferredActions", []),
-                    "imports": module.get("imports", [])
+                    "imports": module.get("imports", []),
+                    "constants": module.get("constants", []),
+                    "classes": module.get("classesWithMeta", [])
                 })
                 bp = result.get("blueprint")
 
@@ -474,38 +494,193 @@ def generateFunctionGraphs(params: dict) -> dict:
 
 
 def generateCompute(params: dict) -> dict:
-    """Generate compute function stubs for blueprints."""
+    """Generate compute modules from extracted source code.
+
+    Uses the function graph data to generate actual Python modules
+    with the original class/function definitions, not just stubs.
+    """
     blueprints = _state.get("blueprints", [])
+    moduleGraphs = _state.get("moduleGraphs", [])
     outputPath = _state.get("outputPath", "")
     generated = 0
 
-    stub = '''"""Compute functions for {name}."""
-from typing import Dict, Any
-
-_state: Dict[str, Any] = {{}}
-
-def execute(params: dict) -> dict:
-    """Execute main action."""
-    # TODO: Implement
-    return {{"success": True}}
-
-COMPUTE_REGISTRY = {{
-    "{id}:execute": execute,
-}}
-'''
+    # Build a mapping of module name -> graph data
+    graphByModule = {}
+    for graph in moduleGraphs:
+        modName = graph.get("module", "")
+        if modName:
+            graphByModule[modName] = graph
 
     for bp in blueprints:
         try:
             computeDir = os.path.join(outputPath, bp["id"], "src")
             os.makedirs(computeDir, exist_ok=True)
-            code = stub.format(name=bp["name"], id=bp["id"])
-            with open(os.path.join(computeDir, f"{bp['id']}_compute.py"), "w") as f:
+
+            # Try to find matching graph data
+            bpSource = bp.get("_source", "")
+            modName = bpSource.replace(".py", "").replace("/", ".").split(".")[-1]
+            graph = graphByModule.get(modName)
+
+            if graph and graph.get("nodes"):
+                # Generate full module from extracted source
+                code = _generateModuleFromGraph(bp, graph)
+            else:
+                # Fallback to stub if no graph data
+                code = _generateStub(bp)
+
+            outPath = os.path.join(computeDir, f"{bp['id']}_compute.py")
+            with open(outPath, "w") as f:
                 f.write(code)
             generated += 1
         except Exception as e:
             _state["results"]["errors"].append((bp["id"], str(e)))
 
     return {"generated": generated}
+
+
+def _generateModuleFromGraph(bp: dict, graph: dict) -> str:
+    """Generate a complete Python module from graph data with source code."""
+    lines = []
+    lines.append(f'"""Compute module for {bp.get("name", bp["id"])}.')
+    lines.append(f'Auto-generated from: {bp.get("_source", "unknown")}')
+    lines.append('"""')
+    lines.append('')
+
+    # Map of stdlib modules to their common "from X import Y" patterns
+    STDLIB_FROM_IMPORTS = {
+        "enum": "from enum import Enum, auto",
+        "abc": "from abc import ABC, abstractmethod",
+        "collections": "from collections import defaultdict, OrderedDict, Counter",
+        "functools": "from functools import wraps, lru_cache, partial",
+        "itertools": "from itertools import chain, groupby, islice",
+        "contextlib": "from contextlib import contextmanager, suppress",
+        "pathlib": "from pathlib import Path",
+        "datetime": "from datetime import datetime, timedelta, date",
+        "uuid": "import uuid",
+        "re": "import re",
+        "json": "import json",
+        "os": "import os",
+        "sys": "import sys",
+        "time": "import time",
+        "logging": "import logging",
+        "copy": "from copy import copy, deepcopy",
+        "threading": "import threading",
+        "asyncio": "import asyncio",
+        "traceback": "import traceback",
+    }
+
+    # Collect imports from edges (dependencies)
+    stdlib_imports = set()
+    thirdparty_imports = set()
+
+    # Check nodes for dependency type
+    for node in graph.get("nodes", []):
+        if node.get("type") == "dependency":
+            mod = node.get("id", "")
+            cat = node.get("category", "")
+            if cat == "stdlib":
+                stdlib_imports.add(mod)
+            elif cat == "thirdparty":
+                thirdparty_imports.add(mod)
+
+    # Add common imports
+    lines.append('from typing import Dict, Any, Optional, List, Tuple, Union, Callable')
+    lines.append('from dataclasses import dataclass, field, asdict')
+    lines.append('')
+
+    # Add stdlib imports with proper from/import format
+    for imp in sorted(stdlib_imports):
+        if imp in ("typing", "dataclasses"):
+            continue  # Already added above
+        if imp in STDLIB_FROM_IMPORTS:
+            lines.append(STDLIB_FROM_IMPORTS[imp])
+        else:
+            lines.append(f'import {imp}')
+
+    # Add third-party imports
+    for imp in sorted(thirdparty_imports):
+        lines.append(f'import {imp}')
+
+    if stdlib_imports or thirdparty_imports:
+        lines.append('')
+
+    # Module state
+    lines.append('_state: Dict[str, Any] = {}')
+    lines.append('')
+
+    # Extract and output class definitions first, then functions
+    classes = []
+    functions = []
+    standalone_functions = []  # Only module-level functions, not class methods
+    registry_entries = []
+
+    for node in graph.get("nodes", []):
+        ntype = node.get("type", "")
+        source = node.get("source")
+        name = node.get("label", "")
+        parent = node.get("parent")  # If set, this is a class method
+
+        if ntype == "class" and source:
+            classes.append((name, source, node))
+        elif ntype in ("function", "async_function") and source:
+            functions.append((name, source, node))
+            # Track standalone functions (not class methods) for registry
+            if not parent:
+                standalone_functions.append(name)
+
+    # Output classes with their source
+    for name, source, node in classes:
+        lines.append(source)
+        lines.append('')
+        lines.append('')
+
+    # Output functions with their source
+    for name, source, node in functions:
+        parent = node.get("parent")
+        # Only output standalone functions, not class methods
+        # (class methods are already included in the class source)
+        if not parent:
+            lines.append(source)
+            lines.append('')
+
+            # Add to registry if it's a public standalone function
+            if not name.startswith("_"):
+                registry_entries.append(f'    "{bp["id"]}:{name}": {name},')
+            lines.append('')
+
+    # Generate COMPUTE_REGISTRY
+    lines.append('')
+    lines.append('COMPUTE_REGISTRY = {')
+    if registry_entries:
+        for entry in registry_entries:
+            lines.append(entry)
+    else:
+        # Add a default execute if no functions
+        lines.append(f'    "{bp["id"]}:execute": lambda p: {{"success": True}},')
+    lines.append('}')
+    lines.append('')
+
+    return '\n'.join(lines)
+
+
+def _generateStub(bp: dict) -> str:
+    """Generate a stub module when no source is available."""
+    bpId = bp["id"]
+    bpName = bp.get("name", bpId)
+    return f'''"""Compute functions for {bpName}."""
+from typing import Dict, Any
+
+_state: Dict[str, Any] = {{}}
+
+def execute(params: dict) -> dict:
+    """Execute main action."""
+    # TODO: Implement - no source code was captured during extraction
+    return {{"success": True}}
+
+COMPUTE_REGISTRY = {{
+    "{bpId}:execute": execute,
+}}
+'''
 
 
 def generateDocs(params: dict) -> dict:
