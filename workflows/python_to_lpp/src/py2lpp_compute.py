@@ -128,6 +128,27 @@ def scanProject(params: dict) -> dict:
                 })
 
     _state["pythonFiles"] = pythonFiles
+
+    # Build dependency graph for the project
+    if _FUNCDEC_REGISTRY and "funcdec:buildProjectDependencyGraph" in _FUNCDEC_REGISTRY:
+        depResult = _FUNCDEC_REGISTRY["funcdec:buildProjectDependencyGraph"]({
+            "projectRoot": projectPath,
+            "pythonFiles": pythonFiles
+        })
+        _state["dependencyGraph"] = depResult.get("graph", {})
+        _state["reverseDependencyGraph"] = depResult.get("reverseGraph", {})
+        _state["externalDeps"] = depResult.get("externalDeps", [])
+        _state["fileToModule"] = depResult.get("fileToModule", {})
+        _state["moduleToFile"] = depResult.get("moduleToFile", {})
+
+        # Get compile order (topological sort)
+        if "funcdec:getCompileOrder" in _FUNCDEC_REGISTRY:
+            orderResult = _FUNCDEC_REGISTRY["funcdec:getCompileOrder"]({
+                "graph": _state["dependencyGraph"]
+            })
+            _state["compileOrder"] = orderResult.get("order", [])
+            _state["dependencyCycles"] = orderResult.get("cycles", [])
+
     return {"files": pythonFiles, "count": len(pythonFiles)}
 
 
@@ -511,6 +532,35 @@ def generateCompute(params: dict) -> dict:
         if modName:
             graphByModule[modName] = graph
 
+    # Build module-to-output mapping for import transformation
+    # Maps original module path -> LPP output module path
+    moduleToOutput = {}
+    for bp in blueprints:
+        bpSource = bp.get("_source", "")
+        origModule = bpSource.replace(".py", "").replace("/", ".")
+        # Output module: decoded_{name}.src.decoded_{name}_compute
+        outputModule = f"{bp['id']}.src.{bp['id']}_compute"
+        moduleToOutput[origModule] = outputModule
+        # Also map the base module name
+        baseName = origModule.split(".")[-1]
+        if baseName not in moduleToOutput:
+            moduleToOutput[baseName] = outputModule
+
+    _state["moduleToOutput"] = moduleToOutput
+
+    # Get compile order if available (dependencies first)
+    compileOrder = _state.get("compileOrder", [])
+    if compileOrder:
+        # Sort blueprints by compile order
+        def getOrder(bp):
+            bpSource = bp.get("_source", "")
+            modName = bpSource.replace(".py", "").replace("/", ".")
+            try:
+                return compileOrder.index(modName)
+            except ValueError:
+                return len(compileOrder)
+        blueprints = sorted(blueprints, key=getOrder)
+
     for bp in blueprints:
         try:
             computeDir = os.path.join(outputPath, bp["id"], "src")
@@ -523,7 +573,7 @@ def generateCompute(params: dict) -> dict:
 
             if graph and graph.get("nodes"):
                 # Generate full module from extracted source
-                code = _generateModuleFromGraph(bp, graph)
+                code = _generateModuleFromGraph(bp, graph, moduleToOutput)
             else:
                 # Fallback to stub if no graph data
                 code = _generateStub(bp)
@@ -538,8 +588,17 @@ def generateCompute(params: dict) -> dict:
     return {"generated": generated}
 
 
-def _generateModuleFromGraph(bp: dict, graph: dict) -> str:
-    """Generate a complete Python module from graph data with source code."""
+def _generateModuleFromGraph(bp: dict, graph: dict, moduleToOutput: dict = None) -> str:
+    """Generate a complete Python module from graph data with source code.
+
+    Args:
+        bp: Blueprint dict
+        graph: Module graph with nodes and edges
+        moduleToOutput: Mapping of original module paths to LPP output paths
+    """
+    if moduleToOutput is None:
+        moduleToOutput = {}
+
     lines = []
     lines.append(f'"""Compute module for {bp.get("name", bp["id"])}.')
     lines.append(f'Auto-generated from: {bp.get("_source", "unknown")}')
@@ -569,9 +628,10 @@ def _generateModuleFromGraph(bp: dict, graph: dict) -> str:
         "traceback": "import traceback",
     }
 
-    # Collect imports from edges (dependencies)
+    # Collect imports from graph outbound data
     stdlib_imports = set()
     thirdparty_imports = set()
+    local_imports = []  # (module, names, category)
 
     # Check nodes for dependency type
     for node in graph.get("nodes", []):
@@ -580,8 +640,20 @@ def _generateModuleFromGraph(bp: dict, graph: dict) -> str:
             cat = node.get("category", "")
             if cat == "stdlib":
                 stdlib_imports.add(mod)
-            elif cat == "thirdparty":
+            elif cat == "thirdparty" or cat == "pip":
                 thirdparty_imports.add(mod)
+
+    # Check outbound imports from graph for local imports
+    for outbound in graph.get("outbound", []):
+        mod = outbound.get("module", "")
+        cat = outbound.get("category", "")
+        names = outbound.get("names", [])
+        if cat == "local":
+            local_imports.append((mod, names, cat))
+        elif cat == "stdlib":
+            stdlib_imports.add(mod.split(".")[0] if mod else "")
+        elif cat in ("thirdparty", "pip"):
+            thirdparty_imports.add(mod.split(".")[0] if mod else "")
 
     # Add common imports
     lines.append('from typing import Dict, Any, Optional, List, Tuple, Union, Callable')
@@ -590,7 +662,7 @@ def _generateModuleFromGraph(bp: dict, graph: dict) -> str:
 
     # Add stdlib imports with proper from/import format
     for imp in sorted(stdlib_imports):
-        if imp in ("typing", "dataclasses"):
+        if not imp or imp in ("typing", "dataclasses"):
             continue  # Already added above
         if imp in STDLIB_FROM_IMPORTS:
             lines.append(STDLIB_FROM_IMPORTS[imp])
@@ -599,9 +671,41 @@ def _generateModuleFromGraph(bp: dict, graph: dict) -> str:
 
     # Add third-party imports
     for imp in sorted(thirdparty_imports):
-        lines.append(f'import {imp}')
+        if imp:
+            lines.append(f'import {imp}')
 
     if stdlib_imports or thirdparty_imports:
+        lines.append('')
+
+    # Add transformed local imports (project dependencies)
+    if local_imports and moduleToOutput:
+        lines.append('# Project dependencies (transformed for LPP output)')
+        for mod, names, cat in local_imports:
+            # Look up the transformed output path
+            outputPath = moduleToOutput.get(mod)
+            if not outputPath:
+                # Try base module name
+                baseMod = mod.split(".")[-1] if mod else ""
+                outputPath = moduleToOutput.get(baseMod)
+
+            if outputPath and names:
+                # Generate from X import Y statement
+                nameStrs = []
+                for n in names:
+                    nName = n.get("name", "") if isinstance(n, dict) else n
+                    nAlias = n.get("alias", "") if isinstance(n, dict) else ""
+                    if nAlias and nAlias != nName:
+                        nameStrs.append(f"{nName} as {nAlias}")
+                    elif nName:
+                        nameStrs.append(nName)
+                if nameStrs:
+                    lines.append(f'from {outputPath} import {", ".join(nameStrs)}')
+            elif names:
+                # No mapping found - add comment and original import
+                nameStrs = [n.get("name", "") if isinstance(n, dict) else n for n in names]
+                nameStrs = [n for n in nameStrs if n]
+                if mod and nameStrs:
+                    lines.append(f'# TODO: Map import - from {mod} import {", ".join(nameStrs)}')
         lines.append('')
 
     # Module state
@@ -763,6 +867,9 @@ def finalize(params: dict) -> dict:
     results = _state.get("results", {})
 
     moduleGraphs = _state.get("moduleGraphs", [])
+    dependencyGraph = _state.get("dependencyGraph", {})
+    compileOrder = _state.get("compileOrder", [])
+    dependencyCycles = _state.get("dependencyCycles", [])
 
     summary = {
         "projectName": _state.get("projectName", ""),
@@ -774,6 +881,12 @@ def finalize(params: dict) -> dict:
         "errors": results.get("errors", []),
         "blueprints": [bp["id"] for bp in blueprints],
         "functionGraphs": [g.get("module") for g in moduleGraphs],
+        "dependencies": {
+            "graph": dependencyGraph,
+            "compileOrder": compileOrder,
+            "cycles": dependencyCycles,
+            "externalDeps": _state.get("externalDeps", [])
+        },
         "utilsUsed": {
             "blueprint_builder": _BLUEPRINT_REGISTRY is not None,
             "doc_generator": _DOC_REGISTRY is not None,
@@ -789,14 +902,31 @@ def finalize(params: dict) -> dict:
             json.dump(summary, f, indent=2)
         with open(os.path.join(outputPath, "README.md"), "w") as f:
             f.write(f"# {summary['projectName']} - L++ Refactored\n\n")
-            f.write(f"| Metric | Count |\n|--------|-------|\n")
+            f.write("| Metric | Count |\n|--------|-------|\n")
             f.write(f"| Modules | {summary['modulesFound']} |\n")
             f.write(f"| Blueprints | {summary['blueprintsGenerated']} |\n")
             f.write(f"| Function Graphs | {summary['functionGraphsGenerated']} |\n")
             f.write(f"| Docs | {summary['docsGenerated']} |\n\n")
-            f.write(f"## Outputs\n\n")
-            f.write(f"- [Function Graph](function_graph.html)\n")
-            f.write(f"- [Dashboard](dashboard.html)\n")
+
+            # Add dependency information
+            if compileOrder:
+                f.write("## Compile Order\n\n")
+                f.write("Modules in topological order (dependencies first):\n\n")
+                for i, mod in enumerate(compileOrder[:20], 1):
+                    f.write(f"{i}. `{mod}`\n")
+                if len(compileOrder) > 20:
+                    f.write(f"\n...and {len(compileOrder) - 20} more\n")
+                f.write("\n")
+
+            if dependencyCycles:
+                f.write("## ⚠️ Dependency Cycles Detected\n\n")
+                for cycle in dependencyCycles:
+                    f.write(f"- {' → '.join(cycle)}\n")
+                f.write("\n")
+
+            f.write("## Outputs\n\n")
+            f.write("- [Function Graph](function_graph.html)\n")
+            f.write("- [Dashboard](dashboard.html)\n")
 
     return summary
 

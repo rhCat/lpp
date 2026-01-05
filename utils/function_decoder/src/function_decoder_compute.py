@@ -1883,6 +1883,388 @@ function toggleTableView() {{
 </html>'''
 
 
+# === DEPENDENCY RESOLUTION FUNCTIONS ===
+
+def resolveImportPath(params: dict) -> dict:
+    """Resolve a project-relative import to a file path.
+
+    Args:
+        params: dict with:
+            - projectRoot: absolute path to project root
+            - importModule: module string (e.g. 'src.actions.scraper')
+            - currentFile: (optional) current file for relative imports
+            - level: (optional) relative import level (1 = ., 2 = .., etc.)
+
+    Returns:
+        dict with:
+            - resolvedPath: absolute path to the Python file, or None
+            - isPackage: True if it's a package __init__.py
+            - error: error message if not found
+    """
+    projectRoot = params.get("projectRoot", "")
+    importModule = params.get("importModule", "")
+    currentFile = params.get("currentFile", "")
+    level = params.get("level", 0)
+
+    if not projectRoot or not importModule:
+        return {"resolvedPath": None, "isPackage": False, "error": "Missing projectRoot or importModule"}
+
+    projectRoot = Path(projectRoot)
+
+    # Handle relative imports
+    if level > 0 and currentFile:
+        currentDir = Path(currentFile).parent
+        # Go up 'level' directories
+        for _ in range(level):
+            currentDir = currentDir.parent
+        basePath = currentDir
+    else:
+        basePath = projectRoot
+
+    # Convert module path to file path
+    parts = importModule.split(".") if importModule else []
+    modulePath = basePath.joinpath(*parts)
+
+    # Check for direct .py file
+    pyFile = modulePath.with_suffix(".py")
+    if pyFile.exists() and pyFile.is_file():
+        return {"resolvedPath": str(pyFile), "isPackage": False, "error": None}
+
+    # Check for package __init__.py
+    initFile = modulePath / "__init__.py"
+    if initFile.exists() and initFile.is_file():
+        return {"resolvedPath": str(initFile), "isPackage": True, "error": None}
+
+    # Check if modulePath itself is a file (without .py extension check)
+    if modulePath.exists() and modulePath.is_file():
+        return {"resolvedPath": str(modulePath), "isPackage": False, "error": None}
+
+    return {
+        "resolvedPath": None,
+        "isPackage": False,
+        "error": f"Cannot resolve: {importModule} from {basePath}"
+    }
+
+
+def buildProjectDependencyGraph(params: dict) -> dict:
+    """Build a complete dependency graph for a Python project.
+
+    Args:
+        params: dict with:
+            - projectRoot: absolute path to project root
+            - pythonFiles: list of file info dicts with 'path' and 'module' keys
+            - includeExternal: (optional) include stdlib/pip deps (default False)
+
+    Returns:
+        dict with:
+            - graph: dict mapping module -> list of dependency modules
+            - reverseGraph: dict mapping module -> list of dependent modules
+            - externalDeps: set of external (non-project) dependencies
+            - fileToModule: dict mapping file path -> module name
+            - moduleToFile: dict mapping module name -> file path
+    """
+    projectRoot = params.get("projectRoot", "")
+    pythonFiles = params.get("pythonFiles", [])
+    includeExternal = params.get("includeExternal", False)
+
+    if not projectRoot or not pythonFiles:
+        return {"graph": {}, "reverseGraph": {}, "externalDeps": set(),
+                "fileToModule": {}, "moduleToFile": {}}
+
+    projectRoot = Path(projectRoot)
+
+    # Build file <-> module mappings
+    fileToModule = {}
+    moduleToFile = {}
+    for fileInfo in pythonFiles:
+        filePath = fileInfo.get("path", "")
+        moduleName = fileInfo.get("module", "")
+        if filePath and moduleName:
+            fileToModule[filePath] = moduleName
+            moduleToFile[moduleName] = filePath
+
+    # Set of all known project modules (for detecting local vs external)
+    projectModules = set(moduleToFile.keys())
+
+    # Also add parent modules (e.g., "src" if we have "src.actions.scraper")
+    for mod in list(projectModules):
+        parts = mod.split(".")
+        for i in range(1, len(parts)):
+            projectModules.add(".".join(parts[:i]))
+
+    graph = defaultdict(list)       # module -> [dependencies]
+    reverseGraph = defaultdict(list)  # module -> [dependents]
+    externalDeps = set()
+
+    for fileInfo in pythonFiles:
+        filePath = fileInfo.get("path", "")
+        moduleName = fileToModule.get(filePath, "")
+
+        if not moduleName:
+            continue
+
+        # Parse the file to extract imports
+        try:
+            result = loadFile({"filePath": filePath})
+            if result.get("error"):
+                continue
+            source = result["sourceCode"]
+
+            result = parseAst({"sourceCode": source})
+            if result.get("error"):
+                continue
+            tree = result["ast"]
+
+            imports = extractImports({"ast": tree}).get("imports", [])
+
+            for imp in imports:
+                impModule = imp.get("module", "")
+                impLevel = imp.get("level", 0)
+                impCategory = imp.get("category", "")
+
+                # Handle relative imports
+                if impLevel > 0:
+                    # Resolve relative import
+                    resolved = resolveImportPath({
+                        "projectRoot": str(projectRoot),
+                        "importModule": impModule,
+                        "currentFile": filePath,
+                        "level": impLevel
+                    })
+                    if resolved.get("resolvedPath"):
+                        depModule = fileToModule.get(resolved["resolvedPath"])
+                        if depModule:
+                            if depModule not in graph[moduleName]:
+                                graph[moduleName].append(depModule)
+                            if moduleName not in reverseGraph[depModule]:
+                                reverseGraph[depModule].append(moduleName)
+                elif impCategory == "local" or impModule in projectModules:
+                    # Local/project import
+                    # Check if this is a known project module or its submodule
+                    depModule = impModule
+                    baseMod = impModule.split(".")[0] if impModule else ""
+
+                    # Try to find the most specific matching module
+                    if depModule in projectModules:
+                        if depModule not in graph[moduleName]:
+                            graph[moduleName].append(depModule)
+                        if moduleName not in reverseGraph[depModule]:
+                            reverseGraph[depModule].append(moduleName)
+                    elif baseMod in projectModules:
+                        # Use base module
+                        if baseMod not in graph[moduleName]:
+                            graph[moduleName].append(baseMod)
+                        if moduleName not in reverseGraph[baseMod]:
+                            reverseGraph[baseMod].append(moduleName)
+                else:
+                    # External dependency (stdlib or pip)
+                    if impModule:
+                        externalDeps.add(impModule.split(".")[0])
+
+        except Exception as e:
+            # Skip files that can't be parsed
+            continue
+
+    return {
+        "graph": dict(graph),
+        "reverseGraph": dict(reverseGraph),
+        "externalDeps": list(externalDeps),
+        "fileToModule": fileToModule,
+        "moduleToFile": moduleToFile
+    }
+
+
+def getCompileOrder(params: dict) -> dict:
+    """Topologically sort modules for correct compilation order.
+
+    Modules are sorted so dependencies are compiled before dependents.
+
+    Args:
+        params: dict with:
+            - graph: dependency graph (module -> [dependencies])
+            - modules: (optional) list of modules to sort (defaults to all)
+
+    Returns:
+        dict with:
+            - order: list of modules in compile order (dependencies first)
+            - cycles: list of detected dependency cycles
+            - error: error message if there's a problem
+    """
+    graph = params.get("graph", {})
+    modules = params.get("modules")
+
+    if modules is None:
+        # Collect all modules from graph
+        allModules = set(graph.keys())
+        for deps in graph.values():
+            allModules.update(deps)
+        modules = list(allModules)
+
+    # Kahn's algorithm for topological sort
+    # Build in-degree map
+    inDegree = {mod: 0 for mod in modules}
+    adjList = defaultdict(list)
+
+    for mod, deps in graph.items():
+        if mod not in inDegree:
+            inDegree[mod] = 0
+        for dep in deps:
+            if dep in inDegree:  # Only count project modules
+                adjList[dep].append(mod)  # dep -> mod (mod depends on dep)
+                if mod in inDegree:
+                    inDegree[mod] += 1
+
+    # Find all modules with no dependencies (in-degree = 0)
+    queue = [mod for mod, deg in inDegree.items() if deg == 0]
+    order = []
+    cycles = []
+
+    while queue:
+        # Sort to ensure deterministic order
+        queue.sort()
+        current = queue.pop(0)
+        order.append(current)
+
+        # Reduce in-degree for dependents
+        for dependent in adjList.get(current, []):
+            if dependent in inDegree:
+                inDegree[dependent] -= 1
+                if inDegree[dependent] == 0:
+                    queue.append(dependent)
+
+    # Check for cycles (modules that weren't processed)
+    remaining = [mod for mod, deg in inDegree.items() if deg > 0]
+    if remaining:
+        # Detect cycle(s)
+        visited = set()
+        for mod in remaining:
+            if mod not in visited:
+                cycle = _detectCycle(mod, graph, visited)
+                if cycle:
+                    cycles.append(cycle)
+
+    return {
+        "order": order,
+        "cycles": cycles,
+        "error": f"Circular dependencies detected: {cycles}" if cycles else None
+    }
+
+
+def _detectCycle(start: str, graph: dict, visited: set) -> list:
+    """Detect a cycle starting from a node using DFS."""
+    path = []
+    pathSet = set()
+
+    def dfs(node):
+        if node in pathSet:
+            # Found cycle
+            idx = path.index(node)
+            return path[idx:] + [node]
+        if node in visited:
+            return None
+        visited.add(node)
+        path.append(node)
+        pathSet.add(node)
+        for dep in graph.get(node, []):
+            result = dfs(dep)
+            if result:
+                return result
+        path.pop()
+        pathSet.remove(node)
+        return None
+
+    return dfs(start)
+
+
+def transformImportPaths(params: dict) -> dict:
+    """Transform project import paths for compiled output.
+
+    Converts imports like 'from src.actions.scraper import X'
+    to 'from lpp_output.decoded_scraper.src.decoded_scraper_compute import X'
+
+    Args:
+        params: dict with:
+            - imports: list of import dicts from extractImports
+            - moduleToOutput: dict mapping original module -> output module path
+            - outputPrefix: prefix for output paths (e.g., 'lpp_output')
+
+    Returns:
+        dict with:
+            - transformedImports: list of import statement strings
+            - unmappedImports: list of imports that couldn't be mapped
+    """
+    imports = params.get("imports", [])
+    moduleToOutput = params.get("moduleToOutput", {})
+    outputPrefix = params.get("outputPrefix", "lpp_output")
+
+    transformedImports = []
+    unmappedImports = []
+
+    for imp in imports:
+        impType = imp.get("type", "")
+        impModule = imp.get("module", "")
+        impCategory = imp.get("category", "")
+        impLevel = imp.get("level", 0)
+        names = imp.get("names", [])
+
+        # Skip stdlib and pip imports - they stay as-is
+        if impCategory in ("stdlib", "pip"):
+            if impType == "import":
+                alias = imp.get("alias", "")
+                if alias and alias != impModule:
+                    transformedImports.append(f"import {impModule} as {alias}")
+                else:
+                    transformedImports.append(f"import {impModule}")
+            elif impType == "from_import":
+                nameStrs = []
+                for n in names:
+                    if n.get("alias") and n["alias"] != n["name"]:
+                        nameStrs.append(f"{n['name']} as {n['alias']}")
+                    else:
+                        nameStrs.append(n["name"])
+                if nameStrs:
+                    transformedImports.append(f"from {impModule} import {', '.join(nameStrs)}")
+            continue
+
+        # Handle local/project imports
+        if impCategory == "local" or impLevel > 0:
+            # Check if we have a mapping for this module
+            outputPath = moduleToOutput.get(impModule)
+
+            if outputPath:
+                if impType == "from_import":
+                    nameStrs = []
+                    for n in names:
+                        if n.get("alias") and n["alias"] != n["name"]:
+                            nameStrs.append(f"{n['name']} as {n['alias']}")
+                        else:
+                            nameStrs.append(n["name"])
+                    if nameStrs:
+                        transformedImports.append(f"from {outputPath} import {', '.join(nameStrs)}")
+                else:
+                    transformedImports.append(f"import {outputPath}")
+            else:
+                # No mapping - keep original and note it
+                unmappedImports.append(imp)
+                if impType == "import":
+                    transformedImports.append(f"import {impModule}")
+                elif impType == "from_import":
+                    nameStrs = [n["name"] for n in names]
+                    if impLevel > 0:
+                        dots = "." * impLevel
+                        if impModule:
+                            transformedImports.append(f"from {dots}{impModule} import {', '.join(nameStrs)}")
+                        else:
+                            transformedImports.append(f"from {dots} import {', '.join(nameStrs)}")
+                    else:
+                        transformedImports.append(f"from {impModule} import {', '.join(nameStrs)}")
+
+    return {
+        "transformedImports": transformedImports,
+        "unmappedImports": unmappedImports
+    }
+
+
 # Compute registry for L++ dispatcher
 COMPUTE_REGISTRY = {
     "funcdec:loadFile": loadFile,
@@ -1893,5 +2275,10 @@ COMPUTE_REGISTRY = {
     "funcdec:traceExternalCalls": traceExternalCalls,
     "funcdec:computeCoupling": computeCoupling,
     "funcdec:generateModuleGraph": generateModuleGraph,
-    "funcdec:visualizeModuleGraph": visualizeModuleGraph
+    "funcdec:visualizeModuleGraph": visualizeModuleGraph,
+    # Dependency resolution
+    "funcdec:resolveImportPath": resolveImportPath,
+    "funcdec:buildProjectDependencyGraph": buildProjectDependencyGraph,
+    "funcdec:getCompileOrder": getCompileOrder,
+    "funcdec:transformImportPaths": transformImportPaths,
 }
