@@ -79,10 +79,15 @@ def extractExports(params: dict) -> dict:
     sourceLines = sourceCode.split('\n') if sourceCode else []
 
     def get_source(node):
-        """Extract source code for a node using line numbers."""
+        """Extract source code for a node using line numbers, including decorators."""
         if not sourceLines or not hasattr(node, 'lineno'):
             return None
         start = node.lineno - 1
+        # Include decorator lines if present
+        if hasattr(node, 'decorator_list') and node.decorator_list:
+            first_decorator = node.decorator_list[0]
+            if hasattr(first_decorator, 'lineno'):
+                start = first_decorator.lineno - 1
         end = getattr(node, 'end_lineno', start + 1)
         if start < len(sourceLines) and end <= len(sourceLines):
             return '\n'.join(sourceLines[start:end])
@@ -135,6 +140,7 @@ def extractExports(params: dict) -> dict:
                     "bases": [_get_name(b) for b in node.bases],
                     "methods": methods,
                     "docstring": ast.get_docstring(node),
+                    "decorators": [_get_decorator_name(d) for d in node.decorator_list],
                     "source": get_source(node)
                 })
 
@@ -408,7 +414,8 @@ def generateModuleGraph(params: dict) -> dict:
             "docstring": exp.get("docstring"),
             "source": exp.get("source"),
             "args": exp.get("args"),
-            "returns": exp.get("returns")
+            "returns": exp.get("returns"),
+            "decorators": exp.get("decorators")
         })
 
     # Import nodes (outbound dependencies)

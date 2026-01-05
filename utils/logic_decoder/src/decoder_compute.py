@@ -199,9 +199,21 @@ def analyzeFunctions(params: dict) -> dict:
             ntype = node.get("_type")
             if ntype == "ClassDef":
                 bases = [_extractName(b) for b in node.get("bases", [])]
+                decorators = [_extractName(d) for d in node.get("decorator_list",
+                                                                [])]
+                # Detect if this is a dataclass
+                isDataclass = any(d in ("dataclass", "dataclasses.dataclass")
+                                  for d in decorators)
+                # Extract class-level field definitions for dataclasses
+                fields = []
+                if isDataclass:
+                    fields = _extractDataclassFields(node.get("body", []))
                 classes.append({
                     "name": node.get("name"),
                     "bases": bases,
+                    "decorators": decorators,
+                    "isDataclass": isDataclass,
+                    "fields": fields,
                     "line": node.get("lineno"),
                     "docstring": _extractDocstring(node)
                 })
@@ -222,6 +234,83 @@ def analyzeFunctions(params: dict) -> dict:
     return {"functions": functions, "classes": classes}
 
 
+def extractConstants(params: dict) -> dict:
+    """Extract module-level constants from AST.
+
+    Constants are module-level assignments that are:
+    - UPPER_CASE names (convention for constants)
+    - Simple values (strings, numbers, lists, dicts)
+    - Not function calls or complex expressions (except for simple containers)
+    """
+    astDict = params.get("ast", {})
+    constants = []
+
+    # Only look at top-level body (module-level)
+    moduleBody = astDict.get("body", [])
+
+    for node in moduleBody:
+        if not isinstance(node, dict):
+            continue
+        ntype = node.get("_type")
+
+        # Regular assignment: CONST_NAME = value
+        if ntype == "Assign":
+            for target in node.get("targets", []):
+                if target.get("_type") != "Name":
+                    continue
+                name = target.get("id", "")
+                # Check if it's UPPER_CASE (constant convention)
+                if not name or not name.isupper():
+                    continue
+                value = _extractValue(node.get("value"))
+                if value is not None:
+                    constants.append({
+                        "name": name,
+                        "value": value,
+                        "type": _inferType(value),
+                        "line": node.get("lineno")
+                    })
+
+        # Annotated assignment: CONST_NAME: Type = value
+        elif ntype == "AnnAssign":
+            target = node.get("target", {})
+            if target.get("_type") != "Name":
+                continue
+            name = target.get("id", "")
+            if not name or not name.isupper():
+                continue
+            annotated_type = _extractType(node.get("annotation"))
+            value = _extractValue(node.get("value"))
+            if value is not None:
+                constants.append({
+                    "name": name,
+                    "value": value,
+                    "type": annotated_type,
+                    "line": node.get("lineno")
+                })
+
+    return {"constants": constants}
+
+
+def _inferType(value: Any) -> str:
+    """Infer JSON schema type from Python value."""
+    if isinstance(value, bool):
+        return "boolean"
+    elif isinstance(value, int):
+        return "integer"
+    elif isinstance(value, float):
+        return "number"
+    elif isinstance(value, str):
+        return "string"
+    elif isinstance(value, list):
+        return "array"
+    elif isinstance(value, dict):
+        return "object"
+    elif isinstance(value, tuple):
+        return "array"
+    return "any"
+
+
 def _extractDocstring(node: dict) -> str:
     """Extract docstring from function/class body."""
     body = node.get("body", [])
@@ -233,6 +322,84 @@ def _extractDocstring(node: dict) -> str:
             if isinstance(val, str):
                 return val.strip()
     return ""
+
+
+def _extractDataclassFields(body: list) -> list:
+    """Extract field definitions from a dataclass body."""
+    fields = []
+    for node in body:
+        if not isinstance(node, dict):
+            continue
+        ntype = node.get("_type")
+        # AnnAssign: field_name: Type = value or field_name: Type
+        if ntype == "AnnAssign":
+            target = node.get("target", {})
+            field_name = target.get("id", "") if target.get("_type") == "Name" \
+                else ""
+            if not field_name:
+                continue
+            field_type = _extractType(node.get("annotation"))
+            # Check for default value
+            value_node = node.get("value")
+            default = None
+            has_default_factory = False
+            if value_node:
+                # Check if it's field(default_factory=...)
+                if value_node.get("_type") == "Call":
+                    func_name = _extractName(value_node.get("func"))
+                    if func_name in ("field", "dataclasses.field"):
+                        has_default_factory = True
+                        # Try to extract default_factory argument
+                        for kw in value_node.get("keywords", []):
+                            if kw.get("arg") == "default_factory":
+                                factory = _extractName(kw.get("value"))
+                                default = f"field(default_factory={factory})"
+                            elif kw.get("arg") == "default":
+                                default = _extractValue(kw.get("value"))
+                    else:
+                        default = _extractValue(value_node)
+                else:
+                    default = _extractValue(value_node)
+            fields.append({
+                "name": field_name,
+                "type": field_type,
+                "default": default,
+                "has_default_factory": has_default_factory,
+                "line": node.get("lineno")
+            })
+    return fields
+
+
+def _extractValue(node: Any) -> Any:
+    """Extract a constant value from an AST node."""
+    if node is None:
+        return None
+    if isinstance(node, dict):
+        ntype = node.get("_type")
+        if ntype == "Constant":
+            return node.get("value")
+        elif ntype == "List":
+            return [_extractValue(el) for el in node.get("elts", [])]
+        elif ntype == "Dict":
+            keys = [_extractValue(k) for k in node.get("keys", [])]
+            vals = [_extractValue(v) for v in node.get("values", [])]
+            return dict(zip(keys, vals))
+        elif ntype == "Tuple":
+            return tuple(_extractValue(el) for el in node.get("elts", []))
+        elif ntype == "Set":
+            return list(_extractValue(el) for el in node.get("elts", []))
+        elif ntype == "Name":
+            # Reference to another name - return as string ref
+            return f"${node.get('id', '')}"
+        elif ntype == "UnaryOp":
+            op = node.get("op", {}).get("_type", "")
+            operand = _extractValue(node.get("operand"))
+            if op == "USub" and isinstance(operand, (int, float)):
+                return -operand
+        elif ntype == "JoinedStr":
+            # f-string - return placeholder
+            return "<f-string>"
+    return None
 
 
 def _extractType(node: Any) -> str:
@@ -842,6 +1009,8 @@ def generateBlueprint(params: dict) -> dict:
     gates = params.get("inferredGates", [])
     actions = params.get("inferredActions", [])
     imports = params.get("imports", [])
+    constants = params.get("constants", [])
+    classes = params.get("classes", [])
 
     baseName = os.path.basename(filePath).replace(".py", "") if filePath else \
         "decoded"
@@ -856,6 +1025,38 @@ def generateBlueprint(params: dict) -> dict:
             contextProps["queryResult"] = {"type": "array"}
     contextProps["error"] = {"type": "string"}
     contextProps["result"] = {"type": "object"}
+
+    # Add module-level constants to context properties
+    for const in constants:
+        prop_def = {"type": const.get("type", "any")}
+        value = const.get("value")
+        if value is not None:
+            # For JSON serialization, convert tuples to lists
+            if isinstance(value, tuple):
+                value = list(value)
+            prop_def["default"] = value
+        contextProps[const["name"]] = prop_def
+
+    # Add dataclass fields to context properties
+    dataclasses_meta = []
+    for cls in classes:
+        if cls.get("isDataclass"):
+            cls_meta = {
+                "name": cls["name"],
+                "decorators": cls.get("decorators", []),
+                "fields": []
+            }
+            for fld in cls.get("fields", []):
+                field_def = {
+                    "name": fld["name"],
+                    "type": fld.get("type", "any")
+                }
+                if fld.get("default") is not None:
+                    field_def["default"] = fld["default"]
+                if fld.get("has_default_factory"):
+                    field_def["has_default_factory"] = True
+                cls_meta["fields"].append(field_def)
+            dataclasses_meta.append(cls_meta)
 
     # Build states dict
     statesDict = {}
@@ -911,12 +1112,18 @@ def generateBlueprint(params: dict) -> dict:
         "terminal_states": ["complete", "error"]
     }
 
+    # Add dataclasses metadata if any were found
+    if dataclasses_meta:
+        blueprint["dataclasses"] = dataclasses_meta
+
     report = {
         "source": filePath,
         "statesCount": len(states),
         "transitionsCount": len(transitions),
         "gatesCount": len(gates),
         "actionsCount": len(actions),
+        "constantsExtracted": len(constants),
+        "dataclassesFound": len(dataclasses_meta),
         "importsAnalyzed": len(imports),
         "importCategories": list(set(i.get("semantic", {}).get("category")
                                      for i in imports))
@@ -936,6 +1143,7 @@ def clearState(params: dict) -> dict:
         "imports": None,
         "functions": None,
         "classes": None,
+        "constants": None,
         "controlFlow": None,
         "inferredStates": None,
         "inferredTransitions": None,
@@ -954,6 +1162,7 @@ COMPUTE_REGISTRY = {
     "decoder:parseAst": parseAst,
     "decoder:analyzeImports": analyzeImports,
     "decoder:analyzeFunctions": analyzeFunctions,
+    "decoder:extractConstants": extractConstants,
     "decoder:analyzeControlFlow": analyzeControlFlow,
     "decoder:inferStates": inferStates,
     "decoder:inferTransitions": inferTransitions,

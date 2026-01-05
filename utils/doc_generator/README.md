@@ -75,8 +75,8 @@ stateDiagram-v2
     generating_dashboard --> error : ERROR [error is not None]
     error --> idle : RESET
     complete --> idle : RESET
-    complete --> [*]
     error --> [*]
+    complete --> [*]
 ```
 
 ## Compute Units
