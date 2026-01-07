@@ -464,6 +464,7 @@
                             <button class="tab active" onclick="showEditTab('json', event)">JSON</button>
                             <button class="tab" onclick="showEditTab('states', event)">States</button>
                             <button class="tab" onclick="showEditTab('transitions', event)">Transitions</button>
+                            <button class="tab" onclick="showEditTab('paths', event)">Paths</button>
                         </div>
                         <div id="editJsonTab">
                             <textarea class="form-textarea json-editor" id="jsonEditor"></textarea>
@@ -474,6 +475,13 @@
                         </div>
                         <div id="editTransitionsTab" style="display:none">
                             <div id="transitionsList"></div>
+                        </div>
+                        <div id="editPathsTab" style="display:none">
+                            <div class="form-group">
+                                <button class="toolbar-btn primary" onclick="loadPaths()">Analyze Paths</button>
+                                <span id="pathStats" style="margin-left:12px;color:var(--text-secondary);font-size:12px"></span>
+                            </div>
+                            <div id="pathsList"></div>
                         </div>
                     </div>
                 </div>
@@ -705,7 +713,8 @@
                 document.querySelectorAll('.tabs .tab').forEach(t => {
                     if ((tab === 'json' && t.textContent === 'JSON') ||
                         (tab === 'states' && t.textContent === 'States') ||
-                        (tab === 'transitions' && t.textContent === 'Transitions')) {
+                        (tab === 'transitions' && t.textContent === 'Transitions') ||
+                        (tab === 'paths' && t.textContent === 'Paths')) {
                         t.classList.add('active');
                     }
                 });
@@ -713,6 +722,7 @@
             document.getElementById('editJsonTab').style.display = tab === 'json' ? 'block' : 'none';
             document.getElementById('editStatesTab').style.display = tab === 'states' ? 'block' : 'none';
             document.getElementById('editTransitionsTab').style.display = tab === 'transitions' ? 'block' : 'none';
+            document.getElementById('editPathsTab').style.display = tab === 'paths' ? 'block' : 'none';
         }
         async function applyJsonEdit() {
             const json = document.getElementById('jsonEditor').value;
@@ -984,9 +994,11 @@
             document.getElementById('tlcModal').classList.remove('hidden');
             setStatus(data.passed ? 'TLC passed' : 'TLC failed', data.passed ? 'success' : 'error');
         }
+        let cachedPaths = [];
         async function analyzePaths() {
             setStatus('Analyzing paths...', 'warning');
             const data = await api('analyze', 'POST');
+            cachedPaths = data.paths || [];
             let html = `<div style="margin-bottom:16px">
                 <div class="metric"><div class="metric-value">${data.state_count}</div><div class="metric-label">States</div></div>
                 <div class="metric"><div class="metric-value">${data.path_count}</div><div class="metric-label">Paths</div></div>
@@ -1004,6 +1016,98 @@
             document.getElementById('pathsResults').innerHTML = html;
             document.getElementById('pathsModal').classList.remove('hidden');
             setStatus('Analysis complete', 'success');
+        }
+        async function loadPaths() {
+            setStatus('Analyzing paths...', 'warning');
+            try {
+                const data = await api('analyze', 'POST');
+                if (!data.success) {
+                    setStatus('Error: ' + (data.error || 'Analysis failed'), 'error');
+                    return;
+                }
+                cachedPaths = data.paths || [];
+                document.getElementById('pathStats').textContent =
+                    `${data.path_count} paths, ${data.state_count} states`;
+                renderPathsList(data);
+                setStatus('Path analysis complete', 'success');
+            } catch (e) {
+                setStatus('Error analyzing paths: ' + e.message, 'error');
+            }
+        }
+        function renderPathsList(data) {
+            const container = document.getElementById('pathsList');
+            let html = '';
+            // Show deadlocks and unreachable first
+            if (data.deadlocks && data.deadlocks.length) {
+                html += `<div class="category-section">
+                    <div class="category-header" style="background:rgba(248,81,73,0.2)">
+                        <span class="category-badge" style="background:var(--error);color:white">Deadlocks</span>
+                        <span class="category-count">${data.deadlocks.length}</span>
+                    </div>
+                    <div class="category-content">
+                        ${data.deadlocks.map(s => `
+                            <div class="list-item" onclick="highlightPath(['${s}'])" style="border-left:3px solid var(--error)">
+                                <div class="list-item-title">${s}</div>
+                                <div class="list-item-desc">No outgoing transitions</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+            }
+            if (data.reachability?.unreachable?.length) {
+                html += `<div class="category-section">
+                    <div class="category-header" style="background:rgba(210,153,34,0.2)">
+                        <span class="category-badge" style="background:var(--warning);color:black">Unreachable</span>
+                        <span class="category-count">${data.reachability.unreachable.length}</span>
+                    </div>
+                    <div class="category-content">
+                        ${data.reachability.unreachable.map(s => `
+                            <div class="list-item" onclick="highlightPath(['${s}'])" style="border-left:3px solid var(--warning)">
+                                <div class="list-item-title">${s}</div>
+                                <div class="list-item-desc">Cannot be reached from entry</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+            }
+            // Show execution paths
+            const paths = data.paths || [];
+            if (paths.length) {
+                html += `<div class="category-section">
+                    <div class="category-header" onclick="toggleCategory(this, event)">
+                        <span class="category-chevron">▼</span>
+                        <span class="category-badge" style="background:var(--accent);color:white">Paths</span>
+                        <span class="category-count">${data.path_count}</span>
+                    </div>
+                    <div class="category-content">
+                        ${paths.slice(0, 20).map((p, i) => `
+                            <div class="list-item" onclick="highlightPath(${JSON.stringify(p.states)})"
+                                 style="cursor:pointer;border-left:3px solid var(--accent)">
+                                <div class="list-item-title">Path ${i + 1}</div>
+                                <div class="list-item-desc" style="font-family:monospace;font-size:11px">
+                                    ${p.states.join(' → ')}
+                                </div>
+                            </div>
+                        `).join('')}
+                        ${paths.length > 20 ? `<div class="list-item-desc" style="text-align:center;padding:8px">
+                            ... and ${paths.length - 20} more paths
+                        </div>` : ''}
+                    </div>
+                </div>`;
+            }
+            container.innerHTML = html || '<p style="color:var(--text-secondary)">Click "Analyze Paths" to discover execution paths</p>';
+        }
+        function highlightPath(stateIds) {
+            const frame = document.getElementById('graphFrame');
+            if (frame.contentWindow) {
+                frame.contentWindow.postMessage({ type: 'highlightMultiple', nodeIds: stateIds }, '*');
+            }
+            // Also highlight in states list
+            document.querySelectorAll('#statesList .list-item').forEach(el => {
+                const title = el.querySelector('.list-item-title')?.textContent;
+                el.classList.toggle('selected', stateIds.includes(title));
+            });
+            setStatus(`Highlighted path: ${stateIds.join(' → ')}`, 'success');
         }
         async function initSimulation() {
             try {

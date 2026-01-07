@@ -154,7 +154,7 @@ def validate():
 def analyze():
     op = getOperator()
     print(f"[DEBUG] analyze called: state={op.state}, has_blueprint={bool(op.context.get('blueprint'))}", flush=True)
-    if op.state != "loaded":
+    if op.state not in ("loaded", "editing"):
         return jsonify({"success": False, "error": f"No blueprint loaded (state={op.state})"})
     print(f"[DEBUG] Before ANALYZE: path_count={op.context.get('path_count')}", flush=True)
     result1 = op.dispatch("ANALYZE", {})

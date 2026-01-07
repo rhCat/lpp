@@ -468,6 +468,14 @@ TRANSITIONS = [
         'actions': ['a_add_action', 'a_add_audit'],
     },
     {
+        'id': 't_edit_analyze',
+        'from': 'editing',
+        'to': 'analyzing',
+        'on_event': 'ANALYZE',
+        'gates': [],
+        'actions': ['a_analyze_paths'],
+    },
+    {
         'id': 't_review_note',
         'from': 'reviewing',
         'to': 'reviewing',

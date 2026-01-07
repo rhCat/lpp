@@ -94,6 +94,7 @@
     {"id": "t_add_trans", "from": "editing", "to": "loaded", "on_event": "ADD_TRANSITION", "actions": ["a_add_transition", "a_add_audit"]},
     {"id": "t_add_gate", "from": "editing", "to": "loaded", "on_event": "ADD_GATE", "actions": ["a_add_gate", "a_add_audit"]},
     {"id": "t_add_action", "from": "editing", "to": "loaded", "on_event": "ADD_ACTION", "actions": ["a_add_action", "a_add_audit"]},
+    {"id": "t_edit_analyze", "from": "editing", "to": "analyzing", "on_event": "ANALYZE", "actions": ["a_analyze_paths"]},
 
     {"id": "t_review_note", "from": "reviewing", "to": "reviewing", "on_event": "ADD_NOTE", "gates": ["g_has_prompt"], "actions": ["a_add_note"]},
     {"id": "t_review_approve", "from": "reviewing", "to": "loaded", "on_event": "APPROVE", "actions": ["a_set_approved"]},
