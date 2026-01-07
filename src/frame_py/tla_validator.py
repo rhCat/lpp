@@ -390,6 +390,10 @@ def _python_to_tla(
     translations = [
         (" is not None", " /= NULL"),
         (" is None", " = NULL"),
+        (" != None", " /= NULL"),
+        (" == None", " = NULL"),
+        ("!= None", " /= NULL"),
+        ("== None", " = NULL"),
         (" and ", " /\\ "),
         (" or ", " \\/ "),
         ("not ", "~"),
@@ -401,11 +405,16 @@ def _python_to_tla(
         (" < ", " < "),
         ("True", "TRUE"),
         ("False", "FALSE"),
+        ("None", "NULL"),  # Standalone None -> NULL
         ("_state", "state"),  # L++ uses _state for current state
     ]
 
     for py_op, tla_op in translations:
-        tla = tla.replace(py_op, tla_op)
+        # Use word boundary for _state to avoid matching sim_state -> simstate
+        if py_op == "_state":
+            tla = re.sub(r'\b_state\b', tla_op, tla)
+        else:
+            tla = tla.replace(py_op, tla_op)
 
     # Handle len() -> Len() for TLA+ (case-sensitive)
     tla = re.sub(r'\blen\(', 'Len(', tla)
