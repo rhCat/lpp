@@ -284,6 +284,14 @@ TRANSITIONS = [
         'actions': [],
     },
     {
+        'id': 't_set_bp_any',
+        'from': '*',
+        'to': 'loaded',
+        'on_event': 'SET_BLUEPRINT',
+        'gates': ['g_has_blueprint'],
+        'actions': [],
+    },
+    {
         'id': 't_reload',
         'from': 'loaded',
         'to': 'loaded',

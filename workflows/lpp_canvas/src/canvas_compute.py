@@ -777,14 +777,28 @@ def _generateGraphHtml(blueprint: dict) -> str:
 
     nodes = []
     for sId, sData in states.items():
-        nodeType = "entry" if sId == entryState else (
-            "terminal" if sId in terminalStates else "normal")
+        sIdLower = sId.lower()
+        if sId == entryState:
+            nodeType = "entry"
+        elif sId in terminalStates:
+            # Differentiate terminal states by name
+            if "error" in sIdLower or "fail" in sIdLower:
+                nodeType = "error"
+            elif "complete" in sIdLower or "done" in sIdLower or "success" in sIdLower or "secure" in sIdLower:
+                nodeType = "complete"
+            else:
+                nodeType = "terminal"
+        else:
+            nodeType = "normal"
         nodes.append({
             "id": sId,
             "label": sId,
             "description": sData.get("description", ""),
             "type": nodeType
         })
+
+    # Build node type map for edge coloring
+    nodeTypeMap = {n["id"]: n["type"] for n in nodes}
 
     edges = []
     stateIds = set(states.keys())
@@ -806,7 +820,8 @@ def _generateGraphHtml(blueprint: dict) -> str:
             "target": toState,
             "event": t.get("on_event", ""),
             "gates": gateInfo,
-            "actions": actionInfo
+            "actions": actionInfo,
+            "targetType": nodeTypeMap.get(toState, "normal")
         })
 
     html = f"""<!DOCTYPE html>
@@ -823,11 +838,10 @@ body {{ font-family: system-ui, sans-serif; background: #1a1a2e; overflow: hidde
 .node.selected rect {{ stroke: #ffd700; stroke-width: 3; }}
 .node:hover rect {{ filter: brightness(1.2); }}
 .node text {{ fill: #fff; font-size: 12px; pointer-events: none; }}
-.link {{ fill: none; stroke: #555; stroke-width: 2; }}
-.link:hover {{ stroke: #888; stroke-width: 3; }}
-.link.selected {{ stroke: #ffd700; stroke-width: 3; }}
-.link-label {{ fill: #aaa; font-size: 10px; pointer-events: none; }}
-.arrowhead {{ fill: #555; }}
+.link {{ fill: none; stroke-width: 2; opacity: 0.8; }}
+.link:hover {{ stroke-width: 3; opacity: 1; filter: brightness(1.2); }}
+.link.selected {{ stroke: #ffd700 !important; stroke-width: 3; opacity: 1; }}
+.link-label {{ fill: #ccc; font-size: 11px; pointer-events: none; font-weight: 500; }}
 #tooltip {{ position: fixed; background: #2d2d44; border: 1px solid #444;
   border-radius: 6px; padding: 10px; color: #eee; font-size: 12px;
   max-width: 300px; display: none; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }}
@@ -851,9 +865,10 @@ body {{ font-family: system-ui, sans-serif; background: #1a1a2e; overflow: hidde
   <button id="layoutBtn">Auto Layout</button>
 </div>
 <div id="legend">
-  <div class="legend-item"><div class="legend-dot" style="background:#4CAF50"></div> Entry State</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#f44336"></div> Terminal State</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#2196F3"></div> Normal State</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#4CAF50"></div> Entry/Complete</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f44336"></div> Error</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#FFC107"></div> Terminal</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#2196F3"></div> Normal</div>
 </div>
 <script>
 const nodesData = {json.dumps(nodes)};
@@ -861,7 +876,7 @@ const edgesData = {json.dumps(edges)};
 const width = window.innerWidth;
 const height = window.innerHeight;
 
-const colorMap = {{ entry: '#4CAF50', terminal: '#f44336', normal: '#2196F3' }};
+const colorMap = {{ entry: '#4CAF50', terminal: '#FFC107', error: '#f44336', complete: '#4CAF50', normal: '#2196F3' }};
 const tooltip = d3.select('#tooltip');
 
 const svg = d3.select('#container')
@@ -877,18 +892,21 @@ const zoom = d3.zoom()
   .on('zoom', (e) => g.attr('transform', e.transform));
 svg.call(zoom);
 
-// Arrow marker
-svg.append('defs').append('marker')
-  .attr('id', 'arrowhead')
-  .attr('viewBox', '-0 -5 10 10')
-  .attr('refX', 20)
-  .attr('refY', 0)
-  .attr('orient', 'auto')
-  .attr('markerWidth', 8)
-  .attr('markerHeight', 8)
-  .append('path')
-  .attr('d', 'M 0,-5 L 10,0 L 0,5')
-  .attr('class', 'arrowhead');
+// Arrow markers for each target type
+const defs = svg.append('defs');
+Object.entries(colorMap).forEach(([type, color]) => {{
+  defs.append('marker')
+    .attr('id', `arrow-${{type}}`)
+    .attr('viewBox', '-0 -5 10 10')
+    .attr('refX', 20)
+    .attr('refY', 0)
+    .attr('orient', 'auto')
+    .attr('markerWidth', 8)
+    .attr('markerHeight', 8)
+    .append('path')
+    .attr('d', 'M 0,-5 L 10,0 L 0,5')
+    .attr('fill', color);
+}});
 
 // Force simulation
 const simulation = d3.forceSimulation(nodesData)
@@ -897,13 +915,14 @@ const simulation = d3.forceSimulation(nodesData)
   .force('center', d3.forceCenter(width / 2, height / 2))
   .force('collision', d3.forceCollide().radius(80));
 
-// Links
+// Links - colored by target state type
 const link = g.append('g')
   .selectAll('path')
   .data(edgesData)
   .join('path')
   .attr('class', 'link')
-  .attr('marker-end', 'url(#arrowhead)')
+  .attr('stroke', d => colorMap[d.targetType] || '#888')
+  .attr('marker-end', d => `url(#arrow-${{d.targetType || 'normal'}})`)
   .on('click', (e, d) => selectEdge(d))
   .on('mouseover', (e, d) => showTooltip(e, 'transition', d))
   .on('mouseout', hideTooltip);
@@ -1031,7 +1050,7 @@ document.getElementById('layoutBtn').onclick = () => {{
 // Hierarchical layout positions
 function computeHierarchy() {{
   const entryNode = nodesData.find(n => n.type === 'entry');
-  const terminalNodes = nodesData.filter(n => n.type === 'terminal');
+  const terminalNodes = nodesData.filter(n => ['terminal', 'error', 'complete'].includes(n.type));
   const normalNodes = nodesData.filter(n => n.type === 'normal');
 
   // Position by layers: entry at top, normal in middle rows, terminal at bottom
@@ -1065,6 +1084,36 @@ function releaseHierarchy() {{
   simulation.alpha(1).restart();
 }}
 
+// Circular layout - arrange nodes in a circle with entry at top
+function computeCircular() {{
+  const entryNode = nodesData.find(n => n.type === 'entry');
+  const terminalNodes = nodesData.filter(n => ['terminal', 'error', 'complete'].includes(n.type));
+  const normalNodes = nodesData.filter(n => n.type === 'normal');
+
+  const cx = width / 2;
+  const cy = height / 2;
+  const radius = Math.min(width, height) * 0.35;
+
+  // Entry at top (angle 0 = -90 degrees)
+  if (entryNode) {{
+    entryNode.fx = cx;
+    entryNode.fy = cy - radius;
+  }}
+
+  // Arrange remaining nodes around the circle
+  const otherNodes = [...normalNodes, ...terminalNodes];
+  const angleStep = (2 * Math.PI) / (otherNodes.length + 1);
+  let startAngle = -Math.PI / 2 + angleStep; // Start after entry node
+
+  otherNodes.forEach((n, i) => {{
+    const angle = startAngle + i * angleStep;
+    n.fx = cx + radius * Math.cos(angle);
+    n.fy = cy + radius * Math.sin(angle);
+  }});
+
+  simulation.alpha(0.3).restart();
+}}
+
 let currentLayout = 'force';
 
 // Listen for messages from parent
@@ -1092,6 +1141,8 @@ window.addEventListener('message', (e) => {{
     currentLayout = e.data.layout;
     if (currentLayout === 'hierarchy') {{
       computeHierarchy();
+    }} else if (currentLayout === 'circular') {{
+      computeCircular();
     }} else {{
       releaseHierarchy();
     }}

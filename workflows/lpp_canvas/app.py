@@ -15,23 +15,28 @@ app = Flask(__name__, template_folder=str(HERE / "templates"),
             static_folder=str(HERE / "static"))
 
 operator = None
+operator_mtime = 0
 
 
 def getOperator():
-    global operator
-    if operator is None:
+    global operator, operator_mtime
+    out = HERE / "results/lpp_canvas_compiled.py"
+    src = HERE / "lpp_canvas.json"
+    out.parent.mkdir(exist_ok=True)
+    # Recompile if source is newer than compiled output
+    needs_recompile = not out.exists() or src.stat().st_mtime > out.stat().st_mtime
+    if needs_recompile:
+        compile_blueprint(str(src), str(out))
+    # Recreate operator if recompiled or not yet created
+    current_mtime = out.stat().st_mtime if out.exists() else 0
+    if operator is None or current_mtime > operator_mtime:
         import importlib.util
-        out = HERE / "results/lpp_canvas_compiled.py"
-        src = HERE / "lpp_canvas.json"
-        out.parent.mkdir(exist_ok=True)
-        # Only recompile if source is newer than compiled output
-        if not out.exists() or src.stat().st_mtime > out.stat().st_mtime:
-            compile_blueprint(str(src), str(out))
         spec = importlib.util.spec_from_file_location("op", out)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
         reg = {tuple(k.split(":")): fn for k, fn in COMPUTE_REGISTRY.items()}
         operator = mod.create_operator(reg)
+        operator_mtime = current_mtime
     return operator
 
 
@@ -93,8 +98,8 @@ def setBlueprint():
     op.context["blueprint_json"] = json.dumps(bp, indent=2)
     op.context["graph_html"] = ""  # Clear graph when blueprint changes
     op.context["is_dirty"] = True
-    # Transition to loaded state via SET_BLUEPRINT event
-    if op.state == "idle" and bp:
+    # Transition to loaded state via SET_BLUEPRINT event (works from any state)
+    if bp:
         op.dispatch("SET_BLUEPRINT", {})
     return jsonify({"success": True, "state": op.state})
 
@@ -102,10 +107,14 @@ def setBlueprint():
 @app.route("/api/graph", methods=["GET"])
 def getGraph():
     op = getOperator()
+    # Check for force refresh parameter
+    force = request.args.get("force", "").lower() in ("1", "true", "yes")
+    if force:
+        op.context["graph_html"] = ""
     html = op.context.get("graph_html", "")
     blueprint = op.context.get("blueprint")
     print(f"[DEBUG] /api/graph: html_len={len(html) if html else 0}, "
-          f"has_blueprint={bool(blueprint)}, state={op.state}")
+          f"has_blueprint={bool(blueprint)}, state={op.state}, force={force}")
     if not html and blueprint:
         try:
             from src.canvas_compute import generateOutputs

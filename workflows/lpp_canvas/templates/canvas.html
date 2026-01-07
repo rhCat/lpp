@@ -678,10 +678,11 @@
                 alert('Error: ' + data.error);
             }
         }
-        async function refreshGraph() {
+        async function refreshGraph(force = true) {
             const frame = document.getElementById('graphFrame');
             frame.removeAttribute('srcdoc');  // Clear srcdoc so src takes effect
-            frame.src = '/api/graph?' + Date.now();
+            // Use force=1 to clear server-side cache and regenerate graph
+            frame.src = `/api/graph?force=${force ? 1 : 0}&t=${Date.now()}`;
         }
         function showPanel(name) {
             ['edit', 'simulate', 'cluster', 'review', 'llm'].forEach(p => {
@@ -883,6 +884,8 @@
                     if (frame.contentWindow) {
                         frame.contentWindow.postMessage({ type: 'highlight', nodeId: stateId }, '*');
                     }
+                    // Highlight in JSON schema
+                    highlightInSchema('state', stateId);
                     setStatus(`Selected state: ${stateId}`, 'success');
                 }
             } catch (e) {
@@ -915,6 +918,8 @@
                     if (frame.contentWindow) {
                         frame.contentWindow.postMessage({ type: 'highlightTransition', transitionId: transitionId }, '*');
                     }
+                    // Highlight in JSON schema
+                    highlightInSchema('transition', transitionId);
                     setStatus(`Selected transition: ${transitionId}`, 'success');
                 }
             } catch (e) {
@@ -1210,15 +1215,49 @@
             }
         }
         let currentLayout = 'force';
+        const layouts = ['force', 'hierarchy', 'circular'];
         function toggleLayout() {
-            currentLayout = currentLayout === 'force' ? 'hierarchy' : 'force';
+            const idx = layouts.indexOf(currentLayout);
+            currentLayout = layouts[(idx + 1) % layouts.length];
             const btn = document.getElementById('layoutToggle');
-            btn.textContent = currentLayout === 'force' ? 'Hierarchy' : 'Force';
+            // Show next layout name on button
+            const nextLayout = layouts[(layouts.indexOf(currentLayout) + 1) % layouts.length];
+            btn.textContent = nextLayout.charAt(0).toUpperCase() + nextLayout.slice(1);
             const frame = document.getElementById('graphFrame');
             if (frame.contentWindow) {
                 frame.contentWindow.postMessage({ type: 'setLayout', layout: currentLayout }, '*');
             }
             setStatus(`Layout: ${currentLayout}`, 'success');
+        }
+
+        // Highlight section in JSON editor for selected state/transition
+        function highlightInSchema(type, id) {
+            const editor = document.getElementById('jsonEditor');
+            if (!editor || !editor.value) return;
+
+            let searchPattern;
+            if (type === 'state') {
+                // Look for "stateName": { in states block
+                searchPattern = new RegExp(`"${id}"\\s*:\\s*\\{`, 'g');
+            } else if (type === 'transition') {
+                // Look for "id": "transitionId" in transitions array
+                searchPattern = new RegExp(`"id"\\s*:\\s*"${id}"`, 'g');
+            } else {
+                return;
+            }
+
+            const match = searchPattern.exec(editor.value);
+            if (match) {
+                // Show JSON tab and scroll to match
+                showEditTab('json');
+                showPanel('edit');
+                editor.focus();
+                editor.setSelectionRange(match.index, match.index + match[0].length);
+                // Scroll to selection
+                const lines = editor.value.substring(0, match.index).split('\n');
+                const lineHeight = parseInt(getComputedStyle(editor).lineHeight) || 18;
+                editor.scrollTop = (lines.length - 5) * lineHeight;
+            }
         }
         function clearSelection() {
             // Clear list selections
@@ -1248,6 +1287,8 @@
                 setStatus(`Selected ${nodeType}: ${nodeId}`, 'success');
                 // Auto-open edit panel and select the node
                 if (nodeType === 'state') {
+                    currentSelectedState = nodeId;
+                    currentSelectedTransition = null;
                     await api('edit', 'POST', { action: 'select', node_id: nodeId, node_type: 'state' });
                     showPanel('edit');
                     showEditTab('states');
@@ -1255,12 +1296,18 @@
                     document.querySelectorAll('#statesList .list-item').forEach(el => {
                         el.classList.toggle('selected', el.textContent.includes(nodeId));
                     });
+                    // Highlight in JSON schema
+                    highlightInSchema('state', nodeId);
                 } else if (nodeType === 'transition') {
+                    currentSelectedTransition = nodeId;
+                    currentSelectedState = null;
                     showPanel('edit');
                     showEditTab('transitions');
                     document.querySelectorAll('#transitionsList .list-item').forEach(el => {
                         el.classList.toggle('selected', el.textContent.includes(nodeId));
                     });
+                    // Highlight in JSON schema
+                    highlightInSchema('transition', nodeId);
                 }
             } else if (e.data.type === 'deselect') {
                 // Node or edge deselected in graph (toggle off)
@@ -1279,13 +1326,20 @@
                     });
                 }
             } else if (e.data.type === 'edit') {
-                // Double-click to edit
+                // Double-click to edit - show JSON tab with highlighted section
                 const { nodeType, nodeId } = e.data;
                 if (nodeType === 'state') {
+                    currentSelectedState = nodeId;
+                    currentSelectedTransition = null;
                     await api('edit', 'POST', { action: 'select', node_id: nodeId, node_type: 'state' });
                     await refreshState();
                     showPanel('edit');
-                    showEditTab('states');
+                    highlightInSchema('state', nodeId);
+                } else if (nodeType === 'transition') {
+                    currentSelectedTransition = nodeId;
+                    currentSelectedState = null;
+                    showPanel('edit');
+                    highlightInSchema('transition', nodeId);
                 }
             }
         });
