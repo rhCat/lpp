@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L++ Canvas - Blueprint Studio</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --border: #30363d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent: #58a6ff;
+            --success: #3fb950;
+            --warning: #d29922;
+            --error: #f85149;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+        .app { display: flex; height: 100vh; }
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar-header h1 {
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sidebar-header h1::before {
+            content: '';
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            border-radius: 4px;
+        }
+        .state-badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            margin-left: auto;
+        }
+        .nav { padding: 8px; flex: 1; overflow-y: auto; }
+        .nav-section { margin-bottom: 16px; }
+        .nav-section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            padding: 8px 12px;
+            font-weight: 600;
+        }
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 12px;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: left;
+        }
+        .nav-btn:hover { background: var(--bg-tertiary); }
+        .nav-btn.active { background: var(--accent); color: white; }
+        .nav-btn-icon {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+        }
+        .toolbar-btn {
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .toolbar-btn:hover { background: var(--border); }
+        .toolbar-btn.primary { background: var(--accent); border-color: var(--accent); }
+        .toolbar-btn.success { background: var(--success); border-color: var(--success); }
+        .toolbar-btn.warning { background: var(--warning); border-color: var(--warning); color: black; }
+        .toolbar-spacer { flex: 1; }
+        .content { flex: 1; display: flex; overflow: hidden; }
+        .canvas-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: var(--bg-primary);
+        }
+        .canvas-area iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .panel {
+            width: 400px;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .panel.hidden { display: none; }
+        .panel-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .panel-header h2 { font-size: 14px; font-weight: 600; }
+        .panel-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .panel-content { flex: 1; overflow-y: auto; padding: 16px; }
+        .form-group { margin-bottom: 16px; }
+        .form-label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+        .form-textarea { min-height: 100px; resize: vertical; font-family: monospace; }
+        .json-editor {
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            min-height: 300px;
+        }
+        .status-bar {
+            display: flex;
+            gap: 16px;
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .status-item { display: flex; align-items: center; gap: 6px; }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+        .status-dot.error { background: var(--error); }
+        .status-dot.warning { background: var(--warning); }
+        .list-item {
+            padding: 10px 12px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .list-item:hover { background: var(--border); }
+        .list-item.selected { border: 1px solid var(--accent); }
+        .list-item-title { font-weight: 500; margin-bottom: 4px; }
+        .list-item-desc { font-size: 12px; color: var(--text-secondary); }
+        .category-section { margin-bottom: 16px; }
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 8px;
+        }
+        .category-header:hover { background: var(--bg-tertiary); }
+        .category-chevron {
+            width: 16px;
+            height: 16px;
+            transition: transform 0.2s;
+            color: var(--text-secondary);
+        }
+        .category-chevron.collapsed { transform: rotate(-90deg); }
+        .category-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+        .category-count {
+            margin-left: auto;
+            font-size: 11px;
+            padding: 2px 8px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            color: var(--text-secondary);
+        }
+        .category-badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+        .category-badge.entry { background: rgba(76, 175, 80, 0.2); color: #4CAF50; }
+        .category-badge.terminal { background: rgba(244, 67, 54, 0.2); color: #f44336; }
+        .category-badge.normal { background: rgba(33, 150, 243, 0.2); color: #2196F3; }
+        .category-content { padding-left: 8px; }
+        .category-content.collapsed { display: none; }
+        .simulation-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .event-btn {
+            padding: 6px 12px;
+            background: var(--accent);
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .event-btn:hover { opacity: 0.9; }
+        .history-item {
+            padding: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            margin-bottom: 4px;
+            font-size: 12px;
+            font-family: monospace;
+        }
+        .cluster-group {
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        .cluster-title { font-weight: 500; margin-bottom: 8px; }
+        .cluster-states {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .state-chip {
+            padding: 4px 8px;
+            background: var(--accent);
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        .review-note {
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-left: 3px solid var(--warning);
+            border-radius: 0 6px 6px 0;
+            margin-bottom: 8px;
+        }
+        .review-note-meta {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .llm-chat {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .llm-messages { flex: 1; overflow-y: auto; padding-bottom: 16px; }
+        .llm-message {
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        .llm-message.assistant { border-left: 3px solid var(--accent); }
+        .llm-input-area { display: flex; gap: 8px; }
+        .llm-input { flex: 1; }
+        .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+        .tab {
+            padding: 8px 16px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 6px 6px 0 0;
+            font-size: 13px;
+        }
+        .tab.active { background: var(--bg-tertiary); color: var(--text-primary); }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal.hidden { display: none; }
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+        }
+        .modal-header h3 { flex: 1; }
+        .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        .tlc-result { padding: 16px; border-radius: 8px; margin-bottom: 16px; }
+        .tlc-result.pass { background: rgba(63, 185, 80, 0.1); border: 1px solid var(--success); }
+        .tlc-result.fail { background: rgba(248, 81, 73, 0.1); border: 1px solid var(--error); }
+        .metric { display: inline-block; margin-right: 16px; }
+        .metric-value { font-size: 24px; font-weight: 600; }
+        .metric-label { font-size: 11px; color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>L++ Canvas <span class="state-badge" id="appState">idle</span></h1>
+            </div>
+            <nav class="nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">File</div>
+                    <button class="nav-btn" onclick="newBlueprint()">
+                        <span class="nav-btn-icon">+</span> New Blueprint
+                    </button>
+                    <button class="nav-btn" onclick="loadBlueprint()">
+                        <span class="nav-btn-icon">O</span> Open Blueprint
+                    </button>
+                    <button class="nav-btn" onclick="saveBlueprint()">
+                        <span class="nav-btn-icon">S</span> Save Blueprint
+                    </button>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Edit</div>
+                    <button class="nav-btn" onclick="showPanel('edit')">
+                        <span class="nav-btn-icon">E</span> Edit Blueprint
+                    </button>
+                    <button class="nav-btn" onclick="addState()">
+                        <span class="nav-btn-icon">+</span> Add State
+                    </button>
+                    <button class="nav-btn" onclick="addTransition()">
+                        <span class="nav-btn-icon">-></span> Add Transition
+                    </button>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Validate</div>
+                    <button class="nav-btn" onclick="runTlc()">
+                        <span class="nav-btn-icon">V</span> Run TLC
+                    </button>
+                    <button class="nav-btn" onclick="analyzePaths()">
+                        <span class="nav-btn-icon">P</span> Analyze Paths
+                    </button>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Simulate</div>
+                    <button class="nav-btn" onclick="showPanel('simulate')">
+                        <span class="nav-btn-icon">></span> Simulate
+                    </button>
+                    <button class="nav-btn" onclick="showPanel('cluster')">
+                        <span class="nav-btn-icon">C</span> Clusters
+                    </button>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Review</div>
+                    <button class="nav-btn" onclick="showPanel('review')">
+                        <span class="nav-btn-icon">R</span> Review & Audit
+                    </button>
+                    <button class="nav-btn" onclick="showPanel('llm')">
+                        <span class="nav-btn-icon">AI</span> LLM Assistant
+                    </button>
+                </div>
+            </nav>
+        </aside>
+        <main class="main">
+            <div class="toolbar">
+                <button class="toolbar-btn" onclick="refreshGraph()">Refresh</button>
+                <button class="toolbar-btn" onclick="zoomIn()">Zoom +</button>
+                <button class="toolbar-btn" onclick="zoomOut()">Zoom -</button>
+                <button class="toolbar-btn" onclick="toggleLayout()" id="layoutToggle">Hierarchy</button>
+                <button class="toolbar-btn" onclick="clearSelection()">Clear</button>
+                <span style="color: var(--text-secondary); font-size: 12px; margin-left: 8px;">Spread:</span>
+                <input type="range" id="spreadSlider" min="100" max="800" value="400" style="width: 80px;" onchange="setSpread(this.value)" oninput="setSpread(this.value)">
+                <span id="spreadValue" style="color: var(--text-secondary); font-size: 11px; width: 30px;">400</span>
+                <span class="toolbar-spacer"></span>
+                <span id="blueprintName" style="color: var(--text-secondary);">No blueprint loaded</span>
+                <span id="dirtyIndicator" style="color: var(--warning); display: none;">*</span>
+            </div>
+            <div class="content">
+                <div class="canvas-area" id="canvasArea">
+                    <iframe id="graphFrame" srcdoc="<html><body style='background:#0d1117;color:#666;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;'><p>Load or create a blueprint to begin</p></body></html>"></iframe>
+                </div>
+                <div class="panel hidden" id="editPanel">
+                    <div class="panel-header">
+                        <h2>Edit Blueprint</h2>
+                        <button class="panel-close" onclick="hidePanel('edit')">&times;</button>
+                    </div>
+                    <div class="panel-content">
+                        <div class="tabs">
+                            <button class="tab active" onclick="showEditTab('json', event)">JSON</button>
+                            <button class="tab" onclick="showEditTab('states', event)">States</button>
+                            <button class="tab" onclick="showEditTab('transitions', event)">Transitions</button>
+                        </div>
+                        <div id="editJsonTab">
+                            <textarea class="form-textarea json-editor" id="jsonEditor"></textarea>
+                            <button class="toolbar-btn primary" style="margin-top:12px" onclick="applyJsonEdit()">Apply Changes</button>
+                        </div>
+                        <div id="editStatesTab" style="display:none">
+                            <div id="statesList"></div>
+                        </div>
+                        <div id="editTransitionsTab" style="display:none">
+                            <div id="transitionsList"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel hidden" id="simulatePanel">
+                    <div class="panel-header">
+                        <h2>Simulation</h2>
+                        <button class="panel-close" onclick="hidePanel('simulate')">&times;</button>
+                    </div>
+                    <div class="panel-content">
+                        <div class="form-group">
+                            <label class="form-label">Current State</label>
+                            <div style="font-size:18px;font-weight:600;color:var(--accent)" id="simCurrentState">-</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Available Events</label>
+                            <div class="simulation-controls" id="simEvents"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Context</label>
+                            <pre style="font-size:11px;background:var(--bg-tertiary);padding:8px;border-radius:4px;overflow:auto;max-height:150px" id="simContext">{}</pre>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">History</label>
+                            <div id="simHistory"></div>
+                        </div>
+                        <button class="toolbar-btn warning" onclick="resetSimulation()">Reset</button>
+                    </div>
+                </div>
+                <div class="panel hidden" id="clusterPanel">
+                    <div class="panel-header">
+                        <h2>Clusters & Dependencies</h2>
+                        <button class="panel-close" onclick="hidePanel('cluster')">&times;</button>
+                    </div>
+                    <div class="panel-content">
+                        <div class="form-group">
+                            <label class="form-label">Topological Order</label>
+                            <div id="sortedStates" style="font-family:monospace;font-size:12px"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">State Clusters</label>
+                            <div id="clustersList"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Dependencies</label>
+                            <pre id="depsView" style="font-size:11px;background:var(--bg-tertiary);padding:8px;border-radius:4px;overflow:auto;max-height:200px"></pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel hidden" id="reviewPanel">
+                    <div class="panel-header">
+                        <h2>Review & Audit</h2>
+                        <button class="panel-close" onclick="hidePanel('review')">&times;</button>
+                    </div>
+                    <div class="panel-content">
+                        <div class="form-group">
+                            <label class="form-label">Coverage</label>
+                            <div id="coverageMetrics"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Add Review Note</label>
+                            <textarea class="form-textarea" id="reviewNoteInput" rows="2" placeholder="Enter review comment..."></textarea>
+                            <button class="toolbar-btn" style="margin-top:8px" onclick="addReviewNote()">Add Note</button>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Review Notes</label>
+                            <div id="reviewNotes"></div>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:16px">
+                            <button class="toolbar-btn success" onclick="approveReview()">Approve</button>
+                            <button class="toolbar-btn" style="background:var(--error);border-color:var(--error)" onclick="rejectReview()">Reject</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel hidden" id="llmPanel">
+                    <div class="panel-header">
+                        <h2>LLM Assistant</h2>
+                        <button class="panel-close" onclick="hidePanel('llm')">&times;</button>
+                    </div>
+                    <div class="panel-content llm-chat">
+                        <div class="llm-messages" id="llmMessages"></div>
+                        <div class="llm-input-area">
+                            <input type="text" class="form-input llm-input" id="llmInput" placeholder="Ask for help..." onkeypress="if(event.key==='Enter')sendLlmQuery()">
+                            <button class="toolbar-btn primary" onclick="sendLlmQuery()">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">Ready</span>
+                </div>
+                <div class="status-item">States: <span id="stateCount">0</span></div>
+                <div class="status-item">Transitions: <span id="transitionCount">0</span></div>
+                <div class="status-item">TLC: <span id="tlcStatus">-</span></div>
+            </div>
+        </main>
+    </div>
+    <div class="modal hidden" id="tlcModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>TLC Validation Results</h3>
+                <button class="panel-close" onclick="closeModal('tlc')">&times;</button>
+            </div>
+            <div class="modal-body" id="tlcResults"></div>
+            <div class="modal-footer">
+                <button class="toolbar-btn" onclick="closeModal('tlc')">Close</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal hidden" id="pathsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Path Analysis</h3>
+                <button class="panel-close" onclick="closeModal('paths')">&times;</button>
+            </div>
+            <div class="modal-body" id="pathsResults"></div>
+            <div class="modal-footer">
+                <button class="toolbar-btn" onclick="closeModal('paths')">Close</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal hidden" id="loadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Load Blueprint</h3>
+                <button class="panel-close" onclick="closeModal('load')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Blueprint Path</label>
+                    <input type="text" class="form-input" id="loadPath" placeholder="/path/to/blueprint.json">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="toolbar-btn" onclick="closeModal('load')">Cancel</button>
+                <button class="toolbar-btn primary" onclick="doLoadBlueprint()">Load</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        let currentBlueprint = null;
+        let appState = 'idle';
+        async function api(endpoint, method = 'GET', body = null) {
+            const opts = { method, headers: { 'Content-Type': 'application/json' } };
+            if (body) opts.body = JSON.stringify(body);
+            const res = await fetch(`/api/${endpoint}`, opts);
+            return res.json();
+        }
+        async function refreshState() {
+            const data = await api('state');
+            appState = data.state;
+            document.getElementById('appState').textContent = appState;
+            if (data.context.blueprint) {
+                currentBlueprint = data.context.blueprint;
+                document.getElementById('blueprintName').textContent = currentBlueprint.name || 'Untitled';
+                document.getElementById('stateCount').textContent = Object.keys(currentBlueprint.states || {}).length;
+                document.getElementById('transitionCount').textContent = (currentBlueprint.transitions || []).length;
+                document.getElementById('jsonEditor').value = JSON.stringify(currentBlueprint, null, 2);
+                updateStatesList();
+                updateTransitionsList();
+            }
+            document.getElementById('dirtyIndicator').style.display = data.context.is_dirty ? 'inline' : 'none';
+        }
+        async function newBlueprint() {
+            try {
+                const data = await api('new', 'POST');
+                if (data.success) {
+                    await refreshState();
+                    refreshGraph();
+                    setStatus('New blueprint created', 'success');
+                } else {
+                    setStatus('Error creating blueprint: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (e) {
+                setStatus('Error creating blueprint: ' + e.message, 'error');
+            }
+        }
+        function loadBlueprint() {
+            document.getElementById('loadModal').classList.remove('hidden');
+        }
+        async function doLoadBlueprint() {
+            const path = document.getElementById('loadPath').value;
+            if (!path) return;
+            const data = await api('load', 'POST', { path });
+            if (data.success) {
+                closeModal('load');
+                await refreshState();
+                refreshGraph();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        }
+        async function saveBlueprint() {
+            const path = prompt('Save path:', currentBlueprint?.id + '.json' || 'blueprint.json');
+            if (!path) return;
+            const data = await api('save', 'POST', { path });
+            if (data.success) {
+                setStatus('Saved', 'success');
+                await refreshState();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        }
+        async function refreshGraph() {
+            const frame = document.getElementById('graphFrame');
+            frame.removeAttribute('srcdoc');  // Clear srcdoc so src takes effect
+            frame.src = '/api/graph?' + Date.now();
+        }
+        function showPanel(name) {
+            ['edit', 'simulate', 'cluster', 'review', 'llm'].forEach(p => {
+                document.getElementById(p + 'Panel').classList.add('hidden');
+            });
+            document.getElementById(name + 'Panel').classList.remove('hidden');
+            if (name === 'simulate') initSimulation();
+            if (name === 'cluster') loadClusters();
+            if (name === 'review') loadReview();
+        }
+        function hidePanel(name) {
+            document.getElementById(name + 'Panel').classList.add('hidden');
+        }
+        function showEditTab(tab, evt) {
+            document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+            if (evt && evt.target) {
+                evt.target.classList.add('active');
+            } else {
+                // Highlight the correct tab when called programmatically
+                document.querySelectorAll('.tabs .tab').forEach(t => {
+                    if ((tab === 'json' && t.textContent === 'JSON') ||
+                        (tab === 'states' && t.textContent === 'States') ||
+                        (tab === 'transitions' && t.textContent === 'Transitions')) {
+                        t.classList.add('active');
+                    }
+                });
+            }
+            document.getElementById('editJsonTab').style.display = tab === 'json' ? 'block' : 'none';
+            document.getElementById('editStatesTab').style.display = tab === 'states' ? 'block' : 'none';
+            document.getElementById('editTransitionsTab').style.display = tab === 'transitions' ? 'block' : 'none';
+        }
+        async function applyJsonEdit() {
+            const json = document.getElementById('jsonEditor').value;
+            try {
+                const bp = JSON.parse(json);
+                await api('blueprint', 'POST', { blueprint: bp });
+                await refreshState();
+                refreshGraph();
+                setStatus('Changes applied', 'success');
+            } catch (e) {
+                alert('Invalid JSON: ' + e.message);
+            }
+        }
+        function updateStatesList() {
+            const container = document.getElementById('statesList');
+            if (!currentBlueprint) return;
+            const states = currentBlueprint.states || {};
+            const entryState = currentBlueprint.entry_state;
+            const terminalStates = currentBlueprint.terminal_states || [];
+
+            // Categorize states
+            const categories = {
+                entry: { title: 'Entry', badge: 'entry', items: [] },
+                normal: { title: 'Normal', badge: 'normal', items: [] },
+                terminal: { title: 'Terminal', badge: 'terminal', items: [] }
+            };
+
+            Object.entries(states).forEach(([id, s]) => {
+                const item = { id, ...s };
+                if (id === entryState) categories.entry.items.push(item);
+                else if (terminalStates.includes(id)) categories.terminal.items.push(item);
+                else categories.normal.items.push(item);
+            });
+
+            let html = '';
+            Object.entries(categories).forEach(([key, cat]) => {
+                if (cat.items.length === 0) return;
+                html += `
+                    <div class="category-section">
+                        <div class="category-header" onclick="toggleCategory(this, event)">
+                            <span class="category-chevron">▼</span>
+                            <span class="category-badge ${cat.badge}">${cat.title}</span>
+                            <span class="category-count">${cat.items.length}</span>
+                        </div>
+                        <div class="category-content">
+                            ${cat.items.map(s => `
+                                <div class="list-item" onclick="selectState('${s.id}')">
+                                    <div class="list-item-title">${s.id}</div>
+                                    <div class="list-item-desc">${s.description || 'No description'}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+        function updateTransitionsList() {
+            const container = document.getElementById('transitionsList');
+            if (!currentBlueprint) return;
+            const transitions = currentBlueprint.transitions || [];
+
+            // Group by source state
+            const groups = {};
+            transitions.forEach(t => {
+                const from = t.from || '*';
+                if (!groups[from]) groups[from] = [];
+                groups[from].push(t);
+            });
+
+            // Sort group keys: entry state first, then alphabetically, wildcard last
+            const entryState = currentBlueprint.entry_state;
+            const sortedKeys = Object.keys(groups).sort((a, b) => {
+                if (a === entryState) return -1;
+                if (b === entryState) return 1;
+                if (a === '*') return 1;
+                if (b === '*') return -1;
+                return a.localeCompare(b);
+            });
+
+            let html = '';
+            sortedKeys.forEach(from => {
+                const items = groups[from];
+                const label = from === '*' ? 'Any State (*)' : from;
+                html += `
+                    <div class="category-section">
+                        <div class="category-header" onclick="toggleCategory(this, event)">
+                            <span class="category-chevron">▼</span>
+                            <span class="category-title">From: ${label}</span>
+                            <span class="category-count">${items.length}</span>
+                        </div>
+                        <div class="category-content">
+                            ${items.map(t => `
+                                <div class="list-item" onclick="selectTransition('${t.id}')">
+                                    <div class="list-item-title">${t.id}: → ${t.to}</div>
+                                    <div class="list-item-desc">Event: ${t.on_event}${t.gates?.length ? ' | Gates: ' + t.gates.join(', ') : ''}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+        function toggleCategory(header, event) {
+            // If clicking on the chevron, toggle collapse
+            if (event.target.classList.contains('category-chevron')) {
+                const chevron = header.querySelector('.category-chevron');
+                const content = header.nextElementSibling;
+                chevron.classList.toggle('collapsed');
+                content.classList.toggle('collapsed');
+            } else {
+                // Clicking elsewhere on header - select all items in category
+                selectCategoryItems(header);
+            }
+        }
+        function selectCategoryItems(header) {
+            const section = header.closest('.category-section');
+            const items = section.querySelectorAll('.list-item');
+            const isStates = header.closest('#statesList') !== null;
+
+            // Get all IDs in this category
+            const ids = Array.from(items).map(item => {
+                const title = item.querySelector('.list-item-title')?.textContent || '';
+                if (isStates) return title;
+                // For transitions, extract ID before the colon
+                return title.split(':')[0];
+            });
+
+            // Highlight all items in list
+            items.forEach(el => el.classList.add('selected'));
+
+            // Send to graph
+            const frame = document.getElementById('graphFrame');
+            if (frame.contentWindow) {
+                if (isStates) {
+                    frame.contentWindow.postMessage({ type: 'highlightMultiple', nodeIds: ids }, '*');
+                } else {
+                    frame.contentWindow.postMessage({ type: 'highlightMultipleTransitions', transitionIds: ids }, '*');
+                }
+            }
+
+            const categoryName = header.querySelector('.category-badge, .category-title')?.textContent || 'items';
+            setStatus(`Selected ${ids.length} ${isStates ? 'states' : 'transitions'} in ${categoryName}`, 'success');
+        }
+        async function selectState(stateId) {
+            try {
+                const frame = document.getElementById('graphFrame');
+                // Toggle: if already selected, deselect
+                if (currentSelectedState === stateId) {
+                    currentSelectedState = null;
+                    document.querySelectorAll('#statesList .list-item').forEach(el => el.classList.remove('selected'));
+                    if (frame.contentWindow) {
+                        frame.contentWindow.postMessage({ type: 'clearSelection' }, '*');
+                    }
+                    setStatus('Selection cleared', 'success');
+                    return;
+                }
+                const data = await api('edit', 'POST', { action: 'select', node_id: stateId, node_type: 'state' });
+                if (data.success) {
+                    currentSelectedState = stateId;
+                    currentSelectedTransition = null;
+                    // Highlight selected state in list
+                    document.querySelectorAll('#statesList .list-item').forEach(el => {
+                        el.classList.toggle('selected', el.querySelector('.list-item-title')?.textContent === stateId);
+                    });
+                    document.querySelectorAll('#transitionsList .list-item').forEach(el => el.classList.remove('selected'));
+                    // Notify graph iframe to highlight node
+                    if (frame.contentWindow) {
+                        frame.contentWindow.postMessage({ type: 'highlight', nodeId: stateId }, '*');
+                    }
+                    setStatus(`Selected state: ${stateId}`, 'success');
+                }
+            } catch (e) {
+                setStatus('Error selecting state: ' + e.message, 'error');
+            }
+        }
+        async function selectTransition(transitionId) {
+            try {
+                const frame = document.getElementById('graphFrame');
+                // Toggle: if already selected, deselect
+                if (currentSelectedTransition === transitionId) {
+                    currentSelectedTransition = null;
+                    document.querySelectorAll('#transitionsList .list-item').forEach(el => el.classList.remove('selected'));
+                    if (frame.contentWindow) {
+                        frame.contentWindow.postMessage({ type: 'clearSelection' }, '*');
+                    }
+                    setStatus('Selection cleared', 'success');
+                    return;
+                }
+                const data = await api('edit', 'POST', { action: 'select', node_id: transitionId, node_type: 'transition' });
+                if (data.success) {
+                    currentSelectedTransition = transitionId;
+                    currentSelectedState = null;
+                    // Highlight selected transition in list
+                    document.querySelectorAll('#transitionsList .list-item').forEach(el => {
+                        el.classList.toggle('selected', el.querySelector('.list-item-title')?.textContent?.startsWith(transitionId + ':'));
+                    });
+                    document.querySelectorAll('#statesList .list-item').forEach(el => el.classList.remove('selected'));
+                    // Notify graph iframe to highlight transition
+                    if (frame.contentWindow) {
+                        frame.contentWindow.postMessage({ type: 'highlightTransition', transitionId: transitionId }, '*');
+                    }
+                    setStatus(`Selected transition: ${transitionId}`, 'success');
+                }
+            } catch (e) {
+                setStatus('Error selecting transition: ' + e.message, 'error');
+            }
+        }
+        async function addState() {
+            const id = prompt('State ID:');
+            if (!id) return;
+            const desc = prompt('Description:');
+            try {
+                const data = await api('edit', 'POST', { action: 'add_state', state_data: { id, description: desc || '' } });
+                if (data.success) {
+                    await refreshState();
+                    refreshGraph();
+                    setStatus(`Added state: ${id}`, 'success');
+                } else {
+                    setStatus('Error adding state: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (e) {
+                setStatus('Error adding state: ' + e.message, 'error');
+            }
+        }
+        async function addTransition() {
+            const from = prompt('From state:');
+            const to = prompt('To state:');
+            const event = prompt('Event name:');
+            if (!from || !to || !event) return;
+            try {
+                const data = await api('edit', 'POST', { action: 'add_transition', transition_data: { from, to, on_event: event } });
+                if (data.success) {
+                    await refreshState();
+                    refreshGraph();
+                    setStatus(`Added transition: ${from} -> ${to}`, 'success');
+                } else {
+                    setStatus('Error adding transition: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (e) {
+                setStatus('Error adding transition: ' + e.message, 'error');
+            }
+        }
+        async function runTlc() {
+            setStatus('Running TLC...', 'warning');
+            const data = await api('validate', 'POST');
+            document.getElementById('tlcStatus').textContent = data.passed ? 'PASS' : 'FAIL';
+            document.getElementById('tlcStatus').style.color = data.passed ? 'var(--success)' : 'var(--error)';
+            let html = `<div class="tlc-result ${data.passed ? 'pass' : 'fail'}">
+                <h4>${data.passed ? 'Validation Passed' : 'Validation Failed'}</h4>`;
+            if (data.result) {
+                html += `<div style="margin-top:12px">
+                    <div class="metric"><div class="metric-value">${data.result.states || '-'}</div><div class="metric-label">States</div></div>
+                    <div class="metric"><div class="metric-value">${data.result.distinct || '-'}</div><div class="metric-label">Distinct</div></div>
+                    <div class="metric"><div class="metric-value">${data.result.depth || '-'}</div><div class="metric-label">Depth</div></div>
+                </div>`;
+            }
+            html += '</div>';
+            if (data.errors && data.errors.length) {
+                html += '<h4 style="margin-top:16px">Errors</h4>';
+                data.errors.forEach(e => { html += `<div class="review-note">${e}</div>`; });
+            }
+            document.getElementById('tlcResults').innerHTML = html;
+            document.getElementById('tlcModal').classList.remove('hidden');
+            setStatus(data.passed ? 'TLC passed' : 'TLC failed', data.passed ? 'success' : 'error');
+        }
+        async function analyzePaths() {
+            setStatus('Analyzing paths...', 'warning');
+            const data = await api('analyze', 'POST');
+            let html = `<div style="margin-bottom:16px">
+                <div class="metric"><div class="metric-value">${data.state_count}</div><div class="metric-label">States</div></div>
+                <div class="metric"><div class="metric-value">${data.path_count}</div><div class="metric-label">Paths</div></div>
+            </div>`;
+            if (data.deadlocks && data.deadlocks.length) {
+                html += `<h4 style="color:var(--error)">Deadlock States</h4><p>${data.deadlocks.join(', ')}</p>`;
+            }
+            if (data.reachability?.unreachable?.length) {
+                html += `<h4 style="color:var(--warning);margin-top:12px">Unreachable States</h4><p>${data.reachability.unreachable.join(', ')}</p>`;
+            }
+            html += '<h4 style="margin-top:16px">Sample Paths</h4>';
+            (data.paths || []).slice(0, 10).forEach((p, i) => {
+                html += `<div class="history-item">${i + 1}. ${p.states.join(' -> ')}</div>`;
+            });
+            document.getElementById('pathsResults').innerHTML = html;
+            document.getElementById('pathsModal').classList.remove('hidden');
+            setStatus('Analysis complete', 'success');
+        }
+        async function initSimulation() {
+            try {
+                setStatus('Initializing simulation...', 'warning');
+                const data = await api('simulate', 'POST', { action: 'init' });
+                if (data.success) {
+                    updateSimUI(data);
+                    setStatus('Simulation ready', 'success');
+                } else {
+                    setStatus('Error starting simulation: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (e) {
+                setStatus('Error initializing simulation: ' + e.message, 'error');
+            }
+        }
+        async function simStep(event) {
+            try {
+                const data = await api('simulate', 'POST', { action: 'step', event });
+                if (data.success) {
+                    updateSimUI(data);
+                    setStatus(`Executed event: ${event}`, 'success');
+                } else {
+                    setStatus('Error executing step: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (e) {
+                setStatus('Error executing step: ' + e.message, 'error');
+            }
+        }
+        async function resetSimulation() {
+            try {
+                const data = await api('simulate', 'POST', { action: 'reset' });
+                if (data.success) {
+                    updateSimUI(data);
+                    setStatus('Simulation reset', 'success');
+                } else {
+                    setStatus('Error resetting simulation: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (e) {
+                setStatus('Error resetting simulation: ' + e.message, 'error');
+            }
+        }
+        function updateSimUI(data) {
+            document.getElementById('simCurrentState').textContent = data.sim_state || '-';
+            document.getElementById('simContext').textContent = JSON.stringify(data.sim_context || {}, null, 2);
+            const events = data.available_events || [];
+            document.getElementById('simEvents').innerHTML = events.map(e =>
+                `<button class="event-btn" onclick="simStep('${e}')">${e}</button>`
+            ).join('');
+            const history = data.sim_history || [];
+            document.getElementById('simHistory').innerHTML = history.slice(-10).reverse().map(h =>
+                `<div class="history-item">#${h.step} ${h.state} ${h.event ? '(' + h.event + ')' : ''}</div>`
+            ).join('');
+        }
+        async function loadClusters() {
+            try {
+                setStatus('Computing clusters...', 'warning');
+                const data = await api('cluster', 'POST');
+                if (data.success) {
+                    document.getElementById('sortedStates').textContent = (data.sorted_states || []).join(' -> ');
+                    document.getElementById('clustersList').innerHTML = (data.clusters || []).map(c => `
+                        <div class="cluster-group">
+                            <div class="cluster-title">Cluster ${c.id} (${c.size} states)</div>
+                            <div class="cluster-states">${c.states.map(s => `<span class="state-chip">${s}</span>`).join('')}</div>
+                        </div>
+                    `).join('');
+                    document.getElementById('depsView').textContent = JSON.stringify(data.dependencies || {}, null, 2);
+                    setStatus('Clusters computed', 'success');
+                } else {
+                    setStatus('Error computing clusters: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (e) {
+                setStatus('Error computing clusters: ' + e.message, 'error');
+            }
+        }
+        async function loadReview() {
+            try {
+                setStatus('Loading review...', 'warning');
+                const data = await api('review', 'POST', { action: 'start' });
+                if (data.success) {
+                    const cov = data.coverage || {};
+                    document.getElementById('coverageMetrics').innerHTML = `
+                        <div class="metric"><div class="metric-value">${cov.states || 0}</div><div class="metric-label">States</div></div>
+                        <div class="metric"><div class="metric-value">${cov.transitions || 0}</div><div class="metric-label">Transitions</div></div>
+                        <div class="metric"><div class="metric-value">${cov.gates_used || 0}/${cov.gates || 0}</div><div class="metric-label">Gates Used</div></div>
+                    `;
+                    updateReviewNotes(data.notes || []);
+                    setStatus('Review loaded', 'success');
+                } else {
+                    setStatus('Error loading review: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (e) {
+                setStatus('Error loading review: ' + e.message, 'error');
+            }
+        }
+        async function addReviewNote() {
+            const note = document.getElementById('reviewNoteInput').value;
+            if (!note) return;
+            try {
+                const data = await api('review', 'POST', { action: 'add_note', note });
+                if (data.success) {
+                    document.getElementById('reviewNoteInput').value = '';
+                    updateReviewNotes(data.notes || []);
+                    setStatus('Note added', 'success');
+                } else {
+                    setStatus('Error adding note: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (e) {
+                setStatus('Error adding note: ' + e.message, 'error');
+            }
+        }
+        function updateReviewNotes(notes) {
+            document.getElementById('reviewNotes').innerHTML = notes.map(n => `
+                <div class="review-note">
+                    <div class="review-note-meta">${n.timestamp} ${n.node_id ? '- ' + n.node_id : ''}</div>
+                    ${n.note}
+                </div>
+            `).join('');
+        }
+        async function approveReview() {
+            try {
+                const data = await api('review', 'POST', { action: 'approve' });
+                if (data.success) {
+                    setStatus('Review approved', 'success');
+                } else {
+                    setStatus('Error approving review: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (e) {
+                setStatus('Error approving review: ' + e.message, 'error');
+            }
+        }
+        async function rejectReview() {
+            try {
+                const data = await api('review', 'POST', { action: 'reject' });
+                if (data.success) {
+                    setStatus('Review rejected', 'warning');
+                } else {
+                    setStatus('Error rejecting review: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (e) {
+                setStatus('Error rejecting review: ' + e.message, 'error');
+            }
+        }
+        async function sendLlmQuery() {
+            const input = document.getElementById('llmInput');
+            const prompt = input.value;
+            if (!prompt) return;
+            input.value = '';
+            const container = document.getElementById('llmMessages');
+            container.innerHTML += `<div class="llm-message"><strong>You:</strong> ${escapeHtml(prompt)}</div>`;
+            try {
+                setStatus('Querying LLM...', 'warning');
+                const data = await api('llm', 'POST', { action: 'query', prompt });
+                if (data.success) {
+                    if (data.response) {
+                        container.innerHTML += `<div class="llm-message assistant"><strong>Assistant:</strong> ${escapeHtml(data.response)}</div>`;
+                    }
+                    if (data.suggestions && data.suggestions.length) {
+                        container.innerHTML += `<div class="llm-message assistant"><button class="toolbar-btn success" onclick="applyLlmSuggestions()">Apply ${data.suggestions.length} suggestions</button></div>`;
+                    }
+                    setStatus('LLM response received', 'success');
+                } else {
+                    container.innerHTML += `<div class="llm-message assistant" style="border-color:var(--error)"><strong>Error:</strong> ${data.error || 'Unknown error'}</div>`;
+                    setStatus('LLM query failed', 'error');
+                }
+            } catch (e) {
+                container.innerHTML += `<div class="llm-message assistant" style="border-color:var(--error)"><strong>Error:</strong> ${e.message}</div>`;
+                setStatus('LLM query failed: ' + e.message, 'error');
+            }
+            container.scrollTop = container.scrollHeight;
+        }
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        async function applyLlmSuggestions() {
+            try {
+                setStatus('Applying suggestions...', 'warning');
+                const data = await api('llm', 'POST', { action: 'apply' });
+                if (data.success) {
+                    await refreshState();
+                    refreshGraph();
+                    setStatus('LLM suggestions applied', 'success');
+                } else {
+                    setStatus('Error applying suggestions: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (e) {
+                setStatus('Error applying suggestions: ' + e.message, 'error');
+            }
+        }
+        function closeModal(name) {
+            document.getElementById(name + 'Modal').classList.add('hidden');
+        }
+        function setStatus(text, type = '') {
+            document.getElementById('statusText').textContent = text;
+            const dot = document.getElementById('statusDot');
+            dot.className = 'status-dot' + (type ? ' ' + type : '');
+        }
+        function zoomIn() {
+            const frame = document.getElementById('graphFrame');
+            if (frame.contentWindow) {
+                frame.contentWindow.postMessage({ type: 'zoom', direction: 'in' }, '*');
+            }
+        }
+        function zoomOut() {
+            const frame = document.getElementById('graphFrame');
+            if (frame.contentWindow) {
+                frame.contentWindow.postMessage({ type: 'zoom', direction: 'out' }, '*');
+            }
+        }
+        let currentLayout = 'force';
+        function toggleLayout() {
+            currentLayout = currentLayout === 'force' ? 'hierarchy' : 'force';
+            const btn = document.getElementById('layoutToggle');
+            btn.textContent = currentLayout === 'force' ? 'Hierarchy' : 'Force';
+            const frame = document.getElementById('graphFrame');
+            if (frame.contentWindow) {
+                frame.contentWindow.postMessage({ type: 'setLayout', layout: currentLayout }, '*');
+            }
+            setStatus(`Layout: ${currentLayout}`, 'success');
+        }
+        function clearSelection() {
+            // Clear list selections
+            document.querySelectorAll('.list-item.selected').forEach(el => el.classList.remove('selected'));
+            // Clear graph selection
+            const frame = document.getElementById('graphFrame');
+            if (frame.contentWindow) {
+                frame.contentWindow.postMessage({ type: 'clearSelection' }, '*');
+            }
+            setStatus('Selection cleared', 'success');
+        }
+        let currentSelectedState = null;
+        let currentSelectedTransition = null;
+        function setSpread(value) {
+            document.getElementById('spreadValue').textContent = value;
+            const frame = document.getElementById('graphFrame');
+            if (frame.contentWindow) {
+                frame.contentWindow.postMessage({ type: 'setSpread', spread: parseInt(value) }, '*');
+            }
+        }
+
+        // Handle messages from graph iframe
+        window.addEventListener('message', async (e) => {
+            if (e.data.type === 'select') {
+                // Node or edge selected in graph
+                const { nodeType, nodeId, data } = e.data;
+                setStatus(`Selected ${nodeType}: ${nodeId}`, 'success');
+                // Auto-open edit panel and select the node
+                if (nodeType === 'state') {
+                    await api('edit', 'POST', { action: 'select', node_id: nodeId, node_type: 'state' });
+                    showPanel('edit');
+                    showEditTab('states');
+                    // Highlight in states list
+                    document.querySelectorAll('#statesList .list-item').forEach(el => {
+                        el.classList.toggle('selected', el.textContent.includes(nodeId));
+                    });
+                } else if (nodeType === 'transition') {
+                    showPanel('edit');
+                    showEditTab('transitions');
+                    document.querySelectorAll('#transitionsList .list-item').forEach(el => {
+                        el.classList.toggle('selected', el.textContent.includes(nodeId));
+                    });
+                }
+            } else if (e.data.type === 'deselect') {
+                // Node or edge deselected in graph (toggle off)
+                const { nodeType, nodeId } = e.data;
+                setStatus('Selection cleared', 'success');
+                // Clear tracking and highlighting in lists
+                if (nodeType === 'state') {
+                    currentSelectedState = null;
+                    document.querySelectorAll('#statesList .list-item').forEach(el => {
+                        if (el.textContent.includes(nodeId)) el.classList.remove('selected');
+                    });
+                } else if (nodeType === 'transition') {
+                    currentSelectedTransition = null;
+                    document.querySelectorAll('#transitionsList .list-item').forEach(el => {
+                        if (el.textContent.includes(nodeId)) el.classList.remove('selected');
+                    });
+                }
+            } else if (e.data.type === 'edit') {
+                // Double-click to edit
+                const { nodeType, nodeId } = e.data;
+                if (nodeType === 'state') {
+                    await api('edit', 'POST', { action: 'select', node_id: nodeId, node_type: 'state' });
+                    await refreshState();
+                    showPanel('edit');
+                    showEditTab('states');
+                }
+            }
+        });
+
+        // Initialize LLM on load
+        api('llm', 'POST', { action: 'enable' });
+        refreshState();
+    </script>
+</body>
+</html>

@@ -22,36 +22,34 @@
   "terminal_states": ["complete", "error"],
 
   "context_schema": {
-    "projectPath": "string",
-    "outputPath": "string",
-    "projectName": "string",
-    "pythonFiles": "array",
-    "extractedModules": "array",
-    "blueprints": "array",
-    "computeFunctions": "array",
-    "options": {
-      "includeTests": "boolean",
-      "generateDocs": "boolean",
-      "preserveOriginal": "boolean",
-      "verbose": "boolean"
-    },
-    "results": {
-      "modulesFound": "number",
-      "blueprintsGenerated": "number",
-      "docsGenerated": "number",
-      "errors": "array"
-    },
-    "error": "string"
+    "properties": {
+      "projectPath": { "type": "string", "description": "Path to Python project" },
+      "outputPath": { "type": "string", "description": "Output path for generated files" },
+      "projectName": { "type": "string", "description": "Name of the project" },
+      "pythonFiles": { "type": "array", "description": "List of Python files found" },
+      "extractedModules": { "type": "array", "description": "Extracted module definitions" },
+      "blueprints": { "type": "array", "description": "Generated blueprints" },
+      "computeFunctions": { "type": "array", "description": "Generated compute functions" },
+      "generateDocs": { "type": "boolean", "description": "Whether to generate documentation" },
+      "includeTests": { "type": "boolean", "description": "Whether to include tests" },
+      "preserveOriginal": { "type": "boolean", "description": "Whether to preserve original files" },
+      "verbose": { "type": "boolean", "description": "Enable verbose output" },
+      "modulesFound": { "type": "number", "description": "Count of modules found" },
+      "blueprintsGenerated": { "type": "number", "description": "Count of blueprints generated" },
+      "docsGenerated": { "type": "number", "description": "Count of docs generated" },
+      "errors": { "type": "array", "description": "List of errors" },
+      "error": { "type": "string", "description": "Error message if any" }
+    }
   },
 
   "gates": {
-    "has_project": { "type": "expression", "expression": "projectPath is not None and len(projectPath) > 0" },
-    "no_project": { "type": "expression", "expression": "projectPath is None or len(projectPath) == 0" },
-    "has_python_files": { "type": "expression", "expression": "pythonFiles is not None and len(pythonFiles) > 0" },
-    "no_python_files": { "type": "expression", "expression": "pythonFiles is None or len(pythonFiles) == 0" },
-    "has_modules": { "type": "expression", "expression": "extractedModules is not None and len(extractedModules) > 0" },
-    "has_blueprints": { "type": "expression", "expression": "blueprints is not None and len(blueprints) > 0" },
-    "wants_docs": { "type": "expression", "expression": "options.get('generateDocs', True)" },
+    "has_project": { "type": "expression", "expression": "projectPath is not None" },
+    "no_project": { "type": "expression", "expression": "projectPath is None" },
+    "has_python_files": { "type": "expression", "expression": "pythonFiles is not None" },
+    "no_python_files": { "type": "expression", "expression": "pythonFiles is None" },
+    "has_modules": { "type": "expression", "expression": "extractedModules is not None" },
+    "has_blueprints": { "type": "expression", "expression": "blueprints is not None" },
+    "wants_docs": { "type": "expression", "expression": "generateDocs == True" },
     "has_error": { "type": "expression", "expression": "error is not None" },
     "no_error": { "type": "expression", "expression": "error is None" }
   },
@@ -69,7 +67,7 @@
   },
 
   "transitions": [
-    { "id": "t0", "from": "idle", "to": "idle", "on_event": "START", "actions": ["init"] },
+    { "id": "t0", "from": "idle", "to": "idle", "on_event": "START", "gates": ["no_project"], "actions": ["init"] },
     { "id": "t1", "from": "idle", "to": "scanning", "on_event": "REFACTOR", "gates": ["has_project"], "actions": ["scan_project"] },
     { "id": "t2", "from": "idle", "to": "error", "on_event": "REFACTOR", "gates": ["no_project"] },
     { "id": "t3", "from": "scanning", "to": "analyzing", "on_event": "DONE", "gates": ["has_python_files", "no_error"], "actions": ["analyze_patterns"] },
