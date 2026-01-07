@@ -207,6 +207,10 @@
         .list-item.selected { border: 1px solid var(--accent); }
         .list-item-title { font-weight: 500; margin-bottom: 4px; }
         .list-item-desc { font-size: 12px; color: var(--text-secondary); }
+        .list-item.small { padding: 6px 10px; margin-bottom: 4px; }
+        .list-item.small .list-item-title { font-size: 12px; margin-bottom: 2px; }
+        .list-item.small .list-item-desc { font-size: 10px; }
+        .toolbar-btn.small { padding: 4px 8px; font-size: 11px; }
         .category-section { margin-bottom: 16px; }
         .category-header {
             display: flex;
@@ -462,6 +466,7 @@
                     <div class="panel-content">
                         <div class="tabs">
                             <button class="tab active" onclick="showEditTab('json', event)">JSON</button>
+                            <button class="tab" onclick="showEditTab('node', event)">Node</button>
                             <button class="tab" onclick="showEditTab('states', event)">States</button>
                             <button class="tab" onclick="showEditTab('transitions', event)">Transitions</button>
                             <button class="tab" onclick="showEditTab('paths', event)">Paths</button>
@@ -469,6 +474,35 @@
                         <div id="editJsonTab">
                             <textarea class="form-textarea json-editor" id="jsonEditor"></textarea>
                             <button class="toolbar-btn primary" style="margin-top:12px" onclick="applyJsonEdit()">Apply Changes</button>
+                        </div>
+                        <div id="editNodeTab" style="display:none">
+                            <div id="nodeNotSelected" style="color:var(--text-secondary);padding:20px;text-align:center">
+                                <p>Select a state or transition to edit</p>
+                            </div>
+                            <div id="nodeDetails" style="display:none">
+                                <div class="form-group">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                                        <label class="form-label" style="margin:0">
+                                            <span id="nodeTypeLabel">State</span>: <strong id="nodeIdLabel">-</strong>
+                                        </label>
+                                        <button class="toolbar-btn small" onclick="jumpToNodeInJson()" title="Jump to full JSON">📍 Find in JSON</button>
+                                    </div>
+                                    <textarea class="form-textarea" id="nodeJsonEditor" rows="6" style="font-family:monospace;font-size:12px"></textarea>
+                                    <button class="toolbar-btn primary small" style="margin-top:8px" onclick="applyNodeEdit()">Apply</button>
+                                </div>
+                                <div class="form-group" id="relatedGatesSection">
+                                    <label class="form-label">Related Gates</label>
+                                    <div id="relatedGatesList" style="max-height:150px;overflow-y:auto"></div>
+                                </div>
+                                <div class="form-group" id="relatedTransitionsSection">
+                                    <label class="form-label">Related Transitions</label>
+                                    <div id="relatedTransitionsList" style="max-height:150px;overflow-y:auto"></div>
+                                </div>
+                                <div class="form-group" id="relatedActionsSection">
+                                    <label class="form-label">Related Actions</label>
+                                    <div id="relatedActionsList" style="max-height:150px;overflow-y:auto"></div>
+                                </div>
+                            </div>
                         </div>
                         <div id="editStatesTab" style="display:none">
                             <div id="statesList"></div>
@@ -687,6 +721,7 @@
             }
         }
         async function refreshGraph(force = true) {
+            graphReady = false;  // Reset ready state when graph is refreshing
             const frame = document.getElementById('graphFrame');
             frame.removeAttribute('srcdoc');  // Clear srcdoc so src takes effect
             // Use force=1 to clear server-side cache and regenerate graph
@@ -712,6 +747,7 @@
                 // Highlight the correct tab when called programmatically
                 document.querySelectorAll('.tabs .tab').forEach(t => {
                     if ((tab === 'json' && t.textContent === 'JSON') ||
+                        (tab === 'node' && t.textContent === 'Node') ||
                         (tab === 'states' && t.textContent === 'States') ||
                         (tab === 'transitions' && t.textContent === 'Transitions') ||
                         (tab === 'paths' && t.textContent === 'Paths')) {
@@ -720,6 +756,7 @@
                 });
             }
             document.getElementById('editJsonTab').style.display = tab === 'json' ? 'block' : 'none';
+            document.getElementById('editNodeTab').style.display = tab === 'node' ? 'block' : 'none';
             document.getElementById('editStatesTab').style.display = tab === 'states' ? 'block' : 'none';
             document.getElementById('editTransitionsTab').style.display = tab === 'transitions' ? 'block' : 'none';
             document.getElementById('editPathsTab').style.display = tab === 'paths' ? 'block' : 'none';
@@ -734,6 +771,154 @@
                 setStatus('Changes applied', 'success');
             } catch (e) {
                 alert('Invalid JSON: ' + e.message);
+            }
+        }
+        // Node Details tab functions
+        function updateNodeDetails(nodeType, nodeId) {
+            if (!currentBlueprint || !nodeId) {
+                document.getElementById('nodeNotSelected').style.display = 'block';
+                document.getElementById('nodeDetails').style.display = 'none';
+                return;
+            }
+            document.getElementById('nodeNotSelected').style.display = 'none';
+            document.getElementById('nodeDetails').style.display = 'block';
+            document.getElementById('nodeTypeLabel').textContent = nodeType === 'state' ? 'State' : 'Transition';
+            document.getElementById('nodeIdLabel').textContent = nodeId;
+
+            // Get node data and show in mini editor
+            let nodeData = null;
+            if (nodeType === 'state') {
+                nodeData = currentBlueprint.states?.[nodeId];
+                if (nodeData) {
+                    nodeData = { [nodeId]: nodeData };
+                }
+            } else if (nodeType === 'transition') {
+                const trans = (currentBlueprint.transitions || []).find(t => t.id === nodeId);
+                if (trans) nodeData = trans;
+            }
+            document.getElementById('nodeJsonEditor').value = nodeData ? JSON.stringify(nodeData, null, 2) : '{}';
+
+            // Find related transitions
+            const transitions = currentBlueprint.transitions || [];
+            const relatedTrans = transitions.filter(t => {
+                if (nodeType === 'state') {
+                    return t.from === nodeId || t.to === nodeId || t.from === '*';
+                }
+                return t.id === nodeId;
+            });
+
+            // Find related gates (gates used in related transitions)
+            const gates = currentBlueprint.gates || {};
+            const usedGateIds = new Set();
+            relatedTrans.forEach(t => (t.gates || []).forEach(g => usedGateIds.add(g)));
+            const relatedGates = {};
+            usedGateIds.forEach(gId => {
+                if (gates[gId]) relatedGates[gId] = gates[gId];
+            });
+
+            // Find related actions (actions used in related transitions)
+            const actions = currentBlueprint.actions || {};
+            const usedActionIds = new Set();
+            relatedTrans.forEach(t => (t.actions || []).forEach(a => usedActionIds.add(a)));
+            const relatedActions = {};
+            usedActionIds.forEach(aId => {
+                if (actions[aId]) relatedActions[aId] = actions[aId];
+            });
+
+            // Render related gates
+            const gatesHtml = Object.entries(relatedGates).map(([id, g]) => `
+                <div class="list-item small" onclick="editGate('${id}')" style="cursor:pointer">
+                    <div class="list-item-title" style="font-size:12px">${id}</div>
+                    <div class="list-item-desc" style="font-size:10px">${g.expression || g.type || '-'}</div>
+                </div>
+            `).join('') || '<div style="color:var(--text-secondary);font-size:11px;padding:4px">No gates</div>';
+            document.getElementById('relatedGatesList').innerHTML = gatesHtml;
+
+            // Render related transitions
+            const transHtml = relatedTrans.map(t => {
+                const isCurrent = nodeType === 'transition' && t.id === nodeId;
+                const direction = t.from === nodeId ? '→ ' + t.to : t.to === nodeId ? t.from + ' →' : t.from + ' → ' + t.to;
+                return `
+                    <div class="list-item small${isCurrent ? ' selected' : ''}" onclick="selectTransition('${t.id}')" style="cursor:pointer">
+                        <div class="list-item-title" style="font-size:12px">${t.id}</div>
+                        <div class="list-item-desc" style="font-size:10px">${direction} [${t.on_event}]</div>
+                    </div>
+                `;
+            }).join('') || '<div style="color:var(--text-secondary);font-size:11px;padding:4px">No transitions</div>';
+            document.getElementById('relatedTransitionsList').innerHTML = transHtml;
+
+            // Render related actions
+            const actionsHtml = Object.entries(relatedActions).map(([id, a]) => `
+                <div class="list-item small" onclick="editAction('${id}')" style="cursor:pointer">
+                    <div class="list-item-title" style="font-size:12px">${id}</div>
+                    <div class="list-item-desc" style="font-size:10px">${a.type || '-'}${a.compute_unit ? ': ' + a.compute_unit : ''}</div>
+                </div>
+            `).join('') || '<div style="color:var(--text-secondary);font-size:11px;padding:4px">No actions</div>';
+            document.getElementById('relatedActionsList').innerHTML = actionsHtml;
+        }
+        function editGate(gateId) {
+            if (!currentBlueprint?.gates?.[gateId]) return;
+            const gate = currentBlueprint.gates[gateId];
+            const newExpr = prompt(`Edit gate "${gateId}" expression:`, gate.expression || '');
+            if (newExpr !== null && newExpr !== gate.expression) {
+                currentBlueprint.gates[gateId].expression = newExpr;
+                api('blueprint', 'POST', { blueprint: currentBlueprint }).then(() => {
+                    refreshState();
+                    setStatus(`Gate "${gateId}" updated`, 'success');
+                });
+            }
+        }
+        function editAction(actionId) {
+            // Jump to action in JSON
+            jumpToNodeInJson('action', actionId);
+        }
+        async function applyNodeEdit() {
+            const json = document.getElementById('nodeJsonEditor').value;
+            const nodeType = document.getElementById('nodeTypeLabel').textContent.toLowerCase();
+            const nodeId = document.getElementById('nodeIdLabel').textContent;
+            try {
+                const data = JSON.parse(json);
+                if (nodeType === 'state') {
+                    // Merge into states
+                    Object.assign(currentBlueprint.states, data);
+                } else if (nodeType === 'transition') {
+                    // Replace in transitions array
+                    const idx = currentBlueprint.transitions.findIndex(t => t.id === nodeId);
+                    if (idx >= 0) currentBlueprint.transitions[idx] = data;
+                }
+                await api('blueprint', 'POST', { blueprint: currentBlueprint });
+                await refreshState();
+                refreshGraph();
+                setStatus('Node updated', 'success');
+            } catch (e) {
+                alert('Invalid JSON: ' + e.message);
+            }
+        }
+        function jumpToNodeInJson(type, id) {
+            type = type || document.getElementById('nodeTypeLabel').textContent.toLowerCase();
+            id = id || document.getElementById('nodeIdLabel').textContent;
+            showEditTab('json');
+            const editor = document.getElementById('jsonEditor');
+            const json = editor.value;
+            // Find the node in JSON
+            let searchStr = '';
+            if (type === 'state') {
+                searchStr = `"${id}":`;
+            } else if (type === 'transition') {
+                searchStr = `"id": "${id}"`;
+            } else if (type === 'action') {
+                searchStr = `"${id}":`;
+            } else if (type === 'gate') {
+                searchStr = `"${id}":`;
+            }
+            const pos = json.indexOf(searchStr);
+            if (pos >= 0) {
+                editor.focus();
+                editor.setSelectionRange(pos, pos + searchStr.length);
+                // Scroll to selection
+                const lines = json.substring(0, pos).split('\n');
+                const lineHeight = 18;
+                editor.scrollTop = (lines.length - 5) * lineHeight;
             }
         }
         function updateStatesList() {
@@ -878,6 +1063,7 @@
                     if (frame.contentWindow) {
                         frame.contentWindow.postMessage({ type: 'clearSelection' }, '*');
                     }
+                    updateNodeDetails(null, null);  // Clear node details
                     setStatus('Selection cleared', 'success');
                     return;
                 }
@@ -894,6 +1080,9 @@
                     if (frame.contentWindow) {
                         frame.contentWindow.postMessage({ type: 'highlight', nodeId: stateId }, '*');
                     }
+                    // Update Node tab with state details
+                    updateNodeDetails('state', stateId);
+                    showEditTab('node');
                     // Highlight in JSON schema
                     highlightInSchema('state', stateId);
                     setStatus(`Selected state: ${stateId}`, 'success');
@@ -912,6 +1101,7 @@
                     if (frame.contentWindow) {
                         frame.contentWindow.postMessage({ type: 'clearSelection' }, '*');
                     }
+                    updateNodeDetails(null, null);  // Clear node details
                     setStatus('Selection cleared', 'success');
                     return;
                 }
@@ -928,6 +1118,9 @@
                     if (frame.contentWindow) {
                         frame.contentWindow.postMessage({ type: 'highlightTransition', transitionId: transitionId }, '*');
                     }
+                    // Update Node tab with transition details
+                    updateNodeDetails('transition', transitionId);
+                    showEditTab('node');
                     // Highlight in JSON schema
                     highlightInSchema('transition', transitionId);
                     setStatus(`Selected transition: ${transitionId}`, 'success');
@@ -1046,7 +1239,7 @@
                     </div>
                     <div class="category-content">
                         ${data.deadlocks.map(s => `
-                            <div class="list-item" onclick="highlightPath(['${s}'])" style="border-left:3px solid var(--error)">
+                            <div class="list-item state-highlight-item" data-states="${s}" style="border-left:3px solid var(--error);cursor:pointer">
                                 <div class="list-item-title">${s}</div>
                                 <div class="list-item-desc">No outgoing transitions</div>
                             </div>
@@ -1062,7 +1255,7 @@
                     </div>
                     <div class="category-content">
                         ${data.reachability.unreachable.map(s => `
-                            <div class="list-item" onclick="highlightPath(['${s}'])" style="border-left:3px solid var(--warning)">
+                            <div class="list-item state-highlight-item" data-states="${s}" style="border-left:3px solid var(--warning);cursor:pointer">
                                 <div class="list-item-title">${s}</div>
                                 <div class="list-item-desc">Cannot be reached from entry</div>
                             </div>
@@ -1081,7 +1274,7 @@
                     </div>
                     <div class="category-content">
                         ${paths.slice(0, 20).map((p, i) => `
-                            <div class="list-item" onclick="highlightPath(${JSON.stringify(p.states)})"
+                            <div class="list-item path-item" data-path-index="${i}"
                                  style="cursor:pointer;border-left:3px solid var(--accent)">
                                 <div class="list-item-title">Path ${i + 1}</div>
                                 <div class="list-item-desc" style="font-family:monospace;font-size:11px">
@@ -1096,12 +1289,61 @@
                 </div>`;
             }
             container.innerHTML = html || '<p style="color:var(--text-secondary)">Click "Analyze Paths" to discover execution paths</p>';
+            // Attach click handlers for path items
+            document.querySelectorAll('#pathsList .path-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    const idx = parseInt(el.dataset.pathIndex);
+                    console.log('[Parent] Path item clicked, index:', idx, 'path:', cachedPaths[idx]);
+                    if (cachedPaths[idx]) {
+                        highlightPath(cachedPaths[idx].states);
+                    }
+                });
+            });
+            // Attach click handlers for single state items (deadlocks, unreachable)
+            document.querySelectorAll('#pathsList .state-highlight-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    const states = el.dataset.states.split(',');
+                    console.log('[Parent] State item clicked, states:', states);
+                    highlightPath(states);
+                });
+            });
         }
         function highlightPath(stateIds) {
-            const frame = document.getElementById('graphFrame');
-            if (frame.contentWindow) {
-                frame.contentWindow.postMessage({ type: 'highlightMultiple', nodeIds: stateIds }, '*');
+            console.log('[Parent] highlightPath called with:', stateIds, 'graphReady:', graphReady);
+            // Store as pending if graph not ready
+            pendingHighlight = stateIds;
+            // Send message to graph iframe - get fresh reference each time
+            function sendHighlight() {
+                const frame = document.getElementById('graphFrame');
+                if (frame && frame.contentWindow) {
+                    console.log('[Parent] Sending highlightPath to iframe, graphReady:', graphReady);
+                    try {
+                        // Send both node IDs and the path for transition highlighting
+                        frame.contentWindow.postMessage({
+                            type: 'highlightPath',
+                            nodeIds: stateIds,
+                            pathStates: stateIds  // Used to find transitions between consecutive states
+                        }, '*');
+                    } catch (e) {
+                        console.error('[Parent] Failed to send highlight message:', e);
+                    }
+                } else {
+                    console.warn('[Parent] No iframe or contentWindow found');
+                }
             }
+            // Try immediately if graph might be ready
+            sendHighlight();
+            // Also retry with delays to handle iframe loading
+            setTimeout(sendHighlight, 100);
+            setTimeout(sendHighlight, 300);
+            setTimeout(sendHighlight, 500);
+            // Highlight in paths list
+            document.querySelectorAll('#pathsList .list-item').forEach(el => {
+                const desc = el.querySelector('.list-item-desc')?.textContent || '';
+                const pathStates = desc.split(' → ').map(s => s.trim());
+                const isMatch = JSON.stringify(pathStates) === JSON.stringify(stateIds);
+                el.classList.toggle('selected', isMatch);
+            });
             // Also highlight in states list
             document.querySelectorAll('#statesList .list-item').forEach(el => {
                 const title = el.querySelector('.list-item-title')?.textContent;
@@ -1383,9 +1625,29 @@
             }
         }
 
+        // Track graph iframe ready state
+        let graphReady = false;
+        let pendingHighlight = null;
+
         // Handle messages from graph iframe
         window.addEventListener('message', async (e) => {
-            if (e.data.type === 'select') {
+            if (e.data.type === 'graphReady') {
+                console.log('[Parent] Graph is ready');
+                graphReady = true;
+                // Send any pending highlight
+                if (pendingHighlight) {
+                    console.log('[Parent] Sending pending highlight:', pendingHighlight);
+                    const frame = document.getElementById('graphFrame');
+                    if (frame && frame.contentWindow) {
+                        frame.contentWindow.postMessage({
+                            type: 'highlightPath',
+                            nodeIds: pendingHighlight,
+                            pathStates: pendingHighlight
+                        }, '*');
+                    }
+                    pendingHighlight = null;
+                }
+            } else if (e.data.type === 'select') {
                 // Node or edge selected in graph
                 const { nodeType, nodeId, data } = e.data;
                 setStatus(`Selected ${nodeType}: ${nodeId}`, 'success');
@@ -1395,7 +1657,9 @@
                     currentSelectedTransition = null;
                     await api('edit', 'POST', { action: 'select', node_id: nodeId, node_type: 'state' });
                     showPanel('edit');
-                    showEditTab('states');
+                    // Update Node tab with details and switch to it
+                    updateNodeDetails('state', nodeId);
+                    showEditTab('node');
                     // Highlight in states list
                     document.querySelectorAll('#statesList .list-item').forEach(el => {
                         el.classList.toggle('selected', el.textContent.includes(nodeId));
@@ -1406,7 +1670,9 @@
                     currentSelectedTransition = nodeId;
                     currentSelectedState = null;
                     showPanel('edit');
-                    showEditTab('transitions');
+                    // Update Node tab with details and switch to it
+                    updateNodeDetails('transition', nodeId);
+                    showEditTab('node');
                     document.querySelectorAll('#transitionsList .list-item').forEach(el => {
                         el.classList.toggle('selected', el.textContent.includes(nodeId));
                     });

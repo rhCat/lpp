@@ -64,20 +64,6 @@ def loadBlueprint(params: Dict[str, Any]) -> Dict[str, Any]:
                 "error": str(e)}
 
 
-def createBlueprint(params: Dict[str, Any]) -> Dict[str, Any]:
-    """Create blueprint with given name."""
-    name = params.get("name", "New Blueprint")
-    blueprint = params.get("blueprint", {})
-    if blueprint:
-        blueprint["name"] = name
-        blueprint["id"] = name.lower().replace(" ", "_")
-    return {
-        "blueprint": blueprint,
-        "blueprint_json": json.dumps(blueprint, indent=2),
-        "is_dirty": True
-    }
-
-
 def selectNode(params: Dict[str, Any]) -> Dict[str, Any]:
     """Select a node for editing."""
     blueprint = params.get("blueprint", {})
@@ -841,6 +827,7 @@ body {{ font-family: system-ui, sans-serif; background: #1a1a2e; overflow: hidde
 .link {{ fill: none; stroke-width: 2; opacity: 0.8; }}
 .link:hover {{ stroke-width: 3; opacity: 1; filter: brightness(1.2); }}
 .link.selected {{ stroke: #ffd700 !important; stroke-width: 3; opacity: 1; }}
+.link.path-highlight {{ stroke: #b347ff !important; stroke-width: 3; opacity: 1; stroke-dasharray: 8,4; filter: drop-shadow(0 0 6px #b347ff); }}
 .link-label {{ fill: #ccc; font-size: 11px; pointer-events: none; font-weight: 500; }}
 #tooltip {{ position: fixed; background: #2d2d44; border: 1px solid #444;
   border-radius: 6px; padding: 10px; color: #eee; font-size: 12px;
@@ -1118,6 +1105,7 @@ let currentLayout = 'force';
 
 // Listen for messages from parent
 window.addEventListener('message', (e) => {{
+  console.log('[Graph] Received message:', e.data.type, e.data);
   if (e.data.type === 'highlight') {{
     node.classed('selected', n => n.id === e.data.nodeId);
     link.classed('selected', false);
@@ -1126,8 +1114,31 @@ window.addEventListener('message', (e) => {{
     node.classed('selected', false);
   }} else if (e.data.type === 'highlightMultiple') {{
     const ids = new Set(e.data.nodeIds || []);
+    console.log('[Graph] Highlighting nodes:', Array.from(ids));
     node.classed('selected', n => ids.has(n.id));
     link.classed('selected', false);
+    link.classed('path-highlight', false);
+  }} else if (e.data.type === 'highlightPath') {{
+    const ids = new Set(e.data.nodeIds || []);
+    const pathStates = e.data.pathStates || [];
+    console.log('[Graph] Highlighting path:', pathStates);
+    // Highlight nodes
+    node.classed('selected', n => ids.has(n.id));
+    link.classed('selected', false);
+    // Find and highlight transitions between consecutive states
+    const pathEdges = new Set();
+    for (let i = 0; i < pathStates.length - 1; i++) {{
+      const from = pathStates[i];
+      const to = pathStates[i + 1];
+      // Find edge from->to
+      edgesData.forEach(edge => {{
+        if (edge.source.id === from && edge.target.id === to) {{
+          pathEdges.add(edge.id);
+        }}
+      }});
+    }}
+    console.log('[Graph] Path edges:', Array.from(pathEdges));
+    link.classed('path-highlight', l => pathEdges.has(l.id));
   }} else if (e.data.type === 'highlightMultipleTransitions') {{
     const ids = new Set(e.data.transitionIds || []);
     link.classed('selected', l => ids.has(l.id));
@@ -1135,6 +1146,7 @@ window.addEventListener('message', (e) => {{
   }} else if (e.data.type === 'clearSelection') {{
     node.classed('selected', false);
     link.classed('selected', false);
+    link.classed('path-highlight', false);
     selectedNode = null;
     selectedEdge = null;
   }} else if (e.data.type === 'setLayout') {{
@@ -1168,7 +1180,13 @@ setTimeout(() => {{
   const tx = (width - bounds.width * scale) / 2 - bounds.x * scale;
   const ty = (height - bounds.height * scale) / 2 - bounds.y * scale;
   svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+  // Notify parent that graph is ready
+  console.log('[Graph] Graph fully loaded, notifying parent');
+  window.parent.postMessage({{ type: 'graphReady' }}, '*');
 }}, 500);
+
+// Also notify ready immediately for faster response
+console.log('[Graph] Initial message listener registered');
 </script>
 </body></html>"""
     return html
@@ -1200,7 +1218,6 @@ def clearAll(params: Dict[str, Any]) -> Dict[str, Any]:
 COMPUTE_REGISTRY = {
     "canvas:init_new": initNew,
     "canvas:load_blueprint": loadBlueprint,
-    "canvas:create_blueprint": createBlueprint,
     "canvas:select_node": selectNode,
     "canvas:apply_edit": applyEdit,
     "canvas:delete_node": deleteNode,

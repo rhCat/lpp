@@ -36,10 +36,7 @@ python3 app.py
 stateDiagram-v2
     [*] --> idle
 
-    idle --> creating: NEW
-    idle --> loaded: LOAD
-    creating --> loaded: CREATE
-    creating --> llm_assist: LLM_ASSIST
+    idle --> loaded: NEW/LOAD
     loaded --> editing: SELECT
     loaded --> reviewing: REVIEW
     loaded --> validating: VALIDATE

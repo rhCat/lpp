@@ -51,7 +51,6 @@
   "states": {
     "idle": {"description": "No blueprint loaded"},
     "loaded": {"description": "Blueprint loaded and ready"},
-    "creating": {"description": "Creating new blueprint from scratch"},
     "editing": {"description": "Editing selected node"},
     "reviewing": {"description": "Reviewing and auditing blueprint"},
     "validating": {"description": "Running TLC validation"},
@@ -70,10 +69,6 @@
     {"id": "t_set_bp", "from": "idle", "to": "loaded", "on_event": "SET_BLUEPRINT", "gates": ["g_has_blueprint"]},
     {"id": "t_set_bp_any", "from": "*", "to": "loaded", "on_event": "SET_BLUEPRINT", "gates": ["g_has_blueprint"]},
     {"id": "t_reload", "from": "loaded", "to": "loaded", "on_event": "LOAD", "actions": ["a_load_blueprint"]},
-
-    {"id": "t_create_done", "from": "creating", "to": "loaded", "on_event": "CREATE", "actions": ["a_create_blueprint"]},
-    {"id": "t_create_llm", "from": "creating", "to": "llm_assist", "on_event": "LLM_ASSIST", "gates": ["g_llm_enabled"], "actions": ["a_set_mode_create"]},
-    {"id": "t_create_cancel", "from": "creating", "to": "idle", "on_event": "CANCEL", "actions": ["a_clear"]},
 
     {"id": "t_select", "from": "loaded", "to": "editing", "on_event": "SELECT", "gates": ["g_has_selection"], "actions": ["a_select_node"]},
     {"id": "t_review", "from": "loaded", "to": "reviewing", "on_event": "REVIEW", "actions": ["a_start_review"]},
@@ -151,12 +146,6 @@
       "compute_unit": "canvas:load_blueprint",
       "input_map": {"path": "blueprint_path"},
       "output_map": {"blueprint": "blueprint", "blueprint_json": "blueprint_json", "error": "error"}
-    },
-    "a_create_blueprint": {
-      "type": "compute",
-      "compute_unit": "canvas:create_blueprint",
-      "input_map": {"name": "prompt", "blueprint": "blueprint"},
-      "output_map": {"blueprint": "blueprint", "blueprint_json": "blueprint_json", "is_dirty": "is_dirty"}
     },
     "a_select_node": {
       "type": "compute",

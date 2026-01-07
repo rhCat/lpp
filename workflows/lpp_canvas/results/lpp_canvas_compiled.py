@@ -28,7 +28,6 @@ TERMINAL_STATES = set()
 STATES = {
     'idle': 'idle',  # No blueprint loaded
     'loaded': 'loaded',  # Blueprint loaded and ready
-    'creating': 'creating',  # Creating new blueprint from scratch
     'editing': 'editing',  # Editing selected node
     'reviewing': 'reviewing',  # Reviewing and auditing blueprint
     'validating': 'validating',  # Running TLC validation
@@ -68,12 +67,6 @@ ACTIONS = {
         'compute_unit': 'canvas:load_blueprint',
         'input_map': {'path': 'blueprint_path'},
         'output_map': {'blueprint': 'blueprint', 'blueprint_json': 'blueprint_json', 'error': 'error'},
-    },
-    'a_create_blueprint': {
-        'type': 'compute',
-        'compute_unit': 'canvas:create_blueprint',
-        'input_map': {'name': 'prompt', 'blueprint': 'blueprint'},
-        'output_map': {'blueprint': 'blueprint', 'blueprint_json': 'blueprint_json', 'is_dirty': 'is_dirty'},
     },
     'a_select_node': {
         'type': 'compute',
@@ -298,30 +291,6 @@ TRANSITIONS = [
         'on_event': 'LOAD',
         'gates': [],
         'actions': ['a_load_blueprint'],
-    },
-    {
-        'id': 't_create_done',
-        'from': 'creating',
-        'to': 'loaded',
-        'on_event': 'CREATE',
-        'gates': [],
-        'actions': ['a_create_blueprint'],
-    },
-    {
-        'id': 't_create_llm',
-        'from': 'creating',
-        'to': 'llm_assist',
-        'on_event': 'LLM_ASSIST',
-        'gates': ['g_llm_enabled'],
-        'actions': ['a_set_mode_create'],
-    },
-    {
-        'id': 't_create_cancel',
-        'from': 'creating',
-        'to': 'idle',
-        'on_event': 'CANCEL',
-        'gates': [],
-        'actions': ['a_clear'],
     },
     {
         'id': 't_select',
