@@ -1,0 +1,126 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "py2lpp_extractor",
+  "name": "Module Extractor",
+  "version": "1.0.0",
+  "description": "Extracts business logic and module definitions",
+  "context_schema": {
+    "properties": {
+      "pythonFiles": {
+        "type": "array",
+        "description": "Python files"
+      },
+      "patterns": {
+        "type": "object",
+        "description": "Detected patterns"
+      },
+      "extractedModules": {
+        "type": "array",
+        "description": "Extracted module definitions"
+      },
+      "modulesFound": {
+        "type": "number",
+        "description": "Count of modules found"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "Awaiting extraction request"
+    },
+    "extracting": {
+      "description": "Extracting modules"
+    },
+    "done": {
+      "description": "Extraction complete"
+    },
+    "error": {
+      "description": "Extraction failed"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "done": {
+      "output_schema": {
+        "extractedModules": {
+          "type": "array",
+          "non_null": true
+        },
+        "modulesFound": {
+          "type": "number",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": ["modules_extracted"]
+    },
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
+  "gates": {
+    "has_patterns": {
+      "type": "expression",
+      "expression": "patterns is not None"
+    },
+    "has_modules": {
+      "type": "expression",
+      "expression": "extractedModules is not None"
+    },
+    "has_error": {
+      "type": "expression",
+      "expression": "error is not None"
+    },
+    "no_error": {
+      "type": "expression",
+      "expression": "error is None"
+    }
+  },
+  "actions": {
+    "extract_modules": {
+      "type": "compute",
+      "compute_unit": "py2lpp:extractModules",
+      "input_map": {
+        "pythonFiles": "pythonFiles",
+        "patterns": "patterns"
+      },
+      "output_map": {
+        "extractedModules": "extractedModules",
+        "modulesFound": "modulesFound",
+        "error": "error"
+      }
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_start",
+      "from": "idle",
+      "to": "extracting",
+      "on_event": "EXTRACT",
+      "gates": ["has_patterns"],
+      "actions": ["extract_modules"]
+    },
+    {
+      "id": "t_done",
+      "from": "extracting",
+      "to": "done",
+      "on_event": "COMPLETE",
+      "gates": ["has_modules", "no_error"]
+    },
+    {
+      "id": "t_error",
+      "from": "extracting",
+      "to": "error",
+      "on_event": "COMPLETE",
+      "gates": ["has_error"]
+    }
+  ]
+}

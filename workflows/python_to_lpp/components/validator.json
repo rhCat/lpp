@@ -1,0 +1,152 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "py2lpp_validator",
+  "name": "Artifact Validator",
+  "version": "1.0.0",
+  "description": "Validates generated L++ artifacts",
+  "context_schema": {
+    "properties": {
+      "blueprints": {
+        "type": "array",
+        "description": "Generated blueprints"
+      },
+      "computeFunctions": {
+        "type": "array",
+        "description": "Generated compute functions"
+      },
+      "validationResult": {
+        "type": "object",
+        "description": "Validation result"
+      },
+      "isValid": {
+        "type": "boolean",
+        "description": "Validation passed"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "Awaiting validation request"
+    },
+    "validating": {
+      "description": "Validating artifacts"
+    },
+    "valid": {
+      "description": "Validation passed"
+    },
+    "invalid": {
+      "description": "Validation failed"
+    },
+    "error": {
+      "description": "Validation error"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "valid": {
+      "output_schema": {
+        "validationResult": {
+          "type": "object",
+          "non_null": true
+        },
+        "isValid": {
+          "type": "boolean",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": ["artifacts_valid"]
+    },
+    "invalid": {
+      "output_schema": {
+        "validationResult": {
+          "type": "object",
+          "non_null": true
+        },
+        "isValid": {
+          "type": "boolean",
+          "non_null": true
+        }
+      }
+    },
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
+  "gates": {
+    "has_blueprints": {
+      "type": "expression",
+      "expression": "blueprints is not None"
+    },
+    "is_valid": {
+      "type": "expression",
+      "expression": "isValid == True"
+    },
+    "is_invalid": {
+      "type": "expression",
+      "expression": "isValid == False"
+    },
+    "has_error": {
+      "type": "expression",
+      "expression": "error is not None"
+    },
+    "no_error": {
+      "type": "expression",
+      "expression": "error is None"
+    }
+  },
+  "actions": {
+    "validate": {
+      "type": "compute",
+      "compute_unit": "py2lpp:validate",
+      "input_map": {
+        "blueprints": "blueprints",
+        "computeFunctions": "computeFunctions"
+      },
+      "output_map": {
+        "validationResult": "validationResult",
+        "isValid": "isValid",
+        "error": "error"
+      }
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_start",
+      "from": "idle",
+      "to": "validating",
+      "on_event": "VALIDATE",
+      "gates": ["has_blueprints"],
+      "actions": ["validate"]
+    },
+    {
+      "id": "t_valid",
+      "from": "validating",
+      "to": "valid",
+      "on_event": "COMPLETE",
+      "gates": ["is_valid", "no_error"]
+    },
+    {
+      "id": "t_invalid",
+      "from": "validating",
+      "to": "invalid",
+      "on_event": "COMPLETE",
+      "gates": ["is_invalid", "no_error"]
+    },
+    {
+      "id": "t_error",
+      "from": "validating",
+      "to": "error",
+      "on_event": "COMPLETE",
+      "gates": ["has_error"]
+    }
+  ]
+}

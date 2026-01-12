@@ -1,0 +1,43 @@
+{
+  "blueprint_id": "lvp_stress_test",
+  "blueprint_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_lvp_stress_test_blueprint.py",
+    "count": 83,
+    "coverage": {
+      "total_tests": 83,
+      "by_type": {
+        "path_coverage": 8,
+        "state_coverage": 3,
+        "gate_boundary": 12,
+        "negative": 25,
+        "property_based": 30,
+        "contract": 5
+      },
+      "state_coverage": {
+        "total": 7,
+        "covered": 7,
+        "percentage": 100.0
+      },
+      "transition_coverage": {
+        "total": 8,
+        "covered": 8,
+        "percentage": 100.0
+      },
+      "gate_coverage": {
+        "total": 6,
+        "covered": 6,
+        "percentage": 100.0
+      }
+    }
+  },
+  "compute_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_lvp_stress_test_compute.py",
+    "units": 3,
+    "units_list": [
+      "lvp:generate_tla",
+      "lvp:run_tlc",
+      "lvp:analyze_traces"
+    ]
+  },
+  "total_tests": 95
+}

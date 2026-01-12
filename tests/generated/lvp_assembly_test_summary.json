@@ -1,0 +1,41 @@
+{
+  "blueprint_id": "lvp_assembly",
+  "blueprint_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_lvp_assembly_blueprint.py",
+    "count": 106,
+    "coverage": {
+      "total_tests": 106,
+      "by_type": {
+        "path_coverage": 15,
+        "state_coverage": 4,
+        "gate_boundary": 2,
+        "negative": 45,
+        "property_based": 40,
+        "contract": 0
+      },
+      "state_coverage": {
+        "total": 10,
+        "covered": 10,
+        "percentage": 100.0
+      },
+      "transition_coverage": {
+        "total": 15,
+        "covered": 15,
+        "percentage": 100.0
+      },
+      "gate_coverage": {
+        "total": 16,
+        "covered": 1,
+        "percentage": 6.25
+      }
+    }
+  },
+  "compute_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_lvp_assembly_compute.py",
+    "units": 1,
+    "units_list": [
+      "lvp:init"
+    ]
+  },
+  "total_tests": 110
+}

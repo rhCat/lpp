@@ -1,0 +1,41 @@
+{
+  "blueprint_id": "py2lpp_compute_gen",
+  "blueprint_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_py2lpp_compute_gen_blueprint.py",
+    "count": 33,
+    "coverage": {
+      "total_tests": 33,
+      "by_type": {
+        "path_coverage": 3,
+        "state_coverage": 2,
+        "gate_boundary": 8,
+        "negative": 9,
+        "property_based": 8,
+        "contract": 3
+      },
+      "state_coverage": {
+        "total": 4,
+        "covered": 4,
+        "percentage": 100.0
+      },
+      "transition_coverage": {
+        "total": 3,
+        "covered": 3,
+        "percentage": 100.0
+      },
+      "gate_coverage": {
+        "total": 4,
+        "covered": 4,
+        "percentage": 100.0
+      }
+    }
+  },
+  "compute_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_py2lpp_compute_gen_compute.py",
+    "units": 1,
+    "units_list": [
+      "py2lpp:generateCompute"
+    ]
+  },
+  "total_tests": 37
+}

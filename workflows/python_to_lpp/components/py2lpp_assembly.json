@@ -1,0 +1,494 @@
+{
+  "$schema": "lpp/assembly/v0.1",
+  "id": "py2lpp_assembly",
+  "name": "Python to L++ Refactorer Assembly",
+  "version": "1.0.0",
+  "description": "Assembly orchestrating Python project refactoring to L++ with 7 phases",
+  "components": {
+    "scanner": {
+      "blueprint": "scanner.json",
+      "required_terminals": ["done", "error"],
+      "input_map": {
+        "projectPath": "assembly.context.projectPath"
+      }
+    },
+    "analyzer": {
+      "blueprint": "analyzer.json",
+      "required_terminals": ["done", "error"],
+      "input_map": {
+        "pythonFiles": "scanner.output.pythonFiles"
+      }
+    },
+    "extractor": {
+      "blueprint": "extractor.json",
+      "required_terminals": ["done", "error"],
+      "input_map": {
+        "pythonFiles": "scanner.output.pythonFiles",
+        "patterns": "analyzer.output.patterns"
+      }
+    },
+    "blueprint_gen": {
+      "blueprint": "blueprint_gen.json",
+      "required_terminals": ["done", "error"],
+      "input_map": {
+        "extractedModules": "extractor.output.extractedModules"
+      }
+    },
+    "compute_gen": {
+      "blueprint": "compute_gen.json",
+      "required_terminals": ["done", "error"],
+      "input_map": {
+        "blueprints": "blueprint_gen.output.blueprints",
+        "extractedModules": "extractor.output.extractedModules"
+      }
+    },
+    "doc_gen": {
+      "blueprint": "doc_gen.json",
+      "required_terminals": ["done", "error"],
+      "input_map": {
+        "blueprints": "blueprint_gen.output.blueprints",
+        "computeFunctions": "compute_gen.output.computeFunctions",
+        "projectName": "assembly.context.projectName"
+      }
+    },
+    "validator": {
+      "blueprint": "validator.json",
+      "required_terminals": ["valid", "invalid", "error"],
+      "input_map": {
+        "blueprints": "blueprint_gen.output.blueprints",
+        "computeFunctions": "compute_gen.output.computeFunctions"
+      }
+    }
+  },
+  "context_schema": {
+    "properties": {
+      "projectPath": {
+        "type": "string",
+        "source": "input",
+        "description": "Path to Python project"
+      },
+      "outputPath": {
+        "type": "string",
+        "source": "input",
+        "description": "Output path"
+      },
+      "projectName": {
+        "type": "string",
+        "source": "input",
+        "description": "Project name"
+      },
+      "generateDocs": {
+        "type": "boolean",
+        "source": "input",
+        "description": "Generate documentation"
+      },
+      "pythonFiles": {
+        "type": "array",
+        "source": "scanner.output.pythonFiles"
+      },
+      "patterns": {
+        "type": "object",
+        "source": "analyzer.output.patterns"
+      },
+      "extractedModules": {
+        "type": "array",
+        "source": "extractor.output.extractedModules"
+      },
+      "blueprints": {
+        "type": "array",
+        "source": "blueprint_gen.output.blueprints"
+      },
+      "computeFunctions": {
+        "type": "array",
+        "source": "compute_gen.output.computeFunctions"
+      },
+      "docs": {
+        "type": "array",
+        "source": "doc_gen.output.docs"
+      },
+      "validationResult": {
+        "type": "object",
+        "source": "validator.output.validationResult"
+      },
+      "error_source": {
+        "type": "string"
+      },
+      "error": {
+        "type": "string"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "type": "coordination",
+      "description": "Awaiting project path"
+    },
+    "phase_scan": {
+      "type": "component_execution",
+      "component": "scanner",
+      "description": "Scanning project"
+    },
+    "phase_analyze": {
+      "type": "component_execution",
+      "component": "analyzer",
+      "description": "Analyzing patterns"
+    },
+    "phase_extract": {
+      "type": "component_execution",
+      "component": "extractor",
+      "description": "Extracting modules"
+    },
+    "phase_blueprint": {
+      "type": "component_execution",
+      "component": "blueprint_gen",
+      "description": "Generating blueprints"
+    },
+    "phase_compute": {
+      "type": "component_execution",
+      "component": "compute_gen",
+      "description": "Generating compute functions"
+    },
+    "phase_docs": {
+      "type": "component_execution",
+      "component": "doc_gen",
+      "description": "Generating documentation"
+    },
+    "phase_validate": {
+      "type": "component_execution",
+      "component": "validator",
+      "description": "Validating artifacts"
+    },
+    "complete": {
+      "type": "coordination",
+      "description": "Refactoring complete"
+    },
+    "error": {
+      "type": "coordination",
+      "description": "Refactoring failed"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_start",
+      "from": "idle",
+      "to": "phase_scan",
+      "on_event": "REFACTOR",
+      "gates": ["g_has_project"]
+    },
+    {
+      "id": "t_scan_done",
+      "from": "phase_scan",
+      "to": "phase_analyze",
+      "on_event": "scanner:TERMINAL",
+      "gates": ["g_scanner_ok"],
+      "actions": ["a_capture_files"]
+    },
+    {
+      "id": "t_scan_error",
+      "from": "phase_scan",
+      "to": "error",
+      "on_event": "scanner:TERMINAL",
+      "gates": ["g_scanner_error"],
+      "actions": ["a_set_error_scan"]
+    },
+    {
+      "id": "t_analyze_done",
+      "from": "phase_analyze",
+      "to": "phase_extract",
+      "on_event": "analyzer:TERMINAL",
+      "gates": ["g_analyzer_ok"],
+      "actions": ["a_capture_patterns"]
+    },
+    {
+      "id": "t_analyze_error",
+      "from": "phase_analyze",
+      "to": "error",
+      "on_event": "analyzer:TERMINAL",
+      "gates": ["g_analyzer_error"],
+      "actions": ["a_set_error_analyze"]
+    },
+    {
+      "id": "t_extract_done",
+      "from": "phase_extract",
+      "to": "phase_blueprint",
+      "on_event": "extractor:TERMINAL",
+      "gates": ["g_extractor_ok"],
+      "actions": ["a_capture_modules"]
+    },
+    {
+      "id": "t_extract_error",
+      "from": "phase_extract",
+      "to": "error",
+      "on_event": "extractor:TERMINAL",
+      "gates": ["g_extractor_error"],
+      "actions": ["a_set_error_extract"]
+    },
+    {
+      "id": "t_blueprint_done",
+      "from": "phase_blueprint",
+      "to": "phase_compute",
+      "on_event": "blueprint_gen:TERMINAL",
+      "gates": ["g_blueprint_ok"],
+      "actions": ["a_capture_blueprints"]
+    },
+    {
+      "id": "t_blueprint_error",
+      "from": "phase_blueprint",
+      "to": "error",
+      "on_event": "blueprint_gen:TERMINAL",
+      "gates": ["g_blueprint_error"],
+      "actions": ["a_set_error_blueprint"]
+    },
+    {
+      "id": "t_compute_to_docs",
+      "from": "phase_compute",
+      "to": "phase_docs",
+      "on_event": "compute_gen:TERMINAL",
+      "gates": ["g_compute_ok", "g_wants_docs"],
+      "actions": ["a_capture_compute"]
+    },
+    {
+      "id": "t_compute_to_validate",
+      "from": "phase_compute",
+      "to": "phase_validate",
+      "on_event": "compute_gen:TERMINAL",
+      "gates": ["g_compute_ok", "g_no_docs"],
+      "actions": ["a_capture_compute"]
+    },
+    {
+      "id": "t_compute_error",
+      "from": "phase_compute",
+      "to": "error",
+      "on_event": "compute_gen:TERMINAL",
+      "gates": ["g_compute_error"],
+      "actions": ["a_set_error_compute"]
+    },
+    {
+      "id": "t_docs_done",
+      "from": "phase_docs",
+      "to": "phase_validate",
+      "on_event": "doc_gen:TERMINAL",
+      "gates": ["g_docs_ok"],
+      "actions": ["a_capture_docs"]
+    },
+    {
+      "id": "t_docs_error",
+      "from": "phase_docs",
+      "to": "phase_validate",
+      "on_event": "doc_gen:TERMINAL",
+      "gates": ["g_docs_error"]
+    },
+    {
+      "id": "t_validate_ok",
+      "from": "phase_validate",
+      "to": "complete",
+      "on_event": "validator:TERMINAL",
+      "gates": ["g_validator_ok"],
+      "actions": ["a_capture_validation"]
+    },
+    {
+      "id": "t_validate_invalid",
+      "from": "phase_validate",
+      "to": "complete",
+      "on_event": "validator:TERMINAL",
+      "gates": ["g_validator_invalid"],
+      "actions": ["a_capture_validation"]
+    },
+    {
+      "id": "t_validate_error",
+      "from": "phase_validate",
+      "to": "error",
+      "on_event": "validator:TERMINAL",
+      "gates": ["g_validator_error"],
+      "actions": ["a_set_error_validate"]
+    }
+  ],
+  "gates": {
+    "g_has_project": {
+      "type": "expression",
+      "expression": "projectPath is not None"
+    },
+    "g_scanner_ok": {
+      "type": "expression",
+      "expression": "scanner._terminal == 'done'"
+    },
+    "g_scanner_error": {
+      "type": "expression",
+      "expression": "scanner._terminal == 'error'"
+    },
+    "g_analyzer_ok": {
+      "type": "expression",
+      "expression": "analyzer._terminal == 'done'"
+    },
+    "g_analyzer_error": {
+      "type": "expression",
+      "expression": "analyzer._terminal == 'error'"
+    },
+    "g_extractor_ok": {
+      "type": "expression",
+      "expression": "extractor._terminal == 'done'"
+    },
+    "g_extractor_error": {
+      "type": "expression",
+      "expression": "extractor._terminal == 'error'"
+    },
+    "g_blueprint_ok": {
+      "type": "expression",
+      "expression": "blueprint_gen._terminal == 'done'"
+    },
+    "g_blueprint_error": {
+      "type": "expression",
+      "expression": "blueprint_gen._terminal == 'error'"
+    },
+    "g_compute_ok": {
+      "type": "expression",
+      "expression": "compute_gen._terminal == 'done'"
+    },
+    "g_compute_error": {
+      "type": "expression",
+      "expression": "compute_gen._terminal == 'error'"
+    },
+    "g_wants_docs": {
+      "type": "expression",
+      "expression": "generateDocs == True"
+    },
+    "g_no_docs": {
+      "type": "expression",
+      "expression": "generateDocs != True"
+    },
+    "g_docs_ok": {
+      "type": "expression",
+      "expression": "doc_gen._terminal == 'done'"
+    },
+    "g_docs_error": {
+      "type": "expression",
+      "expression": "doc_gen._terminal == 'error'"
+    },
+    "g_validator_ok": {
+      "type": "expression",
+      "expression": "validator._terminal == 'valid'"
+    },
+    "g_validator_invalid": {
+      "type": "expression",
+      "expression": "validator._terminal == 'invalid'"
+    },
+    "g_validator_error": {
+      "type": "expression",
+      "expression": "validator._terminal == 'error'"
+    }
+  },
+  "actions": {
+    "a_capture_files": {
+      "type": "set",
+      "target": "pythonFiles",
+      "value_from": "scanner.output.pythonFiles"
+    },
+    "a_capture_patterns": {
+      "type": "set",
+      "target": "patterns",
+      "value_from": "analyzer.output.patterns"
+    },
+    "a_capture_modules": {
+      "type": "set",
+      "target": "extractedModules",
+      "value_from": "extractor.output.extractedModules"
+    },
+    "a_capture_blueprints": {
+      "type": "set",
+      "target": "blueprints",
+      "value_from": "blueprint_gen.output.blueprints"
+    },
+    "a_capture_compute": {
+      "type": "set",
+      "target": "computeFunctions",
+      "value_from": "compute_gen.output.computeFunctions"
+    },
+    "a_capture_docs": {
+      "type": "set",
+      "target": "docs",
+      "value_from": "doc_gen.output.docs"
+    },
+    "a_capture_validation": {
+      "type": "set",
+      "target": "validationResult",
+      "value_from": "validator.output.validationResult"
+    },
+    "a_set_error_scan": {
+      "type": "set",
+      "target": "error_source",
+      "value": "scanner"
+    },
+    "a_set_error_analyze": {
+      "type": "set",
+      "target": "error_source",
+      "value": "analyzer"
+    },
+    "a_set_error_extract": {
+      "type": "set",
+      "target": "error_source",
+      "value": "extractor"
+    },
+    "a_set_error_blueprint": {
+      "type": "set",
+      "target": "error_source",
+      "value": "blueprint_gen"
+    },
+    "a_set_error_compute": {
+      "type": "set",
+      "target": "error_source",
+      "value": "compute_gen"
+    },
+    "a_set_error_validate": {
+      "type": "set",
+      "target": "error_source",
+      "value": "validator"
+    }
+  },
+  "assembly_invariants": [
+    {
+      "id": "AI_001",
+      "name": "Analysis requires scanned files",
+      "type": "state_dependency",
+      "expression": "_state == 'phase_analyze' => pythonFiles != None",
+      "severity": "critical",
+      "description": "Cannot analyze without scanned Python files"
+    },
+    {
+      "id": "AI_002",
+      "name": "Extraction requires patterns",
+      "type": "state_dependency",
+      "expression": "_state == 'phase_extract' => patterns != None",
+      "severity": "critical",
+      "description": "Cannot extract without analyzed patterns"
+    },
+    {
+      "id": "AI_003",
+      "name": "Blueprint gen requires modules",
+      "type": "state_dependency",
+      "expression": "_state == 'phase_blueprint' => extractedModules != None",
+      "severity": "critical",
+      "description": "Cannot generate blueprints without extracted modules"
+    },
+    {
+      "id": "AI_004",
+      "name": "Sequential pipeline execution",
+      "type": "sequence",
+      "expression": "blueprint_gen._terminal != None => extractor._terminal == 'done'",
+      "severity": "critical",
+      "description": "Blueprint gen requires successful extraction"
+    },
+    {
+      "id": "AI_005",
+      "name": "Validation requires blueprints",
+      "type": "state_dependency",
+      "expression": "_state == 'phase_validate' => blueprints != None",
+      "severity": "critical",
+      "description": "Cannot validate without generated blueprints"
+    }
+  ],
+  "entry_state": "idle",
+  "terminal_states": {
+    "complete": {},
+    "error": {}
+  }
+}

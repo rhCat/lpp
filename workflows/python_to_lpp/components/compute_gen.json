@@ -1,0 +1,117 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "py2lpp_compute_gen",
+  "name": "Compute Function Generator",
+  "version": "1.0.0",
+  "description": "Generates compute function implementations",
+  "context_schema": {
+    "properties": {
+      "blueprints": {
+        "type": "array",
+        "description": "Generated blueprints"
+      },
+      "extractedModules": {
+        "type": "array",
+        "description": "Extracted modules"
+      },
+      "computeFunctions": {
+        "type": "array",
+        "description": "Generated compute functions"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "Awaiting generation request"
+    },
+    "generating": {
+      "description": "Generating compute functions"
+    },
+    "done": {
+      "description": "Generation complete"
+    },
+    "error": {
+      "description": "Generation failed"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "done": {
+      "output_schema": {
+        "computeFunctions": {
+          "type": "array",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": ["compute_generated"]
+    },
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
+  "gates": {
+    "has_blueprints": {
+      "type": "expression",
+      "expression": "blueprints is not None"
+    },
+    "has_compute": {
+      "type": "expression",
+      "expression": "computeFunctions is not None"
+    },
+    "has_error": {
+      "type": "expression",
+      "expression": "error is not None"
+    },
+    "no_error": {
+      "type": "expression",
+      "expression": "error is None"
+    }
+  },
+  "actions": {
+    "generate_compute": {
+      "type": "compute",
+      "compute_unit": "py2lpp:generateCompute",
+      "input_map": {
+        "blueprints": "blueprints",
+        "extractedModules": "extractedModules"
+      },
+      "output_map": {
+        "computeFunctions": "computeFunctions",
+        "error": "error"
+      }
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_start",
+      "from": "idle",
+      "to": "generating",
+      "on_event": "GENERATE",
+      "gates": ["has_blueprints"],
+      "actions": ["generate_compute"]
+    },
+    {
+      "id": "t_done",
+      "from": "generating",
+      "to": "done",
+      "on_event": "COMPLETE",
+      "gates": ["has_compute", "no_error"]
+    },
+    {
+      "id": "t_error",
+      "from": "generating",
+      "to": "error",
+      "on_event": "COMPLETE",
+      "gates": ["has_error"]
+    }
+  ]
+}

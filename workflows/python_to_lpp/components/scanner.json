@@ -1,0 +1,123 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "py2lpp_scanner",
+  "name": "Python Project Scanner",
+  "version": "1.0.0",
+  "description": "Scans Python project structure and finds source files",
+  "context_schema": {
+    "properties": {
+      "projectPath": {
+        "type": "string",
+        "description": "Path to Python project"
+      },
+      "pythonFiles": {
+        "type": "array",
+        "description": "List of Python files found"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "Awaiting scan request"
+    },
+    "scanning": {
+      "description": "Scanning project"
+    },
+    "done": {
+      "description": "Scan complete"
+    },
+    "error": {
+      "description": "Scan failed"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "done": {
+      "output_schema": {
+        "pythonFiles": {
+          "type": "array",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": ["files_found"]
+    },
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
+  "gates": {
+    "has_project": {
+      "type": "expression",
+      "expression": "projectPath is not None"
+    },
+    "has_files": {
+      "type": "expression",
+      "expression": "pythonFiles is not None and len(pythonFiles) > 0"
+    },
+    "no_files": {
+      "type": "expression",
+      "expression": "pythonFiles is None or len(pythonFiles) == 0"
+    },
+    "has_error": {
+      "type": "expression",
+      "expression": "error is not None"
+    },
+    "no_error": {
+      "type": "expression",
+      "expression": "error is None"
+    }
+  },
+  "actions": {
+    "scan_project": {
+      "type": "compute",
+      "compute_unit": "py2lpp:scanProject",
+      "input_map": {
+        "projectPath": "projectPath"
+      },
+      "output_map": {
+        "pythonFiles": "pythonFiles",
+        "error": "error"
+      }
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_start",
+      "from": "idle",
+      "to": "scanning",
+      "on_event": "SCAN",
+      "gates": ["has_project"],
+      "actions": ["scan_project"]
+    },
+    {
+      "id": "t_done",
+      "from": "scanning",
+      "to": "done",
+      "on_event": "COMPLETE",
+      "gates": ["has_files", "no_error"]
+    },
+    {
+      "id": "t_no_files",
+      "from": "scanning",
+      "to": "error",
+      "on_event": "COMPLETE",
+      "gates": ["no_files"]
+    },
+    {
+      "id": "t_error",
+      "from": "scanning",
+      "to": "error",
+      "on_event": "COMPLETE",
+      "gates": ["has_error"]
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "blueprint_id": "python_to_lpp",
+  "blueprint_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_python_to_lpp_blueprint.py",
+    "count": 107,
+    "coverage": {
+      "total_tests": 107,
+      "by_type": {
+        "path_coverage": 14,
+        "state_coverage": 3,
+        "gate_boundary": 16,
+        "negative": 42,
+        "property_based": 32,
+        "contract": 0
+      },
+      "state_coverage": {
+        "total": 10,
+        "covered": 10,
+        "percentage": 100.0
+      },
+      "transition_coverage": {
+        "total": 15,
+        "covered": 14,
+        "percentage": 93.33333333333333
+      },
+      "gate_coverage": {
+        "total": 9,
+        "covered": 8,
+        "percentage": 88.88888888888889
+      }
+    }
+  },
+  "compute_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_python_to_lpp_compute.py",
+    "units": 9,
+    "units_list": [
+      "init",
+      "scan_project",
+      "analyze_patterns",
+      "extract_modules",
+      "generate_blueprints",
+      "generate_compute",
+      "generate_docs",
+      "validate",
+      "finalize"
+    ]
+  },
+  "total_tests": 143
+}

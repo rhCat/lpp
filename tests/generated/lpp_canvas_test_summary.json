@@ -1,0 +1,64 @@
+{
+  "blueprint_id": "lpp_canvas",
+  "blueprint_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_lpp_canvas_blueprint.py",
+    "count": 189,
+    "coverage": {
+      "total_tests": 189,
+      "by_type": {
+        "path_coverage": 46,
+        "state_coverage": 8,
+        "gate_boundary": 5,
+        "negative": 50,
+        "property_based": 80,
+        "contract": 0
+      },
+      "state_coverage": {
+        "total": 12,
+        "covered": 12,
+        "percentage": 100.0
+      },
+      "transition_coverage": {
+        "total": 47,
+        "covered": 46,
+        "percentage": 97.87234042553192
+      },
+      "gate_coverage": {
+        "total": 10,
+        "covered": 2,
+        "percentage": 20.0
+      }
+    }
+  },
+  "compute_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_lpp_canvas_compute.py",
+    "units": 24,
+    "units_list": [
+      "canvas:init_new",
+      "canvas:load_blueprint",
+      "canvas:select_node",
+      "canvas:apply_edit",
+      "canvas:delete_node",
+      "canvas:add_state",
+      "canvas:add_transition",
+      "canvas:add_gate",
+      "canvas:add_action",
+      "canvas:run_tlc",
+      "canvas:analyze_paths",
+      "canvas:init_simulation",
+      "canvas:sim_step",
+      "canvas:sim_dispatch",
+      "canvas:init_simulation",
+      "canvas:compute_clusters",
+      "canvas:start_review",
+      "canvas:add_note",
+      "canvas:add_audit",
+      "canvas:llm_query",
+      "canvas:apply_llm",
+      "canvas:generate_outputs",
+      "canvas:save_blueprint",
+      "canvas:clear_all"
+    ]
+  },
+  "total_tests": 285
+}

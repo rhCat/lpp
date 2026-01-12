@@ -1,0 +1,42 @@
+{
+  "blueprint_id": "lvp_fix_gen",
+  "blueprint_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_lvp_fix_gen_blueprint.py",
+    "count": 69,
+    "coverage": {
+      "total_tests": 69,
+      "by_type": {
+        "path_coverage": 6,
+        "state_coverage": 3,
+        "gate_boundary": 8,
+        "negative": 21,
+        "property_based": 26,
+        "contract": 5
+      },
+      "state_coverage": {
+        "total": 6,
+        "covered": 6,
+        "percentage": 100.0
+      },
+      "transition_coverage": {
+        "total": 6,
+        "covered": 6,
+        "percentage": 100.0
+      },
+      "gate_coverage": {
+        "total": 6,
+        "covered": 4,
+        "percentage": 66.66666666666666
+      }
+    }
+  },
+  "compute_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_lvp_fix_gen_compute.py",
+    "units": 2,
+    "units_list": [
+      "lvp:generate_patches",
+      "lvp:verify_fix_tlaps"
+    ]
+  },
+  "total_tests": 77
+}

@@ -1,6 +1,7 @@
 
 CLAUDE.md
 **/.*cache
+.claude/settings.json
 
 # LVP results cache (timestamped folders)
 **/results/[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9][0-9][0-9]/

@@ -42,6 +42,7 @@ print_usage() {
     echo "  report    Generate only analysis report"
     echo "  clean     Remove all generated artifacts"
     echo "  validate  Validate all blueprints with TLA+"
+    echo "  tests     Generate comprehensive tests (blueprint + compute)"
     echo ""
     echo "Options:"
     echo "  -p, --project <path>  Path to L++ project (default: L++ utils)"
@@ -100,6 +101,21 @@ validate_blueprints() {
             tla2sany "$tla_file" 2>/dev/null || echo -e "${RED}  Failed: $name${NC}"
         fi
     done
+}
+
+generate_tests() {
+    local target_dir="${PROJECT_PATH:-${SCRIPT_DIR}/workflows}"
+    local output_dir="${PROJECT_PATH:-${SCRIPT_DIR}}/tests/generated"
+    echo -e "${GREEN}Generating comprehensive tests...${NC}"
+    echo -e "  Source: ${target_dir}"
+    echo -e "  Output: ${output_dir}"
+
+    python3 "${SCRIPT_DIR}/utils/test_generator/comprehensive_test.py" \
+        --all \
+        --workflow-dir "${target_dir}" \
+        --output-dir "${output_dir}"
+
+    echo -e "${GREEN}Tests generated successfully${NC}"
 }
 
 # Parse options first
@@ -169,6 +185,9 @@ case "$COMMAND" in
         ;;
     validate)
         validate_blueprints
+        ;;
+    tests)
+        generate_tests
         ;;
     *)
         echo -e "${RED}Unknown command: $COMMAND${NC}"
