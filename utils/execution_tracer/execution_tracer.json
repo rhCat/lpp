@@ -4,40 +4,96 @@
   "name": "L++ Execution Tracer",
   "version": "1.0.0",
   "description": "Structured logging and tracing for L++ blueprint execution with OpenTelemetry support",
-
   "context_schema": {
     "properties": {
-      "config": { "type": "object", "description": "Tracer configuration" },
-      "trace_id": { "type": "string", "description": "Current trace UUID" },
-      "root_span_id": { "type": "string", "description": "Root span ID" },
-      "spans": { "type": "array", "description": "All recorded spans" },
-      "active_spans": { "type": "object", "description": "Currently open spans by ID" },
-      "events": { "type": "array", "description": "Trace events" },
-      "blueprint_id": { "type": "string", "description": "Blueprint being traced" },
-      "blueprint_name": { "type": "string", "description": "Blueprint name" },
-      "start_time": { "type": "string", "description": "Trace start timestamp" },
-      "end_time": { "type": "string", "description": "Trace end timestamp" },
-      "output_format": { "type": "string", "description": "Current output format" },
-      "export_path": { "type": "string", "description": "Export file path" },
-      "analysis_result": { "type": "object", "description": "Trace analysis results" },
-      "formatted_output": { "type": "string", "description": "Formatted trace output" },
-      "output": { "type": "string", "description": "Display output" },
-      "error": { "type": "string", "description": "Error message if any" }
+      "config": {
+        "type": "object",
+        "description": "Tracer configuration"
+      },
+      "trace_id": {
+        "type": "string",
+        "description": "Current trace UUID"
+      },
+      "root_span_id": {
+        "type": "string",
+        "description": "Root span ID"
+      },
+      "spans": {
+        "type": "array",
+        "description": "All recorded spans"
+      },
+      "active_spans": {
+        "type": "object",
+        "description": "Currently open spans by ID"
+      },
+      "events": {
+        "type": "array",
+        "description": "Trace events"
+      },
+      "blueprint_id": {
+        "type": "string",
+        "description": "Blueprint being traced"
+      },
+      "blueprint_name": {
+        "type": "string",
+        "description": "Blueprint name"
+      },
+      "start_time": {
+        "type": "string",
+        "description": "Trace start timestamp"
+      },
+      "end_time": {
+        "type": "string",
+        "description": "Trace end timestamp"
+      },
+      "output_format": {
+        "type": "string",
+        "description": "Current output format"
+      },
+      "export_path": {
+        "type": "string",
+        "description": "Export file path"
+      },
+      "analysis_result": {
+        "type": "object",
+        "description": "Trace analysis results"
+      },
+      "formatted_output": {
+        "type": "string",
+        "description": "Formatted trace output"
+      },
+      "output": {
+        "type": "string",
+        "description": "Display output"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message if any"
+      }
     }
   },
-
   "states": {
-    "idle": { "description": "No trace active, ready to initialize" },
-    "configured": { "description": "Tracer configured, ready to start trace" },
-    "tracing": { "description": "Actively recording trace events" },
-    "paused": { "description": "Tracing paused, can resume" },
-    "completed": { "description": "Trace completed, ready for export/analysis" },
-    "error": { "description": "Error state" }
+    "idle": {
+      "description": "No trace active, ready to initialize"
+    },
+    "configured": {
+      "description": "Tracer configured, ready to start trace"
+    },
+    "tracing": {
+      "description": "Actively recording trace events"
+    },
+    "paused": {
+      "description": "Tracing paused, can resume"
+    },
+    "completed": {
+      "description": "Trace completed, ready for export/analysis"
+    },
+    "error": {
+      "description": "Error state"
+    }
   },
-
   "entry_state": "idle",
-  "terminal_states": [],
-
+  "terminal_states": {},
   "gates": {
     "has_config": {
       "type": "expression",
@@ -96,7 +152,6 @@
       "expression": "_state == 'error'"
     }
   },
-
   "actions": {
     "init_tracer": {
       "type": "compute",
@@ -439,119 +494,182 @@
       "value": null
     }
   },
-
   "display": {
     "rules": [
-      { "gate": "is_error", "template": "ERROR: {error}" },
-      { "gate": "is_idle", "template": "[IDLE] No tracer configured" },
-      { "gate": "is_configured", "template": "[READY] Tracer configured, format: {output_format}" },
-      { "gate": "is_tracing", "template": "[TRACING] {blueprint_name} - {trace_id}" },
-      { "gate": "is_paused", "template": "[PAUSED] {blueprint_name} - {trace_id}" },
-      { "gate": "is_completed", "template": "[DONE] {blueprint_name} - {trace_id}" },
-      { "template": "L++ Execution Tracer" }
+      {
+        "gate": "is_error",
+        "template": "ERROR: {error}"
+      },
+      {
+        "gate": "is_idle",
+        "template": "[IDLE] No tracer configured"
+      },
+      {
+        "gate": "is_configured",
+        "template": "[READY] Tracer configured, format: {output_format}"
+      },
+      {
+        "gate": "is_tracing",
+        "template": "[TRACING] {blueprint_name} - {trace_id}"
+      },
+      {
+        "gate": "is_paused",
+        "template": "[PAUSED] {blueprint_name} - {trace_id}"
+      },
+      {
+        "gate": "is_completed",
+        "template": "[DONE] {blueprint_name} - {trace_id}"
+      },
+      {
+        "template": "L++ Execution Tracer"
+      }
     ]
   },
-
   "transitions": [
     {
       "id": "t_init",
       "from": "idle",
       "to": "configured",
       "on_event": "INIT",
-      "actions": ["init_tracer"]
+      "actions": [
+        "init_tracer"
+      ]
     },
     {
       "id": "t_init_error",
       "from": "idle",
       "to": "error",
       "on_event": "INIT_FAILED",
-      "actions": ["set_error"]
+      "actions": [
+        "set_error"
+      ]
     },
     {
       "id": "t_reconfigure",
       "from": "configured",
       "to": "configured",
       "on_event": "INIT",
-      "actions": ["init_tracer"]
+      "actions": [
+        "init_tracer"
+      ]
     },
     {
       "id": "t_start_trace",
       "from": "configured",
       "to": "tracing",
       "on_event": "START_TRACE",
-      "gates": ["has_config"],
-      "actions": ["start_trace"]
+      "gates": [
+        "has_config"
+      ],
+      "actions": [
+        "start_trace"
+      ]
     },
     {
       "id": "t_start_trace_idle",
       "from": "idle",
       "to": "tracing",
       "on_event": "START_TRACE",
-      "actions": ["init_tracer", "start_trace"]
+      "actions": [
+        "init_tracer",
+        "start_trace"
+      ]
     },
     {
       "id": "t_record_span",
       "from": "tracing",
       "to": "tracing",
       "on_event": "RECORD_SPAN",
-      "gates": ["has_trace"],
-      "actions": ["record_span"]
+      "gates": [
+        "has_trace"
+      ],
+      "actions": [
+        "record_span"
+      ]
     },
     {
       "id": "t_start_span",
       "from": "tracing",
       "to": "tracing",
       "on_event": "START_SPAN",
-      "gates": ["has_trace"],
-      "actions": ["start_span"]
+      "gates": [
+        "has_trace"
+      ],
+      "actions": [
+        "start_span"
+      ]
     },
     {
       "id": "t_end_span",
       "from": "tracing",
       "to": "tracing",
       "on_event": "END_SPAN",
-      "gates": ["has_trace"],
-      "actions": ["end_span"]
+      "gates": [
+        "has_trace"
+      ],
+      "actions": [
+        "end_span"
+      ]
     },
     {
       "id": "t_record_state",
       "from": "tracing",
       "to": "tracing",
       "on_event": "STATE_CHANGE",
-      "gates": ["has_trace"],
-      "actions": ["record_state_change"]
+      "gates": [
+        "has_trace"
+      ],
+      "actions": [
+        "record_state_change"
+      ]
     },
     {
       "id": "t_record_gate",
       "from": "tracing",
       "to": "tracing",
       "on_event": "GATE_EVAL",
-      "gates": ["has_trace"],
-      "actions": ["record_gate_eval"]
+      "gates": [
+        "has_trace"
+      ],
+      "actions": [
+        "record_gate_eval"
+      ]
     },
     {
       "id": "t_record_action",
       "from": "tracing",
       "to": "tracing",
       "on_event": "ACTION",
-      "gates": ["has_trace"],
-      "actions": ["record_action"]
+      "gates": [
+        "has_trace"
+      ],
+      "actions": [
+        "record_action"
+      ]
     },
     {
       "id": "t_record_event",
       "from": "tracing",
       "to": "tracing",
       "on_event": "EVENT",
-      "gates": ["has_trace"],
-      "actions": ["record_event"]
+      "gates": [
+        "has_trace"
+      ],
+      "actions": [
+        "record_event"
+      ]
     },
     {
       "id": "t_record_context",
       "from": "tracing",
       "to": "tracing",
       "on_event": "CONTEXT_CHANGE",
-      "gates": ["has_trace"],
-      "actions": ["record_context_change"]
+      "gates": [
+        "has_trace"
+      ],
+      "actions": [
+        "record_context_change"
+      ]
     },
     {
       "id": "t_pause_trace",
@@ -572,141 +690,197 @@
       "from": "tracing",
       "to": "completed",
       "on_event": "END_TRACE",
-      "gates": ["has_trace"],
-      "actions": ["end_trace"]
+      "gates": [
+        "has_trace"
+      ],
+      "actions": [
+        "end_trace"
+      ]
     },
     {
       "id": "t_end_trace_paused",
       "from": "paused",
       "to": "completed",
       "on_event": "END_TRACE",
-      "gates": ["has_trace"],
-      "actions": ["end_trace"]
+      "gates": [
+        "has_trace"
+      ],
+      "actions": [
+        "end_trace"
+      ]
     },
     {
       "id": "t_format_otlp",
       "from": "completed",
       "to": "completed",
       "on_event": "FORMAT_OTLP",
-      "gates": ["has_spans"],
-      "actions": ["format_otlp"]
+      "gates": [
+        "has_spans"
+      ],
+      "actions": [
+        "format_otlp"
+      ]
     },
     {
       "id": "t_format_jsonl",
       "from": "completed",
       "to": "completed",
       "on_event": "FORMAT_JSONL",
-      "gates": ["has_spans"],
-      "actions": ["format_jsonl"]
+      "gates": [
+        "has_spans"
+      ],
+      "actions": [
+        "format_jsonl"
+      ]
     },
     {
       "id": "t_format_human",
       "from": "completed",
       "to": "completed",
       "on_event": "FORMAT_HUMAN",
-      "gates": ["has_spans"],
-      "actions": ["format_human"]
+      "gates": [
+        "has_spans"
+      ],
+      "actions": [
+        "format_human"
+      ]
     },
     {
       "id": "t_format_timeline",
       "from": "completed",
       "to": "completed",
       "on_event": "FORMAT_TIMELINE",
-      "gates": ["has_spans"],
-      "actions": ["format_timeline"]
+      "gates": [
+        "has_spans"
+      ],
+      "actions": [
+        "format_timeline"
+      ]
     },
     {
       "id": "t_export",
       "from": "completed",
       "to": "completed",
       "on_event": "EXPORT",
-      "actions": ["export_trace"]
+      "actions": [
+        "export_trace"
+      ]
     },
     {
       "id": "t_analyze",
       "from": "completed",
       "to": "completed",
       "on_event": "ANALYZE",
-      "gates": ["has_spans"],
-      "actions": ["analyze_trace"]
+      "gates": [
+        "has_spans"
+      ],
+      "actions": [
+        "analyze_trace"
+      ]
     },
     {
       "id": "t_status_tracing",
       "from": "tracing",
       "to": "tracing",
       "on_event": "STATUS",
-      "actions": ["render_status"]
+      "actions": [
+        "render_status"
+      ]
     },
     {
       "id": "t_status_paused",
       "from": "paused",
       "to": "paused",
       "on_event": "STATUS",
-      "actions": ["render_status"]
+      "actions": [
+        "render_status"
+      ]
     },
     {
       "id": "t_status_completed",
       "from": "completed",
       "to": "completed",
       "on_event": "STATUS",
-      "actions": ["render_status"]
+      "actions": [
+        "render_status"
+      ]
     },
     {
       "id": "t_set_format_conf",
       "from": "configured",
       "to": "configured",
       "on_event": "SET_FORMAT",
-      "actions": ["set_format"]
+      "actions": [
+        "set_format"
+      ]
     },
     {
       "id": "t_set_format_completed",
       "from": "completed",
       "to": "completed",
       "on_event": "SET_FORMAT",
-      "actions": ["set_format"]
+      "actions": [
+        "set_format"
+      ]
     },
     {
       "id": "t_clear_completed",
       "from": "completed",
       "to": "configured",
       "on_event": "CLEAR",
-      "actions": ["clear_trace"]
+      "actions": [
+        "clear_trace"
+      ]
     },
     {
       "id": "t_new_trace",
       "from": "completed",
       "to": "tracing",
       "on_event": "START_TRACE",
-      "gates": ["has_config"],
-      "actions": ["clear_trace", "start_trace"]
+      "gates": [
+        "has_config"
+      ],
+      "actions": [
+        "clear_trace",
+        "start_trace"
+      ]
     },
     {
       "id": "t_reset",
       "from": "configured",
       "to": "idle",
       "on_event": "RESET",
-      "actions": ["clear_trace"]
+      "actions": [
+        "clear_trace"
+      ]
     },
     {
       "id": "t_reset_tracing",
       "from": "tracing",
       "to": "idle",
       "on_event": "RESET",
-      "actions": ["clear_trace"]
+      "actions": [
+        "clear_trace"
+      ]
     },
     {
       "id": "t_reset_completed",
       "from": "completed",
       "to": "idle",
       "on_event": "RESET",
-      "actions": ["clear_trace"]
+      "actions": [
+        "clear_trace"
+      ]
     },
     {
       "id": "t_recover",
       "from": "error",
       "to": "idle",
       "on_event": "CLEAR",
-      "actions": ["clear_error", "clear_trace"]
+      "actions": [
+        "clear_error",
+        "clear_trace"
+      ]
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1",
+  "$schema": "lpp/v0.2.0",
   "id": "lpp_visualizer",
   "name": "L++ Blueprint Visualizer",
   "version": "1.0.0",
@@ -17,7 +17,10 @@
       },
       "format": {
         "type": "string",
-        "enum": ["mermaid", "ascii"]
+        "enum": [
+          "mermaid",
+          "ascii"
+        ]
       },
       "output": {
         "type": "string"
@@ -131,8 +134,8 @@
     }
   },
   "entry_state": "idle",
-  "terminal_states": [
-    "complete",
-    "error"
-  ]
+  "terminal_states": {
+    "complete": {},
+    "error": {}
+  }
 }

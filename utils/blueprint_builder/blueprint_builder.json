@@ -1,39 +1,90 @@
 {
-  "$schema": "lpp/v0.1.2",
+  "$schema": "lpp/v0.2.0",
   "id": "blueprint_builder",
   "name": "Blueprint Builder",
   "version": "1.0.0",
   "description": "Builds L++ blueprints from extracted patterns and modules",
-
   "states": {
-    "idle": { "description": "Awaiting module data" },
-    "building": { "description": "Building blueprint" },
-    "complete": { "description": "Blueprint built" },
-    "error": { "description": "Build error" }
+    "idle": {
+      "description": "Awaiting module data"
+    },
+    "building": {
+      "description": "Building blueprint"
+    },
+    "complete": {
+      "description": "Blueprint built"
+    },
+    "error": {
+      "description": "Build error"
+    }
   },
-
   "entry_state": "idle",
-  "terminal_states": ["complete", "error"],
-
+  "terminal_states": {
+    "complete": {},
+    "error": {}
+  },
   "gates": {
-    "has_module": { "type": "expression", "expression": "module is not None" },
-    "valid_patterns": { "type": "expression", "expression": "patterns valid" }
+    "has_module": {
+      "type": "expression",
+      "expression": "module is not None"
+    },
+    "valid_patterns": {
+      "type": "expression",
+      "expression": "patterns valid"
+    }
   },
-
   "actions": {
-    "build_from_class": { "type": "compute", "unit": "blueprint:buildFromClass" },
-    "build_from_patterns": { "type": "compute", "unit": "blueprint:buildFromPatterns" },
-    "add_states": { "type": "compute", "unit": "blueprint:addStates" },
-    "add_transitions": { "type": "compute", "unit": "blueprint:addTransitions" },
-    "add_gates": { "type": "compute", "unit": "blueprint:addGates" },
-    "add_actions": { "type": "compute", "unit": "blueprint:addActions" },
-    "validate": { "type": "compute", "unit": "blueprint:validate" },
-    "to_json": { "type": "compute", "unit": "blueprint:toJson" }
+    "build_from_class": {
+      "type": "compute",
+      "unit": "blueprint:buildFromClass"
+    },
+    "build_from_patterns": {
+      "type": "compute",
+      "unit": "blueprint:buildFromPatterns"
+    },
+    "add_states": {
+      "type": "compute",
+      "unit": "blueprint:addStates"
+    },
+    "add_transitions": {
+      "type": "compute",
+      "unit": "blueprint:addTransitions"
+    },
+    "add_gates": {
+      "type": "compute",
+      "unit": "blueprint:addGates"
+    },
+    "add_actions": {
+      "type": "compute",
+      "unit": "blueprint:addActions"
+    },
+    "validate": {
+      "type": "compute",
+      "unit": "blueprint:validate"
+    },
+    "to_json": {
+      "type": "compute",
+      "unit": "blueprint:toJson"
+    }
   },
-
   "transitions": [
-    { "id": "t0", "from": "idle", "to": "building", "on_event": "BUILD" },
-    { "id": "t1", "from": "building", "to": "complete", "on_event": "DONE" },
-    { "id": "t2", "from": "*", "to": "error", "on_event": "ERROR" }
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "building",
+      "on_event": "BUILD"
+    },
+    {
+      "id": "t1",
+      "from": "building",
+      "to": "complete",
+      "on_event": "DONE"
+    },
+    {
+      "id": "t2",
+      "from": "*",
+      "to": "error",
+      "on_event": "ERROR"
+    }
   ]
 }

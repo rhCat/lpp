@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1.2",
+  "$schema": "lpp/v0.2.0",
   "id": "extracted_sample_state_machine",
   "name": "Extracted: Sample State Machine",
   "version": "1.0.0",
@@ -320,14 +320,14 @@
     }
   },
   "entry_state": "idle",
-  "terminal_states": [
-    "pending",
-    "rejected",
-    "delivered",
-    "cancelled",
-    "init",
-    "error"
-  ],
+  "terminal_states": {
+    "pending": {},
+    "rejected": {},
+    "delivered": {},
+    "cancelled": {},
+    "init": {},
+    "error": {}
+  },
   "display": {
     "rules": []
   }

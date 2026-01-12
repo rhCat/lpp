@@ -1,0 +1,102 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "audit_component",
+  "name": "Audit Logging Component",
+  "version": "1.0.0",
+  "description": "Records audit trail for workflow actions",
+  "context_schema": {
+    "properties": {
+      "event_type": {
+        "type": "string"
+      },
+      "user_id": {
+        "type": "string"
+      },
+      "details": {
+        "type": "object"
+      },
+      "audit_id": {
+        "type": "string"
+      },
+      "timestamp": {
+        "type": "string"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Awaiting log request"
+    },
+    "logging": {
+      "name": "Logging",
+      "description": "Writing audit log"
+    },
+    "logged": {
+      "name": "Logged",
+      "description": "Audit entry created"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_log",
+      "from": "idle",
+      "to": "logging",
+      "on_event": "LOG",
+      "actions": [
+        "a_store_event"
+      ]
+    },
+    {
+      "id": "t_complete",
+      "from": "logging",
+      "to": "logged",
+      "on_event": "WRITE",
+      "actions": [
+        "a_write_log"
+      ]
+    }
+  ],
+  "gates": {},
+  "actions": {
+    "a_store_event": {
+      "type": "set",
+      "target": "event_type",
+      "value_from": "event.payload.event_type"
+    },
+    "a_write_log": {
+      "type": "compute",
+      "compute_unit": "audit:write",
+      "input_map": {
+        "event_type": "event_type",
+        "user_id": "user_id",
+        "details": "details"
+      },
+      "output_map": {
+        "audit_id": "id",
+        "timestamp": "timestamp"
+      }
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "logged": {
+      "description": "Audit entry successfully created",
+      "output_schema": {
+        "audit_id": {
+          "type": "string",
+          "non_null": true
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "iso8601",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": [
+        "entry_persisted",
+        "immutable_record"
+      ]
+    }
+  }
+}

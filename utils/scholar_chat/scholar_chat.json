@@ -4,7 +4,6 @@
   "name": "Scholar Chatbot",
   "version": "1.0.0",
   "description": "LLM-powered research assistant with deep search capabilities",
-
   "context_schema": {
     "properties": {
       "apiKey": {
@@ -61,7 +60,6 @@
       }
     }
   },
-
   "states": {
     "idle": {
       "description": "Ready for research query"
@@ -82,10 +80,8 @@
       "description": "Error occurred"
     }
   },
-
   "entry_state": "idle",
-  "terminal_states": [],
-
+  "terminal_states": {},
   "gates": {
     "hasQuery": {
       "type": "expression",
@@ -120,7 +116,6 @@
       "expression": "error is None"
     }
   },
-
   "actions": {
     "initConfig": {
       "type": "compute",
@@ -229,101 +224,136 @@
       "value": null
     }
   },
-
   "transitions": [
     {
       "id": "t_init",
       "from": "idle",
       "to": "idle",
       "on_event": "INIT",
-      "actions": ["initConfig"]
+      "actions": [
+        "initConfig"
+      ]
     },
     {
       "id": "t_search",
       "from": "idle",
       "to": "searching",
       "on_event": "SEARCH",
-      "actions": ["setQuery", "searchAll"]
+      "actions": [
+        "setQuery",
+        "searchAll"
+      ]
     },
     {
       "id": "t_search_done",
       "from": "searching",
       "to": "reviewing",
       "on_event": "DONE",
-      "gates": ["noError"]
+      "gates": [
+        "noError"
+      ]
     },
     {
       "id": "t_search_error",
       "from": "searching",
       "to": "error",
       "on_event": "DONE",
-      "gates": ["hasError"]
+      "gates": [
+        "hasError"
+      ]
     },
     {
       "id": "t_new_search",
       "from": "reviewing",
       "to": "searching",
       "on_event": "SEARCH",
-      "actions": ["clearSelection", "clearSynthesis", "setQuery", "searchAll"]
+      "actions": [
+        "clearSelection",
+        "clearSynthesis",
+        "setQuery",
+        "searchAll"
+      ]
     },
     {
       "id": "t_select",
       "from": "reviewing",
       "to": "analyzing",
       "on_event": "SELECT",
-      "actions": ["selectPapers", "fetchDetails", "synthesize"]
+      "actions": [
+        "selectPapers",
+        "fetchDetails",
+        "synthesize"
+      ]
     },
     {
       "id": "t_analyze_done",
       "from": "analyzing",
       "to": "chatting",
       "on_event": "DONE",
-      "gates": ["noError"]
+      "gates": [
+        "noError"
+      ]
     },
     {
       "id": "t_analyze_error",
       "from": "analyzing",
       "to": "error",
       "on_event": "DONE",
-      "gates": ["hasError"]
+      "gates": [
+        "hasError"
+      ]
     },
     {
       "id": "t_ask",
       "from": "chatting",
       "to": "chatting",
       "on_event": "ASK",
-      "actions": ["chat"]
+      "actions": [
+        "chat"
+      ]
     },
     {
       "id": "t_new_search_chat",
       "from": "chatting",
       "to": "searching",
       "on_event": "SEARCH",
-      "actions": ["clearResults", "clearSelection", "clearSynthesis", "setQuery", "searchAll"]
+      "actions": [
+        "clearResults",
+        "clearSelection",
+        "clearSynthesis",
+        "setQuery",
+        "searchAll"
+      ]
     },
     {
       "id": "t_reselect",
       "from": "chatting",
       "to": "reviewing",
       "on_event": "BACK",
-      "actions": ["clearSynthesis"]
+      "actions": [
+        "clearSynthesis"
+      ]
     },
     {
       "id": "t_reset",
       "from": "reviewing",
       "to": "idle",
       "on_event": "RESET",
-      "actions": ["clearResults", "clearSelection"]
+      "actions": [
+        "clearResults",
+        "clearSelection"
+      ]
     },
     {
       "id": "t_retry",
       "from": "error",
       "to": "idle",
       "on_event": "RETRY",
-      "actions": ["clearError"]
+      "actions": [
+        "clearError"
+      ]
     }
   ],
-
   "display": {
     "rules": [
       {

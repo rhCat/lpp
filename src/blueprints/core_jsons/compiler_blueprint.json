@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1",
+  "$schema": "lpp/v0.2.0",
   "id": "lpp_compiler",
   "name": "L++ Blueprint Compiler",
   "version": "1.0.0",
@@ -84,14 +84,18 @@
       "from": "generating",
       "to": "writing",
       "on_event": "GENERATE_DONE",
-      "gates": ["g_has_output_path"]
+      "gates": [
+        "g_has_output_path"
+      ]
     },
     {
       "id": "t_skip_write",
       "from": "generating",
       "to": "generating_tla",
       "on_event": "GENERATE_DONE",
-      "gates": ["g_has_tla_dir"]
+      "gates": [
+        "g_has_tla_dir"
+      ]
     },
     {
       "id": "t_skip_all",
@@ -104,7 +108,9 @@
       "from": "writing",
       "to": "generating_tla",
       "on_event": "WRITE_DONE",
-      "gates": ["g_has_tla_dir"]
+      "gates": [
+        "g_has_tla_dir"
+      ]
     },
     {
       "id": "t_skip_tla",
@@ -202,8 +208,8 @@
     }
   },
   "entry_state": "idle",
-  "terminal_states": [
-    "complete",
-    "error"
-  ]
+  "terminal_states": {
+    "complete": {},
+    "error": {}
+  }
 }

@@ -4,42 +4,106 @@
   "name": "L++ Event Sequence Simulator",
   "version": "1.0.0",
   "description": "Interactive simulation of L++ blueprints for what-if analysis and state space exploration",
-
   "context_schema": {
     "properties": {
-      "blueprint": { "type": "object", "description": "The loaded blueprint object" },
-      "blueprint_path": { "type": "string", "description": "Path to the loaded blueprint" },
-      "blueprint_name": { "type": "string", "description": "Blueprint name" },
-      "blueprint_id": { "type": "string", "description": "Blueprint ID" },
-      "sim_state": { "type": "string", "description": "Current simulated state" },
-      "sim_context": { "type": "object", "description": "Simulated context values" },
-      "available_events": { "type": "array", "description": "Events available in current state" },
-      "available_transitions": { "type": "array", "description": "Transitions available from current state" },
-      "trace": { "type": "array", "description": "Execution trace history" },
-      "forks": { "type": "object", "description": "Named simulation forks for what-if analysis" },
-      "current_fork": { "type": "string", "description": "Name of current fork (null = main)" },
-      "state_space": { "type": "object", "description": "Explored state space graph" },
-      "path_result": { "type": "object", "description": "Result of path finding" },
-      "fuzz_config": { "type": "object", "description": "Fuzzing configuration" },
-      "fuzz_result": { "type": "object", "description": "Fuzzing run result" },
-      "sequence": { "type": "array", "description": "Event sequence to execute" },
-      "sequence_index": { "type": "number", "description": "Current position in sequence" },
-      "mode": { "type": "string", "description": "Simulation mode: manual | sequence | fuzzing | replay" },
-      "output": { "type": "string", "description": "Display output" },
-      "error": { "type": "string", "description": "Error message if any" }
+      "blueprint": {
+        "type": "object",
+        "description": "The loaded blueprint object"
+      },
+      "blueprint_path": {
+        "type": "string",
+        "description": "Path to the loaded blueprint"
+      },
+      "blueprint_name": {
+        "type": "string",
+        "description": "Blueprint name"
+      },
+      "blueprint_id": {
+        "type": "string",
+        "description": "Blueprint ID"
+      },
+      "sim_state": {
+        "type": "string",
+        "description": "Current simulated state"
+      },
+      "sim_context": {
+        "type": "object",
+        "description": "Simulated context values"
+      },
+      "available_events": {
+        "type": "array",
+        "description": "Events available in current state"
+      },
+      "available_transitions": {
+        "type": "array",
+        "description": "Transitions available from current state"
+      },
+      "trace": {
+        "type": "array",
+        "description": "Execution trace history"
+      },
+      "forks": {
+        "type": "object",
+        "description": "Named simulation forks for what-if analysis"
+      },
+      "current_fork": {
+        "type": "string",
+        "description": "Name of current fork (null = main)"
+      },
+      "state_space": {
+        "type": "object",
+        "description": "Explored state space graph"
+      },
+      "path_result": {
+        "type": "object",
+        "description": "Result of path finding"
+      },
+      "fuzz_config": {
+        "type": "object",
+        "description": "Fuzzing configuration"
+      },
+      "fuzz_result": {
+        "type": "object",
+        "description": "Fuzzing run result"
+      },
+      "sequence": {
+        "type": "array",
+        "description": "Event sequence to execute"
+      },
+      "sequence_index": {
+        "type": "number",
+        "description": "Current position in sequence"
+      },
+      "mode": {
+        "type": "string",
+        "description": "Simulation mode: manual | sequence | fuzzing | replay"
+      },
+      "output": {
+        "type": "string",
+        "description": "Display output"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message if any"
+      }
     }
   },
-
   "states": {
-    "idle": { "description": "No blueprint loaded, waiting for input" },
-    "ready": { "description": "Blueprint loaded, ready to simulate" },
-    "simulating": { "description": "Actively simulating, can dispatch events" },
-    "error": { "description": "Error state" }
+    "idle": {
+      "description": "No blueprint loaded, waiting for input"
+    },
+    "ready": {
+      "description": "Blueprint loaded, ready to simulate"
+    },
+    "simulating": {
+      "description": "Actively simulating, can dispatch events"
+    },
+    "error": {
+      "description": "Error state"
+    }
   },
-
   "entry_state": "idle",
-  "terminal_states": [],
-
+  "terminal_states": {},
   "gates": {
     "has_blueprint": {
       "type": "expression",
@@ -102,12 +166,13 @@
       "expression": "blueprint is not None"
     }
   },
-
   "actions": {
     "load_blueprint": {
       "type": "compute",
       "compute_unit": "sim:load_blueprint",
-      "input_map": { "path": "event.payload.path" },
+      "input_map": {
+        "path": "event.payload.path"
+      },
       "output_map": {
         "blueprint": "blueprint",
         "blueprint_path": "blueprint_path",
@@ -119,7 +184,9 @@
     "init_simulation": {
       "type": "compute",
       "compute_unit": "sim:init_simulation",
-      "input_map": { "blueprint": "blueprint" },
+      "input_map": {
+        "blueprint": "blueprint"
+      },
       "output_map": {
         "sim_state": "sim_state",
         "sim_context": "sim_context",
@@ -139,7 +206,9 @@
         "key": "event.payload.key",
         "value": "event.payload.value"
       },
-      "output_map": { "sim_context": "sim_context" }
+      "output_map": {
+        "sim_context": "sim_context"
+      }
     },
     "dispatch_event": {
       "type": "compute",
@@ -182,7 +251,9 @@
         "blueprint": "blueprint",
         "sim_context": "sim_context"
       },
-      "output_map": { "output": "output" }
+      "output_map": {
+        "output": "output"
+      }
     },
     "fork_simulation": {
       "type": "compute",
@@ -258,7 +329,9 @@
     "set_sequence": {
       "type": "compute",
       "compute_unit": "sim:set_sequence",
-      "input_map": { "events": "event.payload.events" },
+      "input_map": {
+        "events": "event.payload.events"
+      },
       "output_map": {
         "sequence": "sequence",
         "sequence_index": "sequence_index",
@@ -322,12 +395,16 @@
         "blueprint_id": "blueprint_id",
         "path": "event.payload.path"
       },
-      "output_map": { "output": "output" }
+      "output_map": {
+        "output": "output"
+      }
     },
     "import_trace": {
       "type": "compute",
       "compute_unit": "sim:import_trace",
-      "input_map": { "path": "event.payload.path" },
+      "input_map": {
+        "path": "event.payload.path"
+      },
       "output_map": {
         "trace": "trace",
         "sequence": "sequence",
@@ -339,7 +416,9 @@
     "reset_simulation": {
       "type": "compute",
       "compute_unit": "sim:reset_simulation",
-      "input_map": { "blueprint": "blueprint" },
+      "input_map": {
+        "blueprint": "blueprint"
+      },
       "output_map": {
         "sim_state": "sim_state",
         "sim_context": "sim_context",
@@ -362,19 +441,29 @@
         "mode": "mode",
         "current_fork": "current_fork"
       },
-      "output_map": { "output": "output" }
+      "output_map": {
+        "output": "output"
+      }
     },
     "render_trace": {
       "type": "compute",
       "compute_unit": "sim:render_trace",
-      "input_map": { "trace": "trace" },
-      "output_map": { "output": "output" }
+      "input_map": {
+        "trace": "trace"
+      },
+      "output_map": {
+        "output": "output"
+      }
     },
     "render_state_space": {
       "type": "compute",
       "compute_unit": "sim:render_state_space",
-      "input_map": { "state_space": "state_space" },
-      "output_map": { "output": "output" }
+      "input_map": {
+        "state_space": "state_space"
+      },
+      "output_map": {
+        "output": "output"
+      }
     },
     "set_error": {
       "type": "set",
@@ -412,179 +501,254 @@
       "value": null
     }
   },
-
   "display": {
     "rules": [
-      { "gate": "is_error", "template": "ERROR: {error}" },
-      { "gate": "is_idle", "template": "No blueprint loaded. Use LOAD command." },
-      { "gate": "is_simulating", "template": "[{mode}] {blueprint_name} @ {sim_state}" },
-      { "gate": "is_ready", "template": "Loaded: {blueprint_name} - Ready to simulate" },
-      { "template": "L++ Event Simulator" }
+      {
+        "gate": "is_error",
+        "template": "ERROR: {error}"
+      },
+      {
+        "gate": "is_idle",
+        "template": "No blueprint loaded. Use LOAD command."
+      },
+      {
+        "gate": "is_simulating",
+        "template": "[{mode}] {blueprint_name} @ {sim_state}"
+      },
+      {
+        "gate": "is_ready",
+        "template": "Loaded: {blueprint_name} - Ready to simulate"
+      },
+      {
+        "template": "L++ Event Simulator"
+      }
     ]
   },
-
   "transitions": [
     {
       "id": "t_load",
       "from": "idle",
       "to": "ready",
       "on_event": "LOAD",
-      "gates": ["no_blueprint"],
-      "actions": ["load_blueprint"]
+      "gates": [
+        "no_blueprint"
+      ],
+      "actions": [
+        "load_blueprint"
+      ]
     },
     {
       "id": "t_load_error",
       "from": "idle",
       "to": "error",
       "on_event": "LOAD_FAILED",
-      "actions": ["set_error"]
+      "actions": [
+        "set_error"
+      ]
     },
     {
       "id": "t_reload",
       "from": "ready",
       "to": "ready",
       "on_event": "LOAD",
-      "actions": ["load_blueprint"]
+      "actions": [
+        "load_blueprint"
+      ]
     },
     {
       "id": "t_reload_from_sim",
       "from": "simulating",
       "to": "ready",
       "on_event": "LOAD",
-      "actions": ["load_blueprint"]
+      "actions": [
+        "load_blueprint"
+      ]
     },
     {
       "id": "t_start_simulation",
       "from": "ready",
       "to": "simulating",
       "on_event": "START",
-      "gates": ["has_blueprint"],
-      "actions": ["init_simulation", "render_status"]
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "init_simulation",
+        "render_status"
+      ]
     },
     {
       "id": "t_dispatch",
       "from": "simulating",
       "to": "simulating",
       "on_event": "DISPATCH",
-      "actions": ["dispatch_event"]
+      "actions": [
+        "dispatch_event"
+      ]
     },
     {
       "id": "t_set_context",
       "from": "simulating",
       "to": "simulating",
       "on_event": "SET_CONTEXT",
-      "actions": ["set_context", "get_available_events"]
+      "actions": [
+        "set_context",
+        "get_available_events"
+      ]
     },
     {
       "id": "t_refresh_events",
       "from": "simulating",
       "to": "simulating",
       "on_event": "REFRESH",
-      "actions": ["get_available_events", "render_status"]
+      "actions": [
+        "get_available_events",
+        "render_status"
+      ]
     },
     {
       "id": "t_evaluate_gates",
       "from": "simulating",
       "to": "simulating",
       "on_event": "EVAL_GATES",
-      "actions": ["evaluate_gates"]
+      "actions": [
+        "evaluate_gates"
+      ]
     },
     {
       "id": "t_fork",
       "from": "simulating",
       "to": "simulating",
       "on_event": "FORK",
-      "actions": ["fork_simulation"]
+      "actions": [
+        "fork_simulation"
+      ]
     },
     {
       "id": "t_switch_fork",
       "from": "simulating",
       "to": "simulating",
       "on_event": "SWITCH_FORK",
-      "gates": ["has_forks"],
-      "actions": ["switch_fork"]
+      "gates": [
+        "has_forks"
+      ],
+      "actions": [
+        "switch_fork"
+      ]
     },
     {
       "id": "t_step_back",
       "from": "simulating",
       "to": "simulating",
       "on_event": "STEP_BACK",
-      "gates": ["can_step_back"],
-      "actions": ["step_back"]
+      "gates": [
+        "can_step_back"
+      ],
+      "actions": [
+        "step_back"
+      ]
     },
     {
       "id": "t_set_sequence",
       "from": "simulating",
       "to": "simulating",
       "on_event": "SET_SEQUENCE",
-      "actions": ["set_sequence"]
+      "actions": [
+        "set_sequence"
+      ]
     },
     {
       "id": "t_run_sequence",
       "from": "simulating",
       "to": "simulating",
       "on_event": "RUN_SEQUENCE",
-      "gates": ["has_sequence"],
-      "actions": ["run_sequence"]
+      "gates": [
+        "has_sequence"
+      ],
+      "actions": [
+        "run_sequence"
+      ]
     },
     {
       "id": "t_fuzz",
       "from": "simulating",
       "to": "simulating",
       "on_event": "FUZZ",
-      "actions": ["fuzz_run"]
+      "actions": [
+        "fuzz_run"
+      ]
     },
     {
       "id": "t_find_path",
       "from": "simulating",
       "to": "simulating",
       "on_event": "FIND_PATH",
-      "actions": ["find_path"]
+      "actions": [
+        "find_path"
+      ]
     },
     {
       "id": "t_explore",
       "from": "simulating",
       "to": "simulating",
       "on_event": "EXPLORE",
-      "actions": ["explore_state_space"]
+      "actions": [
+        "explore_state_space"
+      ]
     },
     {
       "id": "t_view_trace",
       "from": "simulating",
       "to": "simulating",
       "on_event": "VIEW_TRACE",
-      "actions": ["render_trace"]
+      "actions": [
+        "render_trace"
+      ]
     },
     {
       "id": "t_view_space",
       "from": "simulating",
       "to": "simulating",
       "on_event": "VIEW_SPACE",
-      "gates": ["has_state_space"],
-      "actions": ["render_state_space"]
+      "gates": [
+        "has_state_space"
+      ],
+      "actions": [
+        "render_state_space"
+      ]
     },
     {
       "id": "t_export",
       "from": "simulating",
       "to": "simulating",
       "on_event": "EXPORT",
-      "gates": ["has_trace"],
-      "actions": ["export_trace"]
+      "gates": [
+        "has_trace"
+      ],
+      "actions": [
+        "export_trace"
+      ]
     },
     {
       "id": "t_import",
       "from": "simulating",
       "to": "simulating",
       "on_event": "IMPORT",
-      "gates": ["can_import"],
-      "actions": ["import_trace"]
+      "gates": [
+        "can_import"
+      ],
+      "actions": [
+        "import_trace"
+      ]
     },
     {
       "id": "t_reset",
       "from": "simulating",
       "to": "simulating",
       "on_event": "RESET",
-      "actions": ["reset_simulation"]
+      "actions": [
+        "reset_simulation"
+      ]
     },
     {
       "id": "t_back_to_ready",
@@ -598,21 +762,27 @@
       "from": "ready",
       "to": "idle",
       "on_event": "UNLOAD",
-      "actions": ["unload_blueprint"]
+      "actions": [
+        "unload_blueprint"
+      ]
     },
     {
       "id": "t_unload_from_sim",
       "from": "simulating",
       "to": "idle",
       "on_event": "UNLOAD",
-      "actions": ["unload_blueprint"]
+      "actions": [
+        "unload_blueprint"
+      ]
     },
     {
       "id": "t_recover",
       "from": "error",
       "to": "idle",
       "on_event": "CLEAR",
-      "actions": ["clear_error"]
+      "actions": [
+        "clear_error"
+      ]
     }
   ]
 }

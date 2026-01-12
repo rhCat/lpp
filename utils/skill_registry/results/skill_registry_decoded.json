@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1",
+  "$schema": "lpp/v0.2.0",
   "id": "decoded_registry_compute",
   "name": "Decoded: registry_compute",
   "version": "1.0.0",
@@ -182,8 +182,8 @@
     }
   },
   "entry_state": "idle",
-  "terminal_states": [
-    "complete",
-    "error"
-  ]
+  "terminal_states": {
+    "complete": {},
+    "error": {}
+  }
 }

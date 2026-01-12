@@ -1,0 +1,322 @@
+{
+  "$schema": "lpp/assembly/v0.1",
+  "id": "payment_workflow",
+  "name": "Payment Processing Workflow",
+  "version": "1.0.0",
+  "description": "Orchestrates authentication, payment processing, and audit logging",
+  "components": {
+    "auth": {
+      "blueprint": "components/auth.json",
+      "required_terminals": [
+        "authenticated",
+        "auth_failed"
+      ],
+      "input_map": {
+        "username": "assembly.context.username",
+        "password": "assembly.context.password"
+      }
+    },
+    "payment": {
+      "blueprint": "components/payment.json",
+      "required_terminals": [
+        "payment_complete",
+        "payment_failed"
+      ],
+      "input_map": {
+        "auth_token": "auth.output.token",
+        "user_id": "auth.output.user_id",
+        "amount": "assembly.context.amount"
+      }
+    },
+    "audit": {
+      "blueprint": "components/audit.json",
+      "required_terminals": [
+        "logged"
+      ],
+      "input_map": {
+        "user_id": "auth.output.user_id",
+        "event_type": "assembly.context.audit_event_type",
+        "details": "assembly.context.audit_details"
+      }
+    }
+  },
+  "context_schema": {
+    "properties": {
+      "workflow_id": {
+        "type": "string"
+      },
+      "username": {
+        "type": "string",
+        "source": "input"
+      },
+      "password": {
+        "type": "string",
+        "source": "input"
+      },
+      "amount": {
+        "type": "number",
+        "source": "input"
+      },
+      "auth_token": {
+        "type": "string",
+        "source": "auth.output.token"
+      },
+      "user_id": {
+        "type": "string",
+        "source": "auth.output.user_id"
+      },
+      "payment_id": {
+        "type": "string",
+        "source": "payment.output.payment_id"
+      },
+      "transaction_ref": {
+        "type": "string",
+        "source": "payment.output.transaction_ref"
+      },
+      "audit_id": {
+        "type": "string",
+        "source": "audit.output.audit_id"
+      },
+      "error_source": {
+        "type": "string"
+      },
+      "error_code": {
+        "type": "string"
+      },
+      "audit_event_type": {
+        "type": "string"
+      },
+      "audit_details": {
+        "type": "object"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "type": "coordination",
+      "description": "Awaiting workflow start"
+    },
+    "authenticating": {
+      "type": "component_execution",
+      "component": "auth",
+      "description": "Executing auth component"
+    },
+    "processing_payment": {
+      "type": "component_execution",
+      "component": "payment",
+      "description": "Executing payment component"
+    },
+    "logging_success": {
+      "type": "component_execution",
+      "component": "audit",
+      "description": "Logging successful payment"
+    },
+    "logging_failure": {
+      "type": "component_execution",
+      "component": "audit",
+      "description": "Logging workflow failure"
+    },
+    "complete": {
+      "type": "coordination",
+      "description": "Workflow completed successfully"
+    },
+    "failed": {
+      "type": "coordination",
+      "description": "Workflow failed"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_start",
+      "from": "idle",
+      "to": "authenticating",
+      "on_event": "START_WORKFLOW",
+      "actions": [
+        "a_init_workflow"
+      ]
+    },
+    {
+      "id": "t_auth_success",
+      "from": "authenticating",
+      "to": "processing_payment",
+      "on_event": "auth:TERMINAL",
+      "gates": [
+        "g_auth_ok"
+      ],
+      "actions": [
+        "a_capture_auth"
+      ]
+    },
+    {
+      "id": "t_auth_failed",
+      "from": "authenticating",
+      "to": "logging_failure",
+      "on_event": "auth:TERMINAL",
+      "gates": [
+        "g_auth_failed"
+      ],
+      "actions": [
+        "a_set_error_auth",
+        "a_prep_failure_audit"
+      ]
+    },
+    {
+      "id": "t_payment_success",
+      "from": "processing_payment",
+      "to": "logging_success",
+      "on_event": "payment:TERMINAL",
+      "gates": [
+        "g_payment_ok"
+      ],
+      "actions": [
+        "a_capture_payment",
+        "a_prep_success_audit"
+      ]
+    },
+    {
+      "id": "t_payment_failed",
+      "from": "processing_payment",
+      "to": "logging_failure",
+      "on_event": "payment:TERMINAL",
+      "gates": [
+        "g_payment_failed"
+      ],
+      "actions": [
+        "a_set_error_payment",
+        "a_prep_failure_audit"
+      ]
+    },
+    {
+      "id": "t_logged_success",
+      "from": "logging_success",
+      "to": "complete",
+      "on_event": "audit:TERMINAL",
+      "gates": [
+        "g_audit_done"
+      ],
+      "actions": [
+        "a_capture_audit"
+      ]
+    },
+    {
+      "id": "t_logged_failure",
+      "from": "logging_failure",
+      "to": "failed",
+      "on_event": "audit:TERMINAL",
+      "gates": [
+        "g_audit_done"
+      ],
+      "actions": [
+        "a_capture_audit"
+      ]
+    }
+  ],
+  "gates": {
+    "g_auth_ok": {
+      "type": "expression",
+      "expression": "auth._terminal == 'authenticated'"
+    },
+    "g_auth_failed": {
+      "type": "expression",
+      "expression": "auth._terminal == 'auth_failed'"
+    },
+    "g_payment_ok": {
+      "type": "expression",
+      "expression": "payment._terminal == 'payment_complete'"
+    },
+    "g_payment_failed": {
+      "type": "expression",
+      "expression": "payment._terminal == 'payment_failed'"
+    },
+    "g_audit_done": {
+      "type": "expression",
+      "expression": "audit._terminal == 'logged'"
+    }
+  },
+  "actions": {
+    "a_init_workflow": {
+      "type": "compute",
+      "compute_unit": "workflow:init",
+      "input_map": {},
+      "output_map": {
+        "workflow_id": "id"
+      }
+    },
+    "a_capture_auth": {
+      "type": "set",
+      "target": "auth_token",
+      "value_from": "auth.output.token"
+    },
+    "a_capture_payment": {
+      "type": "set",
+      "target": "payment_id",
+      "value_from": "payment.output.payment_id"
+    },
+    "a_capture_audit": {
+      "type": "set",
+      "target": "audit_id",
+      "value_from": "audit.output.audit_id"
+    },
+    "a_set_error_auth": {
+      "type": "set",
+      "target": "error_source",
+      "value": "auth"
+    },
+    "a_set_error_payment": {
+      "type": "set",
+      "target": "error_source",
+      "value": "payment"
+    },
+    "a_prep_success_audit": {
+      "type": "set",
+      "target": "audit_event_type",
+      "value": "PAYMENT_SUCCESS"
+    },
+    "a_prep_failure_audit": {
+      "type": "set",
+      "target": "audit_event_type",
+      "value": "WORKFLOW_FAILURE"
+    }
+  },
+  "assembly_invariants": [
+    {
+      "id": "AI_001",
+      "name": "Payment requires authentication",
+      "type": "state_dependency",
+      "expression": "_state == 'processing_payment' => auth_token != None",
+      "severity": "critical",
+      "description": "Cannot process payment without valid auth token"
+    },
+    {
+      "id": "AI_002",
+      "name": "Auth before payment",
+      "type": "sequence",
+      "expression": "payment._terminal != None => auth._terminal == 'authenticated'",
+      "severity": "critical",
+      "description": "Payment component can only complete if auth succeeded"
+    },
+    {
+      "id": "AI_003",
+      "name": "All paths audited",
+      "type": "state_dependency",
+      "expression": "(_state == 'complete' or _state == 'failed') => audit._terminal == 'logged'",
+      "severity": "high",
+      "description": "Every terminal path must pass through audit logging"
+    },
+    {
+      "id": "AI_004",
+      "name": "Interface: auth token to payment",
+      "type": "contract_match",
+      "check": {
+        "source": "auth.terminal_contracts.authenticated.output_schema.token",
+        "target": "payment.context_schema.properties.auth_token",
+        "match": "type"
+      }
+    }
+  ],
+  "entry_state": "idle",
+  "terminal_states": {
+    "complete": {},
+    "failed": {}
+  }
+}

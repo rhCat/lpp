@@ -210,8 +210,13 @@ def _generate_code(bp: dict) -> str:
     lines.append(f"BLUEPRINT_NAME = {repr(bp.get('name', 'Unnamed'))}")
     lines.append(f"BLUEPRINT_VERSION = {repr(bp.get('version', '0.0.0'))}")
     lines.append(f"ENTRY_STATE = {repr(bp.get('entry_state', 'start'))}")
-    lines.append(
-        f"TERMINAL_STATES = {repr(set(bp.get('terminal_states', [])))}")
+    # Handle both v0.2.0 (object) and legacy (array) terminal_states
+    termStates = bp.get('terminal_states', {})
+    if isinstance(termStates, dict):
+        termStateIds = set(termStates.keys())
+    else:
+        termStateIds = set(termStates)
+    lines.append(f"TERMINAL_STATES = {repr(termStateIds)}")
     lines.append("")
 
     # States

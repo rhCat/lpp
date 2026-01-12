@@ -4,7 +4,6 @@
   "name": "L++ Blueprint Diff & Merge",
   "version": "1.0.0",
   "description": "Semantic diff and merge tool for L++ blueprints",
-
   "context_schema": {
     "properties": {
       "blueprint_left": {
@@ -69,7 +68,6 @@
       }
     }
   },
-
   "states": {
     "idle": {
       "description": "No blueprints loaded, waiting for input"
@@ -99,10 +97,8 @@
       "description": "Error state"
     }
   },
-
   "entry_state": "idle",
-  "terminal_states": [],
-
+  "terminal_states": {},
   "gates": {
     "has_left": {
       "type": "expression",
@@ -145,7 +141,6 @@
       "expression": "blueprint_base is not None"
     }
   },
-
   "actions": {
     "load_left": {
       "type": "compute",
@@ -346,7 +341,6 @@
       "value": null
     }
   },
-
   "display": {
     "rules": [
       {
@@ -382,214 +376,301 @@
       }
     ]
   },
-
   "transitions": [
     {
       "id": "t_load_left_from_idle",
       "from": "idle",
       "to": "left_loaded",
       "on_event": "LOAD_LEFT",
-      "actions": ["load_left"]
+      "actions": [
+        "load_left"
+      ]
     },
     {
       "id": "t_load_right_from_left",
       "from": "left_loaded",
       "to": "ready",
       "on_event": "LOAD_RIGHT",
-      "actions": ["load_right"]
+      "actions": [
+        "load_right"
+      ]
     },
     {
       "id": "t_load_base_from_ready",
       "from": "ready",
       "to": "ready",
       "on_event": "LOAD_BASE",
-      "actions": ["load_base"]
+      "actions": [
+        "load_base"
+      ]
     },
     {
       "id": "t_reload_left",
       "from": "ready",
       "to": "ready",
       "on_event": "LOAD_LEFT",
-      "actions": ["load_left", "clear_diff", "clear_merge"]
+      "actions": [
+        "load_left",
+        "clear_diff",
+        "clear_merge"
+      ]
     },
     {
       "id": "t_reload_right",
       "from": "ready",
       "to": "ready",
       "on_event": "LOAD_RIGHT",
-      "actions": ["load_right", "clear_diff", "clear_merge"]
+      "actions": [
+        "load_right",
+        "clear_diff",
+        "clear_merge"
+      ]
     },
     {
       "id": "t_start_diff",
       "from": "ready",
       "to": "diffing",
       "on_event": "DIFF",
-      "gates": ["has_both"],
-      "actions": ["compute_diff"]
+      "gates": [
+        "has_both"
+      ],
+      "actions": [
+        "compute_diff"
+      ]
     },
     {
       "id": "t_diff_to_complete",
       "from": "diffing",
       "to": "diff_complete",
       "on_event": "DIFF_DONE",
-      "actions": ["format_diff_unified"]
+      "actions": [
+        "format_diff_unified"
+      ]
     },
     {
       "id": "t_auto_diff_complete",
       "from": "ready",
       "to": "diff_complete",
       "on_event": "DIFF_ALL",
-      "gates": ["has_both"],
-      "actions": ["compute_diff", "format_diff_unified"]
+      "gates": [
+        "has_both"
+      ],
+      "actions": [
+        "compute_diff",
+        "format_diff_unified"
+      ]
     },
     {
       "id": "t_show_summary",
       "from": "diff_complete",
       "to": "diff_complete",
       "on_event": "SHOW_SUMMARY",
-      "gates": ["has_diff"],
-      "actions": ["format_diff_summary"]
+      "gates": [
+        "has_diff"
+      ],
+      "actions": [
+        "format_diff_summary"
+      ]
     },
     {
       "id": "t_show_unified",
       "from": "diff_complete",
       "to": "diff_complete",
       "on_event": "SHOW_UNIFIED",
-      "gates": ["has_diff"],
-      "actions": ["format_diff_unified"]
+      "gates": [
+        "has_diff"
+      ],
+      "actions": [
+        "format_diff_unified"
+      ]
     },
     {
       "id": "t_show_patch",
       "from": "diff_complete",
       "to": "diff_complete",
       "on_event": "SHOW_PATCH",
-      "gates": ["has_diff"],
-      "actions": ["generate_json_patch"]
+      "gates": [
+        "has_diff"
+      ],
+      "actions": [
+        "generate_json_patch"
+      ]
     },
     {
       "id": "t_start_merge",
       "from": "diff_complete",
       "to": "merging",
       "on_event": "MERGE",
-      "gates": ["has_diff"],
-      "actions": ["detect_conflicts"]
+      "gates": [
+        "has_diff"
+      ],
+      "actions": [
+        "detect_conflicts"
+      ]
     },
     {
       "id": "t_merge_no_conflict",
       "from": "merging",
       "to": "merge_complete",
       "on_event": "MERGE_AUTO",
-      "gates": ["no_conflicts"],
-      "actions": ["merge_auto"]
+      "gates": [
+        "no_conflicts"
+      ],
+      "actions": [
+        "merge_auto"
+      ]
     },
     {
       "id": "t_merge_conflict_detected",
       "from": "merging",
       "to": "conflict",
       "on_event": "CONFLICT_DETECTED",
-      "gates": ["has_conflicts"],
-      "actions": ["set_strategy_manual"]
+      "gates": [
+        "has_conflicts"
+      ],
+      "actions": [
+        "set_strategy_manual"
+      ]
     },
     {
       "id": "t_resolve_take_left",
       "from": "conflict",
       "to": "merge_complete",
       "on_event": "TAKE_LEFT",
-      "actions": ["merge_take_left"]
+      "actions": [
+        "merge_take_left"
+      ]
     },
     {
       "id": "t_resolve_take_right",
       "from": "conflict",
       "to": "merge_complete",
       "on_event": "TAKE_RIGHT",
-      "actions": ["merge_take_right"]
+      "actions": [
+        "merge_take_right"
+      ]
     },
     {
       "id": "t_force_merge_left",
       "from": "diff_complete",
       "to": "merge_complete",
       "on_event": "MERGE_LEFT",
-      "gates": ["has_diff"],
-      "actions": ["detect_conflicts", "merge_take_left"]
+      "gates": [
+        "has_diff"
+      ],
+      "actions": [
+        "detect_conflicts",
+        "merge_take_left"
+      ]
     },
     {
       "id": "t_force_merge_right",
       "from": "diff_complete",
       "to": "merge_complete",
       "on_event": "MERGE_RIGHT",
-      "gates": ["has_diff"],
-      "actions": ["detect_conflicts", "merge_take_right"]
+      "gates": [
+        "has_diff"
+      ],
+      "actions": [
+        "detect_conflicts",
+        "merge_take_right"
+      ]
     },
     {
       "id": "t_export",
       "from": "merge_complete",
       "to": "merge_complete",
       "on_event": "EXPORT",
-      "gates": ["has_merged"],
-      "actions": ["export_merged"]
+      "gates": [
+        "has_merged"
+      ],
+      "actions": [
+        "export_merged"
+      ]
     },
     {
       "id": "t_back_to_diff",
       "from": "merge_complete",
       "to": "diff_complete",
       "on_event": "BACK",
-      "actions": ["clear_merge"]
+      "actions": [
+        "clear_merge"
+      ]
     },
     {
       "id": "t_back_from_conflict",
       "from": "conflict",
       "to": "diff_complete",
       "on_event": "BACK",
-      "actions": ["clear_merge"]
+      "actions": [
+        "clear_merge"
+      ]
     },
     {
       "id": "t_rediff",
       "from": "diff_complete",
       "to": "diff_complete",
       "on_event": "DIFF_ALL",
-      "actions": ["compute_diff", "format_diff_unified"]
+      "actions": [
+        "compute_diff",
+        "format_diff_unified"
+      ]
     },
     {
       "id": "t_back_to_ready",
       "from": "diff_complete",
       "to": "ready",
       "on_event": "RESET",
-      "actions": ["clear_diff", "clear_merge"]
+      "actions": [
+        "clear_diff",
+        "clear_merge"
+      ]
     },
     {
       "id": "t_clear_all",
       "from": "ready",
       "to": "idle",
       "on_event": "CLEAR",
-      "actions": ["clear_all"]
+      "actions": [
+        "clear_all"
+      ]
     },
     {
       "id": "t_clear_from_diff",
       "from": "diff_complete",
       "to": "idle",
       "on_event": "CLEAR",
-      "actions": ["clear_all"]
+      "actions": [
+        "clear_all"
+      ]
     },
     {
       "id": "t_clear_from_merge",
       "from": "merge_complete",
       "to": "idle",
       "on_event": "CLEAR",
-      "actions": ["clear_all"]
+      "actions": [
+        "clear_all"
+      ]
     },
     {
       "id": "t_error_recover",
       "from": "error",
       "to": "idle",
       "on_event": "CLEAR",
-      "actions": ["clear_error", "clear_all"]
+      "actions": [
+        "clear_error",
+        "clear_all"
+      ]
     },
     {
       "id": "t_load_error",
       "from": "*",
       "to": "error",
       "on_event": "LOAD_FAILED",
-      "actions": ["set_error"]
+      "actions": [
+        "set_error"
+      ]
     }
   ]
 }

@@ -4,7 +4,6 @@
   "name": "L++ Compliance Checker",
   "version": "1.0.0",
   "description": "Verifies L++ blueprints against compliance policies",
-
   "context_schema": {
     "properties": {
       "blueprint": {
@@ -57,7 +56,6 @@
       }
     }
   },
-
   "states": {
     "idle": {
       "description": "No blueprint loaded, waiting for input"
@@ -78,10 +76,8 @@
       "description": "Error state"
     }
   },
-
   "entry_state": "idle",
-  "terminal_states": [],
-
+  "terminal_states": {},
   "gates": {
     "has_blueprint": {
       "type": "expression",
@@ -140,7 +136,6 @@
       "expression": "score is not None and score < 50"
     }
   },
-
   "actions": {
     "load_blueprint": {
       "type": "compute",
@@ -283,7 +278,6 @@
       "value": null
     }
   },
-
   "display": {
     "rules": [
       {
@@ -311,176 +305,256 @@
       }
     ]
   },
-
   "transitions": [
     {
       "id": "t_load_blueprint",
       "from": "idle",
       "to": "blueprint_loaded",
       "on_event": "LOAD_BLUEPRINT",
-      "gates": ["no_blueprint"],
-      "actions": ["load_blueprint"]
+      "gates": [
+        "no_blueprint"
+      ],
+      "actions": [
+        "load_blueprint"
+      ]
     },
     {
       "id": "t_load_blueprint_error",
       "from": "idle",
       "to": "error",
       "on_event": "LOAD_FAILED",
-      "actions": ["set_error"]
+      "actions": [
+        "set_error"
+      ]
     },
     {
       "id": "t_reload_blueprint",
       "from": "blueprint_loaded",
       "to": "blueprint_loaded",
       "on_event": "LOAD_BLUEPRINT",
-      "actions": ["load_blueprint", "clear_findings", "clear_report"]
+      "actions": [
+        "load_blueprint",
+        "clear_findings",
+        "clear_report"
+      ]
     },
     {
       "id": "t_reload_blueprint_ready",
       "from": "ready",
       "to": "ready",
       "on_event": "LOAD_BLUEPRINT",
-      "actions": ["load_blueprint", "clear_findings", "clear_report"]
+      "actions": [
+        "load_blueprint",
+        "clear_findings",
+        "clear_report"
+      ]
     },
     {
       "id": "t_reload_blueprint_report",
       "from": "report_ready",
       "to": "ready",
       "on_event": "LOAD_BLUEPRINT",
-      "actions": ["load_blueprint", "clear_findings", "clear_report"]
+      "actions": [
+        "load_blueprint",
+        "clear_findings",
+        "clear_report"
+      ]
     },
     {
       "id": "t_load_policies",
       "from": "blueprint_loaded",
       "to": "ready",
       "on_event": "LOAD_POLICIES",
-      "gates": ["has_blueprint"],
-      "actions": ["load_policies"]
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "load_policies"
+      ]
     },
     {
       "id": "t_load_single_policy",
       "from": "blueprint_loaded",
       "to": "ready",
       "on_event": "LOAD_POLICY",
-      "gates": ["has_blueprint"],
-      "actions": ["load_policy"]
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "load_policy"
+      ]
     },
     {
       "id": "t_reload_policies",
       "from": "ready",
       "to": "ready",
       "on_event": "LOAD_POLICIES",
-      "actions": ["load_policies", "clear_findings", "clear_report"]
+      "actions": [
+        "load_policies",
+        "clear_findings",
+        "clear_report"
+      ]
     },
     {
       "id": "t_reload_policies_report",
       "from": "report_ready",
       "to": "ready",
       "on_event": "LOAD_POLICIES",
-      "actions": ["load_policies", "clear_findings", "clear_report"]
+      "actions": [
+        "load_policies",
+        "clear_findings",
+        "clear_report"
+      ]
     },
     {
       "id": "t_add_policy",
       "from": "ready",
       "to": "ready",
       "on_event": "LOAD_POLICY",
-      "actions": ["load_policy"]
+      "actions": [
+        "load_policy"
+      ]
     },
     {
       "id": "t_check_all",
       "from": "ready",
       "to": "checking",
       "on_event": "CHECK",
-      "gates": ["has_blueprint", "has_policies"],
-      "actions": ["check_all_policies"]
+      "gates": [
+        "has_blueprint",
+        "has_policies"
+      ],
+      "actions": [
+        "check_all_policies"
+      ]
     },
     {
       "id": "t_check_single",
       "from": "ready",
       "to": "checking",
       "on_event": "CHECK_POLICY",
-      "gates": ["has_blueprint"],
-      "actions": ["check_policy"]
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "check_policy"
+      ]
     },
     {
       "id": "t_generate_report",
       "from": "checking",
       "to": "report_ready",
       "on_event": "GENERATE_REPORT",
-      "gates": ["has_findings"],
-      "actions": ["generate_report"]
+      "gates": [
+        "has_findings"
+      ],
+      "actions": [
+        "generate_report"
+      ]
     },
     {
       "id": "t_auto_report",
       "from": "checking",
       "to": "report_ready",
       "on_event": "AUTO",
-      "actions": ["generate_report"]
+      "actions": [
+        "generate_report"
+      ]
     },
     {
       "id": "t_export_report",
       "from": "report_ready",
       "to": "report_ready",
       "on_event": "EXPORT",
-      "gates": ["has_report"],
-      "actions": ["export_report"]
+      "gates": [
+        "has_report"
+      ],
+      "actions": [
+        "export_report"
+      ]
     },
     {
       "id": "t_recheck",
       "from": "report_ready",
       "to": "checking",
       "on_event": "CHECK",
-      "gates": ["has_blueprint", "has_policies"],
-      "actions": ["clear_report", "check_all_policies"]
+      "gates": [
+        "has_blueprint",
+        "has_policies"
+      ],
+      "actions": [
+        "clear_report",
+        "check_all_policies"
+      ]
     },
     {
       "id": "t_back_to_ready",
       "from": "report_ready",
       "to": "ready",
       "on_event": "BACK",
-      "actions": ["clear_report"]
+      "actions": [
+        "clear_report"
+      ]
     },
     {
       "id": "t_back_to_loaded",
       "from": "ready",
       "to": "blueprint_loaded",
       "on_event": "BACK",
-      "actions": ["unload_policies", "clear_findings"]
+      "actions": [
+        "unload_policies",
+        "clear_findings"
+      ]
     },
     {
       "id": "t_unload",
       "from": "blueprint_loaded",
       "to": "idle",
       "on_event": "UNLOAD",
-      "actions": ["unload_blueprint"]
+      "actions": [
+        "unload_blueprint"
+      ]
     },
     {
       "id": "t_unload_ready",
       "from": "ready",
       "to": "idle",
       "on_event": "UNLOAD",
-      "actions": ["unload_blueprint", "unload_policies", "clear_findings"]
+      "actions": [
+        "unload_blueprint",
+        "unload_policies",
+        "clear_findings"
+      ]
     },
     {
       "id": "t_unload_report",
       "from": "report_ready",
       "to": "idle",
       "on_event": "UNLOAD",
-      "actions": ["unload_blueprint", "unload_policies", "clear_findings", "clear_report"]
+      "actions": [
+        "unload_blueprint",
+        "unload_policies",
+        "clear_findings",
+        "clear_report"
+      ]
     },
     {
       "id": "t_recover",
       "from": "error",
       "to": "idle",
       "on_event": "CLEAR",
-      "actions": ["clear_error"]
+      "actions": [
+        "clear_error"
+      ]
     },
     {
       "id": "t_global_error",
       "from": "*",
       "to": "error",
       "on_event": "ERROR",
-      "actions": ["set_error"]
+      "actions": [
+        "set_error"
+      ]
     }
   ]
 }

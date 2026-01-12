@@ -52,7 +52,7 @@
     }
   },
   "entry_state": "idle",
-  "terminal_states": [],
+  "terminal_states": {},
   "gates": {
     "hasQuery": {
       "type": "expression",
@@ -291,16 +291,24 @@
       "from": "idle",
       "to": "error",
       "on_event": "ERROR",
-      "gates": ["hasError"],
-      "actions": ["log_error"]
+      "gates": [
+        "hasError"
+      ],
+      "actions": [
+        "log_error"
+      ]
     },
     {
       "id": "t_error_from_results",
       "from": "hasResults",
       "to": "error",
       "on_event": "ERROR",
-      "gates": ["hasError"],
-      "actions": ["log_error"]
+      "gates": [
+        "hasError"
+      ],
+      "actions": [
+        "log_error"
+      ]
     }
   ],
   "display": {

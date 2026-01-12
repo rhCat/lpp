@@ -1,3 +1,11 @@
+
+CLAUDE.md
+**/.*cache
+
+# LVP results cache (timestamped folders)
+**/results/[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9][0-9][0-9]/
+**/results/batch_*/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

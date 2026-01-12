@@ -4,7 +4,6 @@
   "name": "Skill Registry",
   "version": "1.0.0",
   "description": "Scan and document L++ skills for agent blueprint generation",
-
   "context_schema": {
     "properties": {
       "basePath": {
@@ -29,7 +28,6 @@
       }
     }
   },
-
   "states": {
     "idle": {
       "description": "Ready to scan"
@@ -44,10 +42,8 @@
       "description": "Error occurred"
     }
   },
-
   "entry_state": "idle",
-  "terminal_states": [],
-
+  "terminal_states": {},
   "gates": {
     "hasPath": {
       "type": "expression",
@@ -74,7 +70,6 @@
       "expression": "error is None"
     }
   },
-
   "actions": {
     "setBasePath": {
       "type": "set",
@@ -137,7 +132,6 @@
       "value": null
     }
   },
-
   "transitions": [
     {
       "id": "t_scan",
@@ -228,19 +222,26 @@
       "from": "idle",
       "to": "error",
       "on_event": "ERROR",
-      "gates": ["hasError"],
-      "actions": ["log_error"]
+      "gates": [
+        "hasError"
+      ],
+      "actions": [
+        "log_error"
+      ]
     },
     {
       "id": "t_error_from_scanned",
       "from": "scanned",
       "to": "error",
       "on_event": "ERROR",
-      "gates": ["hasError"],
-      "actions": ["log_error"]
+      "gates": [
+        "hasError"
+      ],
+      "actions": [
+        "log_error"
+      ]
     }
   ],
-
   "display": {
     "rules": [
       {

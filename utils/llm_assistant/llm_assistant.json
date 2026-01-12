@@ -4,34 +4,74 @@
   "name": "L++ LLM Schema Assistant",
   "version": "1.0.0",
   "description": "LLM-powered assistant for understanding and working with L++ blueprints. Automation agent building block.",
-
   "context_schema": {
     "properties": {
-      "api_key": { "type": "string", "description": "OpenAI-compatible API key" },
-      "api_base": { "type": "string", "description": "API base URL (OpenAI v1 compatible)" },
-      "model": { "type": "string", "description": "Model identifier (e.g., gpt-4o-mini)" },
-      "schema_content": { "type": "string", "description": "Loaded L++ schema specification" },
-      "blueprint": { "type": "object", "description": "Currently loaded blueprint" },
-      "blueprint_path": { "type": "string", "description": "Path to loaded blueprint" },
-      "conversation": { "type": "array", "description": "Conversation history [{role, content}]" },
-      "last_query": { "type": "string", "description": "Last user query" },
-      "last_response": { "type": "string", "description": "Last LLM response" },
-      "temperature": { "type": "number", "description": "LLM temperature (0.0-2.0)" },
-      "max_tokens": { "type": "number", "description": "Max response tokens" },
-      "error": { "type": "string", "description": "Error message if any" }
+      "api_key": {
+        "type": "string",
+        "description": "OpenAI-compatible API key"
+      },
+      "api_base": {
+        "type": "string",
+        "description": "API base URL (OpenAI v1 compatible)"
+      },
+      "model": {
+        "type": "string",
+        "description": "Model identifier (e.g., gpt-4o-mini)"
+      },
+      "schema_content": {
+        "type": "string",
+        "description": "Loaded L++ schema specification"
+      },
+      "blueprint": {
+        "type": "object",
+        "description": "Currently loaded blueprint"
+      },
+      "blueprint_path": {
+        "type": "string",
+        "description": "Path to loaded blueprint"
+      },
+      "conversation": {
+        "type": "array",
+        "description": "Conversation history [{role, content}]"
+      },
+      "last_query": {
+        "type": "string",
+        "description": "Last user query"
+      },
+      "last_response": {
+        "type": "string",
+        "description": "Last LLM response"
+      },
+      "temperature": {
+        "type": "number",
+        "description": "LLM temperature (0.0-2.0)"
+      },
+      "max_tokens": {
+        "type": "number",
+        "description": "Max response tokens"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message if any"
+      }
     }
   },
-
   "states": {
-    "init": { "description": "Initial state, checking API configuration" },
-    "ready": { "description": "Configured and ready for queries" },
-    "querying": { "description": "Sending query to LLM API" },
-    "error": { "description": "Error state - recoverable" }
+    "init": {
+      "description": "Initial state, checking API configuration"
+    },
+    "ready": {
+      "description": "Configured and ready for queries"
+    },
+    "querying": {
+      "description": "Sending query to LLM API"
+    },
+    "error": {
+      "description": "Error state - recoverable"
+    }
   },
-
   "entry_state": "init",
-  "terminal_states": [],
-
+  "terminal_states": {},
   "gates": {
     "has_api_key": {
       "type": "expression",
@@ -58,7 +98,6 @@
       "expression": "error is None"
     }
   },
-
   "actions": {
     "init_config": {
       "type": "compute",
@@ -84,7 +123,9 @@
     "load_blueprint": {
       "type": "compute",
       "compute_unit": "llm:load_blueprint",
-      "input_map": { "path": "event.payload.path" },
+      "input_map": {
+        "path": "event.payload.path"
+      },
       "output_map": {
         "blueprint": "blueprint",
         "blueprint_path": "blueprint_path",
@@ -180,112 +221,160 @@
       "value": null
     }
   },
-
   "transitions": [
     {
       "id": "t_init_start",
       "from": "init",
       "to": "ready",
       "on_event": "START",
-      "gates": ["has_api_key"],
-      "actions": ["load_schema"]
+      "gates": [
+        "has_api_key"
+      ],
+      "actions": [
+        "load_schema"
+      ]
     },
     {
       "id": "t_init_no_key",
       "from": "init",
       "to": "error",
       "on_event": "START",
-      "gates": ["no_api_key"]
+      "gates": [
+        "no_api_key"
+      ]
     },
     {
       "id": "t_configure",
       "from": "*",
       "to": "init",
       "on_event": "CONFIGURE",
-      "actions": ["init_config"]
+      "actions": [
+        "init_config"
+      ]
     },
     {
       "id": "t_set_key",
       "from": "error",
       "to": "init",
       "on_event": "SET_KEY",
-      "actions": ["clear_error"]
+      "actions": [
+        "clear_error"
+      ]
     },
     {
       "id": "t_load_blueprint",
       "from": "ready",
       "to": "ready",
       "on_event": "LOAD",
-      "actions": ["load_blueprint", "clear_conversation"]
+      "actions": [
+        "load_blueprint",
+        "clear_conversation"
+      ]
     },
     {
       "id": "t_query",
       "from": "ready",
       "to": "querying",
       "on_event": "QUERY",
-      "actions": ["set_query", "query_llm"]
+      "actions": [
+        "set_query",
+        "query_llm"
+      ]
     },
     {
       "id": "t_explain",
       "from": "ready",
       "to": "querying",
       "on_event": "EXPLAIN",
-      "gates": ["has_blueprint"],
-      "actions": ["explain_blueprint"]
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "explain_blueprint"
+      ]
     },
     {
       "id": "t_validate",
       "from": "ready",
       "to": "querying",
       "on_event": "VALIDATE",
-      "gates": ["has_blueprint"],
-      "actions": ["validate_blueprint"]
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "validate_blueprint"
+      ]
     },
     {
       "id": "t_suggest",
       "from": "ready",
       "to": "querying",
       "on_event": "SUGGEST",
-      "gates": ["has_blueprint"],
-      "actions": ["suggest_improvements"]
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "suggest_improvements"
+      ]
     },
     {
       "id": "t_query_done",
       "from": "querying",
       "to": "ready",
       "on_event": "DONE",
-      "gates": ["no_error"]
+      "gates": [
+        "no_error"
+      ]
     },
     {
       "id": "t_query_error",
       "from": "querying",
       "to": "error",
       "on_event": "DONE",
-      "gates": ["has_error"]
+      "gates": [
+        "has_error"
+      ]
     },
     {
       "id": "t_clear",
       "from": "ready",
       "to": "ready",
       "on_event": "CLEAR",
-      "actions": ["clear_conversation", "clear_blueprint"]
+      "actions": [
+        "clear_conversation",
+        "clear_blueprint"
+      ]
     },
     {
       "id": "t_recover",
       "from": "error",
       "to": "ready",
       "on_event": "RETRY",
-      "gates": ["has_api_key"],
-      "actions": ["clear_error"]
+      "gates": [
+        "has_api_key"
+      ],
+      "actions": [
+        "clear_error"
+      ]
     }
   ],
-
   "display": {
     "rules": [
-      { "gate": "has_error", "template": "❌ {error}" },
-      { "gate": "has_blueprint", "template": "📋 {blueprint_path}" },
-      { "gate": "has_schema", "template": "📖 Schema loaded" },
-      { "template": "⚙️ Initializing..." }
+      {
+        "gate": "has_error",
+        "template": "\u274c {error}"
+      },
+      {
+        "gate": "has_blueprint",
+        "template": "\ud83d\udccb {blueprint_path}"
+      },
+      {
+        "gate": "has_schema",
+        "template": "\ud83d\udcd6 Schema loaded"
+      },
+      {
+        "template": "\u2699\ufe0f Initializing..."
+      }
     ]
   }
 }

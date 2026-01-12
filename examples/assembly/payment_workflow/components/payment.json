@@ -1,0 +1,244 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "payment_component",
+  "name": "Payment Processing Component",
+  "version": "1.0.0",
+  "description": "Handles payment processing with validation and execution",
+  "context_schema": {
+    "properties": {
+      "auth_token": {
+        "type": "string"
+      },
+      "user_id": {
+        "type": "string"
+      },
+      "amount": {
+        "type": "number"
+      },
+      "currency": {
+        "type": "string"
+      },
+      "payment_id": {
+        "type": "string"
+      },
+      "transaction_ref": {
+        "type": "string"
+      },
+      "error_code": {
+        "type": "string"
+      },
+      "error_message": {
+        "type": "string"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Awaiting payment request"
+    },
+    "validating": {
+      "name": "Validating",
+      "description": "Validating payment details"
+    },
+    "processing": {
+      "name": "Processing",
+      "description": "Processing payment"
+    },
+    "payment_complete": {
+      "name": "Complete",
+      "description": "Payment successful"
+    },
+    "payment_failed": {
+      "name": "Failed",
+      "description": "Payment failed"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_start",
+      "from": "idle",
+      "to": "validating",
+      "on_event": "START",
+      "actions": [
+        "a_store_details"
+      ]
+    },
+    {
+      "id": "t_valid",
+      "from": "validating",
+      "to": "processing",
+      "on_event": "VALIDATE",
+      "gates": [
+        "g_token_valid",
+        "g_amount_valid"
+      ],
+      "actions": [
+        "a_create_payment"
+      ]
+    },
+    {
+      "id": "t_invalid_token",
+      "from": "validating",
+      "to": "payment_failed",
+      "on_event": "VALIDATE",
+      "gates": [
+        "g_token_invalid"
+      ],
+      "actions": [
+        "a_set_auth_error"
+      ]
+    },
+    {
+      "id": "t_invalid_amount",
+      "from": "validating",
+      "to": "payment_failed",
+      "on_event": "VALIDATE",
+      "gates": [
+        "g_amount_invalid"
+      ],
+      "actions": [
+        "a_set_amount_error"
+      ]
+    },
+    {
+      "id": "t_success",
+      "from": "processing",
+      "to": "payment_complete",
+      "on_event": "PROCESS",
+      "gates": [
+        "g_process_success"
+      ],
+      "actions": [
+        "a_finalize"
+      ]
+    },
+    {
+      "id": "t_process_fail",
+      "from": "processing",
+      "to": "payment_failed",
+      "on_event": "PROCESS",
+      "gates": [
+        "g_process_failed"
+      ],
+      "actions": [
+        "a_set_process_error"
+      ]
+    }
+  ],
+  "gates": {
+    "g_token_valid": {
+      "type": "expression",
+      "expression": "auth_token is not None and token_verified == True"
+    },
+    "g_token_invalid": {
+      "type": "expression",
+      "expression": "auth_token is None or token_verified != True"
+    },
+    "g_amount_valid": {
+      "type": "expression",
+      "expression": "amount > 0 and amount <= 10000"
+    },
+    "g_amount_invalid": {
+      "type": "expression",
+      "expression": "amount <= 0 or amount > 10000"
+    },
+    "g_process_success": {
+      "type": "expression",
+      "expression": "process_result == 'success'"
+    },
+    "g_process_failed": {
+      "type": "expression",
+      "expression": "process_result != 'success'"
+    }
+  },
+  "actions": {
+    "a_store_details": {
+      "type": "set",
+      "target": "amount",
+      "value_from": "event.payload.amount"
+    },
+    "a_create_payment": {
+      "type": "compute",
+      "compute_unit": "payment:create",
+      "input_map": {
+        "user_id": "user_id",
+        "amount": "amount"
+      },
+      "output_map": {
+        "payment_id": "id"
+      }
+    },
+    "a_finalize": {
+      "type": "compute",
+      "compute_unit": "payment:finalize",
+      "input_map": {
+        "payment_id": "payment_id"
+      },
+      "output_map": {
+        "transaction_ref": "ref"
+      }
+    },
+    "a_set_auth_error": {
+      "type": "set",
+      "target": "error_code",
+      "value": "AUTH_REQUIRED"
+    },
+    "a_set_amount_error": {
+      "type": "set",
+      "target": "error_code",
+      "value": "INVALID_AMOUNT"
+    },
+    "a_set_process_error": {
+      "type": "set",
+      "target": "error_code",
+      "value": "PROCESSING_FAILED"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "payment_complete": {
+      "description": "Payment processed successfully",
+      "output_schema": {
+        "payment_id": {
+          "type": "string",
+          "non_null": true
+        },
+        "transaction_ref": {
+          "type": "string",
+          "non_null": true
+        },
+        "amount": {
+          "type": "number",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": [
+        "funds_transferred",
+        "audit_logged"
+      ]
+    },
+    "payment_failed": {
+      "description": "Payment processing failed",
+      "output_schema": {
+        "error_code": {
+          "type": "string",
+          "non_null": true,
+          "enum": [
+            "AUTH_REQUIRED",
+            "INVALID_AMOUNT",
+            "INSUFFICIENT_FUNDS",
+            "PROCESSING_FAILED"
+          ]
+        },
+        "error_message": {
+          "type": "string"
+        }
+      },
+      "invariants_guaranteed": [
+        "no_funds_transferred",
+        "state_rolled_back"
+      ]
+    }
+  }
+}

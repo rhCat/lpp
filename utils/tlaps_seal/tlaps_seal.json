@@ -1,10 +1,9 @@
 {
-  "$schema": "lpp/v0.1.2",
+  "$schema": "lpp/v0.2.0",
   "id": "tlaps_seal",
   "name": "TLAPS Seal Certifier",
   "version": "1.0.0",
   "description": "Certify L++ blueprints with formal verification - transition from empirical to axiomatic certainty",
-
   "context_schema": {
     "properties": {
       "blueprintPath": {
@@ -45,7 +44,12 @@
       },
       "sealStatus": {
         "type": "string",
-        "enum": ["pending", "tlc_verified", "tlaps_certified", "rejected"],
+        "enum": [
+          "pending",
+          "tlc_verified",
+          "tlaps_certified",
+          "rejected"
+        ],
         "description": "Current certification status"
       },
       "sealCertificate": {
@@ -58,7 +62,6 @@
       }
     }
   },
-
   "states": {
     "idle": {
       "description": "Ready to receive blueprint for certification"
@@ -91,10 +94,11 @@
       "description": "Error during certification process"
     }
   },
-
   "entry_state": "idle",
-  "terminal_states": ["certified", "rejected"],
-
+  "terminal_states": {
+    "certified": {},
+    "rejected": {}
+  },
   "gates": {
     "hasBlueprint": {
       "type": "expression",
@@ -129,7 +133,6 @@
       "expression": "error is None"
     }
   },
-
   "actions": {
     "setPath": {
       "type": "set",
@@ -254,118 +257,170 @@
       }
     }
   },
-
   "transitions": [
     {
       "id": "t1_certify",
       "from": "idle",
       "to": "loading",
       "on_event": "CERTIFY",
-      "actions": ["setPath"]
+      "actions": [
+        "setPath"
+      ]
     },
     {
       "id": "t2_load",
       "from": "loading",
       "to": "auditing",
       "on_event": "AUTO",
-      "actions": ["loadBlueprint"],
-      "gates": ["noError"]
+      "actions": [
+        "loadBlueprint"
+      ],
+      "gates": [
+        "noError"
+      ]
     },
     {
       "id": "t3_audit",
       "from": "auditing",
       "to": "generating_tla",
       "on_event": "AUTO",
-      "actions": ["auditTrinity", "auditFlange"],
-      "gates": ["hasBlueprint", "noError"]
+      "actions": [
+        "auditTrinity",
+        "auditFlange"
+      ],
+      "gates": [
+        "hasBlueprint",
+        "noError"
+      ]
     },
     {
       "id": "t4_generate",
       "from": "generating_tla",
       "to": "tlc_verifying",
       "on_event": "AUTO",
-      "actions": ["generateTla"],
-      "gates": ["trinityValid", "flangeValid", "noError"]
+      "actions": [
+        "generateTla"
+      ],
+      "gates": [
+        "trinityValid",
+        "flangeValid",
+        "noError"
+      ]
     },
     {
       "id": "t5_tlc",
       "from": "tlc_verifying",
       "to": "tlc_verified",
       "on_event": "AUTO",
-      "actions": ["runTlc"],
-      "gates": ["hasTlaSpec", "noError"]
+      "actions": [
+        "runTlc"
+      ],
+      "gates": [
+        "hasTlaSpec",
+        "noError"
+      ]
     },
     {
       "id": "t6_tlaps_start",
       "from": "tlc_verified",
       "to": "tlaps_proving",
       "on_event": "PROVE",
-      "gates": ["tlcPassed"]
+      "gates": [
+        "tlcPassed"
+      ]
     },
     {
       "id": "t7_tlaps_complete",
       "from": "tlaps_proving",
       "to": "certified",
       "on_event": "AUTO",
-      "actions": ["runTlaps", "generateCertificate"],
-      "gates": ["noError"]
+      "actions": [
+        "runTlaps",
+        "generateCertificate"
+      ],
+      "gates": [
+        "noError"
+      ]
     },
     {
       "id": "t8_quick_seal",
       "from": "tlc_verified",
       "to": "certified",
       "on_event": "SEAL_TLC",
-      "actions": ["generateCertificate"],
-      "gates": ["tlcPassed"]
+      "actions": [
+        "generateCertificate"
+      ],
+      "gates": [
+        "tlcPassed"
+      ]
     },
     {
       "id": "t9_audit_fail",
       "from": "auditing",
       "to": "rejected",
       "on_event": "AUTO",
-      "actions": ["setRejected"],
-      "gates": ["hasError"]
+      "actions": [
+        "setRejected"
+      ],
+      "gates": [
+        "hasError"
+      ]
     },
     {
       "id": "t10_tlc_fail",
       "from": "tlc_verifying",
       "to": "rejected",
       "on_event": "AUTO",
-      "actions": ["setRejected"],
-      "gates": ["hasError"]
+      "actions": [
+        "setRejected"
+      ],
+      "gates": [
+        "hasError"
+      ]
     },
     {
       "id": "t11_tlaps_fail",
       "from": "tlaps_proving",
       "to": "rejected",
       "on_event": "AUTO",
-      "actions": ["setRejected"],
-      "gates": ["hasError"]
+      "actions": [
+        "setRejected"
+      ],
+      "gates": [
+        "hasError"
+      ]
     },
     {
       "id": "t12_error_any",
       "from": "*",
       "to": "error",
       "on_event": "ERROR",
-      "gates": ["hasError"],
-      "actions": ["log_error"]
+      "gates": [
+        "hasError"
+      ],
+      "actions": [
+        "log_error"
+      ]
     },
     {
       "id": "t13_reset",
       "from": "*",
       "to": "idle",
       "on_event": "RESET",
-      "actions": ["resetContext"]
+      "actions": [
+        "resetContext"
+      ]
     },
     {
       "id": "t14_view_cert",
       "from": "certified",
       "to": "certified",
       "on_event": "VIEW",
-      "gates": ["tlapsPassed"]
+      "gates": [
+        "tlapsPassed"
+      ]
     }
   ],
-
   "display": {
     "rules": [
       {

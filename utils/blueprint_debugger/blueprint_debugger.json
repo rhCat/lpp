@@ -4,43 +4,109 @@
   "name": "L++ Blueprint Debugger",
   "version": "1.0.0",
   "description": "Step-through debugging for L++ blueprints with breakpoints, inspection, and time-travel debugging",
-
   "context_schema": {
     "properties": {
-      "blueprint": { "type": "object", "description": "The loaded blueprint object" },
-      "blueprint_path": { "type": "string", "description": "Path to the loaded blueprint" },
-      "blueprint_name": { "type": "string", "description": "Blueprint name" },
-      "blueprint_id": { "type": "string", "description": "Blueprint ID" },
-      "debug_state": { "type": "string", "description": "Current state in the debugged blueprint" },
-      "debug_context": { "type": "object", "description": "Context of the debugged blueprint" },
-      "breakpoints": { "type": "array", "description": "List of breakpoints" },
-      "watches": { "type": "array", "description": "Watch expressions" },
-      "watch_values": { "type": "object", "description": "Current watch values" },
-      "history": { "type": "array", "description": "Execution history for time-travel" },
-      "history_index": { "type": "number", "description": "Current position in history" },
-      "available_events": { "type": "array", "description": "Events available in current state" },
-      "available_transitions": { "type": "array", "description": "Transitions available from current state" },
-      "last_transition": { "type": "object", "description": "Last executed transition details" },
-      "last_gate_results": { "type": "object", "description": "Results of last gate evaluations" },
-      "last_action_results": { "type": "array", "description": "Results of last action executions" },
-      "is_paused": { "type": "boolean", "description": "Whether execution is paused" },
-      "hit_breakpoint": { "type": "object", "description": "The breakpoint that was hit" },
-      "output": { "type": "string", "description": "Display output" },
-      "error": { "type": "string", "description": "Error message if any" }
+      "blueprint": {
+        "type": "object",
+        "description": "The loaded blueprint object"
+      },
+      "blueprint_path": {
+        "type": "string",
+        "description": "Path to the loaded blueprint"
+      },
+      "blueprint_name": {
+        "type": "string",
+        "description": "Blueprint name"
+      },
+      "blueprint_id": {
+        "type": "string",
+        "description": "Blueprint ID"
+      },
+      "debug_state": {
+        "type": "string",
+        "description": "Current state in the debugged blueprint"
+      },
+      "debug_context": {
+        "type": "object",
+        "description": "Context of the debugged blueprint"
+      },
+      "breakpoints": {
+        "type": "array",
+        "description": "List of breakpoints"
+      },
+      "watches": {
+        "type": "array",
+        "description": "Watch expressions"
+      },
+      "watch_values": {
+        "type": "object",
+        "description": "Current watch values"
+      },
+      "history": {
+        "type": "array",
+        "description": "Execution history for time-travel"
+      },
+      "history_index": {
+        "type": "number",
+        "description": "Current position in history"
+      },
+      "available_events": {
+        "type": "array",
+        "description": "Events available in current state"
+      },
+      "available_transitions": {
+        "type": "array",
+        "description": "Transitions available from current state"
+      },
+      "last_transition": {
+        "type": "object",
+        "description": "Last executed transition details"
+      },
+      "last_gate_results": {
+        "type": "object",
+        "description": "Results of last gate evaluations"
+      },
+      "last_action_results": {
+        "type": "array",
+        "description": "Results of last action executions"
+      },
+      "is_paused": {
+        "type": "boolean",
+        "description": "Whether execution is paused"
+      },
+      "hit_breakpoint": {
+        "type": "object",
+        "description": "The breakpoint that was hit"
+      },
+      "output": {
+        "type": "string",
+        "description": "Display output"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message if any"
+      }
     }
   },
-
   "states": {
-    "idle": { "description": "No blueprint loaded, waiting for input" },
-    "loaded": { "description": "Blueprint loaded, ready to debug" },
-    "debugging": { "description": "Actively debugging, can step through execution" },
-    "paused": { "description": "Paused at a breakpoint" },
-    "error": { "description": "Error state" }
+    "idle": {
+      "description": "No blueprint loaded, waiting for input"
+    },
+    "loaded": {
+      "description": "Blueprint loaded, ready to debug"
+    },
+    "debugging": {
+      "description": "Actively debugging, can step through execution"
+    },
+    "paused": {
+      "description": "Paused at a breakpoint"
+    },
+    "error": {
+      "description": "Error state"
+    }
   },
-
   "entry_state": "idle",
-  "terminal_states": [],
-
+  "terminal_states": {},
   "gates": {
     "has_blueprint": {
       "type": "expression",
@@ -103,12 +169,13 @@
       "expression": "_state == 'error'"
     }
   },
-
   "actions": {
     "load_blueprint": {
       "type": "compute",
       "compute_unit": "debug:load_blueprint",
-      "input_map": { "path": "event.payload.path" },
+      "input_map": {
+        "path": "event.payload.path"
+      },
       "output_map": {
         "blueprint": "blueprint",
         "blueprint_path": "blueprint_path",
@@ -120,7 +187,9 @@
     "init_debug_session": {
       "type": "compute",
       "compute_unit": "debug:init_debug_session",
-      "input_map": { "blueprint": "blueprint" },
+      "input_map": {
+        "blueprint": "blueprint"
+      },
       "output_map": {
         "debug_state": "debug_state",
         "debug_context": "debug_context",
@@ -138,7 +207,11 @@
     "reset_session": {
       "type": "compute",
       "compute_unit": "debug:reset_session",
-      "input_map": { "blueprint": "blueprint", "breakpoints": "breakpoints", "watches": "watches" },
+      "input_map": {
+        "blueprint": "blueprint",
+        "breakpoints": "breakpoints",
+        "watches": "watches"
+      },
       "output_map": {
         "debug_state": "debug_state",
         "debug_context": "debug_context",
@@ -159,7 +232,10 @@
         "target": "event.payload.target",
         "condition": "event.payload.condition"
       },
-      "output_map": { "breakpoints": "breakpoints", "output": "output" }
+      "output_map": {
+        "breakpoints": "breakpoints",
+        "output": "output"
+      }
     },
     "remove_breakpoint": {
       "type": "compute",
@@ -168,13 +244,20 @@
         "breakpoints": "breakpoints",
         "bp_id": "event.payload.bp_id"
       },
-      "output_map": { "breakpoints": "breakpoints", "output": "output" }
+      "output_map": {
+        "breakpoints": "breakpoints",
+        "output": "output"
+      }
     },
     "list_breakpoints": {
       "type": "compute",
       "compute_unit": "debug:list_breakpoints",
-      "input_map": { "breakpoints": "breakpoints" },
-      "output_map": { "output": "output" }
+      "input_map": {
+        "breakpoints": "breakpoints"
+      },
+      "output_map": {
+        "output": "output"
+      }
     },
     "step": {
       "type": "compute",
@@ -326,7 +409,9 @@
         "debug_state": "debug_state",
         "available_transitions": "available_transitions"
       },
-      "output_map": { "output": "output" }
+      "output_map": {
+        "output": "output"
+      }
     },
     "inspect_context": {
       "type": "compute",
@@ -335,7 +420,9 @@
         "debug_context": "debug_context",
         "key": "event.payload.key"
       },
-      "output_map": { "output": "output" }
+      "output_map": {
+        "output": "output"
+      }
     },
     "evaluate_expression": {
       "type": "compute",
@@ -344,7 +431,9 @@
         "debug_context": "debug_context",
         "expression": "event.payload.expression"
       },
-      "output_map": { "output": "output" }
+      "output_map": {
+        "output": "output"
+      }
     },
     "add_watch": {
       "type": "compute",
@@ -354,7 +443,10 @@
         "expression": "event.payload.expression",
         "name": "event.payload.name"
       },
-      "output_map": { "watches": "watches", "output": "output" }
+      "output_map": {
+        "watches": "watches",
+        "output": "output"
+      }
     },
     "remove_watch": {
       "type": "compute",
@@ -363,7 +455,10 @@
         "watches": "watches",
         "watch_id": "event.payload.watch_id"
       },
-      "output_map": { "watches": "watches", "output": "output" }
+      "output_map": {
+        "watches": "watches",
+        "output": "output"
+      }
     },
     "get_watches": {
       "type": "compute",
@@ -373,7 +468,10 @@
         "watch_values": "watch_values",
         "debug_context": "debug_context"
       },
-      "output_map": { "watch_values": "watch_values", "output": "output" }
+      "output_map": {
+        "watch_values": "watch_values",
+        "output": "output"
+      }
     },
     "get_history": {
       "type": "compute",
@@ -382,7 +480,9 @@
         "history": "history",
         "history_index": "history_index"
       },
-      "output_map": { "output": "output" }
+      "output_map": {
+        "output": "output"
+      }
     },
     "goto_step": {
       "type": "compute",
@@ -411,7 +511,9 @@
         "step1": "event.payload.step1",
         "step2": "event.payload.step2"
       },
-      "output_map": { "output": "output" }
+      "output_map": {
+        "output": "output"
+      }
     },
     "render_status": {
       "type": "compute",
@@ -426,7 +528,9 @@
         "is_paused": "is_paused",
         "hit_breakpoint": "hit_breakpoint"
       },
-      "output_map": { "output": "output" }
+      "output_map": {
+        "output": "output"
+      }
     },
     "set_error": {
       "type": "set",
@@ -449,112 +553,160 @@
       "value": null
     }
   },
-
   "display": {
     "rules": [
-      { "gate": "is_error", "template": "ERROR: {error}" },
-      { "gate": "is_idle", "template": "No blueprint loaded. Use LOAD command." },
-      { "gate": "is_paused_state", "template": "[PAUSED] {blueprint_name} @ {debug_state} (step {history_index})" },
-      { "gate": "is_debugging", "template": "[DEBUG] {blueprint_name} @ {debug_state} (step {history_index})" },
-      { "gate": "is_loaded", "template": "Loaded: {blueprint_name} - Ready to debug" },
-      { "template": "L++ Blueprint Debugger" }
+      {
+        "gate": "is_error",
+        "template": "ERROR: {error}"
+      },
+      {
+        "gate": "is_idle",
+        "template": "No blueprint loaded. Use LOAD command."
+      },
+      {
+        "gate": "is_paused_state",
+        "template": "[PAUSED] {blueprint_name} @ {debug_state} (step {history_index})"
+      },
+      {
+        "gate": "is_debugging",
+        "template": "[DEBUG] {blueprint_name} @ {debug_state} (step {history_index})"
+      },
+      {
+        "gate": "is_loaded",
+        "template": "Loaded: {blueprint_name} - Ready to debug"
+      },
+      {
+        "template": "L++ Blueprint Debugger"
+      }
     ]
   },
-
   "transitions": [
     {
       "id": "t_load",
       "from": "idle",
       "to": "loaded",
       "on_event": "LOAD",
-      "gates": ["no_blueprint"],
-      "actions": ["load_blueprint"]
+      "gates": [
+        "no_blueprint"
+      ],
+      "actions": [
+        "load_blueprint"
+      ]
     },
     {
       "id": "t_load_error",
       "from": "idle",
       "to": "error",
       "on_event": "LOAD_FAILED",
-      "actions": ["set_error"]
+      "actions": [
+        "set_error"
+      ]
     },
     {
       "id": "t_reload",
       "from": "loaded",
       "to": "loaded",
       "on_event": "LOAD",
-      "actions": ["load_blueprint"]
+      "actions": [
+        "load_blueprint"
+      ]
     },
     {
       "id": "t_reload_from_debug",
       "from": "debugging",
       "to": "loaded",
       "on_event": "LOAD",
-      "actions": ["load_blueprint"]
+      "actions": [
+        "load_blueprint"
+      ]
     },
     {
       "id": "t_start_debug",
       "from": "loaded",
       "to": "debugging",
       "on_event": "START",
-      "gates": ["has_blueprint"],
-      "actions": ["init_debug_session", "render_status"]
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "init_debug_session",
+        "render_status"
+      ]
     },
     {
       "id": "t_set_bp_loaded",
       "from": "loaded",
       "to": "loaded",
       "on_event": "SET_BREAKPOINT",
-      "actions": ["set_breakpoint"]
+      "actions": [
+        "set_breakpoint"
+      ]
     },
     {
       "id": "t_set_bp_debug",
       "from": "debugging",
       "to": "debugging",
       "on_event": "SET_BREAKPOINT",
-      "actions": ["set_breakpoint"]
+      "actions": [
+        "set_breakpoint"
+      ]
     },
     {
       "id": "t_set_bp_paused",
       "from": "paused",
       "to": "paused",
       "on_event": "SET_BREAKPOINT",
-      "actions": ["set_breakpoint"]
+      "actions": [
+        "set_breakpoint"
+      ]
     },
     {
       "id": "t_remove_bp_debug",
       "from": "debugging",
       "to": "debugging",
       "on_event": "REMOVE_BREAKPOINT",
-      "actions": ["remove_breakpoint"]
+      "actions": [
+        "remove_breakpoint"
+      ]
     },
     {
       "id": "t_remove_bp_paused",
       "from": "paused",
       "to": "paused",
       "on_event": "REMOVE_BREAKPOINT",
-      "actions": ["remove_breakpoint"]
+      "actions": [
+        "remove_breakpoint"
+      ]
     },
     {
       "id": "t_list_bp_debug",
       "from": "debugging",
       "to": "debugging",
       "on_event": "LIST_BREAKPOINTS",
-      "actions": ["list_breakpoints"]
+      "actions": [
+        "list_breakpoints"
+      ]
     },
     {
       "id": "t_list_bp_paused",
       "from": "paused",
       "to": "paused",
       "on_event": "LIST_BREAKPOINTS",
-      "actions": ["list_breakpoints"]
+      "actions": [
+        "list_breakpoints"
+      ]
     },
     {
       "id": "t_step",
       "from": "debugging",
       "to": "debugging",
       "on_event": "STEP",
-      "gates": ["is_not_paused"],
-      "actions": ["step"]
+      "gates": [
+        "is_not_paused"
+      ],
+      "actions": [
+        "step"
+      ]
     },
     {
       "id": "t_step_to_paused",
@@ -568,31 +720,46 @@
       "from": "debugging",
       "to": "debugging",
       "on_event": "STEP_OVER",
-      "gates": ["is_not_paused"],
-      "actions": ["step_over"]
+      "gates": [
+        "is_not_paused"
+      ],
+      "actions": [
+        "step_over"
+      ]
     },
     {
       "id": "t_step_back",
       "from": "debugging",
       "to": "debugging",
       "on_event": "STEP_BACK",
-      "gates": ["can_step_back"],
-      "actions": ["step_back"]
+      "gates": [
+        "can_step_back"
+      ],
+      "actions": [
+        "step_back"
+      ]
     },
     {
       "id": "t_step_back_paused",
       "from": "paused",
       "to": "debugging",
       "on_event": "STEP_BACK",
-      "gates": ["can_step_back"],
-      "actions": ["step_back", "clear_hit_breakpoint"]
+      "gates": [
+        "can_step_back"
+      ],
+      "actions": [
+        "step_back",
+        "clear_hit_breakpoint"
+      ]
     },
     {
       "id": "t_run",
       "from": "debugging",
       "to": "debugging",
       "on_event": "RUN",
-      "actions": ["run_to_breakpoint"]
+      "actions": [
+        "run_to_breakpoint"
+      ]
     },
     {
       "id": "t_run_hit_bp",
@@ -606,21 +773,29 @@
       "from": "paused",
       "to": "debugging",
       "on_event": "CONTINUE",
-      "actions": ["clear_hit_breakpoint", "resume_execution"]
+      "actions": [
+        "clear_hit_breakpoint",
+        "resume_execution"
+      ]
     },
     {
       "id": "t_continue_run",
       "from": "paused",
       "to": "debugging",
       "on_event": "RUN",
-      "actions": ["clear_hit_breakpoint", "continue_execution"]
+      "actions": [
+        "clear_hit_breakpoint",
+        "continue_execution"
+      ]
     },
     {
       "id": "t_pause",
       "from": "debugging",
       "to": "paused",
       "on_event": "PAUSE",
-      "actions": ["pause_execution"]
+      "actions": [
+        "pause_execution"
+      ]
     },
     {
       "id": "t_stop",
@@ -634,184 +809,243 @@
       "from": "paused",
       "to": "loaded",
       "on_event": "STOP",
-      "actions": ["clear_hit_breakpoint"]
+      "actions": [
+        "clear_hit_breakpoint"
+      ]
     },
     {
       "id": "t_inspect_state",
       "from": "debugging",
       "to": "debugging",
       "on_event": "INSPECT_STATE",
-      "actions": ["inspect_state"]
+      "actions": [
+        "inspect_state"
+      ]
     },
     {
       "id": "t_inspect_state_paused",
       "from": "paused",
       "to": "paused",
       "on_event": "INSPECT_STATE",
-      "actions": ["inspect_state"]
+      "actions": [
+        "inspect_state"
+      ]
     },
     {
       "id": "t_inspect_context",
       "from": "debugging",
       "to": "debugging",
       "on_event": "INSPECT_CONTEXT",
-      "actions": ["inspect_context"]
+      "actions": [
+        "inspect_context"
+      ]
     },
     {
       "id": "t_inspect_context_paused",
       "from": "paused",
       "to": "paused",
       "on_event": "INSPECT_CONTEXT",
-      "actions": ["inspect_context"]
+      "actions": [
+        "inspect_context"
+      ]
     },
     {
       "id": "t_eval",
       "from": "debugging",
       "to": "debugging",
       "on_event": "EVAL",
-      "actions": ["evaluate_expression"]
+      "actions": [
+        "evaluate_expression"
+      ]
     },
     {
       "id": "t_eval_paused",
       "from": "paused",
       "to": "paused",
       "on_event": "EVAL",
-      "actions": ["evaluate_expression"]
+      "actions": [
+        "evaluate_expression"
+      ]
     },
     {
       "id": "t_add_watch",
       "from": "debugging",
       "to": "debugging",
       "on_event": "ADD_WATCH",
-      "actions": ["add_watch"]
+      "actions": [
+        "add_watch"
+      ]
     },
     {
       "id": "t_add_watch_paused",
       "from": "paused",
       "to": "paused",
       "on_event": "ADD_WATCH",
-      "actions": ["add_watch"]
+      "actions": [
+        "add_watch"
+      ]
     },
     {
       "id": "t_remove_watch",
       "from": "debugging",
       "to": "debugging",
       "on_event": "REMOVE_WATCH",
-      "actions": ["remove_watch"]
+      "actions": [
+        "remove_watch"
+      ]
     },
     {
       "id": "t_get_watches",
       "from": "debugging",
       "to": "debugging",
       "on_event": "GET_WATCHES",
-      "actions": ["get_watches"]
+      "actions": [
+        "get_watches"
+      ]
     },
     {
       "id": "t_get_watches_paused",
       "from": "paused",
       "to": "paused",
       "on_event": "GET_WATCHES",
-      "actions": ["get_watches"]
+      "actions": [
+        "get_watches"
+      ]
     },
     {
       "id": "t_history",
       "from": "debugging",
       "to": "debugging",
       "on_event": "HISTORY",
-      "actions": ["get_history"]
+      "actions": [
+        "get_history"
+      ]
     },
     {
       "id": "t_history_paused",
       "from": "paused",
       "to": "paused",
       "on_event": "HISTORY",
-      "actions": ["get_history"]
+      "actions": [
+        "get_history"
+      ]
     },
     {
       "id": "t_goto_step",
       "from": "debugging",
       "to": "debugging",
       "on_event": "GOTO",
-      "gates": ["has_history"],
-      "actions": ["goto_step"]
+      "gates": [
+        "has_history"
+      ],
+      "actions": [
+        "goto_step"
+      ]
     },
     {
       "id": "t_goto_step_paused",
       "from": "paused",
       "to": "debugging",
       "on_event": "GOTO",
-      "gates": ["has_history"],
-      "actions": ["goto_step", "clear_hit_breakpoint"]
+      "gates": [
+        "has_history"
+      ],
+      "actions": [
+        "goto_step",
+        "clear_hit_breakpoint"
+      ]
     },
     {
       "id": "t_compare",
       "from": "debugging",
       "to": "debugging",
       "on_event": "COMPARE",
-      "actions": ["compare_states"]
+      "actions": [
+        "compare_states"
+      ]
     },
     {
       "id": "t_compare_paused",
       "from": "paused",
       "to": "paused",
       "on_event": "COMPARE",
-      "actions": ["compare_states"]
+      "actions": [
+        "compare_states"
+      ]
     },
     {
       "id": "t_reset",
       "from": "debugging",
       "to": "debugging",
       "on_event": "RESET",
-      "actions": ["reset_session"]
+      "actions": [
+        "reset_session"
+      ]
     },
     {
       "id": "t_reset_paused",
       "from": "paused",
       "to": "debugging",
       "on_event": "RESET",
-      "actions": ["reset_session", "clear_hit_breakpoint"]
+      "actions": [
+        "reset_session",
+        "clear_hit_breakpoint"
+      ]
     },
     {
       "id": "t_status",
       "from": "debugging",
       "to": "debugging",
       "on_event": "STATUS",
-      "actions": ["render_status"]
+      "actions": [
+        "render_status"
+      ]
     },
     {
       "id": "t_status_paused",
       "from": "paused",
       "to": "paused",
       "on_event": "STATUS",
-      "actions": ["render_status"]
+      "actions": [
+        "render_status"
+      ]
     },
     {
       "id": "t_unload",
       "from": "loaded",
       "to": "idle",
       "on_event": "UNLOAD",
-      "actions": ["unload_blueprint"]
+      "actions": [
+        "unload_blueprint"
+      ]
     },
     {
       "id": "t_unload_debug",
       "from": "debugging",
       "to": "idle",
       "on_event": "UNLOAD",
-      "actions": ["unload_blueprint"]
+      "actions": [
+        "unload_blueprint"
+      ]
     },
     {
       "id": "t_unload_paused",
       "from": "paused",
       "to": "idle",
       "on_event": "UNLOAD",
-      "actions": ["unload_blueprint", "clear_hit_breakpoint"]
+      "actions": [
+        "unload_blueprint",
+        "clear_hit_breakpoint"
+      ]
     },
     {
       "id": "t_recover",
       "from": "error",
       "to": "idle",
       "on_event": "CLEAR",
-      "actions": ["clear_error"]
+      "actions": [
+        "clear_error"
+      ]
     }
   ]
 }

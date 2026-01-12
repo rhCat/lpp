@@ -4,7 +4,6 @@
   "name": "L++ Blueprint Composer",
   "version": "1.0.0",
   "description": "Hierarchical composition tool for L++ blueprints - embeds sub-blueprints as macro states",
-
   "context_schema": {
     "properties": {
       "parent_blueprint": {
@@ -57,7 +56,6 @@
       }
     }
   },
-
   "states": {
     "idle": {
       "description": "No blueprints loaded, waiting for input"
@@ -84,10 +82,8 @@
       "description": "Error state"
     }
   },
-
   "entry_state": "idle",
-  "terminal_states": [],
-
+  "terminal_states": {},
   "gates": {
     "has_parent": {
       "type": "expression",
@@ -134,7 +130,6 @@
       "expression": "parent_blueprint is not None and embeddings is not None"
     }
   },
-
   "actions": {
     "load_parent": {
       "type": "compute",
@@ -353,7 +348,6 @@
       }
     }
   },
-
   "display": {
     "rules": [
       {
@@ -389,154 +383,225 @@
       }
     ]
   },
-
   "transitions": [
     {
       "id": "t_load_parent_from_idle",
       "from": "idle",
       "to": "parent_loaded",
       "on_event": "LOAD_PARENT",
-      "actions": ["load_parent"]
+      "actions": [
+        "load_parent"
+      ]
     },
     {
       "id": "t_load_manifest",
       "from": "idle",
       "to": "composed",
       "on_event": "LOAD_MANIFEST",
-      "actions": ["load_manifest", "compose_from_manifest"]
+      "actions": [
+        "load_manifest",
+        "compose_from_manifest"
+      ]
     },
     {
       "id": "t_load_child",
       "from": "parent_loaded",
       "to": "child_loaded",
       "on_event": "LOAD_CHILD",
-      "gates": ["has_parent"],
-      "actions": ["load_child"]
+      "gates": [
+        "has_parent"
+      ],
+      "actions": [
+        "load_child"
+      ]
     },
     {
       "id": "t_reload_parent",
       "from": "parent_loaded",
       "to": "parent_loaded",
       "on_event": "LOAD_PARENT",
-      "actions": ["load_parent", "clear_embeddings"]
+      "actions": [
+        "load_parent",
+        "clear_embeddings"
+      ]
     },
     {
       "id": "t_reload_child",
       "from": "child_loaded",
       "to": "child_loaded",
       "on_event": "LOAD_CHILD",
-      "actions": ["load_child"]
+      "actions": [
+        "load_child"
+      ]
     },
     {
       "id": "t_define_embedding",
       "from": "child_loaded",
       "to": "defining_embedding",
       "on_event": "DEFINE",
-      "gates": ["has_both"],
-      "actions": ["init_embedding"]
+      "gates": [
+        "has_both"
+      ],
+      "actions": [
+        "init_embedding"
+      ]
     },
     {
       "id": "t_set_input",
       "from": "defining_embedding",
       "to": "defining_embedding",
       "on_event": "SET_INPUT",
-      "gates": ["has_embedding"],
-      "actions": ["set_input_contract"]
+      "gates": [
+        "has_embedding"
+      ],
+      "actions": [
+        "set_input_contract"
+      ]
     },
     {
       "id": "t_set_output",
       "from": "defining_embedding",
       "to": "defining_embedding",
       "on_event": "SET_OUTPUT",
-      "gates": ["has_embedding"],
-      "actions": ["set_output_contract"]
+      "gates": [
+        "has_embedding"
+      ],
+      "actions": [
+        "set_output_contract"
+      ]
     },
     {
       "id": "t_set_events",
       "from": "defining_embedding",
       "to": "defining_embedding",
       "on_event": "SET_EVENTS",
-      "gates": ["has_embedding"],
-      "actions": ["set_event_map"]
+      "gates": [
+        "has_embedding"
+      ],
+      "actions": [
+        "set_event_map"
+      ]
     },
     {
       "id": "t_done_defining",
       "from": "defining_embedding",
       "to": "embedding_ready",
       "on_event": "DONE",
-      "gates": ["has_embedding"],
-      "actions": ["finalize_embedding"]
+      "gates": [
+        "has_embedding"
+      ],
+      "actions": [
+        "finalize_embedding"
+      ]
     },
     {
       "id": "t_add_more",
       "from": "embedding_ready",
       "to": "child_loaded",
       "on_event": "ADD_MORE",
-      "actions": ["clear_child"]
+      "actions": [
+        "clear_child"
+      ]
     },
     {
       "id": "t_compose",
       "from": "embedding_ready",
       "to": "composed",
       "on_event": "COMPOSE",
-      "gates": ["has_embeddings"],
-      "actions": ["compose"]
+      "gates": [
+        "has_embeddings"
+      ],
+      "actions": [
+        "compose"
+      ]
     },
     {
       "id": "t_quick_compose",
       "from": "child_loaded",
       "to": "composed",
       "on_event": "QUICK_COMPOSE",
-      "gates": ["has_both"],
-      "actions": ["init_embedding", "finalize_embedding", "compose"]
+      "gates": [
+        "has_both"
+      ],
+      "actions": [
+        "init_embedding",
+        "finalize_embedding",
+        "compose"
+      ]
     },
     {
       "id": "t_validate",
       "from": "composed",
       "to": "validated",
       "on_event": "VALIDATE",
-      "gates": ["has_composed"],
-      "actions": ["validate_composition"]
+      "gates": [
+        "has_composed"
+      ],
+      "actions": [
+        "validate_composition"
+      ]
     },
     {
       "id": "t_flatten",
       "from": "composed",
       "to": "composed",
       "on_event": "FLATTEN",
-      "gates": ["has_composed"],
-      "actions": ["flatten"]
+      "gates": [
+        "has_composed"
+      ],
+      "actions": [
+        "flatten"
+      ]
     },
     {
       "id": "t_export",
       "from": "composed",
       "to": "composed",
       "on_event": "EXPORT",
-      "gates": ["has_composed"],
-      "actions": ["export_composed"]
+      "gates": [
+        "has_composed"
+      ],
+      "actions": [
+        "export_composed"
+      ]
     },
     {
       "id": "t_export_after_validate",
       "from": "validated",
       "to": "validated",
       "on_event": "EXPORT",
-      "gates": ["has_composed"],
-      "actions": ["export_composed"]
+      "gates": [
+        "has_composed"
+      ],
+      "actions": [
+        "export_composed"
+      ]
     },
     {
       "id": "t_save_manifest",
       "from": "embedding_ready",
       "to": "embedding_ready",
       "on_event": "SAVE_MANIFEST",
-      "gates": ["has_embeddings", "has_valid_data"],
-      "actions": ["generate_manifest", "export_manifest"]
+      "gates": [
+        "has_embeddings",
+        "has_valid_data"
+      ],
+      "actions": [
+        "generate_manifest",
+        "export_manifest"
+      ]
     },
     {
       "id": "t_revalidate",
       "from": "validated",
       "to": "validated",
       "on_event": "VALIDATE",
-      "gates": ["has_composed"],
-      "actions": ["validate_composition"]
+      "gates": [
+        "has_composed"
+      ],
+      "actions": [
+        "validate_composition"
+      ]
     },
     {
       "id": "t_back_to_composed",
@@ -550,7 +615,9 @@
       "from": "composed",
       "to": "embedding_ready",
       "on_event": "BACK",
-      "actions": ["clear_composed"]
+      "actions": [
+        "clear_composed"
+      ]
     },
     {
       "id": "t_back_from_defining",
@@ -564,42 +631,55 @@
       "from": "composed",
       "to": "idle",
       "on_event": "RESET",
-      "actions": ["clear_all"]
+      "actions": [
+        "clear_all"
+      ]
     },
     {
       "id": "t_reset_from_validated",
       "from": "validated",
       "to": "idle",
       "on_event": "RESET",
-      "actions": ["clear_all"]
+      "actions": [
+        "clear_all"
+      ]
     },
     {
       "id": "t_clear_from_parent",
       "from": "parent_loaded",
       "to": "idle",
       "on_event": "CLEAR",
-      "actions": ["clear_all"]
+      "actions": [
+        "clear_all"
+      ]
     },
     {
       "id": "t_clear_from_child",
       "from": "child_loaded",
       "to": "idle",
       "on_event": "CLEAR",
-      "actions": ["clear_all"]
+      "actions": [
+        "clear_all"
+      ]
     },
     {
       "id": "t_error_recover",
       "from": "error",
       "to": "idle",
       "on_event": "CLEAR",
-      "actions": ["clear_error", "clear_all"]
+      "actions": [
+        "clear_error",
+        "clear_all"
+      ]
     },
     {
       "id": "t_load_error",
       "from": "*",
       "to": "error",
       "on_event": "LOAD_FAILED",
-      "actions": ["set_error"]
+      "actions": [
+        "set_error"
+      ]
     }
   ]
 }

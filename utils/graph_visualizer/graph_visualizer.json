@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1.2",
+  "$schema": "lpp/v0.2.0",
   "id": "graph_visualizer",
   "name": "Graph Visualizer",
   "version": "1.0.0",
@@ -39,9 +39,9 @@
     }
   },
   "entry_state": "idle",
-  "terminal_states": [
-    "done"
-  ],
+  "terminal_states": {
+    "done": {}
+  },
   "gates": {
     "has_blueprint": {
       "type": "expression",

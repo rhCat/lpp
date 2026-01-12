@@ -6,158 +6,763 @@
   "description": "Higher-assembly blueprint studio for creating, reviewing, auditing, simulating, and editing L++ blueprints with LLM assistance and interactive GUI",
   "context_schema": {
     "properties": {
-      "blueprint": {"type": "object", "description": "Current blueprint being edited"},
-      "blueprint_path": {"type": "string", "description": "Path to blueprint file"},
-      "blueprint_json": {"type": "string", "description": "JSON string of blueprint"},
-      "is_dirty": {"type": "boolean", "description": "Has unsaved changes"},
-      "mode": {"type": "string", "enum": ["create", "edit", "review", "simulate"]},
-      "llm_enabled": {"type": "boolean", "description": "LLM assistance enabled"},
-      "api_key": {"type": "string"},
-      "api_base": {"type": "string"},
-      "model": {"type": "string"},
-      "prompt": {"type": "string", "description": "User prompt for LLM"},
-      "llm_response": {"type": "string", "description": "LLM response"},
-      "suggestions": {"type": "array", "description": "LLM suggestions"},
-      "selected_node": {"type": "string", "description": "Currently selected state/transition"},
-      "selected_type": {"type": "string", "enum": ["state", "transition", "gate", "action"]},
-      "node_data": {"type": "object", "description": "Data for selected node"},
-      "edit_buffer": {"type": "object", "description": "Pending edits"},
-      "tlc_result": {"type": "object", "description": "TLC validation result"},
-      "tlc_errors": {"type": "array", "description": "TLC validation errors"},
-      "tlc_passed": {"type": "boolean"},
-      "paths": {"type": "array", "description": "All execution paths"},
-      "path_count": {"type": "number"},
-      "states_list": {"type": "array", "description": "All states"},
-      "state_count": {"type": "number"},
-      "reachability": {"type": "object", "description": "State reachability map"},
-      "deadlocks": {"type": "array", "description": "Detected deadlock states"},
-      "sim_state": {"type": "string", "description": "Current simulation state"},
-      "sim_context": {"type": "object", "description": "Simulation context data"},
-      "sim_history": {"type": "array", "description": "Simulation step history"},
-      "sim_available_events": {"type": "array", "description": "Events available at current state"},
-      "sim_step_count": {"type": "number"},
-      "clusters": {"type": "array", "description": "State clusters"},
-      "dependencies": {"type": "object", "description": "State dependency graph"},
-      "sorted_states": {"type": "array", "description": "Topologically sorted states"},
-      "audit_log": {"type": "array", "description": "Audit trail of changes"},
-      "review_notes": {"type": "array", "description": "Review comments"},
-      "review_status": {"type": "string", "enum": ["pending", "approved", "rejected"]},
-      "coverage": {"type": "object", "description": "Test coverage metrics"},
-      "graph_html": {"type": "string", "description": "Generated graph HTML"},
-      "mermaid": {"type": "string", "description": "Generated Mermaid diagram"},
-      "error": {"type": "string"}
+      "blueprint": {
+        "type": "object",
+        "description": "Current blueprint being edited"
+      },
+      "blueprint_path": {
+        "type": "string",
+        "description": "Path to blueprint file"
+      },
+      "blueprint_json": {
+        "type": "string",
+        "description": "JSON string of blueprint"
+      },
+      "is_dirty": {
+        "type": "boolean",
+        "description": "Has unsaved changes"
+      },
+      "mode": {
+        "type": "string",
+        "enum": [
+          "create",
+          "edit",
+          "review",
+          "simulate"
+        ]
+      },
+      "llm_enabled": {
+        "type": "boolean",
+        "description": "LLM assistance enabled"
+      },
+      "api_key": {
+        "type": "string"
+      },
+      "api_base": {
+        "type": "string"
+      },
+      "model": {
+        "type": "string"
+      },
+      "prompt": {
+        "type": "string",
+        "description": "User prompt for LLM"
+      },
+      "llm_response": {
+        "type": "string",
+        "description": "LLM response"
+      },
+      "suggestions": {
+        "type": "array",
+        "description": "LLM suggestions"
+      },
+      "selected_node": {
+        "type": "string",
+        "description": "Currently selected state/transition"
+      },
+      "selected_type": {
+        "type": "string",
+        "enum": [
+          "state",
+          "transition",
+          "gate",
+          "action"
+        ]
+      },
+      "node_data": {
+        "type": "object",
+        "description": "Data for selected node"
+      },
+      "edit_buffer": {
+        "type": "object",
+        "description": "Pending edits"
+      },
+      "tlc_result": {
+        "type": "object",
+        "description": "TLC validation result"
+      },
+      "tlc_errors": {
+        "type": "array",
+        "description": "TLC validation errors"
+      },
+      "tlc_passed": {
+        "type": "boolean"
+      },
+      "paths": {
+        "type": "array",
+        "description": "All execution paths"
+      },
+      "path_count": {
+        "type": "number"
+      },
+      "states_list": {
+        "type": "array",
+        "description": "All states"
+      },
+      "state_count": {
+        "type": "number"
+      },
+      "reachability": {
+        "type": "object",
+        "description": "State reachability map"
+      },
+      "deadlocks": {
+        "type": "array",
+        "description": "Detected deadlock states"
+      },
+      "sim_state": {
+        "type": "string",
+        "description": "Current simulation state"
+      },
+      "sim_context": {
+        "type": "object",
+        "description": "Simulation context data"
+      },
+      "sim_history": {
+        "type": "array",
+        "description": "Simulation step history"
+      },
+      "sim_available_events": {
+        "type": "array",
+        "description": "Events available at current state"
+      },
+      "sim_step_count": {
+        "type": "number"
+      },
+      "clusters": {
+        "type": "array",
+        "description": "State clusters"
+      },
+      "dependencies": {
+        "type": "object",
+        "description": "State dependency graph"
+      },
+      "sorted_states": {
+        "type": "array",
+        "description": "Topologically sorted states"
+      },
+      "audit_log": {
+        "type": "array",
+        "description": "Audit trail of changes"
+      },
+      "review_notes": {
+        "type": "array",
+        "description": "Review comments"
+      },
+      "review_status": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "approved",
+          "rejected"
+        ]
+      },
+      "coverage": {
+        "type": "object",
+        "description": "Test coverage metrics"
+      },
+      "graph_html": {
+        "type": "string",
+        "description": "Generated graph HTML"
+      },
+      "mermaid": {
+        "type": "string",
+        "description": "Generated Mermaid diagram"
+      },
+      "error": {
+        "type": "string"
+      }
     }
   },
   "states": {
-    "idle": {"description": "No blueprint loaded"},
-    "loaded": {"description": "Blueprint loaded and ready"},
-    "editing": {"description": "Editing selected node"},
-    "reviewing": {"description": "Reviewing and auditing blueprint"},
-    "validating": {"description": "Running TLC validation"},
-    "analyzing": {"description": "Analyzing paths and states"},
-    "simulating": {"description": "Simulating user walkthrough"},
-    "clustering": {"description": "Computing clusters and dependencies"},
-    "llm_assist": {"description": "Getting LLM assistance"},
-    "generating": {"description": "Generating outputs (graph, mermaid)"},
-    "saving": {"description": "Saving blueprint to file"},
-    "error": {"description": "Error state"}
+    "idle": {
+      "description": "No blueprint loaded"
+    },
+    "loaded": {
+      "description": "Blueprint loaded and ready"
+    },
+    "editing": {
+      "description": "Editing selected node"
+    },
+    "reviewing": {
+      "description": "Reviewing and auditing blueprint"
+    },
+    "validating": {
+      "description": "Running TLC validation"
+    },
+    "analyzing": {
+      "description": "Analyzing paths and states"
+    },
+    "simulating": {
+      "description": "Simulating user walkthrough"
+    },
+    "clustering": {
+      "description": "Computing clusters and dependencies"
+    },
+    "llm_assist": {
+      "description": "Getting LLM assistance"
+    },
+    "generating": {
+      "description": "Generating outputs (graph, mermaid)"
+    },
+    "saving": {
+      "description": "Saving blueprint to file"
+    },
+    "error": {
+      "description": "Error state"
+    }
   },
   "transitions": [
-    {"id": "t_new", "from": "idle", "to": "loaded", "on_event": "NEW", "actions": ["a_init_new"]},
-    {"id": "t_load", "from": "idle", "to": "loaded", "on_event": "LOAD", "actions": ["a_load_blueprint"]},
-    {"id": "t_load_err", "from": "idle", "to": "error", "on_event": "LOAD", "gates": ["g_load_failed"], "actions": ["a_set_error"]},
-    {"id": "t_set_bp", "from": "idle", "to": "loaded", "on_event": "SET_BLUEPRINT", "gates": ["g_has_blueprint"]},
-    {"id": "t_set_bp_any", "from": "*", "to": "loaded", "on_event": "SET_BLUEPRINT", "gates": ["g_has_blueprint"]},
-    {"id": "t_reload", "from": "loaded", "to": "loaded", "on_event": "LOAD", "actions": ["a_load_blueprint"]},
-
-    {"id": "t_select", "from": "loaded", "to": "editing", "on_event": "SELECT", "gates": ["g_has_selection"], "actions": ["a_select_node"]},
-    {"id": "t_review", "from": "loaded", "to": "reviewing", "on_event": "REVIEW", "actions": ["a_start_review"]},
-    {"id": "t_validate", "from": "loaded", "to": "validating", "on_event": "VALIDATE", "actions": ["a_run_tlc"]},
-    {"id": "t_analyze", "from": "loaded", "to": "analyzing", "on_event": "ANALYZE", "actions": ["a_analyze_paths"]},
-    {"id": "t_simulate", "from": "loaded", "to": "simulating", "on_event": "SIMULATE", "actions": ["a_init_sim"]},
-    {"id": "t_cluster", "from": "loaded", "to": "clustering", "on_event": "CLUSTER", "actions": ["a_compute_clusters"]},
-    {"id": "t_generate", "from": "loaded", "to": "generating", "on_event": "GENERATE", "actions": ["a_generate_outputs"]},
-    {"id": "t_llm_loaded", "from": "loaded", "to": "llm_assist", "on_event": "LLM_ASSIST", "gates": ["g_llm_enabled"], "actions": ["a_set_mode_edit"]},
-    {"id": "t_save", "from": "loaded", "to": "saving", "on_event": "SAVE", "gates": ["g_is_dirty"], "actions": ["a_save_blueprint"]},
-    {"id": "t_close", "from": "loaded", "to": "idle", "on_event": "CLOSE", "actions": ["a_clear"]},
-
-    {"id": "t_edit_apply", "from": "editing", "to": "loaded", "on_event": "APPLY", "actions": ["a_apply_edit", "a_add_audit"]},
-    {"id": "t_edit_cancel", "from": "editing", "to": "loaded", "on_event": "CANCEL", "actions": ["a_clear_edit"]},
-    {"id": "t_edit_llm", "from": "editing", "to": "llm_assist", "on_event": "LLM_ASSIST", "gates": ["g_llm_enabled"], "actions": ["a_set_mode_edit"]},
-    {"id": "t_edit_delete", "from": "editing", "to": "loaded", "on_event": "DELETE", "actions": ["a_delete_node", "a_add_audit"]},
-    {"id": "t_add_state", "from": "editing", "to": "loaded", "on_event": "ADD_STATE", "actions": ["a_add_state", "a_add_audit"]},
-    {"id": "t_add_trans", "from": "editing", "to": "loaded", "on_event": "ADD_TRANSITION", "actions": ["a_add_transition", "a_add_audit"]},
-    {"id": "t_add_gate", "from": "editing", "to": "loaded", "on_event": "ADD_GATE", "actions": ["a_add_gate", "a_add_audit"]},
-    {"id": "t_add_action", "from": "editing", "to": "loaded", "on_event": "ADD_ACTION", "actions": ["a_add_action", "a_add_audit"]},
-    {"id": "t_edit_analyze", "from": "editing", "to": "analyzing", "on_event": "ANALYZE", "actions": ["a_analyze_paths"]},
-
-    {"id": "t_review_note", "from": "reviewing", "to": "reviewing", "on_event": "ADD_NOTE", "gates": ["g_has_prompt"], "actions": ["a_add_note"]},
-    {"id": "t_review_approve", "from": "reviewing", "to": "loaded", "on_event": "APPROVE", "actions": ["a_set_approved"]},
-    {"id": "t_review_reject", "from": "reviewing", "to": "loaded", "on_event": "REJECT", "actions": ["a_set_rejected"]},
-    {"id": "t_review_done", "from": "reviewing", "to": "loaded", "on_event": "DONE", "actions": []},
-
-    {"id": "t_validate_done", "from": "validating", "to": "loaded", "on_event": "DONE", "actions": []},
-    {"id": "t_validate_to_gen", "from": "validating", "to": "generating", "on_event": "GENERATE", "gates": ["g_tlc_passed"], "actions": ["a_generate_outputs"]},
-    {"id": "t_validate_err", "from": "validating", "to": "error", "on_event": "ERROR", "actions": ["a_set_error"]},
-
-    {"id": "t_analyze_done", "from": "analyzing", "to": "loaded", "on_event": "DONE", "actions": []},
-
-    {"id": "t_sim_step", "from": "simulating", "to": "simulating", "on_event": "STEP", "gates": ["g_sim_not_terminal", "g_sim_step_limit", "g_has_available_events"], "actions": ["a_sim_step"]},
-    {"id": "t_sim_event", "from": "simulating", "to": "simulating", "on_event": "DISPATCH", "gates": ["g_sim_not_terminal", "g_sim_step_limit"], "actions": ["a_sim_dispatch"]},
-    {"id": "t_sim_reset", "from": "simulating", "to": "simulating", "on_event": "RESET", "gates": ["g_has_blueprint"], "actions": ["a_sim_reset"]},
-    {"id": "t_sim_done", "from": "simulating", "to": "loaded", "on_event": "DONE", "actions": []},
-
-    {"id": "t_cluster_done", "from": "clustering", "to": "loaded", "on_event": "DONE", "actions": []},
-
-    {"id": "t_llm_done", "from": "llm_assist", "to": "loaded", "on_event": "DONE", "actions": []},
-    {"id": "t_llm_apply", "from": "llm_assist", "to": "loaded", "on_event": "APPLY", "actions": ["a_apply_llm", "a_add_audit"]},
-    {"id": "t_llm_cancel", "from": "llm_assist", "to": "loaded", "on_event": "CANCEL", "actions": ["a_clear_llm"]},
-    {"id": "t_llm_query", "from": "llm_assist", "to": "llm_assist", "on_event": "QUERY", "gates": ["g_has_prompt", "g_llm_enabled"], "actions": ["a_llm_query"]},
-
-    {"id": "t_generate_done", "from": "generating", "to": "loaded", "on_event": "DONE", "actions": []},
-
-    {"id": "t_save_done", "from": "saving", "to": "loaded", "on_event": "DONE", "actions": ["a_clear_dirty"]},
-    {"id": "t_save_err", "from": "saving", "to": "error", "on_event": "ERROR", "actions": ["a_set_error"]},
-
-    {"id": "t_err_retry", "from": "error", "to": "loaded", "on_event": "RETRY", "gates": ["g_has_blueprint"], "actions": ["a_clear_error"]},
-    {"id": "t_err_reset", "from": "error", "to": "idle", "on_event": "RESET", "actions": ["a_clear"]}
+    {
+      "id": "t_new",
+      "from": "idle",
+      "to": "loaded",
+      "on_event": "NEW",
+      "actions": [
+        "a_init_new"
+      ]
+    },
+    {
+      "id": "t_load",
+      "from": "idle",
+      "to": "loaded",
+      "on_event": "LOAD",
+      "actions": [
+        "a_load_blueprint"
+      ]
+    },
+    {
+      "id": "t_load_err",
+      "from": "idle",
+      "to": "error",
+      "on_event": "LOAD",
+      "gates": [
+        "g_load_failed"
+      ],
+      "actions": [
+        "a_set_error"
+      ]
+    },
+    {
+      "id": "t_set_bp",
+      "from": "idle",
+      "to": "loaded",
+      "on_event": "SET_BLUEPRINT",
+      "gates": [
+        "g_has_blueprint"
+      ]
+    },
+    {
+      "id": "t_set_bp_any",
+      "from": "*",
+      "to": "loaded",
+      "on_event": "SET_BLUEPRINT",
+      "gates": [
+        "g_has_blueprint"
+      ]
+    },
+    {
+      "id": "t_reload",
+      "from": "loaded",
+      "to": "loaded",
+      "on_event": "LOAD",
+      "actions": [
+        "a_load_blueprint"
+      ]
+    },
+    {
+      "id": "t_select",
+      "from": "loaded",
+      "to": "editing",
+      "on_event": "SELECT",
+      "gates": [
+        "g_has_selection"
+      ],
+      "actions": [
+        "a_select_node"
+      ]
+    },
+    {
+      "id": "t_review",
+      "from": "loaded",
+      "to": "reviewing",
+      "on_event": "REVIEW",
+      "actions": [
+        "a_start_review"
+      ]
+    },
+    {
+      "id": "t_validate",
+      "from": "loaded",
+      "to": "validating",
+      "on_event": "VALIDATE",
+      "actions": [
+        "a_run_tlc"
+      ]
+    },
+    {
+      "id": "t_analyze",
+      "from": "loaded",
+      "to": "analyzing",
+      "on_event": "ANALYZE",
+      "actions": [
+        "a_analyze_paths"
+      ]
+    },
+    {
+      "id": "t_simulate",
+      "from": "loaded",
+      "to": "simulating",
+      "on_event": "SIMULATE",
+      "actions": [
+        "a_init_sim"
+      ]
+    },
+    {
+      "id": "t_cluster",
+      "from": "loaded",
+      "to": "clustering",
+      "on_event": "CLUSTER",
+      "actions": [
+        "a_compute_clusters"
+      ]
+    },
+    {
+      "id": "t_generate",
+      "from": "loaded",
+      "to": "generating",
+      "on_event": "GENERATE",
+      "actions": [
+        "a_generate_outputs"
+      ]
+    },
+    {
+      "id": "t_llm_loaded",
+      "from": "loaded",
+      "to": "llm_assist",
+      "on_event": "LLM_ASSIST",
+      "gates": [
+        "g_llm_enabled"
+      ],
+      "actions": [
+        "a_set_mode_edit"
+      ]
+    },
+    {
+      "id": "t_save",
+      "from": "loaded",
+      "to": "saving",
+      "on_event": "SAVE",
+      "gates": [
+        "g_is_dirty"
+      ],
+      "actions": [
+        "a_save_blueprint"
+      ]
+    },
+    {
+      "id": "t_close",
+      "from": "loaded",
+      "to": "idle",
+      "on_event": "CLOSE",
+      "actions": [
+        "a_clear"
+      ]
+    },
+    {
+      "id": "t_edit_apply",
+      "from": "editing",
+      "to": "loaded",
+      "on_event": "APPLY",
+      "actions": [
+        "a_apply_edit",
+        "a_add_audit"
+      ]
+    },
+    {
+      "id": "t_edit_cancel",
+      "from": "editing",
+      "to": "loaded",
+      "on_event": "CANCEL",
+      "actions": [
+        "a_clear_edit"
+      ]
+    },
+    {
+      "id": "t_edit_llm",
+      "from": "editing",
+      "to": "llm_assist",
+      "on_event": "LLM_ASSIST",
+      "gates": [
+        "g_llm_enabled"
+      ],
+      "actions": [
+        "a_set_mode_edit"
+      ]
+    },
+    {
+      "id": "t_edit_delete",
+      "from": "editing",
+      "to": "loaded",
+      "on_event": "DELETE",
+      "actions": [
+        "a_delete_node",
+        "a_add_audit"
+      ]
+    },
+    {
+      "id": "t_add_state",
+      "from": "editing",
+      "to": "loaded",
+      "on_event": "ADD_STATE",
+      "actions": [
+        "a_add_state",
+        "a_add_audit"
+      ]
+    },
+    {
+      "id": "t_add_trans",
+      "from": "editing",
+      "to": "loaded",
+      "on_event": "ADD_TRANSITION",
+      "actions": [
+        "a_add_transition",
+        "a_add_audit"
+      ]
+    },
+    {
+      "id": "t_add_gate",
+      "from": "editing",
+      "to": "loaded",
+      "on_event": "ADD_GATE",
+      "actions": [
+        "a_add_gate",
+        "a_add_audit"
+      ]
+    },
+    {
+      "id": "t_add_action",
+      "from": "editing",
+      "to": "loaded",
+      "on_event": "ADD_ACTION",
+      "actions": [
+        "a_add_action",
+        "a_add_audit"
+      ]
+    },
+    {
+      "id": "t_edit_analyze",
+      "from": "editing",
+      "to": "analyzing",
+      "on_event": "ANALYZE",
+      "actions": [
+        "a_analyze_paths"
+      ]
+    },
+    {
+      "id": "t_review_note",
+      "from": "reviewing",
+      "to": "reviewing",
+      "on_event": "ADD_NOTE",
+      "gates": [
+        "g_has_prompt"
+      ],
+      "actions": [
+        "a_add_note"
+      ]
+    },
+    {
+      "id": "t_review_approve",
+      "from": "reviewing",
+      "to": "loaded",
+      "on_event": "APPROVE",
+      "actions": [
+        "a_set_approved"
+      ]
+    },
+    {
+      "id": "t_review_reject",
+      "from": "reviewing",
+      "to": "loaded",
+      "on_event": "REJECT",
+      "actions": [
+        "a_set_rejected"
+      ]
+    },
+    {
+      "id": "t_review_done",
+      "from": "reviewing",
+      "to": "loaded",
+      "on_event": "DONE",
+      "actions": []
+    },
+    {
+      "id": "t_validate_done",
+      "from": "validating",
+      "to": "loaded",
+      "on_event": "DONE",
+      "actions": []
+    },
+    {
+      "id": "t_validate_to_gen",
+      "from": "validating",
+      "to": "generating",
+      "on_event": "GENERATE",
+      "gates": [
+        "g_tlc_passed"
+      ],
+      "actions": [
+        "a_generate_outputs"
+      ]
+    },
+    {
+      "id": "t_validate_err",
+      "from": "validating",
+      "to": "error",
+      "on_event": "ERROR",
+      "actions": [
+        "a_set_error"
+      ]
+    },
+    {
+      "id": "t_analyze_done",
+      "from": "analyzing",
+      "to": "loaded",
+      "on_event": "DONE",
+      "actions": []
+    },
+    {
+      "id": "t_sim_step",
+      "from": "simulating",
+      "to": "simulating",
+      "on_event": "STEP",
+      "gates": [
+        "g_sim_not_terminal",
+        "g_sim_step_limit",
+        "g_has_available_events"
+      ],
+      "actions": [
+        "a_sim_step"
+      ]
+    },
+    {
+      "id": "t_sim_event",
+      "from": "simulating",
+      "to": "simulating",
+      "on_event": "DISPATCH",
+      "gates": [
+        "g_sim_not_terminal",
+        "g_sim_step_limit"
+      ],
+      "actions": [
+        "a_sim_dispatch"
+      ]
+    },
+    {
+      "id": "t_sim_reset",
+      "from": "simulating",
+      "to": "simulating",
+      "on_event": "RESET",
+      "gates": [
+        "g_has_blueprint"
+      ],
+      "actions": [
+        "a_sim_reset"
+      ]
+    },
+    {
+      "id": "t_sim_done",
+      "from": "simulating",
+      "to": "loaded",
+      "on_event": "DONE",
+      "actions": []
+    },
+    {
+      "id": "t_cluster_done",
+      "from": "clustering",
+      "to": "loaded",
+      "on_event": "DONE",
+      "actions": []
+    },
+    {
+      "id": "t_llm_done",
+      "from": "llm_assist",
+      "to": "loaded",
+      "on_event": "DONE",
+      "actions": []
+    },
+    {
+      "id": "t_llm_apply",
+      "from": "llm_assist",
+      "to": "loaded",
+      "on_event": "APPLY",
+      "actions": [
+        "a_apply_llm",
+        "a_add_audit"
+      ]
+    },
+    {
+      "id": "t_llm_cancel",
+      "from": "llm_assist",
+      "to": "loaded",
+      "on_event": "CANCEL",
+      "actions": [
+        "a_clear_llm"
+      ]
+    },
+    {
+      "id": "t_llm_query",
+      "from": "llm_assist",
+      "to": "llm_assist",
+      "on_event": "QUERY",
+      "gates": [
+        "g_has_prompt",
+        "g_llm_enabled"
+      ],
+      "actions": [
+        "a_llm_query"
+      ]
+    },
+    {
+      "id": "t_generate_done",
+      "from": "generating",
+      "to": "loaded",
+      "on_event": "DONE",
+      "actions": []
+    },
+    {
+      "id": "t_save_done",
+      "from": "saving",
+      "to": "loaded",
+      "on_event": "DONE",
+      "actions": [
+        "a_clear_dirty"
+      ]
+    },
+    {
+      "id": "t_save_err",
+      "from": "saving",
+      "to": "error",
+      "on_event": "ERROR",
+      "actions": [
+        "a_set_error"
+      ]
+    },
+    {
+      "id": "t_err_retry",
+      "from": "error",
+      "to": "loaded",
+      "on_event": "RETRY",
+      "gates": [
+        "g_has_blueprint"
+      ],
+      "actions": [
+        "a_clear_error"
+      ]
+    },
+    {
+      "id": "t_err_reset",
+      "from": "error",
+      "to": "idle",
+      "on_event": "RESET",
+      "actions": [
+        "a_clear"
+      ]
+    }
   ],
   "gates": {
-    "g_llm_enabled": {"type": "expression", "expression": "llm_enabled == True and api_key != None"},
-    "g_is_dirty": {"type": "expression", "expression": "is_dirty == True"},
-    "g_has_blueprint": {"type": "expression", "expression": "blueprint != None"},
-    "g_load_failed": {"type": "expression", "expression": "error != None"},
-    "g_tlc_passed": {"type": "expression", "expression": "tlc_passed == True"},
-    "g_has_selection": {"type": "expression", "expression": "selected_node != None"},
-    "g_sim_not_terminal": {"type": "expression", "expression": "sim_state != None"},
-    "g_has_prompt": {"type": "expression", "expression": "prompt != None"},
-    "g_sim_step_limit": {"type": "expression", "expression": "sim_step_count < 1000"},
-    "g_has_available_events": {"type": "expression", "expression": "sim_available_events != None"}
+    "g_llm_enabled": {
+      "type": "expression",
+      "expression": "llm_enabled == True and api_key != None"
+    },
+    "g_is_dirty": {
+      "type": "expression",
+      "expression": "is_dirty == True"
+    },
+    "g_has_blueprint": {
+      "type": "expression",
+      "expression": "blueprint != None"
+    },
+    "g_load_failed": {
+      "type": "expression",
+      "expression": "error != None"
+    },
+    "g_tlc_passed": {
+      "type": "expression",
+      "expression": "tlc_passed == True"
+    },
+    "g_has_selection": {
+      "type": "expression",
+      "expression": "selected_node != None"
+    },
+    "g_sim_not_terminal": {
+      "type": "expression",
+      "expression": "sim_state != None"
+    },
+    "g_has_prompt": {
+      "type": "expression",
+      "expression": "prompt != None"
+    },
+    "g_sim_step_limit": {
+      "type": "expression",
+      "expression": "sim_step_count < 1000"
+    },
+    "g_has_available_events": {
+      "type": "expression",
+      "expression": "sim_available_events != None"
+    }
   },
   "actions": {
     "a_init_new": {
       "type": "compute",
       "compute_unit": "canvas:init_new",
       "input_map": {},
-      "output_map": {"blueprint": "blueprint", "blueprint_json": "blueprint_json", "is_dirty": "is_dirty", "mode": "mode"}
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprint_json": "blueprint_json",
+        "is_dirty": "is_dirty",
+        "mode": "mode"
+      }
     },
     "a_load_blueprint": {
       "type": "compute",
       "compute_unit": "canvas:load_blueprint",
-      "input_map": {"path": "blueprint_path"},
-      "output_map": {"blueprint": "blueprint", "blueprint_json": "blueprint_json", "error": "error"}
+      "input_map": {
+        "path": "blueprint_path"
+      },
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprint_json": "blueprint_json",
+        "error": "error"
+      }
     },
     "a_select_node": {
       "type": "compute",
       "compute_unit": "canvas:select_node",
-      "input_map": {"blueprint": "blueprint", "node_id": "selected_node", "node_type": "selected_type"},
-      "output_map": {"node_data": "node_data", "edit_buffer": "edit_buffer"}
+      "input_map": {
+        "blueprint": "blueprint",
+        "node_id": "selected_node",
+        "node_type": "selected_type"
+      },
+      "output_map": {
+        "node_data": "node_data",
+        "edit_buffer": "edit_buffer"
+      }
     },
     "a_apply_edit": {
       "type": "compute",
       "compute_unit": "canvas:apply_edit",
-      "input_map": {"blueprint": "blueprint", "node_id": "selected_node", "node_type": "selected_type", "edit_buffer": "edit_buffer"},
-      "output_map": {"blueprint": "blueprint", "blueprint_json": "blueprint_json", "is_dirty": "is_dirty"}
+      "input_map": {
+        "blueprint": "blueprint",
+        "node_id": "selected_node",
+        "node_type": "selected_type",
+        "edit_buffer": "edit_buffer"
+      },
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprint_json": "blueprint_json",
+        "is_dirty": "is_dirty"
+      }
     },
     "a_clear_edit": {
       "type": "set",
@@ -167,86 +772,197 @@
     "a_delete_node": {
       "type": "compute",
       "compute_unit": "canvas:delete_node",
-      "input_map": {"blueprint": "blueprint", "node_id": "selected_node", "node_type": "selected_type"},
-      "output_map": {"blueprint": "blueprint", "blueprint_json": "blueprint_json", "is_dirty": "is_dirty"}
+      "input_map": {
+        "blueprint": "blueprint",
+        "node_id": "selected_node",
+        "node_type": "selected_type"
+      },
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprint_json": "blueprint_json",
+        "is_dirty": "is_dirty"
+      }
     },
     "a_add_state": {
       "type": "compute",
       "compute_unit": "canvas:add_state",
-      "input_map": {"blueprint": "blueprint", "state_data": "edit_buffer"},
-      "output_map": {"blueprint": "blueprint", "blueprint_json": "blueprint_json", "is_dirty": "is_dirty"}
+      "input_map": {
+        "blueprint": "blueprint",
+        "state_data": "edit_buffer"
+      },
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprint_json": "blueprint_json",
+        "is_dirty": "is_dirty"
+      }
     },
     "a_add_transition": {
       "type": "compute",
       "compute_unit": "canvas:add_transition",
-      "input_map": {"blueprint": "blueprint", "transition_data": "edit_buffer"},
-      "output_map": {"blueprint": "blueprint", "blueprint_json": "blueprint_json", "is_dirty": "is_dirty"}
+      "input_map": {
+        "blueprint": "blueprint",
+        "transition_data": "edit_buffer"
+      },
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprint_json": "blueprint_json",
+        "is_dirty": "is_dirty"
+      }
     },
     "a_add_gate": {
       "type": "compute",
       "compute_unit": "canvas:add_gate",
-      "input_map": {"blueprint": "blueprint", "gate_data": "edit_buffer"},
-      "output_map": {"blueprint": "blueprint", "blueprint_json": "blueprint_json", "is_dirty": "is_dirty"}
+      "input_map": {
+        "blueprint": "blueprint",
+        "gate_data": "edit_buffer"
+      },
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprint_json": "blueprint_json",
+        "is_dirty": "is_dirty"
+      }
     },
     "a_add_action": {
       "type": "compute",
       "compute_unit": "canvas:add_action",
-      "input_map": {"blueprint": "blueprint", "action_data": "edit_buffer"},
-      "output_map": {"blueprint": "blueprint", "blueprint_json": "blueprint_json", "is_dirty": "is_dirty"}
+      "input_map": {
+        "blueprint": "blueprint",
+        "action_data": "edit_buffer"
+      },
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprint_json": "blueprint_json",
+        "is_dirty": "is_dirty"
+      }
     },
     "a_run_tlc": {
       "type": "compute",
       "compute_unit": "canvas:run_tlc",
-      "input_map": {"blueprint": "blueprint"},
-      "output_map": {"tlc_result": "tlc_result", "tlc_errors": "tlc_errors", "tlc_passed": "tlc_passed", "error": "error"}
+      "input_map": {
+        "blueprint": "blueprint"
+      },
+      "output_map": {
+        "tlc_result": "tlc_result",
+        "tlc_errors": "tlc_errors",
+        "tlc_passed": "tlc_passed",
+        "error": "error"
+      }
     },
     "a_analyze_paths": {
       "type": "compute",
       "compute_unit": "canvas:analyze_paths",
-      "input_map": {"blueprint": "blueprint"},
-      "output_map": {"paths": "paths", "path_count": "path_count", "states_list": "states_list", "state_count": "state_count", "reachability": "reachability", "deadlocks": "deadlocks"}
+      "input_map": {
+        "blueprint": "blueprint"
+      },
+      "output_map": {
+        "paths": "paths",
+        "path_count": "path_count",
+        "states_list": "states_list",
+        "state_count": "state_count",
+        "reachability": "reachability",
+        "deadlocks": "deadlocks"
+      }
     },
     "a_init_sim": {
       "type": "compute",
       "compute_unit": "canvas:init_simulation",
-      "input_map": {"blueprint": "blueprint"},
-      "output_map": {"sim_state": "sim_state", "sim_context": "sim_context", "sim_history": "sim_history", "sim_available_events": "sim_available_events", "sim_step_count": "sim_step_count"}
+      "input_map": {
+        "blueprint": "blueprint"
+      },
+      "output_map": {
+        "sim_state": "sim_state",
+        "sim_context": "sim_context",
+        "sim_history": "sim_history",
+        "sim_available_events": "sim_available_events",
+        "sim_step_count": "sim_step_count"
+      }
     },
     "a_sim_step": {
       "type": "compute",
       "compute_unit": "canvas:sim_step",
-      "input_map": {"blueprint": "blueprint", "sim_state": "sim_state", "sim_context": "sim_context", "sim_history": "sim_history", "event": "prompt"},
-      "output_map": {"sim_state": "sim_state", "sim_context": "sim_context", "sim_history": "sim_history", "sim_available_events": "sim_available_events", "sim_step_count": "sim_step_count"}
+      "input_map": {
+        "blueprint": "blueprint",
+        "sim_state": "sim_state",
+        "sim_context": "sim_context",
+        "sim_history": "sim_history",
+        "event": "prompt"
+      },
+      "output_map": {
+        "sim_state": "sim_state",
+        "sim_context": "sim_context",
+        "sim_history": "sim_history",
+        "sim_available_events": "sim_available_events",
+        "sim_step_count": "sim_step_count"
+      }
     },
     "a_sim_dispatch": {
       "type": "compute",
       "compute_unit": "canvas:sim_dispatch",
-      "input_map": {"blueprint": "blueprint", "sim_state": "sim_state", "sim_context": "sim_context", "event": "prompt", "payload": "edit_buffer"},
-      "output_map": {"sim_state": "sim_state", "sim_context": "sim_context", "sim_history": "sim_history", "sim_available_events": "sim_available_events", "sim_step_count": "sim_step_count"}
+      "input_map": {
+        "blueprint": "blueprint",
+        "sim_state": "sim_state",
+        "sim_context": "sim_context",
+        "event": "prompt",
+        "payload": "edit_buffer"
+      },
+      "output_map": {
+        "sim_state": "sim_state",
+        "sim_context": "sim_context",
+        "sim_history": "sim_history",
+        "sim_available_events": "sim_available_events",
+        "sim_step_count": "sim_step_count"
+      }
     },
     "a_sim_reset": {
       "type": "compute",
       "compute_unit": "canvas:init_simulation",
-      "input_map": {"blueprint": "blueprint"},
-      "output_map": {"sim_state": "sim_state", "sim_context": "sim_context", "sim_history": "sim_history", "sim_available_events": "sim_available_events", "sim_step_count": "sim_step_count"}
+      "input_map": {
+        "blueprint": "blueprint"
+      },
+      "output_map": {
+        "sim_state": "sim_state",
+        "sim_context": "sim_context",
+        "sim_history": "sim_history",
+        "sim_available_events": "sim_available_events",
+        "sim_step_count": "sim_step_count"
+      }
     },
     "a_compute_clusters": {
       "type": "compute",
       "compute_unit": "canvas:compute_clusters",
-      "input_map": {"blueprint": "blueprint"},
-      "output_map": {"clusters": "clusters", "dependencies": "dependencies", "sorted_states": "sorted_states"}
+      "input_map": {
+        "blueprint": "blueprint"
+      },
+      "output_map": {
+        "clusters": "clusters",
+        "dependencies": "dependencies",
+        "sorted_states": "sorted_states"
+      }
     },
     "a_start_review": {
       "type": "compute",
       "compute_unit": "canvas:start_review",
-      "input_map": {"blueprint": "blueprint", "review_notes": "review_notes"},
-      "output_map": {"review_notes": "review_notes", "review_status": "review_status", "coverage": "coverage"}
+      "input_map": {
+        "blueprint": "blueprint",
+        "review_notes": "review_notes"
+      },
+      "output_map": {
+        "review_notes": "review_notes",
+        "review_status": "review_status",
+        "coverage": "coverage"
+      }
     },
     "a_add_note": {
       "type": "compute",
       "compute_unit": "canvas:add_note",
-      "input_map": {"review_notes": "review_notes", "note": "prompt", "node_id": "selected_node"},
-      "output_map": {"review_notes": "review_notes"}
+      "input_map": {
+        "review_notes": "review_notes",
+        "note": "prompt",
+        "node_id": "selected_node"
+      },
+      "output_map": {
+        "review_notes": "review_notes"
+      }
     },
     "a_set_approved": {
       "type": "set",
@@ -261,20 +977,46 @@
     "a_add_audit": {
       "type": "compute",
       "compute_unit": "canvas:add_audit",
-      "input_map": {"audit_log": "audit_log", "action": "mode", "node_id": "selected_node", "node_type": "selected_type"},
-      "output_map": {"audit_log": "audit_log"}
+      "input_map": {
+        "audit_log": "audit_log",
+        "action": "mode",
+        "node_id": "selected_node",
+        "node_type": "selected_type"
+      },
+      "output_map": {
+        "audit_log": "audit_log"
+      }
     },
     "a_llm_query": {
       "type": "compute",
       "compute_unit": "canvas:llm_query",
-      "input_map": {"api_key": "api_key", "api_base": "api_base", "model": "model", "blueprint": "blueprint", "prompt": "prompt", "mode": "mode", "selected_node": "selected_node"},
-      "output_map": {"llm_response": "llm_response", "suggestions": "suggestions", "error": "error"}
+      "input_map": {
+        "api_key": "api_key",
+        "api_base": "api_base",
+        "model": "model",
+        "blueprint": "blueprint",
+        "prompt": "prompt",
+        "mode": "mode",
+        "selected_node": "selected_node"
+      },
+      "output_map": {
+        "llm_response": "llm_response",
+        "suggestions": "suggestions",
+        "error": "error"
+      }
     },
     "a_apply_llm": {
       "type": "compute",
       "compute_unit": "canvas:apply_llm",
-      "input_map": {"blueprint": "blueprint", "suggestions": "suggestions"},
-      "output_map": {"blueprint": "blueprint", "blueprint_json": "blueprint_json", "is_dirty": "is_dirty"}
+      "input_map": {
+        "blueprint": "blueprint",
+        "suggestions": "suggestions"
+      },
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprint_json": "blueprint_json",
+        "is_dirty": "is_dirty"
+      }
     },
     "a_clear_llm": {
       "type": "set",
@@ -294,14 +1036,24 @@
     "a_generate_outputs": {
       "type": "compute",
       "compute_unit": "canvas:generate_outputs",
-      "input_map": {"blueprint": "blueprint"},
-      "output_map": {"graph_html": "graph_html", "mermaid": "mermaid"}
+      "input_map": {
+        "blueprint": "blueprint"
+      },
+      "output_map": {
+        "graph_html": "graph_html",
+        "mermaid": "mermaid"
+      }
     },
     "a_save_blueprint": {
       "type": "compute",
       "compute_unit": "canvas:save_blueprint",
-      "input_map": {"blueprint": "blueprint", "path": "blueprint_path"},
-      "output_map": {"error": "error"}
+      "input_map": {
+        "blueprint": "blueprint",
+        "path": "blueprint_path"
+      },
+      "output_map": {
+        "error": "error"
+      }
     },
     "a_clear_dirty": {
       "type": "set",
@@ -322,9 +1074,14 @@
       "type": "compute",
       "compute_unit": "canvas:clear_all",
       "input_map": {},
-      "output_map": {"blueprint": "blueprint", "blueprint_json": "blueprint_json", "is_dirty": "is_dirty", "error": "error"}
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprint_json": "blueprint_json",
+        "is_dirty": "is_dirty",
+        "error": "error"
+      }
     }
   },
   "entry_state": "idle",
-  "terminal_states": []
+  "terminal_states": {}
 }

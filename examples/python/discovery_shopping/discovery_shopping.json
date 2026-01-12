@@ -4,53 +4,155 @@
   "name": "Fit-First Discovery Shopping",
   "version": "1.0.0",
   "description": "Quiz-driven product discovery with explainable matching and transparent rankings.",
-
   "context_schema": {
     "properties": {
-      "category": { "type": "string", "description": "Product category (e.g., headphones)" },
-      "quiz_questions": { "type": "array", "description": "Generated quiz questions" },
-      "quiz_answers": { "type": "object", "description": "User answers keyed by question_id" },
-      "preferences": { "type": "object", "description": "Extracted user preferences" },
-      "products": { "type": "array", "description": "Fetched product list" },
-      "reviews": { "type": "object", "description": "Aggregated review insights by product_id" },
-      "rankings": { "type": "array", "description": "Ranked products with scores and reasons" },
-      "comparison": { "type": "object", "description": "Side-by-side comparison result" },
-      "selected_product": { "type": "string", "description": "Product ID user is viewing" },
-      "alerts": { "type": "array", "description": "Price/restock alert subscriptions" },
-      "affiliate_links": { "type": "object", "description": "Affiliate URLs by product_id" },
-      "current_question_idx": { "type": "number", "description": "Quiz progress index" },
-      "quiz_question_count": { "type": "number", "description": "Total quiz questions", "default": 0 },
-      "has_category": { "type": "boolean", "description": "Category is set", "default": false },
-      "quiz_complete": { "type": "boolean", "description": "All quiz questions answered", "default": false },
-      "has_products": { "type": "boolean", "description": "Products fetched", "default": false },
-      "has_rankings": { "type": "boolean", "description": "Rankings computed", "default": false },
-      "has_selection": { "type": "boolean", "description": "Product selected", "default": false },
-      "is_last_question": { "type": "boolean", "description": "About to answer last question", "default": false },
-      "has_error": { "type": "boolean", "description": "Error occurred", "default": false },
-      "error": { "type": "string" },
-      "fetch_offset": { "type": "number", "description": "Current fetch offset", "default": 0 },
-      "fetch_limit": { "type": "number", "description": "Products per batch", "default": 10 },
-      "fetch_total": { "type": "number", "description": "Total products available", "default": 0 },
-      "has_more_products": { "type": "boolean", "description": "More products to fetch", "default": false }
+      "category": {
+        "type": "string",
+        "description": "Product category (e.g., headphones)"
+      },
+      "quiz_questions": {
+        "type": "array",
+        "description": "Generated quiz questions"
+      },
+      "quiz_answers": {
+        "type": "object",
+        "description": "User answers keyed by question_id"
+      },
+      "preferences": {
+        "type": "object",
+        "description": "Extracted user preferences"
+      },
+      "products": {
+        "type": "array",
+        "description": "Fetched product list"
+      },
+      "reviews": {
+        "type": "object",
+        "description": "Aggregated review insights by product_id"
+      },
+      "rankings": {
+        "type": "array",
+        "description": "Ranked products with scores and reasons"
+      },
+      "comparison": {
+        "type": "object",
+        "description": "Side-by-side comparison result"
+      },
+      "selected_product": {
+        "type": "string",
+        "description": "Product ID user is viewing"
+      },
+      "alerts": {
+        "type": "array",
+        "description": "Price/restock alert subscriptions"
+      },
+      "affiliate_links": {
+        "type": "object",
+        "description": "Affiliate URLs by product_id"
+      },
+      "current_question_idx": {
+        "type": "number",
+        "description": "Quiz progress index"
+      },
+      "quiz_question_count": {
+        "type": "number",
+        "description": "Total quiz questions",
+        "default": 0
+      },
+      "has_category": {
+        "type": "boolean",
+        "description": "Category is set",
+        "default": false
+      },
+      "quiz_complete": {
+        "type": "boolean",
+        "description": "All quiz questions answered",
+        "default": false
+      },
+      "has_products": {
+        "type": "boolean",
+        "description": "Products fetched",
+        "default": false
+      },
+      "has_rankings": {
+        "type": "boolean",
+        "description": "Rankings computed",
+        "default": false
+      },
+      "has_selection": {
+        "type": "boolean",
+        "description": "Product selected",
+        "default": false
+      },
+      "is_last_question": {
+        "type": "boolean",
+        "description": "About to answer last question",
+        "default": false
+      },
+      "has_error": {
+        "type": "boolean",
+        "description": "Error occurred",
+        "default": false
+      },
+      "error": {
+        "type": "string"
+      },
+      "fetch_offset": {
+        "type": "number",
+        "description": "Current fetch offset",
+        "default": 0
+      },
+      "fetch_limit": {
+        "type": "number",
+        "description": "Products per batch",
+        "default": 10
+      },
+      "fetch_total": {
+        "type": "number",
+        "description": "Total products available",
+        "default": 0
+      },
+      "has_more_products": {
+        "type": "boolean",
+        "description": "More products to fetch",
+        "default": false
+      }
     }
   },
-
   "states": {
-    "idle": { "description": "Awaiting category selection" },
-    "quizzing": { "description": "Presenting preference quiz" },
-    "fetching": { "description": "Fetching products from feeds" },
-    "analyzing": { "description": "Aggregating review insights" },
-    "ranking": { "description": "Scoring and ranking products" },
-    "browsing": { "description": "User browsing ranked results" },
-    "comparing": { "description": "Side-by-side comparison view" },
-    "detail": { "description": "Single product detail view" },
-    "alerting": { "description": "Setting up price/restock alert" },
-    "error": { "description": "Error state" }
+    "idle": {
+      "description": "Awaiting category selection"
+    },
+    "quizzing": {
+      "description": "Presenting preference quiz"
+    },
+    "fetching": {
+      "description": "Fetching products from feeds"
+    },
+    "analyzing": {
+      "description": "Aggregating review insights"
+    },
+    "ranking": {
+      "description": "Scoring and ranking products"
+    },
+    "browsing": {
+      "description": "User browsing ranked results"
+    },
+    "comparing": {
+      "description": "Side-by-side comparison view"
+    },
+    "detail": {
+      "description": "Single product detail view"
+    },
+    "alerting": {
+      "description": "Setting up price/restock alert"
+    },
+    "error": {
+      "description": "Error state"
+    }
   },
-
   "entry_state": "idle",
-  "terminal_states": [],
-
+  "terminal_states": {},
   "gates": {
     "has_category": {
       "type": "expression",
@@ -85,7 +187,6 @@
       "expression": "has_error == False"
     }
   },
-
   "actions": {
     "set_category": {
       "type": "set",
@@ -95,7 +196,9 @@
     "generate_quiz": {
       "type": "compute",
       "compute_unit": "shop:generate_quiz",
-      "input_map": { "category": "category" },
+      "input_map": {
+        "category": "category"
+      },
       "output_map": {
         "quiz_questions": "questions",
         "current_question_idx": "idx",
@@ -131,7 +234,9 @@
         "quiz_questions": "quiz_questions",
         "quiz_answers": "quiz_answers"
       },
-      "output_map": { "preferences": "preferences" }
+      "output_map": {
+        "preferences": "preferences"
+      }
     },
     "fetch_products": {
       "type": "compute",
@@ -180,7 +285,9 @@
     "aggregate_reviews": {
       "type": "compute",
       "compute_unit": "shop:aggregate_reviews",
-      "input_map": { "products": "products" },
+      "input_map": {
+        "products": "products"
+      },
       "output_map": {
         "reviews": "reviews",
         "has_error": "has_error",
@@ -221,7 +328,9 @@
         "reviews": "reviews",
         "preferences": "preferences"
       },
-      "output_map": { "comparison": "comparison" }
+      "output_map": {
+        "comparison": "comparison"
+      }
     },
     "add_alert": {
       "type": "compute",
@@ -231,7 +340,9 @@
         "product_id": "event.payload.product_id",
         "alert_type": "event.payload.alert_type"
       },
-      "output_map": { "alerts": "alerts" }
+      "output_map": {
+        "alerts": "alerts"
+      }
     },
     "clear_selection": {
       "type": "set",
@@ -298,123 +409,170 @@
       }
     }
   },
-
   "transitions": [
     {
       "id": "t_start",
       "from": "idle",
       "to": "quizzing",
       "on_event": "SELECT_CATEGORY",
-      "actions": ["set_category", "generate_quiz"]
+      "actions": [
+        "set_category",
+        "generate_quiz"
+      ]
     },
     {
       "id": "t_answer",
       "from": "quizzing",
       "to": "quizzing",
       "on_event": "ANSWER",
-      "gates": ["quiz_incomplete"],
-      "actions": ["record_answer"]
+      "gates": [
+        "quiz_incomplete"
+      ],
+      "actions": [
+        "record_answer"
+      ]
     },
     {
       "id": "t_quiz_done",
       "from": "quizzing",
       "to": "fetching",
       "on_event": "ANSWER",
-      "gates": ["quiz_complete"],
-      "actions": ["record_answer", "extract_preferences", "fetch_products"]
+      "gates": [
+        "quiz_complete"
+      ],
+      "actions": [
+        "record_answer",
+        "extract_preferences",
+        "fetch_products"
+      ]
     },
     {
       "id": "t_skip_quiz",
       "from": "quizzing",
       "to": "fetching",
       "on_event": "SKIP_QUIZ",
-      "actions": ["extract_preferences", "fetch_products"]
+      "actions": [
+        "extract_preferences",
+        "fetch_products"
+      ]
     },
     {
       "id": "t_fetch_more",
       "from": "fetching",
       "to": "fetching",
       "on_event": "FETCH_MORE",
-      "actions": ["fetch_more_products"]
+      "actions": [
+        "fetch_more_products"
+      ]
     },
     {
       "id": "t_fetch_done",
       "from": "fetching",
       "to": "analyzing",
       "on_event": "DONE",
-      "gates": ["has_products", "no_error"],
-      "actions": ["aggregate_reviews"]
+      "gates": [
+        "has_products",
+        "no_error"
+      ],
+      "actions": [
+        "aggregate_reviews"
+      ]
     },
     {
       "id": "t_fetch_error",
       "from": "fetching",
       "to": "error",
       "on_event": "DONE",
-      "gates": ["has_error"]
+      "gates": [
+        "has_error"
+      ]
     },
     {
       "id": "t_analyze_done",
       "from": "analyzing",
       "to": "ranking",
       "on_event": "DONE",
-      "gates": ["no_error"],
-      "actions": ["rank_products"]
+      "gates": [
+        "no_error"
+      ],
+      "actions": [
+        "rank_products"
+      ]
     },
     {
       "id": "t_analyze_error",
       "from": "analyzing",
       "to": "error",
       "on_event": "DONE",
-      "gates": ["has_error"]
+      "gates": [
+        "has_error"
+      ]
     },
     {
       "id": "t_rank_done",
       "from": "ranking",
       "to": "browsing",
       "on_event": "DONE",
-      "gates": ["has_rankings", "no_error"]
+      "gates": [
+        "has_rankings",
+        "no_error"
+      ]
     },
     {
       "id": "t_rank_error",
       "from": "ranking",
       "to": "error",
       "on_event": "DONE",
-      "gates": ["has_error"]
+      "gates": [
+        "has_error"
+      ]
     },
     {
       "id": "t_view_detail",
       "from": "browsing",
       "to": "detail",
       "on_event": "VIEW",
-      "actions": ["select_product", "set_has_selection"]
+      "actions": [
+        "select_product",
+        "set_has_selection"
+      ]
     },
     {
       "id": "t_start_compare",
       "from": "browsing",
       "to": "comparing",
       "on_event": "COMPARE",
-      "actions": ["compare_products"]
+      "actions": [
+        "compare_products"
+      ]
     },
     {
       "id": "t_back_from_detail",
       "from": "detail",
       "to": "browsing",
       "on_event": "BACK",
-      "actions": ["clear_selection", "clear_has_selection"]
+      "actions": [
+        "clear_selection",
+        "clear_has_selection"
+      ]
     },
     {
       "id": "t_back_from_compare",
       "from": "comparing",
       "to": "browsing",
       "on_event": "BACK",
-      "actions": ["clear_comparison"]
+      "actions": [
+        "clear_comparison"
+      ]
     },
     {
       "id": "t_detail_to_compare",
       "from": "detail",
       "to": "comparing",
       "on_event": "COMPARE",
-      "actions": ["compare_products"]
+      "actions": [
+        "compare_products"
+      ]
     },
     {
       "id": "t_set_alert_from_detail",
@@ -427,14 +585,19 @@
       "from": "browsing",
       "to": "alerting",
       "on_event": "SET_ALERT",
-      "actions": ["select_product", "set_has_selection"]
+      "actions": [
+        "select_product",
+        "set_has_selection"
+      ]
     },
     {
       "id": "t_confirm_alert",
       "from": "alerting",
       "to": "detail",
       "on_event": "CONFIRM",
-      "actions": ["add_alert"]
+      "actions": [
+        "add_alert"
+      ]
     },
     {
       "id": "t_cancel_alert",
@@ -447,38 +610,61 @@
       "from": "browsing",
       "to": "idle",
       "on_event": "NEW_SEARCH",
-      "actions": ["reset"]
+      "actions": [
+        "reset"
+      ]
     },
     {
       "id": "t_refine",
       "from": "browsing",
       "to": "quizzing",
       "on_event": "REFINE",
-      "actions": ["generate_quiz"]
+      "actions": [
+        "generate_quiz"
+      ]
     },
     {
       "id": "t_recover",
       "from": "error",
       "to": "idle",
       "on_event": "RETRY",
-      "actions": ["clear_error", "clear_has_error", "reset"]
+      "actions": [
+        "clear_error",
+        "clear_has_error",
+        "reset"
+      ]
     },
     {
       "id": "t_global_reset",
       "from": "*",
       "to": "idle",
       "on_event": "RESET",
-      "actions": ["reset"]
+      "actions": [
+        "reset"
+      ]
     }
   ],
-
   "display": {
     "rules": [
-      { "gate": "has_error", "template": "Error: {error}" },
-      { "gate": "quiz_incomplete", "template": "Quiz Q{current_question_idx}/{len(quiz_questions)}" },
-      { "gate": "has_rankings", "template": "{category}: {len(rankings)} matches" },
-      { "gate": "has_selection", "template": "Viewing: {selected_product}" },
-      { "template": "Discovery Shopping" }
+      {
+        "gate": "has_error",
+        "template": "Error: {error}"
+      },
+      {
+        "gate": "quiz_incomplete",
+        "template": "Quiz Q{current_question_idx}/{len(quiz_questions)}"
+      },
+      {
+        "gate": "has_rankings",
+        "template": "{category}: {len(rankings)} matches"
+      },
+      {
+        "gate": "has_selection",
+        "template": "Viewing: {selected_product}"
+      },
+      {
+        "template": "Discovery Shopping"
+      }
     ]
   }
 }

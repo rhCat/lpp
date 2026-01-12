@@ -4,27 +4,55 @@
   "name": "Python Logic Decoder",
   "version": "1.0.0",
   "description": "Decode Python files into L++ blueprints by analyzing AST, control flow, and import semantics",
-
   "context_schema": {
     "properties": {
-      "filePath": {"type": "string"},
-      "sourceCode": {"type": "string"},
-      "ast": {"type": "object"},
-      "imports": {"type": "array"},
-      "functions": {"type": "array"},
-      "classes": {"type": "array"},
-      "controlFlow": {"type": "object"},
-      "inferredStates": {"type": "array"},
-      "inferredTransitions": {"type": "array"},
-      "inferredActions": {"type": "array"},
-      "inferredGates": {"type": "array"},
-      "blueprint": {"type": "object"},
-      "blueprintJson": {"type": "string"},
-      "analysisReport": {"type": "object"},
-      "error": {"type": "string"}
+      "filePath": {
+        "type": "string"
+      },
+      "sourceCode": {
+        "type": "string"
+      },
+      "ast": {
+        "type": "object"
+      },
+      "imports": {
+        "type": "array"
+      },
+      "functions": {
+        "type": "array"
+      },
+      "classes": {
+        "type": "array"
+      },
+      "controlFlow": {
+        "type": "object"
+      },
+      "inferredStates": {
+        "type": "array"
+      },
+      "inferredTransitions": {
+        "type": "array"
+      },
+      "inferredActions": {
+        "type": "array"
+      },
+      "inferredGates": {
+        "type": "array"
+      },
+      "blueprint": {
+        "type": "object"
+      },
+      "blueprintJson": {
+        "type": "string"
+      },
+      "analysisReport": {
+        "type": "object"
+      },
+      "error": {
+        "type": "string"
+      }
     }
   },
-
   "states": {
     "idle": {
       "name": "Idle",
@@ -55,43 +83,52 @@
       "description": "Decoding failed"
     }
   },
-
   "entry_state": "idle",
-  "terminal_states": [],
-
+  "terminal_states": {},
   "gates": {
     "hasFilePath": {
       "type": "compute",
       "compute_unit": "decoder:hasValue",
-      "input_map": {"field": "'filePath'"}
+      "input_map": {
+        "field": "'filePath'"
+      }
     },
     "hasSourceCode": {
       "type": "compute",
       "compute_unit": "decoder:hasValue",
-      "input_map": {"field": "'sourceCode'"}
+      "input_map": {
+        "field": "'sourceCode'"
+      }
     },
     "hasAst": {
       "type": "compute",
       "compute_unit": "decoder:hasValue",
-      "input_map": {"field": "'ast'"}
+      "input_map": {
+        "field": "'ast'"
+      }
     },
     "hasAnalysis": {
       "type": "compute",
       "compute_unit": "decoder:hasValue",
-      "input_map": {"field": "'controlFlow'"}
+      "input_map": {
+        "field": "'controlFlow'"
+      }
     },
     "hasInferences": {
       "type": "compute",
       "compute_unit": "decoder:hasValue",
-      "input_map": {"field": "'inferredStates'"}
+      "input_map": {
+        "field": "'inferredStates'"
+      }
     },
     "hasError": {
       "type": "compute",
       "compute_unit": "decoder:hasValue",
-      "input_map": {"field": "'error'"}
+      "input_map": {
+        "field": "'error'"
+      }
     }
   },
-
   "actions": {
     "loadFile": {
       "type": "compute",
@@ -249,7 +286,6 @@
       "description": "Reset analysis state"
     }
   },
-
   "transitions": [
     {
       "id": "t1_load",
@@ -257,7 +293,9 @@
       "to": "parsing",
       "on_event": "DECODE",
       "guard": "hasFilePath",
-      "actions": ["loadFile"]
+      "actions": [
+        "loadFile"
+      ]
     },
     {
       "id": "t2_parse",
@@ -265,7 +303,9 @@
       "to": "analyzing",
       "on_event": "AUTO",
       "guard": "hasSourceCode",
-      "actions": ["parseAst"]
+      "actions": [
+        "parseAst"
+      ]
     },
     {
       "id": "t3_analyze",
@@ -273,7 +313,11 @@
       "to": "inferring",
       "on_event": "AUTO",
       "guard": "hasAst",
-      "actions": ["analyzeImports", "analyzeFunctions", "analyzeControlFlow"]
+      "actions": [
+        "analyzeImports",
+        "analyzeFunctions",
+        "analyzeControlFlow"
+      ]
     },
     {
       "id": "t4_infer",
@@ -281,7 +325,11 @@
       "to": "generating",
       "on_event": "AUTO",
       "guard": "hasAnalysis",
-      "actions": ["inferStates", "inferTransitions", "inferActions"]
+      "actions": [
+        "inferStates",
+        "inferTransitions",
+        "inferActions"
+      ]
     },
     {
       "id": "t5_generate",
@@ -289,48 +337,73 @@
       "to": "complete",
       "on_event": "AUTO",
       "guard": "hasInferences",
-      "actions": ["generateBlueprint"]
+      "actions": [
+        "generateBlueprint"
+      ]
     },
     {
       "id": "t6_error_parse",
       "from": "parsing",
       "to": "error",
       "on_event": "ERROR",
-      "actions": ["setError", "log_error"]
+      "actions": [
+        "setError",
+        "log_error"
+      ]
     },
     {
       "id": "t7_error_analyze",
       "from": "analyzing",
       "to": "error",
       "on_event": "ERROR",
-      "actions": ["setError", "log_error"]
+      "actions": [
+        "setError",
+        "log_error"
+      ]
     },
     {
       "id": "t8_error_infer",
       "from": "inferring",
       "to": "error",
       "on_event": "ERROR",
-      "actions": ["setError", "log_error"]
+      "actions": [
+        "setError",
+        "log_error"
+      ]
     },
     {
       "id": "t9_reset",
       "from": "complete",
       "to": "idle",
       "on_event": "RESET",
-      "actions": ["clearState"]
+      "actions": [
+        "clearState"
+      ]
     },
     {
       "id": "t10_error_reset",
       "from": "error",
       "to": "idle",
       "on_event": "RESET",
-      "actions": ["clearError", "clearState"]
+      "actions": [
+        "clearError",
+        "clearState"
+      ]
     }
   ],
-
   "flanges": {
-    "inputs": ["filePath", "sourceCode"],
-    "outputs": ["blueprint", "blueprintJson", "analysisReport"],
-    "stacks": ["code_parser", "ast_analyzer"]
+    "inputs": [
+      "filePath",
+      "sourceCode"
+    ],
+    "outputs": [
+      "blueprint",
+      "blueprintJson",
+      "analysisReport"
+    ],
+    "stacks": [
+      "code_parser",
+      "ast_analyzer"
+    ]
   }
 }

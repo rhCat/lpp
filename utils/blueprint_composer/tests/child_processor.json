@@ -1,10 +1,9 @@
 {
-  "$schema": "lpp/v0.1.2",
+  "$schema": "lpp/v0.2.0",
   "id": "child_processor",
   "name": "Child Processor",
   "version": "1.0.0",
   "description": "A specific processing implementation to be embedded",
-
   "context_schema": {
     "properties": {
       "process_input": {
@@ -25,7 +24,6 @@
       }
     }
   },
-
   "states": {
     "init": {
       "description": "Initialize processing"
@@ -43,10 +41,10 @@
       "description": "Processing complete"
     }
   },
-
   "entry_state": "init",
-  "terminal_states": ["done"],
-
+  "terminal_states": {
+    "done": {}
+  },
   "gates": {
     "has_process_input": {
       "type": "expression",
@@ -65,7 +63,6 @@
       "expression": "step_count >= 3"
     }
   },
-
   "actions": {
     "init_processing": {
       "type": "set",
@@ -116,38 +113,52 @@
       }
     }
   },
-
   "transitions": [
     {
       "id": "t_start_processing",
       "from": "init",
       "to": "step1",
       "on_event": "START",
-      "gates": ["has_process_input"],
-      "actions": ["init_processing"]
+      "gates": [
+        "has_process_input"
+      ],
+      "actions": [
+        "init_processing"
+      ]
     },
     {
       "id": "t_step1_execute",
       "from": "step1",
       "to": "step2",
       "on_event": "NEXT",
-      "actions": ["execute_step1"]
+      "actions": [
+        "execute_step1"
+      ]
     },
     {
       "id": "t_step2_execute",
       "from": "step2",
       "to": "step3",
       "on_event": "NEXT",
-      "gates": ["step1_complete"],
-      "actions": ["execute_step2"]
+      "gates": [
+        "step1_complete"
+      ],
+      "actions": [
+        "execute_step2"
+      ]
     },
     {
       "id": "t_step3_execute",
       "from": "step3",
       "to": "done",
       "on_event": "NEXT",
-      "gates": ["step2_complete"],
-      "actions": ["execute_step3", "finalize"]
+      "gates": [
+        "step2_complete"
+      ],
+      "actions": [
+        "execute_step3",
+        "finalize"
+      ]
     },
     {
       "id": "t_complete",

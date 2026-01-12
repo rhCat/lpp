@@ -40,10 +40,15 @@ def validate_blueprint(bp: dict) -> None:
         if field not in bp:
             errors.append(f"Missing required root field: {field}")
 
-    # terminal_states must be present (can be empty array)
+    # terminal_states must be present (can be empty object or legacy array)
     if "terminal_states" not in bp:
         errors.append(
-            "Missing required root field: terminal_states (can be empty [])")
+            "Missing required root field: terminal_states (can be empty {})")
+    else:
+        termStates = bp["terminal_states"]
+        if not isinstance(termStates, (dict, list)):
+            errors.append(
+                "terminal_states must be an object (v0.2.0) or array (legacy)")
 
     # Validate transitions - id is required
     for i, trans in enumerate(bp.get("transitions", [])):

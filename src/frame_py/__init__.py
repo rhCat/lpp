@@ -70,6 +70,21 @@ from .operational_validator import (
     OperationalValidationError,
 )
 
+# ==========================================================================
+# ASSEMBLY VALIDATOR
+# ==========================================================================
+
+from .assembly_validator import (
+    loadAssembly,
+    validateAssembly,
+    validateTerminals,
+    validateInterfaces,
+    generateAssemblyTla,
+    AssemblyValidationError,
+    ComponentLoadError,
+    InterfaceCompatibilityError,
+)
+
 
 __version__ = "0.1.0"
 
@@ -111,4 +126,14 @@ __all__ = [
     'validate_skill',
     'sanitize_python_code',
     'OperationalValidationError',
+
+    # Assembly Validator
+    'loadAssembly',
+    'validateAssembly',
+    'validateTerminals',
+    'validateInterfaces',
+    'generateAssemblyTla',
+    'AssemblyValidationError',
+    'ComponentLoadError',
+    'InterfaceCompatibilityError',
 ]

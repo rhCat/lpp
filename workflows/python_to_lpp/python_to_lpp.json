@@ -1,86 +1,353 @@
 {
-  "$schema": "lpp/v0.1.2",
+  "$schema": "lpp/v0.2.0",
   "id": "python_to_lpp",
   "name": "Python to L++ Refactorer",
   "version": "1.0.0",
   "description": "Refactors a Python repository into an L++ based project with full documentation",
-
   "states": {
-    "idle": { "description": "Awaiting project path" },
-    "scanning": { "description": "Scanning Python project structure" },
-    "analyzing": { "description": "Analyzing code patterns and state machines" },
-    "extracting": { "description": "Extracting business logic and workflows" },
-    "generating_blueprints": { "description": "Generating L++ blueprints" },
-    "generating_compute": { "description": "Generating compute functions" },
-    "generating_docs": { "description": "Generating documentation" },
-    "validating": { "description": "Validating generated artifacts" },
-    "complete": { "description": "Refactoring complete" },
-    "error": { "description": "Refactoring error" }
-  },
-
-  "entry_state": "idle",
-  "terminal_states": ["complete", "error"],
-
-  "context_schema": {
-    "properties": {
-      "projectPath": { "type": "string", "description": "Path to Python project" },
-      "outputPath": { "type": "string", "description": "Output path for generated files" },
-      "projectName": { "type": "string", "description": "Name of the project" },
-      "pythonFiles": { "type": "array", "description": "List of Python files found" },
-      "extractedModules": { "type": "array", "description": "Extracted module definitions" },
-      "blueprints": { "type": "array", "description": "Generated blueprints" },
-      "computeFunctions": { "type": "array", "description": "Generated compute functions" },
-      "generateDocs": { "type": "boolean", "description": "Whether to generate documentation" },
-      "includeTests": { "type": "boolean", "description": "Whether to include tests" },
-      "preserveOriginal": { "type": "boolean", "description": "Whether to preserve original files" },
-      "verbose": { "type": "boolean", "description": "Enable verbose output" },
-      "modulesFound": { "type": "number", "description": "Count of modules found" },
-      "blueprintsGenerated": { "type": "number", "description": "Count of blueprints generated" },
-      "docsGenerated": { "type": "number", "description": "Count of docs generated" },
-      "errors": { "type": "array", "description": "List of errors" },
-      "error": { "type": "string", "description": "Error message if any" }
+    "idle": {
+      "description": "Awaiting project path"
+    },
+    "scanning": {
+      "description": "Scanning Python project structure"
+    },
+    "analyzing": {
+      "description": "Analyzing code patterns and state machines"
+    },
+    "extracting": {
+      "description": "Extracting business logic and workflows"
+    },
+    "generating_blueprints": {
+      "description": "Generating L++ blueprints"
+    },
+    "generating_compute": {
+      "description": "Generating compute functions"
+    },
+    "generating_docs": {
+      "description": "Generating documentation"
+    },
+    "validating": {
+      "description": "Validating generated artifacts"
+    },
+    "complete": {
+      "description": "Refactoring complete"
+    },
+    "error": {
+      "description": "Refactoring error"
     }
   },
-
+  "entry_state": "idle",
+  "terminal_states": {
+    "complete": {},
+    "error": {}
+  },
+  "context_schema": {
+    "properties": {
+      "projectPath": {
+        "type": "string",
+        "description": "Path to Python project"
+      },
+      "outputPath": {
+        "type": "string",
+        "description": "Output path for generated files"
+      },
+      "projectName": {
+        "type": "string",
+        "description": "Name of the project"
+      },
+      "pythonFiles": {
+        "type": "array",
+        "description": "List of Python files found"
+      },
+      "extractedModules": {
+        "type": "array",
+        "description": "Extracted module definitions"
+      },
+      "blueprints": {
+        "type": "array",
+        "description": "Generated blueprints"
+      },
+      "computeFunctions": {
+        "type": "array",
+        "description": "Generated compute functions"
+      },
+      "generateDocs": {
+        "type": "boolean",
+        "description": "Whether to generate documentation"
+      },
+      "includeTests": {
+        "type": "boolean",
+        "description": "Whether to include tests"
+      },
+      "preserveOriginal": {
+        "type": "boolean",
+        "description": "Whether to preserve original files"
+      },
+      "verbose": {
+        "type": "boolean",
+        "description": "Enable verbose output"
+      },
+      "modulesFound": {
+        "type": "number",
+        "description": "Count of modules found"
+      },
+      "blueprintsGenerated": {
+        "type": "number",
+        "description": "Count of blueprints generated"
+      },
+      "docsGenerated": {
+        "type": "number",
+        "description": "Count of docs generated"
+      },
+      "errors": {
+        "type": "array",
+        "description": "List of errors"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message if any"
+      }
+    }
+  },
   "gates": {
-    "has_project": { "type": "expression", "expression": "projectPath is not None" },
-    "no_project": { "type": "expression", "expression": "projectPath is None" },
-    "has_python_files": { "type": "expression", "expression": "pythonFiles is not None" },
-    "no_python_files": { "type": "expression", "expression": "pythonFiles is None" },
-    "has_modules": { "type": "expression", "expression": "extractedModules is not None" },
-    "has_blueprints": { "type": "expression", "expression": "blueprints is not None" },
-    "wants_docs": { "type": "expression", "expression": "generateDocs == True" },
-    "has_error": { "type": "expression", "expression": "error is not None" },
-    "no_error": { "type": "expression", "expression": "error is None" }
+    "has_project": {
+      "type": "expression",
+      "expression": "projectPath is not None"
+    },
+    "no_project": {
+      "type": "expression",
+      "expression": "projectPath is None"
+    },
+    "has_python_files": {
+      "type": "expression",
+      "expression": "pythonFiles is not None"
+    },
+    "no_python_files": {
+      "type": "expression",
+      "expression": "pythonFiles is None"
+    },
+    "has_modules": {
+      "type": "expression",
+      "expression": "extractedModules is not None"
+    },
+    "has_blueprints": {
+      "type": "expression",
+      "expression": "blueprints is not None"
+    },
+    "wants_docs": {
+      "type": "expression",
+      "expression": "generateDocs == True"
+    },
+    "has_error": {
+      "type": "expression",
+      "expression": "error is not None"
+    },
+    "no_error": {
+      "type": "expression",
+      "expression": "error is None"
+    }
   },
-
   "actions": {
-    "init": { "type": "compute", "unit": "py2lpp:init" },
-    "scan_project": { "type": "compute", "unit": "py2lpp:scanProject" },
-    "analyze_patterns": { "type": "compute", "unit": "py2lpp:analyzePatterns" },
-    "extract_modules": { "type": "compute", "unit": "py2lpp:extractModules" },
-    "generate_blueprints": { "type": "compute", "unit": "py2lpp:generateBlueprints" },
-    "generate_compute": { "type": "compute", "unit": "py2lpp:generateCompute" },
-    "generate_docs": { "type": "compute", "unit": "py2lpp:generateDocs" },
-    "validate": { "type": "compute", "unit": "py2lpp:validate" },
-    "finalize": { "type": "compute", "unit": "py2lpp:finalize" }
+    "init": {
+      "type": "compute",
+      "unit": "py2lpp:init"
+    },
+    "scan_project": {
+      "type": "compute",
+      "unit": "py2lpp:scanProject"
+    },
+    "analyze_patterns": {
+      "type": "compute",
+      "unit": "py2lpp:analyzePatterns"
+    },
+    "extract_modules": {
+      "type": "compute",
+      "unit": "py2lpp:extractModules"
+    },
+    "generate_blueprints": {
+      "type": "compute",
+      "unit": "py2lpp:generateBlueprints"
+    },
+    "generate_compute": {
+      "type": "compute",
+      "unit": "py2lpp:generateCompute"
+    },
+    "generate_docs": {
+      "type": "compute",
+      "unit": "py2lpp:generateDocs"
+    },
+    "validate": {
+      "type": "compute",
+      "unit": "py2lpp:validate"
+    },
+    "finalize": {
+      "type": "compute",
+      "unit": "py2lpp:finalize"
+    }
   },
-
   "transitions": [
-    { "id": "t0", "from": "idle", "to": "idle", "on_event": "START", "gates": ["no_project"], "actions": ["init"] },
-    { "id": "t1", "from": "idle", "to": "scanning", "on_event": "REFACTOR", "gates": ["has_project"], "actions": ["scan_project"] },
-    { "id": "t2", "from": "idle", "to": "error", "on_event": "REFACTOR", "gates": ["no_project"] },
-    { "id": "t3", "from": "scanning", "to": "analyzing", "on_event": "DONE", "gates": ["has_python_files", "no_error"], "actions": ["analyze_patterns"] },
-    { "id": "t4", "from": "scanning", "to": "error", "on_event": "DONE", "gates": ["no_python_files"] },
-    { "id": "t5", "from": "analyzing", "to": "extracting", "on_event": "DONE", "gates": ["no_error"], "actions": ["extract_modules"] },
-    { "id": "t6", "from": "extracting", "to": "generating_blueprints", "on_event": "DONE", "gates": ["has_modules", "no_error"], "actions": ["generate_blueprints"] },
-    { "id": "t7", "from": "generating_blueprints", "to": "generating_compute", "on_event": "DONE", "gates": ["has_blueprints", "no_error"], "actions": ["generate_compute"] },
-    { "id": "t8", "from": "generating_compute", "to": "generating_docs", "on_event": "DONE", "gates": ["wants_docs", "no_error"], "actions": ["generate_docs"] },
-    { "id": "t9", "from": "generating_compute", "to": "validating", "on_event": "DONE", "gates": ["no_error"], "actions": ["validate"] },
-    { "id": "t10", "from": "generating_docs", "to": "validating", "on_event": "DONE", "gates": ["no_error"], "actions": ["validate"] },
-    { "id": "t11", "from": "validating", "to": "complete", "on_event": "DONE", "gates": ["no_error"], "actions": ["finalize"] },
-    { "id": "t12", "from": "*", "to": "error", "on_event": "ERROR", "gates": ["has_error"] },
-    { "id": "t13", "from": "error", "to": "idle", "on_event": "RESET" },
-    { "id": "t14", "from": "complete", "to": "idle", "on_event": "RESET" }
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "idle",
+      "on_event": "START",
+      "gates": [
+        "no_project"
+      ],
+      "actions": [
+        "init"
+      ]
+    },
+    {
+      "id": "t1",
+      "from": "idle",
+      "to": "scanning",
+      "on_event": "REFACTOR",
+      "gates": [
+        "has_project"
+      ],
+      "actions": [
+        "scan_project"
+      ]
+    },
+    {
+      "id": "t2",
+      "from": "idle",
+      "to": "error",
+      "on_event": "REFACTOR",
+      "gates": [
+        "no_project"
+      ]
+    },
+    {
+      "id": "t3",
+      "from": "scanning",
+      "to": "analyzing",
+      "on_event": "DONE",
+      "gates": [
+        "has_python_files",
+        "no_error"
+      ],
+      "actions": [
+        "analyze_patterns"
+      ]
+    },
+    {
+      "id": "t4",
+      "from": "scanning",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": [
+        "no_python_files"
+      ]
+    },
+    {
+      "id": "t5",
+      "from": "analyzing",
+      "to": "extracting",
+      "on_event": "DONE",
+      "gates": [
+        "no_error"
+      ],
+      "actions": [
+        "extract_modules"
+      ]
+    },
+    {
+      "id": "t6",
+      "from": "extracting",
+      "to": "generating_blueprints",
+      "on_event": "DONE",
+      "gates": [
+        "has_modules",
+        "no_error"
+      ],
+      "actions": [
+        "generate_blueprints"
+      ]
+    },
+    {
+      "id": "t7",
+      "from": "generating_blueprints",
+      "to": "generating_compute",
+      "on_event": "DONE",
+      "gates": [
+        "has_blueprints",
+        "no_error"
+      ],
+      "actions": [
+        "generate_compute"
+      ]
+    },
+    {
+      "id": "t8",
+      "from": "generating_compute",
+      "to": "generating_docs",
+      "on_event": "DONE",
+      "gates": [
+        "wants_docs",
+        "no_error"
+      ],
+      "actions": [
+        "generate_docs"
+      ]
+    },
+    {
+      "id": "t9",
+      "from": "generating_compute",
+      "to": "validating",
+      "on_event": "DONE",
+      "gates": [
+        "no_error"
+      ],
+      "actions": [
+        "validate"
+      ]
+    },
+    {
+      "id": "t10",
+      "from": "generating_docs",
+      "to": "validating",
+      "on_event": "DONE",
+      "gates": [
+        "no_error"
+      ],
+      "actions": [
+        "validate"
+      ]
+    },
+    {
+      "id": "t11",
+      "from": "validating",
+      "to": "complete",
+      "on_event": "DONE",
+      "gates": [
+        "no_error"
+      ],
+      "actions": [
+        "finalize"
+      ]
+    },
+    {
+      "id": "t12",
+      "from": "*",
+      "to": "error",
+      "on_event": "ERROR",
+      "gates": [
+        "has_error"
+      ]
+    },
+    {
+      "id": "t13",
+      "from": "error",
+      "to": "idle",
+      "on_event": "RESET"
+    },
+    {
+      "id": "t14",
+      "from": "complete",
+      "to": "idle",
+      "on_event": "RESET"
+    }
   ]
 }

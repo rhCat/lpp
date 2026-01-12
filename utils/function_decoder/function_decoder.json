@@ -4,23 +4,50 @@
   "name": "Python Function Decoder",
   "version": "1.0.0",
   "description": "Analyze Python scripts to extract inbound/outbound function interfaces and build modular dependency graphs",
-
   "context_schema": {
     "properties": {
-      "filePath": {"type": "string"},
-      "sourceCode": {"type": "string"},
-      "ast": {"type": "object"},
-      "exports": {"type": "array", "description": "Public functions/classes (inbound interface)"},
-      "imports": {"type": "array", "description": "Import statements with usage tracking"},
-      "internalCalls": {"type": "array", "description": "Function-to-function call edges within script"},
-      "externalCalls": {"type": "array", "description": "Calls to imported modules"},
-      "localCalls": {"type": "array", "description": "Calls to other local scripts"},
-      "coupling": {"type": "object", "description": "Coupling metrics (fan-in, fan-out, etc.)"},
-      "moduleGraph": {"type": "object", "description": "Final linkable module graph"},
-      "error": {"type": "string"}
+      "filePath": {
+        "type": "string"
+      },
+      "sourceCode": {
+        "type": "string"
+      },
+      "ast": {
+        "type": "object"
+      },
+      "exports": {
+        "type": "array",
+        "description": "Public functions/classes (inbound interface)"
+      },
+      "imports": {
+        "type": "array",
+        "description": "Import statements with usage tracking"
+      },
+      "internalCalls": {
+        "type": "array",
+        "description": "Function-to-function call edges within script"
+      },
+      "externalCalls": {
+        "type": "array",
+        "description": "Calls to imported modules"
+      },
+      "localCalls": {
+        "type": "array",
+        "description": "Calls to other local scripts"
+      },
+      "coupling": {
+        "type": "object",
+        "description": "Coupling metrics (fan-in, fan-out, etc.)"
+      },
+      "moduleGraph": {
+        "type": "object",
+        "description": "Final linkable module graph"
+      },
+      "error": {
+        "type": "string"
+      }
     }
   },
-
   "states": {
     "idle": {
       "description": "Awaiting file path"
@@ -44,10 +71,8 @@
       "description": "Analysis failed"
     }
   },
-
   "entry_state": "idle",
-  "terminal_states": [],
-
+  "terminal_states": {},
   "gates": {
     "hasFilePath": {
       "type": "expression",
@@ -74,48 +99,77 @@
       "expression": "error is not None and len(error) > 0"
     }
   },
-
   "actions": {
     "loadFile": {
       "type": "compute",
       "compute_unit": "funcdec:loadFile",
-      "input_map": {"filePath": "filePath"},
-      "output_map": {"sourceCode": "sourceCode", "error": "error"},
+      "input_map": {
+        "filePath": "filePath"
+      },
+      "output_map": {
+        "sourceCode": "sourceCode",
+        "error": "error"
+      },
       "description": "Load Python file from disk"
     },
     "parseAst": {
       "type": "compute",
       "compute_unit": "funcdec:parseAst",
-      "input_map": {"sourceCode": "sourceCode"},
-      "output_map": {"ast": "ast", "error": "error"},
+      "input_map": {
+        "sourceCode": "sourceCode"
+      },
+      "output_map": {
+        "ast": "ast",
+        "error": "error"
+      },
       "description": "Parse source into AST"
     },
     "extractExports": {
       "type": "compute",
       "compute_unit": "funcdec:extractExports",
-      "input_map": {"ast": "ast", "filePath": "filePath"},
-      "output_map": {"exports": "exports"},
+      "input_map": {
+        "ast": "ast",
+        "filePath": "filePath"
+      },
+      "output_map": {
+        "exports": "exports"
+      },
       "description": "Extract public functions/classes (inbound interface)"
     },
     "extractImports": {
       "type": "compute",
       "compute_unit": "funcdec:extractImports",
-      "input_map": {"ast": "ast"},
-      "output_map": {"imports": "imports"},
+      "input_map": {
+        "ast": "ast"
+      },
+      "output_map": {
+        "imports": "imports"
+      },
       "description": "Extract import statements with aliases"
     },
     "traceInternalCalls": {
       "type": "compute",
       "compute_unit": "funcdec:traceInternalCalls",
-      "input_map": {"ast": "ast", "exports": "exports"},
-      "output_map": {"internalCalls": "internalCalls"},
+      "input_map": {
+        "ast": "ast",
+        "exports": "exports"
+      },
+      "output_map": {
+        "internalCalls": "internalCalls"
+      },
       "description": "Trace function-to-function calls within script"
     },
     "traceExternalCalls": {
       "type": "compute",
       "compute_unit": "funcdec:traceExternalCalls",
-      "input_map": {"ast": "ast", "imports": "imports"},
-      "output_map": {"externalCalls": "externalCalls", "localCalls": "localCalls"},
+      "input_map": {
+        "ast": "ast",
+        "imports": "imports"
+      },
+      "output_map": {
+        "externalCalls": "externalCalls",
+        "localCalls": "localCalls"
+      },
       "description": "Trace calls to imported modules"
     },
     "computeCoupling": {
@@ -128,7 +182,9 @@
         "externalCalls": "externalCalls",
         "localCalls": "localCalls"
       },
-      "output_map": {"coupling": "coupling"},
+      "output_map": {
+        "coupling": "coupling"
+      },
       "description": "Compute fan-in, fan-out, coupling metrics"
     },
     "generateModuleGraph": {
@@ -143,83 +199,115 @@
         "localCalls": "localCalls",
         "coupling": "coupling"
       },
-      "output_map": {"moduleGraph": "moduleGraph"},
+      "output_map": {
+        "moduleGraph": "moduleGraph"
+      },
       "description": "Generate final linkable module graph JSON"
     },
     "setError": {
       "type": "assign",
-      "assignments": {"error": "error"},
+      "assignments": {
+        "error": "error"
+      },
       "description": "Record error message"
     }
   },
-
   "transitions": [
     {
       "id": "t_start_decode",
       "from": "idle",
       "to": "parsing",
       "on_event": "DECODE",
-      "gates": ["hasFilePath"],
-      "actions": ["loadFile", "parseAst"]
+      "gates": [
+        "hasFilePath"
+      ],
+      "actions": [
+        "loadFile",
+        "parseAst"
+      ]
     },
     {
       "id": "t_parse_error",
       "from": "parsing",
       "to": "error",
       "on_event": "AUTO",
-      "gates": ["hasError"]
+      "gates": [
+        "hasError"
+      ]
     },
     {
       "id": "t_parse_done",
       "from": "parsing",
       "to": "extracting",
       "on_event": "AUTO",
-      "gates": ["hasAst"],
-      "actions": ["extractExports", "extractImports"]
+      "gates": [
+        "hasAst"
+      ],
+      "actions": [
+        "extractExports",
+        "extractImports"
+      ]
     },
     {
       "id": "t_extract_error",
       "from": "extracting",
       "to": "error",
       "on_event": "AUTO",
-      "gates": ["hasError"]
+      "gates": [
+        "hasError"
+      ]
     },
     {
       "id": "t_extract_done",
       "from": "extracting",
       "to": "tracing",
       "on_event": "AUTO",
-      "gates": ["hasExtracts"],
-      "actions": ["traceInternalCalls", "traceExternalCalls"]
+      "gates": [
+        "hasExtracts"
+      ],
+      "actions": [
+        "traceInternalCalls",
+        "traceExternalCalls"
+      ]
     },
     {
       "id": "t_trace_error",
       "from": "tracing",
       "to": "error",
       "on_event": "AUTO",
-      "gates": ["hasError"]
+      "gates": [
+        "hasError"
+      ]
     },
     {
       "id": "t_trace_done",
       "from": "tracing",
       "to": "computing",
       "on_event": "AUTO",
-      "gates": ["hasCalls"],
-      "actions": ["computeCoupling"]
+      "gates": [
+        "hasCalls"
+      ],
+      "actions": [
+        "computeCoupling"
+      ]
     },
     {
       "id": "t_compute_error",
       "from": "computing",
       "to": "error",
       "on_event": "AUTO",
-      "gates": ["hasError"]
+      "gates": [
+        "hasError"
+      ]
     },
     {
       "id": "t_compute_done",
       "from": "computing",
       "to": "complete",
       "on_event": "AUTO",
-      "actions": ["generateModuleGraph"]
+      "actions": [
+        "generateModuleGraph"
+      ]
     },
     {
       "id": "t_reset",
@@ -229,7 +317,6 @@
       "actions": []
     }
   ],
-
   "display": {
     "rules": []
   }

@@ -4,7 +4,6 @@
   "name": "L++ Schema Migrator",
   "version": "1.0.0",
   "description": "Tool for migrating L++ blueprints between schema versions",
-
   "context_schema": {
     "properties": {
       "blueprint": {
@@ -65,7 +64,6 @@
       }
     }
   },
-
   "states": {
     "idle": {
       "description": "No blueprint loaded, waiting for input"
@@ -95,10 +93,8 @@
       "description": "Error state"
     }
   },
-
   "entry_state": "idle",
-  "terminal_states": [],
-
+  "terminal_states": {},
   "gates": {
     "has_blueprint": {
       "type": "expression",
@@ -137,7 +133,6 @@
       "expression": "batch_paths is not None and len(batch_paths) > 0"
     }
   },
-
   "actions": {
     "load_blueprint": {
       "type": "compute",
@@ -334,7 +329,6 @@
       }
     }
   },
-
   "display": {
     "rules": [
       {
@@ -358,129 +352,194 @@
       }
     ]
   },
-
   "transitions": [
     {
       "id": "t_load",
       "from": "idle",
       "to": "loaded",
       "on_event": "LOAD",
-      "gates": ["no_blueprint"],
-      "actions": ["load_blueprint", "detect_version", "list_migrations"]
+      "gates": [
+        "no_blueprint"
+      ],
+      "actions": [
+        "load_blueprint",
+        "detect_version",
+        "list_migrations"
+      ]
     },
     {
       "id": "t_load_error",
       "from": "idle",
       "to": "error",
       "on_event": "LOAD_FAILED",
-      "actions": ["set_error"]
+      "actions": [
+        "set_error"
+      ]
     },
     {
       "id": "t_reload",
       "from": "loaded",
       "to": "loaded",
       "on_event": "LOAD",
-      "actions": ["load_blueprint", "detect_version", "clear_migration"]
+      "actions": [
+        "load_blueprint",
+        "detect_version",
+        "clear_migration"
+      ]
     },
     {
       "id": "t_reload_from_complete",
       "from": "complete",
       "to": "loaded",
       "on_event": "LOAD",
-      "actions": ["load_blueprint", "detect_version", "clear_migration"]
+      "actions": [
+        "load_blueprint",
+        "detect_version",
+        "clear_migration"
+      ]
     },
     {
       "id": "t_set_target",
       "from": "loaded",
       "to": "planning",
       "on_event": "SET_TARGET",
-      "gates": ["has_blueprint"],
-      "actions": ["set_target_version"]
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "set_target_version"
+      ]
     },
     {
       "id": "t_set_target_latest",
       "from": "loaded",
       "to": "planning",
       "on_event": "MIGRATE_LATEST",
-      "gates": ["has_blueprint"],
-      "actions": ["set_target_latest"]
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "set_target_latest"
+      ]
     },
     {
       "id": "t_plan",
       "from": "planning",
       "to": "planned",
       "on_event": "PLAN",
-      "actions": ["plan_migration", "analyze_changes"]
+      "actions": [
+        "plan_migration",
+        "analyze_changes"
+      ]
     },
     {
       "id": "t_auto_plan",
       "from": "loaded",
       "to": "planned",
       "on_event": "PLAN_TO",
-      "gates": ["has_blueprint"],
-      "actions": ["set_target_version", "plan_migration", "analyze_changes"]
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "set_target_version",
+        "plan_migration",
+        "analyze_changes"
+      ]
     },
     {
       "id": "t_auto_plan_latest",
       "from": "loaded",
       "to": "planned",
       "on_event": "PLAN_LATEST",
-      "gates": ["has_blueprint"],
-      "actions": ["set_target_latest", "plan_migration", "analyze_changes"]
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "set_target_latest",
+        "plan_migration",
+        "analyze_changes"
+      ]
     },
     {
       "id": "t_dry_run",
       "from": "planned",
       "to": "complete",
       "on_event": "DRY_RUN",
-      "gates": ["has_migration_plan"],
-      "actions": ["set_dry_run_on", "dry_run", "generate_report"]
+      "gates": [
+        "has_migration_plan"
+      ],
+      "actions": [
+        "set_dry_run_on",
+        "dry_run",
+        "generate_report"
+      ]
     },
     {
       "id": "t_execute",
       "from": "planned",
       "to": "migrating",
       "on_event": "EXECUTE",
-      "gates": ["has_migration_plan"],
-      "actions": ["set_dry_run_off", "apply_migration"]
+      "gates": [
+        "has_migration_plan"
+      ],
+      "actions": [
+        "set_dry_run_off",
+        "apply_migration"
+      ]
     },
     {
       "id": "t_validate",
       "from": "migrating",
       "to": "validating",
       "on_event": "VALIDATE",
-      "gates": ["has_migrated_blueprint"],
-      "actions": ["validate_blueprint"]
+      "gates": [
+        "has_migrated_blueprint"
+      ],
+      "actions": [
+        "validate_blueprint"
+      ]
     },
     {
       "id": "t_auto_validate",
       "from": "migrating",
       "to": "validating",
       "on_event": "AUTO_CONTINUE",
-      "gates": ["has_migrated_blueprint"],
-      "actions": ["validate_blueprint"]
+      "gates": [
+        "has_migrated_blueprint"
+      ],
+      "actions": [
+        "validate_blueprint"
+      ]
     },
     {
       "id": "t_finalize",
       "from": "validating",
       "to": "complete",
       "on_event": "FINALIZE",
-      "gates": ["validation_passed"],
-      "actions": ["generate_report"]
+      "gates": [
+        "validation_passed"
+      ],
+      "actions": [
+        "generate_report"
+      ]
     },
     {
       "id": "t_finalize_with_warnings",
       "from": "validating",
       "to": "complete",
       "on_event": "FORCE_FINALIZE",
-      "actions": ["generate_report"]
+      "actions": [
+        "generate_report"
+      ]
     },
     {
       "id": "t_migrate_all",
       "from": "loaded",
       "to": "complete",
       "on_event": "MIGRATE_ALL",
-      "gates": ["has_blueprint"],
+      "gates": [
+        "has_blueprint"
+      ],
       "actions": [
         "set_target_latest",
         "plan_migration",
@@ -496,7 +555,9 @@
       "from": "loaded",
       "to": "complete",
       "on_event": "PREVIEW_ALL",
-      "gates": ["has_blueprint"],
+      "gates": [
+        "has_blueprint"
+      ],
       "actions": [
         "set_target_latest",
         "plan_migration",
@@ -511,87 +572,121 @@
       "from": "complete",
       "to": "complete",
       "on_event": "EXPORT",
-      "gates": ["has_migrated_blueprint"],
-      "actions": ["export_migrated"]
+      "gates": [
+        "has_migrated_blueprint"
+      ],
+      "actions": [
+        "export_migrated"
+      ]
     },
     {
       "id": "t_start_batch",
       "from": "idle",
       "to": "batch_mode",
       "on_event": "BATCH",
-      "actions": ["set_batch_paths", "set_target_latest"]
+      "actions": [
+        "set_batch_paths",
+        "set_target_latest"
+      ]
     },
     {
       "id": "t_batch_with_target",
       "from": "idle",
       "to": "batch_mode",
       "on_event": "BATCH_TO",
-      "actions": ["set_batch_paths", "set_target_version"]
+      "actions": [
+        "set_batch_paths",
+        "set_target_version"
+      ]
     },
     {
       "id": "t_run_batch",
       "from": "batch_mode",
       "to": "complete",
       "on_event": "RUN_BATCH",
-      "gates": ["has_batch_paths"],
-      "actions": ["batch_migrate", "generate_report"]
+      "gates": [
+        "has_batch_paths"
+      ],
+      "actions": [
+        "batch_migrate",
+        "generate_report"
+      ]
     },
     {
       "id": "t_back_to_loaded",
       "from": "planned",
       "to": "loaded",
       "on_event": "BACK",
-      "actions": ["clear_migration"]
+      "actions": [
+        "clear_migration"
+      ]
     },
     {
       "id": "t_back_from_complete",
       "from": "complete",
       "to": "loaded",
       "on_event": "BACK",
-      "actions": ["clear_migration"]
+      "actions": [
+        "clear_migration"
+      ]
     },
     {
       "id": "t_replan",
       "from": "planned",
       "to": "planning",
       "on_event": "REPLAN",
-      "actions": ["clear_migration"]
+      "actions": [
+        "clear_migration"
+      ]
     },
     {
       "id": "t_unload",
       "from": "loaded",
       "to": "idle",
       "on_event": "UNLOAD",
-      "actions": ["unload_blueprint"]
+      "actions": [
+        "unload_blueprint"
+      ]
     },
     {
       "id": "t_unload_from_complete",
       "from": "complete",
       "to": "idle",
       "on_event": "UNLOAD",
-      "actions": ["unload_blueprint"]
+      "actions": [
+        "unload_blueprint"
+      ]
     },
     {
       "id": "t_unload_from_planned",
       "from": "planned",
       "to": "idle",
       "on_event": "UNLOAD",
-      "actions": ["unload_blueprint"]
+      "actions": [
+        "unload_blueprint"
+      ]
     },
     {
       "id": "t_recover",
       "from": "error",
       "to": "idle",
       "on_event": "CLEAR",
-      "actions": ["clear_error", "unload_blueprint"]
+      "actions": [
+        "clear_error",
+        "unload_blueprint"
+      ]
     },
     {
       "id": "t_recover_to_loaded",
       "from": "error",
       "to": "loaded",
       "on_event": "RETRY",
-      "gates": ["has_blueprint"],
-      "actions": ["clear_error"]
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "clear_error"
+      ]
     }
   ]
 }

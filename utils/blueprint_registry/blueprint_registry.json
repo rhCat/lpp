@@ -4,7 +4,6 @@
   "name": "L++ Blueprint Registry",
   "version": "1.0.0",
   "description": "Centralized blueprint management with version control, dependency tracking, and discovery",
-
   "context_schema": {
     "properties": {
       "registry_path": {
@@ -73,7 +72,6 @@
       }
     }
   },
-
   "states": {
     "idle": {
       "description": "No registry loaded, waiting for initialization"
@@ -94,10 +92,8 @@
       "description": "Error state"
     }
   },
-
   "entry_state": "idle",
-  "terminal_states": [],
-
+  "terminal_states": {},
   "gates": {
     "has_registry": {
       "type": "expression",
@@ -148,7 +144,6 @@
       "expression": "True"
     }
   },
-
   "actions": {
     "init_registry": {
       "type": "compute",
@@ -426,7 +421,6 @@
       "value": "Blueprint deleted"
     }
   },
-
   "display": {
     "rules": [
       {
@@ -458,227 +452,336 @@
       }
     ]
   },
-
   "transitions": [
     {
       "id": "t_init_registry",
       "from": "idle",
       "to": "ready",
       "on_event": "INIT",
-      "actions": ["init_registry", "save_registry"]
+      "actions": [
+        "init_registry",
+        "save_registry"
+      ]
     },
     {
       "id": "t_load_registry",
       "from": "idle",
       "to": "ready",
       "on_event": "LOAD",
-      "actions": ["load_registry"]
+      "actions": [
+        "load_registry"
+      ]
     },
     {
       "id": "t_reload_registry",
       "from": "ready",
       "to": "ready",
       "on_event": "LOAD",
-      "actions": ["load_registry"]
+      "actions": [
+        "load_registry"
+      ]
     },
     {
       "id": "t_register",
       "from": "ready",
       "to": "ready",
       "on_event": "REGISTER",
-      "gates": ["has_registry"],
-      "actions": ["register_blueprint", "save_registry"]
+      "gates": [
+        "has_registry"
+      ],
+      "actions": [
+        "register_blueprint",
+        "save_registry"
+      ]
     },
     {
       "id": "t_update",
       "from": "ready",
       "to": "ready",
       "on_event": "UPDATE",
-      "gates": ["has_registry", "has_permission"],
-      "actions": ["update_blueprint", "save_registry", "log_update"]
+      "gates": [
+        "has_registry",
+        "has_permission"
+      ],
+      "actions": [
+        "update_blueprint",
+        "save_registry",
+        "log_update"
+      ]
     },
     {
       "id": "t_update_from_viewing",
       "from": "viewing",
       "to": "viewing",
       "on_event": "UPDATE",
-      "gates": ["has_current", "has_permission"],
-      "actions": ["update_blueprint", "save_registry", "log_update"]
+      "gates": [
+        "has_current",
+        "has_permission"
+      ],
+      "actions": [
+        "update_blueprint",
+        "save_registry",
+        "log_update"
+      ]
     },
     {
       "id": "t_get",
       "from": "ready",
       "to": "viewing",
       "on_event": "GET",
-      "gates": ["has_registry"],
-      "actions": ["get_blueprint"]
+      "gates": [
+        "has_registry"
+      ],
+      "actions": [
+        "get_blueprint"
+      ]
     },
     {
       "id": "t_get_another",
       "from": "viewing",
       "to": "viewing",
       "on_event": "GET",
-      "actions": ["get_blueprint"]
+      "actions": [
+        "get_blueprint"
+      ]
     },
     {
       "id": "t_list",
       "from": "ready",
       "to": "searching",
       "on_event": "LIST",
-      "gates": ["has_registry"],
-      "actions": ["list_blueprints"]
+      "gates": [
+        "has_registry"
+      ],
+      "actions": [
+        "list_blueprints"
+      ]
     },
     {
       "id": "t_search",
       "from": "ready",
       "to": "searching",
       "on_event": "SEARCH",
-      "gates": ["has_registry"],
-      "actions": ["search_blueprints"]
+      "gates": [
+        "has_registry"
+      ],
+      "actions": [
+        "search_blueprints"
+      ]
     },
     {
       "id": "t_search_again",
       "from": "searching",
       "to": "searching",
       "on_event": "SEARCH",
-      "actions": ["search_blueprints"]
+      "actions": [
+        "search_blueprints"
+      ]
     },
     {
       "id": "t_select_from_search",
       "from": "searching",
       "to": "viewing",
       "on_event": "SELECT",
-      "gates": ["has_search_results"],
-      "actions": ["get_blueprint"]
+      "gates": [
+        "has_search_results"
+      ],
+      "actions": [
+        "get_blueprint"
+      ]
     },
     {
       "id": "t_versions",
       "from": "viewing",
       "to": "viewing",
       "on_event": "VERSIONS",
-      "gates": ["has_current"],
-      "actions": ["get_versions"]
+      "gates": [
+        "has_current"
+      ],
+      "actions": [
+        "get_versions"
+      ]
     },
     {
       "id": "t_compare",
       "from": "viewing",
       "to": "comparing",
       "on_event": "COMPARE",
-      "gates": ["has_versions"],
-      "actions": ["compare_versions"]
+      "gates": [
+        "has_versions"
+      ],
+      "actions": [
+        "compare_versions"
+      ]
     },
     {
       "id": "t_compare_again",
       "from": "comparing",
       "to": "comparing",
       "on_event": "COMPARE",
-      "actions": ["compare_versions"]
+      "actions": [
+        "compare_versions"
+      ]
     },
     {
       "id": "t_rollback",
       "from": "viewing",
       "to": "viewing",
       "on_event": "ROLLBACK",
-      "gates": ["has_versions"],
-      "actions": ["rollback_version", "save_registry"]
+      "gates": [
+        "has_versions"
+      ],
+      "actions": [
+        "rollback_version",
+        "save_registry"
+      ]
     },
     {
       "id": "t_deps",
       "from": "viewing",
       "to": "viewing",
       "on_event": "DEPS",
-      "gates": ["has_current"],
-      "actions": ["get_dependencies"]
+      "gates": [
+        "has_current"
+      ],
+      "actions": [
+        "get_dependencies"
+      ]
     },
     {
       "id": "t_check_deps",
       "from": "viewing",
       "to": "viewing",
       "on_event": "CHECK_DEPS",
-      "gates": ["has_current"],
-      "actions": ["check_circular_deps"]
+      "gates": [
+        "has_current"
+      ],
+      "actions": [
+        "check_circular_deps"
+      ]
     },
     {
       "id": "t_deprecate",
       "from": "viewing",
       "to": "viewing",
       "on_event": "DEPRECATE",
-      "gates": ["has_current", "not_deprecated"],
-      "actions": ["deprecate_blueprint", "save_registry"]
+      "gates": [
+        "has_current",
+        "not_deprecated"
+      ],
+      "actions": [
+        "deprecate_blueprint",
+        "save_registry"
+      ]
     },
     {
       "id": "t_delete",
       "from": "viewing",
       "to": "ready",
       "on_event": "DELETE",
-      "gates": ["has_current", "has_permission"],
-      "actions": ["delete_blueprint", "save_registry", "clear_current", "log_delete"]
+      "gates": [
+        "has_current",
+        "has_permission"
+      ],
+      "actions": [
+        "delete_blueprint",
+        "save_registry",
+        "clear_current",
+        "log_delete"
+      ]
     },
     {
       "id": "t_delete_from_ready",
       "from": "ready",
       "to": "ready",
       "on_event": "DELETE",
-      "gates": ["has_registry", "has_permission"],
-      "actions": ["delete_blueprint", "save_registry", "log_delete"]
+      "gates": [
+        "has_registry",
+        "has_permission"
+      ],
+      "actions": [
+        "delete_blueprint",
+        "save_registry",
+        "log_delete"
+      ]
     },
     {
       "id": "t_export",
       "from": "ready",
       "to": "ready",
       "on_event": "EXPORT",
-      "gates": ["has_registry"],
-      "actions": ["export_registry"]
+      "gates": [
+        "has_registry"
+      ],
+      "actions": [
+        "export_registry"
+      ]
     },
     {
       "id": "t_export_from_viewing",
       "from": "viewing",
       "to": "viewing",
       "on_event": "EXPORT",
-      "actions": ["export_registry"]
+      "actions": [
+        "export_registry"
+      ]
     },
     {
       "id": "t_stats",
       "from": "ready",
       "to": "ready",
       "on_event": "STATS",
-      "gates": ["has_registry"],
-      "actions": ["get_stats"]
+      "gates": [
+        "has_registry"
+      ],
+      "actions": [
+        "get_stats"
+      ]
     },
     {
       "id": "t_back_from_viewing",
       "from": "viewing",
       "to": "ready",
       "on_event": "BACK",
-      "actions": ["clear_current"]
+      "actions": [
+        "clear_current"
+      ]
     },
     {
       "id": "t_back_from_searching",
       "from": "searching",
       "to": "ready",
       "on_event": "BACK",
-      "actions": ["clear_search"]
+      "actions": [
+        "clear_search"
+      ]
     },
     {
       "id": "t_back_from_comparing",
       "from": "comparing",
       "to": "viewing",
       "on_event": "BACK",
-      "actions": ["clear_diff"]
+      "actions": [
+        "clear_diff"
+      ]
     },
     {
       "id": "t_error_recover",
       "from": "error",
       "to": "idle",
       "on_event": "CLEAR",
-      "actions": ["clear_error"]
+      "actions": [
+        "clear_error"
+      ]
     },
     {
       "id": "t_load_failed",
       "from": "*",
       "to": "error",
       "on_event": "LOAD_FAILED",
-      "actions": ["set_error"]
+      "actions": [
+        "set_error"
+      ]
     }
   ]
 }

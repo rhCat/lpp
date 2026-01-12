@@ -10,7 +10,7 @@ An L++ Blueprint is a JSON document that defines a complete, deterministic state
 
 ```json
 {
-  "$schema": "lpp/v0.1.2",
+  "$schema": "lpp/v0.2.0",
   "id": "string",
   "name": "string",
   "version": "string",

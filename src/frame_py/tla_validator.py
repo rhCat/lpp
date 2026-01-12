@@ -119,7 +119,9 @@ def generate_tla(
     name = _to_tla_safe(bp.get("id", "Blueprint"))
     states = list(bp.get("states", {}).keys())
     entry = bp.get("entry_state", states[0] if states else "init")
-    terminal = bp.get("terminal_states", [])
+    # Handle both v0.2.0 (object) and legacy (array) terminal_states
+    termStates = bp.get("terminal_states", {})
+    terminal = list(termStates.keys()) if isinstance(termStates, dict) else termStates
     transitions = bp.get("transitions", [])
     gates = bp.get("gates", {})
     context_schema = bp.get("context_schema", {})

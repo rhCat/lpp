@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1",
+  "$schema": "lpp/v0.2.0",
   "id": "decoded_orchestrator_compute",
   "name": "Decoded: orchestrator_compute",
   "version": "1.0.0",
@@ -350,8 +350,8 @@
     }
   },
   "entry_state": "idle",
-  "terminal_states": [
-    "complete",
-    "error"
-  ]
+  "terminal_states": {
+    "complete": {},
+    "error": {}
+  }
 }

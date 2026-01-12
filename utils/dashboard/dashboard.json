@@ -1,10 +1,9 @@
 {
-  "$schema": "lpp/v0.1.2",
+  "$schema": "lpp/v0.2.0",
   "id": "dashboard",
   "name": "L++ Tools Dashboard",
   "version": "1.0.0",
   "description": "Aggregates and visualizes all L++ utility tools with interactive search, filtering, and quick access to visualizations.",
-
   "context_schema": {
     "properties": {
       "utilsPath": {
@@ -40,7 +39,6 @@
       }
     }
   },
-
   "states": {
     "idle": {
       "description": "Awaiting utils path input"
@@ -64,10 +62,10 @@
       "description": "Error during processing"
     }
   },
-
   "entry_state": "idle",
-  "terminal_states": ["complete"],
-
+  "terminal_states": {
+    "complete": {}
+  },
   "gates": {
     "hasUtilsPath": {
       "type": "expression",
@@ -90,7 +88,6 @@
       "expression": "error is not None and len(error) > 0"
     }
   },
-
   "actions": {
     "scanTools": {
       "type": "compute",
@@ -152,67 +149,90 @@
       "value_from": "error"
     }
   },
-
   "transitions": [
     {
       "id": "t_start_scan",
       "from": "idle",
       "to": "scanning",
       "on_event": "SCAN",
-      "gates": ["hasUtilsPath"],
-      "actions": ["scanTools"]
+      "gates": [
+        "hasUtilsPath"
+      ],
+      "actions": [
+        "scanTools"
+      ]
     },
     {
       "id": "t_scan_error",
       "from": "scanning",
       "to": "error",
       "on_event": "AUTO",
-      "gates": ["hasError"]
+      "gates": [
+        "hasError"
+      ]
     },
     {
       "id": "t_scan_done",
       "from": "scanning",
       "to": "analyzing",
       "on_event": "AUTO",
-      "gates": ["hasTools"],
-      "actions": ["analyzeTools"]
+      "gates": [
+        "hasTools"
+      ],
+      "actions": [
+        "analyzeTools"
+      ]
     },
     {
       "id": "t_analyze_error",
       "from": "analyzing",
       "to": "error",
       "on_event": "AUTO",
-      "gates": ["hasError"]
+      "gates": [
+        "hasError"
+      ]
     },
     {
       "id": "t_analyze_done",
       "from": "analyzing",
       "to": "categorizing",
       "on_event": "AUTO",
-      "gates": ["hasStatistics"],
-      "actions": ["categorizeTools"]
+      "gates": [
+        "hasStatistics"
+      ],
+      "actions": [
+        "categorizeTools"
+      ]
     },
     {
       "id": "t_categorize_error",
       "from": "categorizing",
       "to": "error",
       "on_event": "AUTO",
-      "gates": ["hasError"]
+      "gates": [
+        "hasError"
+      ]
     },
     {
       "id": "t_categorize_done",
       "from": "categorizing",
       "to": "generating",
       "on_event": "AUTO",
-      "gates": ["hasCategories"],
-      "actions": ["generateDashboard"]
+      "gates": [
+        "hasCategories"
+      ],
+      "actions": [
+        "generateDashboard"
+      ]
     },
     {
       "id": "t_generate_error",
       "from": "generating",
       "to": "error",
       "on_event": "AUTO",
-      "gates": ["hasError"]
+      "gates": [
+        "hasError"
+      ]
     },
     {
       "id": "t_generate_done",
@@ -227,7 +247,6 @@
       "on_event": "RESET"
     }
   ],
-
   "display": {
     "rules": []
   }

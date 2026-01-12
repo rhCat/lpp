@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1",
+  "$schema": "lpp/v0.2.0",
   "id": "lpp_tla_validator",
   "name": "L++ TLA+ Validator",
   "version": "1.0.0",
@@ -71,7 +71,9 @@
       "from": "generating",
       "to": "validating",
       "on_event": "GENERATE_DONE",
-      "gates": ["g_do_validate"]
+      "gates": [
+        "g_do_validate"
+      ]
     },
     {
       "id": "t_skip_validate",
@@ -174,8 +176,8 @@
     }
   },
   "entry_state": "idle",
-  "terminal_states": [
-    "complete",
-    "error"
-  ]
+  "terminal_states": {
+    "complete": {},
+    "error": {}
+  }
 }

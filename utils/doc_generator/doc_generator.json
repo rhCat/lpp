@@ -1,27 +1,49 @@
 {
-  "$schema": "lpp/v0.1.2",
+  "$schema": "lpp/v0.2.0",
   "id": "doc_generator",
   "name": "Documentation Generator",
   "version": "1.0.0",
   "description": "Generates all documentation artifacts for L++ blueprints including graphs, Mermaid diagrams, and analysis reports",
-
   "states": {
-    "idle": { "description": "Awaiting generation command" },
-    "discovering": { "description": "Scanning for blueprints" },
-    "generating_graphs": { "description": "Generating HTML graph visualizations" },
-    "generating_logic": { "description": "Generating logic graphs from Python" },
-    "generating_functions": { "description": "Generating function dependency graphs" },
-    "generating_mermaid": { "description": "Generating Mermaid diagrams" },
-    "updating_readmes": { "description": "Updating README files" },
-    "generating_report": { "description": "Generating analysis report" },
-    "generating_dashboard": { "description": "Generating dashboard HTML" },
-    "complete": { "description": "Generation complete" },
-    "error": { "description": "Generation error" }
+    "idle": {
+      "description": "Awaiting generation command"
+    },
+    "discovering": {
+      "description": "Scanning for blueprints"
+    },
+    "generating_graphs": {
+      "description": "Generating HTML graph visualizations"
+    },
+    "generating_logic": {
+      "description": "Generating logic graphs from Python"
+    },
+    "generating_functions": {
+      "description": "Generating function dependency graphs"
+    },
+    "generating_mermaid": {
+      "description": "Generating Mermaid diagrams"
+    },
+    "updating_readmes": {
+      "description": "Updating README files"
+    },
+    "generating_report": {
+      "description": "Generating analysis report"
+    },
+    "generating_dashboard": {
+      "description": "Generating dashboard HTML"
+    },
+    "complete": {
+      "description": "Generation complete"
+    },
+    "error": {
+      "description": "Generation error"
+    }
   },
-
   "entry_state": "idle",
-  "terminal_states": ["complete", "error"],
-
+  "terminal_states": {
+    "complete": {},
+    "error": {}
+  },
   "context_schema": {
     "utilsPath": "string",
     "outputPath": "string",
@@ -36,57 +58,326 @@
       "dashboard": "boolean",
       "all": "boolean"
     },
-    "results": { "generated": "number", "errors": "array" },
+    "results": {
+      "generated": "number",
+      "errors": "array"
+    },
     "error": "string"
   },
-
   "gates": {
-    "has_blueprints": { "type": "expression", "expression": "blueprints is not None and len(blueprints) > 0" },
-    "no_blueprints": { "type": "expression", "expression": "blueprints is None or len(blueprints) == 0" },
-    "wants_graphs": { "type": "expression", "expression": "options.get('graphs') or options.get('all')" },
-    "wants_logic": { "type": "expression", "expression": "options.get('logic') or options.get('all')" },
-    "wants_functions": { "type": "expression", "expression": "options.get('functions') or options.get('all')" },
-    "wants_mermaid": { "type": "expression", "expression": "options.get('mermaid') or options.get('all')" },
-    "wants_readme": { "type": "expression", "expression": "options.get('readme') or options.get('all')" },
-    "wants_report": { "type": "expression", "expression": "options.get('report') or options.get('all')" },
-    "wants_dashboard": { "type": "expression", "expression": "options.get('dashboard') or options.get('all')" },
-    "has_error": { "type": "expression", "expression": "error is not None" },
-    "no_error": { "type": "expression", "expression": "error is None" }
+    "has_blueprints": {
+      "type": "expression",
+      "expression": "blueprints is not None and len(blueprints) > 0"
+    },
+    "no_blueprints": {
+      "type": "expression",
+      "expression": "blueprints is None or len(blueprints) == 0"
+    },
+    "wants_graphs": {
+      "type": "expression",
+      "expression": "options.get('graphs') or options.get('all')"
+    },
+    "wants_logic": {
+      "type": "expression",
+      "expression": "options.get('logic') or options.get('all')"
+    },
+    "wants_functions": {
+      "type": "expression",
+      "expression": "options.get('functions') or options.get('all')"
+    },
+    "wants_mermaid": {
+      "type": "expression",
+      "expression": "options.get('mermaid') or options.get('all')"
+    },
+    "wants_readme": {
+      "type": "expression",
+      "expression": "options.get('readme') or options.get('all')"
+    },
+    "wants_report": {
+      "type": "expression",
+      "expression": "options.get('report') or options.get('all')"
+    },
+    "wants_dashboard": {
+      "type": "expression",
+      "expression": "options.get('dashboard') or options.get('all')"
+    },
+    "has_error": {
+      "type": "expression",
+      "expression": "error is not None"
+    },
+    "no_error": {
+      "type": "expression",
+      "expression": "error is None"
+    }
   },
-
   "actions": {
-    "init": { "type": "compute", "unit": "docgen:init" },
-    "discover": { "type": "compute", "unit": "docgen:discoverBlueprints" },
-    "gen_graphs": { "type": "compute", "unit": "docgen:generateGraphs" },
-    "gen_logic": { "type": "compute", "unit": "docgen:generateLogicGraphs" },
-    "gen_functions": { "type": "compute", "unit": "docgen:generateFunctionGraphs" },
-    "gen_mermaid": { "type": "compute", "unit": "docgen:generateMermaid" },
-    "update_readmes": { "type": "compute", "unit": "docgen:updateReadmes" },
-    "gen_report": { "type": "compute", "unit": "docgen:generateReport" },
-    "gen_dashboard": { "type": "compute", "unit": "docgen:generateDashboard" },
-    "finalize": { "type": "compute", "unit": "docgen:finalize" }
+    "init": {
+      "type": "compute",
+      "unit": "docgen:init"
+    },
+    "discover": {
+      "type": "compute",
+      "unit": "docgen:discoverBlueprints"
+    },
+    "gen_graphs": {
+      "type": "compute",
+      "unit": "docgen:generateGraphs"
+    },
+    "gen_logic": {
+      "type": "compute",
+      "unit": "docgen:generateLogicGraphs"
+    },
+    "gen_functions": {
+      "type": "compute",
+      "unit": "docgen:generateFunctionGraphs"
+    },
+    "gen_mermaid": {
+      "type": "compute",
+      "unit": "docgen:generateMermaid"
+    },
+    "update_readmes": {
+      "type": "compute",
+      "unit": "docgen:updateReadmes"
+    },
+    "gen_report": {
+      "type": "compute",
+      "unit": "docgen:generateReport"
+    },
+    "gen_dashboard": {
+      "type": "compute",
+      "unit": "docgen:generateDashboard"
+    },
+    "finalize": {
+      "type": "compute",
+      "unit": "docgen:finalize"
+    }
   },
-
   "transitions": [
-    { "id": "t0", "from": "idle", "to": "idle", "on_event": "START", "actions": ["init"] },
-    { "id": "t1", "from": "idle", "to": "discovering", "on_event": "GENERATE", "actions": ["discover"] },
-    { "id": "t2", "from": "discovering", "to": "generating_graphs", "on_event": "DONE", "gates": ["has_blueprints", "wants_graphs", "no_error"] },
-    { "id": "t3", "from": "discovering", "to": "generating_mermaid", "on_event": "DONE", "gates": ["has_blueprints", "wants_mermaid", "no_error"] },
-    { "id": "t4", "from": "discovering", "to": "error", "on_event": "DONE", "gates": ["no_blueprints"] },
-    { "id": "t5", "from": "generating_graphs", "to": "generating_logic", "on_event": "DONE", "gates": ["wants_logic", "no_error"], "actions": ["gen_graphs"] },
-    { "id": "t6", "from": "generating_graphs", "to": "generating_mermaid", "on_event": "DONE", "gates": ["wants_mermaid", "no_error"], "actions": ["gen_graphs"] },
-    { "id": "t7", "from": "generating_logic", "to": "generating_functions", "on_event": "DONE", "gates": ["wants_functions", "no_error"], "actions": ["gen_logic"] },
-    { "id": "t8", "from": "generating_logic", "to": "generating_mermaid", "on_event": "DONE", "gates": ["wants_mermaid", "no_error"], "actions": ["gen_logic"] },
-    { "id": "t9", "from": "generating_functions", "to": "generating_mermaid", "on_event": "DONE", "gates": ["wants_mermaid", "no_error"], "actions": ["gen_functions"] },
-    { "id": "t10", "from": "generating_mermaid", "to": "updating_readmes", "on_event": "DONE", "gates": ["wants_readme", "no_error"], "actions": ["gen_mermaid"] },
-    { "id": "t11", "from": "generating_mermaid", "to": "generating_report", "on_event": "DONE", "gates": ["wants_report", "no_error"], "actions": ["gen_mermaid"] },
-    { "id": "t12", "from": "updating_readmes", "to": "generating_report", "on_event": "DONE", "gates": ["wants_report", "no_error"], "actions": ["update_readmes"] },
-    { "id": "t13", "from": "updating_readmes", "to": "generating_dashboard", "on_event": "DONE", "gates": ["wants_dashboard", "no_error"], "actions": ["update_readmes"] },
-    { "id": "t14", "from": "generating_report", "to": "generating_dashboard", "on_event": "DONE", "gates": ["wants_dashboard", "no_error"], "actions": ["gen_report"] },
-    { "id": "t15", "from": "generating_report", "to": "complete", "on_event": "DONE", "gates": ["no_error"], "actions": ["gen_report", "finalize"] },
-    { "id": "t16", "from": "generating_dashboard", "to": "complete", "on_event": "DONE", "gates": ["no_error"], "actions": ["gen_dashboard", "finalize"] },
-    { "id": "t17", "from": "*", "to": "error", "on_event": "ERROR", "gates": ["has_error"] },
-    { "id": "t18", "from": "error", "to": "idle", "on_event": "RESET" },
-    { "id": "t19", "from": "complete", "to": "idle", "on_event": "RESET" }
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "idle",
+      "on_event": "START",
+      "actions": [
+        "init"
+      ]
+    },
+    {
+      "id": "t1",
+      "from": "idle",
+      "to": "discovering",
+      "on_event": "GENERATE",
+      "actions": [
+        "discover"
+      ]
+    },
+    {
+      "id": "t2",
+      "from": "discovering",
+      "to": "generating_graphs",
+      "on_event": "DONE",
+      "gates": [
+        "has_blueprints",
+        "wants_graphs",
+        "no_error"
+      ]
+    },
+    {
+      "id": "t3",
+      "from": "discovering",
+      "to": "generating_mermaid",
+      "on_event": "DONE",
+      "gates": [
+        "has_blueprints",
+        "wants_mermaid",
+        "no_error"
+      ]
+    },
+    {
+      "id": "t4",
+      "from": "discovering",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": [
+        "no_blueprints"
+      ]
+    },
+    {
+      "id": "t5",
+      "from": "generating_graphs",
+      "to": "generating_logic",
+      "on_event": "DONE",
+      "gates": [
+        "wants_logic",
+        "no_error"
+      ],
+      "actions": [
+        "gen_graphs"
+      ]
+    },
+    {
+      "id": "t6",
+      "from": "generating_graphs",
+      "to": "generating_mermaid",
+      "on_event": "DONE",
+      "gates": [
+        "wants_mermaid",
+        "no_error"
+      ],
+      "actions": [
+        "gen_graphs"
+      ]
+    },
+    {
+      "id": "t7",
+      "from": "generating_logic",
+      "to": "generating_functions",
+      "on_event": "DONE",
+      "gates": [
+        "wants_functions",
+        "no_error"
+      ],
+      "actions": [
+        "gen_logic"
+      ]
+    },
+    {
+      "id": "t8",
+      "from": "generating_logic",
+      "to": "generating_mermaid",
+      "on_event": "DONE",
+      "gates": [
+        "wants_mermaid",
+        "no_error"
+      ],
+      "actions": [
+        "gen_logic"
+      ]
+    },
+    {
+      "id": "t9",
+      "from": "generating_functions",
+      "to": "generating_mermaid",
+      "on_event": "DONE",
+      "gates": [
+        "wants_mermaid",
+        "no_error"
+      ],
+      "actions": [
+        "gen_functions"
+      ]
+    },
+    {
+      "id": "t10",
+      "from": "generating_mermaid",
+      "to": "updating_readmes",
+      "on_event": "DONE",
+      "gates": [
+        "wants_readme",
+        "no_error"
+      ],
+      "actions": [
+        "gen_mermaid"
+      ]
+    },
+    {
+      "id": "t11",
+      "from": "generating_mermaid",
+      "to": "generating_report",
+      "on_event": "DONE",
+      "gates": [
+        "wants_report",
+        "no_error"
+      ],
+      "actions": [
+        "gen_mermaid"
+      ]
+    },
+    {
+      "id": "t12",
+      "from": "updating_readmes",
+      "to": "generating_report",
+      "on_event": "DONE",
+      "gates": [
+        "wants_report",
+        "no_error"
+      ],
+      "actions": [
+        "update_readmes"
+      ]
+    },
+    {
+      "id": "t13",
+      "from": "updating_readmes",
+      "to": "generating_dashboard",
+      "on_event": "DONE",
+      "gates": [
+        "wants_dashboard",
+        "no_error"
+      ],
+      "actions": [
+        "update_readmes"
+      ]
+    },
+    {
+      "id": "t14",
+      "from": "generating_report",
+      "to": "generating_dashboard",
+      "on_event": "DONE",
+      "gates": [
+        "wants_dashboard",
+        "no_error"
+      ],
+      "actions": [
+        "gen_report"
+      ]
+    },
+    {
+      "id": "t15",
+      "from": "generating_report",
+      "to": "complete",
+      "on_event": "DONE",
+      "gates": [
+        "no_error"
+      ],
+      "actions": [
+        "gen_report",
+        "finalize"
+      ]
+    },
+    {
+      "id": "t16",
+      "from": "generating_dashboard",
+      "to": "complete",
+      "on_event": "DONE",
+      "gates": [
+        "no_error"
+      ],
+      "actions": [
+        "gen_dashboard",
+        "finalize"
+      ]
+    },
+    {
+      "id": "t17",
+      "from": "*",
+      "to": "error",
+      "on_event": "ERROR",
+      "gates": [
+        "has_error"
+      ]
+    },
+    {
+      "id": "t18",
+      "from": "error",
+      "to": "idle",
+      "on_event": "RESET"
+    },
+    {
+      "id": "t19",
+      "from": "complete",
+      "to": "idle",
+      "on_event": "RESET"
+    }
   ]
 }

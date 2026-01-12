@@ -4,7 +4,6 @@
   "name": "L++ Coverage Analyzer",
   "version": "1.0.0",
   "description": "Tracks runtime coverage of blueprints during execution",
-
   "context_schema": {
     "properties": {
       "blueprint": {
@@ -77,7 +76,6 @@
       }
     }
   },
-
   "states": {
     "idle": {
       "description": "No blueprint loaded, waiting for input"
@@ -98,10 +96,8 @@
       "description": "Error state"
     }
   },
-
   "entry_state": "idle",
-  "terminal_states": [],
-
+  "terminal_states": {},
   "gates": {
     "has_blueprint": {
       "type": "expression",
@@ -156,7 +152,6 @@
       "expression": "blueprint is not None"
     }
   },
-
   "actions": {
     "load_blueprint": {
       "type": "compute",
@@ -408,7 +403,6 @@
       "value": null
     }
   },
-
   "display": {
     "rules": [
       {
@@ -424,50 +418,72 @@
       }
     ]
   },
-
   "transitions": [
     {
       "id": "t_load",
       "from": "idle",
       "to": "loaded",
       "on_event": "LOAD",
-      "gates": ["no_blueprint"],
-      "actions": ["load_blueprint", "init_coverage"]
+      "gates": [
+        "no_blueprint"
+      ],
+      "actions": [
+        "load_blueprint",
+        "init_coverage"
+      ]
     },
     {
       "id": "t_reload",
       "from": "loaded",
       "to": "loaded",
       "on_event": "LOAD",
-      "actions": ["clear_all", "load_blueprint", "init_coverage"]
+      "actions": [
+        "clear_all",
+        "load_blueprint",
+        "init_coverage"
+      ]
     },
     {
       "id": "t_reload_from_tracking",
       "from": "tracking",
       "to": "loaded",
       "on_event": "LOAD",
-      "actions": ["clear_all", "load_blueprint", "init_coverage"]
+      "actions": [
+        "clear_all",
+        "load_blueprint",
+        "init_coverage"
+      ]
     },
     {
       "id": "t_reload_from_analyzing",
       "from": "analyzing",
       "to": "loaded",
       "on_event": "LOAD",
-      "actions": ["clear_all", "load_blueprint", "init_coverage"]
+      "actions": [
+        "clear_all",
+        "load_blueprint",
+        "init_coverage"
+      ]
     },
     {
       "id": "t_reload_from_reporting",
       "from": "reporting",
       "to": "loaded",
       "on_event": "LOAD",
-      "actions": ["clear_all", "load_blueprint", "init_coverage"]
+      "actions": [
+        "clear_all",
+        "load_blueprint",
+        "init_coverage"
+      ]
     },
     {
       "id": "t_start_tracking",
       "from": "loaded",
       "to": "tracking",
       "on_event": "START",
-      "gates": ["has_blueprint"],
+      "gates": [
+        "has_blueprint"
+      ],
       "actions": []
     },
     {
@@ -475,176 +491,255 @@
       "from": "tracking",
       "to": "tracking",
       "on_event": "STATE",
-      "actions": ["record_state"]
+      "actions": [
+        "record_state"
+      ]
     },
     {
       "id": "t_record_transition",
       "from": "tracking",
       "to": "tracking",
       "on_event": "TRANSITION",
-      "actions": ["record_transition"]
+      "actions": [
+        "record_transition"
+      ]
     },
     {
       "id": "t_record_gate",
       "from": "tracking",
       "to": "tracking",
       "on_event": "GATE",
-      "actions": ["record_gate"]
+      "actions": [
+        "record_gate"
+      ]
     },
     {
       "id": "t_record_action",
       "from": "tracking",
       "to": "tracking",
       "on_event": "ACTION",
-      "actions": ["record_action"]
+      "actions": [
+        "record_action"
+      ]
     },
     {
       "id": "t_record_event",
       "from": "tracking",
       "to": "tracking",
       "on_event": "EVENT",
-      "actions": ["record_event"]
+      "actions": [
+        "record_event"
+      ]
     },
     {
       "id": "t_import_trace_loaded",
       "from": "loaded",
       "to": "tracking",
       "on_event": "IMPORT",
-      "gates": ["has_blueprint", "can_import"],
-      "actions": ["import_trace"]
+      "gates": [
+        "has_blueprint",
+        "can_import"
+      ],
+      "actions": [
+        "import_trace"
+      ]
     },
     {
       "id": "t_import_trace_tracking",
       "from": "tracking",
       "to": "tracking",
       "on_event": "IMPORT",
-      "gates": ["can_import"],
-      "actions": ["import_trace"]
+      "gates": [
+        "can_import"
+      ],
+      "actions": [
+        "import_trace"
+      ]
     },
     {
       "id": "t_analyze",
       "from": "tracking",
       "to": "analyzing",
       "on_event": "ANALYZE",
-      "gates": ["has_coverage"],
-      "actions": ["compute_metrics"]
+      "gates": [
+        "has_coverage"
+      ],
+      "actions": [
+        "compute_metrics"
+      ]
     },
     {
       "id": "t_analyze_from_loaded",
       "from": "loaded",
       "to": "analyzing",
       "on_event": "ANALYZE",
-      "gates": ["has_blueprint"],
-      "actions": ["compute_metrics"]
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "compute_metrics"
+      ]
     },
     {
       "id": "t_summary",
       "from": "analyzing",
       "to": "reporting",
       "on_event": "SUMMARY",
-      "gates": ["has_metrics"],
-      "actions": ["generate_summary"]
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "generate_summary"
+      ]
     },
     {
       "id": "t_detailed",
       "from": "analyzing",
       "to": "reporting",
       "on_event": "DETAILED",
-      "gates": ["has_metrics"],
-      "actions": ["generate_detailed"]
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "generate_detailed"
+      ]
     },
     {
       "id": "t_gap",
       "from": "analyzing",
       "to": "reporting",
       "on_event": "GAP",
-      "gates": ["has_metrics"],
-      "actions": ["generate_gap_report"]
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "generate_gap_report"
+      ]
     },
     {
       "id": "t_all_reports",
       "from": "analyzing",
       "to": "reporting",
       "on_event": "ALL_REPORTS",
-      "gates": ["has_metrics"],
-      "actions": ["generate_summary", "generate_detailed", "generate_gap_report"]
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "generate_summary",
+        "generate_detailed",
+        "generate_gap_report"
+      ]
     },
     {
       "id": "t_export_html",
       "from": "reporting",
       "to": "reporting",
       "on_event": "EXPORT_HTML",
-      "gates": ["has_metrics"],
-      "actions": ["export_html"]
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "export_html"
+      ]
     },
     {
       "id": "t_export_html_from_analyzing",
       "from": "analyzing",
       "to": "reporting",
       "on_event": "EXPORT_HTML",
-      "gates": ["has_metrics"],
-      "actions": ["export_html"]
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "export_html"
+      ]
     },
     {
       "id": "t_export_json",
       "from": "reporting",
       "to": "reporting",
       "on_event": "EXPORT_JSON",
-      "gates": ["has_metrics"],
-      "actions": ["export_json"]
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "export_json"
+      ]
     },
     {
       "id": "t_export_json_from_analyzing",
       "from": "analyzing",
       "to": "reporting",
       "on_event": "EXPORT_JSON",
-      "gates": ["has_metrics"],
-      "actions": ["export_json"]
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "export_json"
+      ]
     },
     {
       "id": "t_more_summary",
       "from": "reporting",
       "to": "reporting",
       "on_event": "SUMMARY",
-      "gates": ["has_metrics"],
-      "actions": ["generate_summary"]
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "generate_summary"
+      ]
     },
     {
       "id": "t_more_detailed",
       "from": "reporting",
       "to": "reporting",
       "on_event": "DETAILED",
-      "gates": ["has_metrics"],
-      "actions": ["generate_detailed"]
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "generate_detailed"
+      ]
     },
     {
       "id": "t_more_gap",
       "from": "reporting",
       "to": "reporting",
       "on_event": "GAP",
-      "gates": ["has_metrics"],
-      "actions": ["generate_gap_report"]
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "generate_gap_report"
+      ]
     },
     {
       "id": "t_reset",
       "from": "tracking",
       "to": "loaded",
       "on_event": "RESET",
-      "actions": ["reset_coverage"]
+      "actions": [
+        "reset_coverage"
+      ]
     },
     {
       "id": "t_reset_from_analyzing",
       "from": "analyzing",
       "to": "loaded",
       "on_event": "RESET",
-      "actions": ["reset_coverage"]
+      "actions": [
+        "reset_coverage"
+      ]
     },
     {
       "id": "t_reset_from_reporting",
       "from": "reporting",
       "to": "loaded",
       "on_event": "RESET",
-      "actions": ["reset_coverage"]
+      "actions": [
+        "reset_coverage"
+      ]
     },
     {
       "id": "t_back_to_tracking",
@@ -665,48 +760,78 @@
       "from": "loaded",
       "to": "idle",
       "on_event": "UNLOAD",
-      "actions": ["clear_all"]
+      "actions": [
+        "clear_all"
+      ]
     },
     {
       "id": "t_unload_from_tracking",
       "from": "tracking",
       "to": "idle",
       "on_event": "UNLOAD",
-      "actions": ["clear_all"]
+      "actions": [
+        "clear_all"
+      ]
     },
     {
       "id": "t_unload_from_analyzing",
       "from": "analyzing",
       "to": "idle",
       "on_event": "UNLOAD",
-      "actions": ["clear_all"]
+      "actions": [
+        "clear_all"
+      ]
     },
     {
       "id": "t_unload_from_reporting",
       "from": "reporting",
       "to": "idle",
       "on_event": "UNLOAD",
-      "actions": ["clear_all"]
+      "actions": [
+        "clear_all"
+      ]
     },
     {
       "id": "t_error",
       "from": "*",
       "to": "error",
       "on_event": "ERROR",
-      "actions": ["set_error"]
+      "actions": [
+        "set_error"
+      ]
     },
     {
       "id": "t_recover",
       "from": "error",
       "to": "idle",
       "on_event": "CLEAR",
-      "actions": ["clear_error", "clear_all"]
+      "actions": [
+        "clear_error",
+        "clear_all"
+      ]
     }
   ],
-
   "flanges": {
-    "inputs": ["path", "state_id", "transition_id", "gate_id", "action_id", "event_name", "result"],
-    "outputs": ["metrics", "summary_report", "detailed_report", "gap_report", "html_report", "json_report"],
-    "stacks": ["event_sequence_simulator", "execution_tracer"]
+    "inputs": [
+      "path",
+      "state_id",
+      "transition_id",
+      "gate_id",
+      "action_id",
+      "event_name",
+      "result"
+    ],
+    "outputs": [
+      "metrics",
+      "summary_report",
+      "detailed_report",
+      "gap_report",
+      "html_report",
+      "json_report"
+    ],
+    "stacks": [
+      "event_sequence_simulator",
+      "execution_tracer"
+    ]
   }
 }
