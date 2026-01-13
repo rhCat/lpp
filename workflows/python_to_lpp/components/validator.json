@@ -10,17 +10,21 @@
         "type": "array",
         "description": "Generated blueprints"
       },
-      "computeFunctions": {
-        "type": "array",
-        "description": "Generated compute functions"
+      "computeGenerated": {
+        "type": "number",
+        "description": "Count of generated compute modules"
       },
-      "validationResult": {
-        "type": "object",
-        "description": "Validation result"
-      },
-      "isValid": {
+      "valid": {
         "type": "boolean",
         "description": "Validation passed"
+      },
+      "errors": {
+        "type": "array",
+        "description": "Validation errors"
+      },
+      "warnings": {
+        "type": "array",
+        "description": "Validation warnings"
       },
       "error": {
         "type": "string",
@@ -49,12 +53,16 @@
   "terminal_states": {
     "valid": {
       "output_schema": {
-        "validationResult": {
-          "type": "object",
+        "valid": {
+          "type": "boolean",
           "non_null": true
         },
-        "isValid": {
-          "type": "boolean",
+        "errors": {
+          "type": "array",
+          "non_null": true
+        },
+        "warnings": {
+          "type": "array",
           "non_null": true
         }
       },
@@ -62,12 +70,16 @@
     },
     "invalid": {
       "output_schema": {
-        "validationResult": {
-          "type": "object",
+        "valid": {
+          "type": "boolean",
           "non_null": true
         },
-        "isValid": {
-          "type": "boolean",
+        "errors": {
+          "type": "array",
+          "non_null": true
+        },
+        "warnings": {
+          "type": "array",
           "non_null": true
         }
       }
@@ -88,11 +100,11 @@
     },
     "is_valid": {
       "type": "expression",
-      "expression": "isValid == True"
+      "expression": "valid == True"
     },
     "is_invalid": {
       "type": "expression",
-      "expression": "isValid == False"
+      "expression": "valid == False"
     },
     "has_error": {
       "type": "expression",
@@ -109,12 +121,12 @@
       "compute_unit": "py2lpp:validate",
       "input_map": {
         "blueprints": "blueprints",
-        "computeFunctions": "computeFunctions"
+        "computeGenerated": "computeGenerated"
       },
       "output_map": {
-        "validationResult": "validationResult",
-        "isValid": "isValid",
-        "error": "error"
+        "valid": "valid",
+        "errors": "errors",
+        "warnings": "warnings"
       }
     }
   },

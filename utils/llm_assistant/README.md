@@ -116,20 +116,15 @@ stateDiagram-v2
     %% L++ State Diagram: L++ LLM Schema Assistant
     [*] --> init
     init --> ready : START [api_key is not None]
-    init --> error : START [api_key is None]
-    error --> init : CONFIGURE
     ready --> init : CONFIGURE
     querying --> init : CONFIGURE
-    error --> init : SET_KEY
     ready --> ready : LOAD
     ready --> querying : QUERY
     ready --> querying : EXPLAIN [blueprint is not None]
     ready --> querying : VALIDATE [blueprint is not None]
     ready --> querying : SUGGEST [blueprint is not None]
     querying --> ready : DONE [error is None]
-    querying --> error : DONE [error is not None]
     ready --> ready : CLEAR
-    error --> ready : RETRY [api_key is not None]
 ```
 > **Interactive View:** [Open zoomable diagram](results/llm_assistant_diagram.html) for pan/zoom controls
 

@@ -290,7 +290,7 @@ def create_test_blueprints(testsDir: Path):
 
     # Parent workflow - a simple workflow with a placeholder processing state
     parent = {
-        "$schema": "lpp/v0.1.2",
+        "$schema": "lpp/v0.2.0",
         "id": "parent_workflow",
         "name": "Parent Workflow",
         "version": "1.0.0",
@@ -361,7 +361,7 @@ def create_test_blueprints(testsDir: Path):
 
     # Child processor - specific processing logic to embed
     child = {
-        "$schema": "lpp/v0.1.2",
+        "$schema": "lpp/v0.2.0",
         "id": "child_processor",
         "name": "Child Processor",
         "version": "1.0.0",

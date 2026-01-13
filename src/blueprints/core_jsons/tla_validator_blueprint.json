@@ -142,42 +142,73 @@
     "a_to_tla_safe": {
       "type": "compute",
       "compute_unit": "impl:_to_tla_safe",
-      "description": "Convert name to TLA+ safe identifier"
+      "description": "Convert name to TLA+ safe identifier",
+      "input_map": {},
+      "output_map": {}
     },
     "a_extract_domains": {
       "type": "compute",
       "compute_unit": "impl:_extract_domains",
-      "description": "Extract type domains from schema"
+      "description": "Extract type domains from schema",
+      "input_map": {},
+      "output_map": {}
     },
     "a_escape_string": {
       "type": "compute",
       "compute_unit": "impl:_escape_tla_string",
-      "description": "Escape string for TLA+"
+      "description": "Escape string for TLA+",
+      "input_map": {},
+      "output_map": {}
     },
     "a_generate_spec": {
       "type": "compute",
       "compute_unit": "impl:generate_tla",
-      "description": "Generate TLA+ specification"
+      "description": "Generate TLA+ specification",
+      "input_map": {},
+      "output_map": {}
     },
     "a_run_tlc": {
       "type": "compute",
       "compute_unit": "impl:validate_with_tlc",
-      "description": "Run TLC model checker"
+      "description": "Run TLC model checker",
+      "input_map": {},
+      "output_map": {}
     },
     "a_save_tla": {
       "type": "compute",
       "compute_unit": "impl:save_tla",
-      "description": "Save TLA+ files to disk"
+      "description": "Save TLA+ files to disk",
+      "input_map": {},
+      "output_map": {}
     },
     "a_append_line": {
       "type": "compute",
       "compute_unit": "impl:lines.append",
-      "description": "Append line to spec"
+      "description": "Append line to spec",
+      "input_map": {},
+      "output_map": {}
     }
   },
   "entry_state": "idle",
   "terminal_states": {
-    "complete": {},
-    "error": {}
+    "complete": {
+      "output_schema": {
+        "result": {
+          "type": "object",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": [
+        "result_produced"
+      ]
+    },
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
   }
 }

@@ -2,16 +2,16 @@
   "blueprint_id": "python_to_lpp",
   "blueprint_tests": {
     "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_python_to_lpp_blueprint.py",
-    "count": 107,
+    "count": 108,
     "coverage": {
-      "total_tests": 107,
+      "total_tests": 108,
       "by_type": {
         "path_coverage": 14,
         "state_coverage": 3,
         "gate_boundary": 16,
         "negative": 42,
         "property_based": 32,
-        "contract": 0
+        "contract": 1
       },
       "state_coverage": {
         "total": 10,
@@ -45,5 +45,5 @@
       "finalize"
     ]
   },
-  "total_tests": 143
+  "total_tests": 144
 }

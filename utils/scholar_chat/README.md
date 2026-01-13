@@ -11,16 +11,13 @@ stateDiagram-v2
     idle --> idle : INIT
     idle --> searching : SEARCH
     searching --> reviewing : DONE [error is None]
-    searching --> error : DONE [error is not None]
     reviewing --> searching : SEARCH
     reviewing --> analyzing : SELECT
     analyzing --> chatting : DONE [error is None]
-    analyzing --> error : DONE [error is not None]
     chatting --> chatting : ASK
     chatting --> searching : SEARCH
     chatting --> reviewing : BACK
     reviewing --> idle : RESET
-    error --> idle : RETRY
 ```
 > **Interactive View:** [Open zoomable diagram](results/scholar_chat_diagram.html) for pan/zoom controls
 

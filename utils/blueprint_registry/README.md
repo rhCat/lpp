@@ -221,12 +221,6 @@ stateDiagram-v2
     viewing --> ready : BACK
     searching --> ready : BACK
     comparing --> viewing : BACK
-    error --> idle : CLEAR
-    idle --> error : LOAD_FAILED
-    ready --> error : LOAD_FAILED
-    searching --> error : LOAD_FAILED
-    viewing --> error : LOAD_FAILED
-    comparing --> error : LOAD_FAILED
 ```
 > **Interactive View:** [Open zoomable diagram](results/blueprint_registry_diagram.html) for pan/zoom controls
 

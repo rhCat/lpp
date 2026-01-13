@@ -42,7 +42,14 @@
   "entry_state": "idle",
   "terminal_states": {
     "complete": {},
-    "error": {}
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
   },
   "context_schema": {
     "utilsPath": "string",
@@ -113,43 +120,63 @@
   "actions": {
     "init": {
       "type": "compute",
-      "unit": "docgen:init"
+      "unit": "docgen:init",
+      "input_map": {},
+      "output_map": {}
     },
     "discover": {
       "type": "compute",
-      "unit": "docgen:discoverBlueprints"
+      "unit": "docgen:discoverBlueprints",
+      "input_map": {},
+      "output_map": {}
     },
     "gen_graphs": {
       "type": "compute",
-      "unit": "docgen:generateGraphs"
+      "unit": "docgen:generateGraphs",
+      "input_map": {},
+      "output_map": {}
     },
     "gen_logic": {
       "type": "compute",
-      "unit": "docgen:generateLogicGraphs"
+      "unit": "docgen:generateLogicGraphs",
+      "input_map": {},
+      "output_map": {}
     },
     "gen_functions": {
       "type": "compute",
-      "unit": "docgen:generateFunctionGraphs"
+      "unit": "docgen:generateFunctionGraphs",
+      "input_map": {},
+      "output_map": {}
     },
     "gen_mermaid": {
       "type": "compute",
-      "unit": "docgen:generateMermaid"
+      "unit": "docgen:generateMermaid",
+      "input_map": {},
+      "output_map": {}
     },
     "update_readmes": {
       "type": "compute",
-      "unit": "docgen:updateReadmes"
+      "unit": "docgen:updateReadmes",
+      "input_map": {},
+      "output_map": {}
     },
     "gen_report": {
       "type": "compute",
-      "unit": "docgen:generateReport"
+      "unit": "docgen:generateReport",
+      "input_map": {},
+      "output_map": {}
     },
     "gen_dashboard": {
       "type": "compute",
-      "unit": "docgen:generateDashboard"
+      "unit": "docgen:generateDashboard",
+      "input_map": {},
+      "output_map": {}
     },
     "finalize": {
       "type": "compute",
-      "unit": "docgen:finalize"
+      "unit": "docgen:finalize",
+      "input_map": {},
+      "output_map": {}
     }
   },
   "transitions": [

@@ -14,9 +14,9 @@
         "type": "array",
         "description": "Extracted modules"
       },
-      "computeFunctions": {
-        "type": "array",
-        "description": "Generated compute functions"
+      "computeGenerated": {
+        "type": "number",
+        "description": "Count of generated compute modules"
       },
       "error": {
         "type": "string",
@@ -42,8 +42,8 @@
   "terminal_states": {
     "done": {
       "output_schema": {
-        "computeFunctions": {
-          "type": "array",
+        "computeGenerated": {
+          "type": "number",
           "non_null": true
         }
       },
@@ -65,7 +65,7 @@
     },
     "has_compute": {
       "type": "expression",
-      "expression": "computeFunctions is not None"
+      "expression": "computeGenerated is not None and computeGenerated > 0"
     },
     "has_error": {
       "type": "expression",
@@ -85,8 +85,7 @@
         "extractedModules": "extractedModules"
       },
       "output_map": {
-        "computeFunctions": "computeFunctions",
-        "error": "error"
+        "computeGenerated": "generated"
       }
     }
   },

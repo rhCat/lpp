@@ -2,13 +2,13 @@
   "blueprint_id": "py2lpp_compute_gen",
   "blueprint_tests": {
     "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_py2lpp_compute_gen_blueprint.py",
-    "count": 33,
+    "count": 36,
     "coverage": {
-      "total_tests": 33,
+      "total_tests": 36,
       "by_type": {
         "path_coverage": 3,
         "state_coverage": 2,
-        "gate_boundary": 8,
+        "gate_boundary": 11,
         "negative": 9,
         "property_based": 8,
         "contract": 3
@@ -37,5 +37,5 @@
       "py2lpp:generateCompute"
     ]
   },
-  "total_tests": 37
+  "total_tests": 40
 }

@@ -46,12 +46,6 @@ stateDiagram-v2
     tracking --> idle : UNLOAD
     analyzing --> idle : UNLOAD
     reporting --> idle : UNLOAD
-    idle --> error : ERROR
-    loaded --> error : ERROR
-    analyzing --> error : ERROR
-    tracking --> error : ERROR
-    reporting --> error : ERROR
-    error --> idle : CLEAR
 ```
 > **Interactive View:** [Open zoomable diagram](results/coverage_analyzer_diagram.html) for pan/zoom controls
 

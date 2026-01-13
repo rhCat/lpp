@@ -24,12 +24,6 @@ stateDiagram-v2
     parsing --> analyzing : AUTO
     analyzing --> inferring : AUTO
     inferring --> generating : AUTO
-    generating --> complete : AUTO
-    parsing --> error : ERROR
-    analyzing --> error : ERROR
-    inferring --> error : ERROR
-    complete --> idle : RESET
-    error --> idle : RESET
 ```
 > **Interactive View:** [Open zoomable diagram](results/logic_decoder_diagram.html) for pan/zoom controls
 
@@ -57,7 +51,7 @@ Decoded: 6 states, 10 transitions
 Imports: ['meta', 'unknown', 'serialization', 'http', 'filesystem', 'system']
 [complete]> show
 {
-  "$schema": "lpp/v0.1",
+  "$schema": "lpp/v0.2.0",
   "id": "decoded_scholar_compute",
   "name": "Decoded: scholar_compute",
   ...

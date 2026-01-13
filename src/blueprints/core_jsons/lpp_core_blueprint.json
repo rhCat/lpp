@@ -151,52 +151,87 @@
     "a_safe_eval": {
       "type": "compute",
       "compute_unit": "impl:safe_eval_bool",
-      "description": "Safely evaluate boolean expression"
+      "description": "Safely evaluate boolean expression",
+      "input_map": {},
+      "output_map": {}
     },
     "a_create_trace": {
       "type": "compute",
       "compute_unit": "impl:TransitionTrace",
-      "description": "Create transition trace"
+      "description": "Create transition trace",
+      "input_map": {},
+      "output_map": {}
     },
     "a_get_timestamp": {
       "type": "compute",
       "compute_unit": "impl:datetime.datetime.now",
-      "description": "Get current timestamp"
+      "description": "Get current timestamp",
+      "input_map": {},
+      "output_map": {}
     },
     "a_copy_context": {
       "type": "compute",
       "compute_unit": "impl:context_data.copy",
-      "description": "Copy context data"
+      "description": "Copy context data",
+      "input_map": {},
+      "output_map": {}
     },
     "a_split_path": {
       "type": "compute",
       "compute_unit": "impl:path.split",
-      "description": "Split path into parts"
+      "description": "Split path into parts",
+      "input_map": {},
+      "output_map": {}
     },
     "a_check_type": {
       "type": "compute",
       "compute_unit": "impl:isinstance",
-      "description": "Check type of value"
+      "description": "Check type of value",
+      "input_map": {},
+      "output_map": {}
     },
     "a_get_compute_func": {
       "type": "compute",
       "compute_unit": "impl:compute_registry.get",
-      "description": "Get compute function from registry"
+      "description": "Get compute function from registry",
+      "input_map": {},
+      "output_map": {}
     },
     "a_call_compute": {
       "type": "compute",
       "compute_unit": "impl:compute_func",
-      "description": "Call compute function"
+      "description": "Call compute function",
+      "input_map": {},
+      "output_map": {}
     },
     "a_log": {
       "type": "compute",
       "compute_unit": "impl:print",
-      "description": "Log message"
+      "description": "Log message",
+      "input_map": {},
+      "output_map": {}
     }
   },
   "entry_state": "idle",
   "terminal_states": {
-    "complete": {},
-    "error": {}
+    "complete": {
+      "output_schema": {
+        "result": {
+          "type": "object",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": [
+        "result_produced"
+      ]
+    },
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
   }
 }

@@ -1,0 +1,59 @@
+{
+  "blueprint_id": "decoded_jobs",
+  "blueprint_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_decoded_jobs_blueprint.py",
+    "count": 73,
+    "coverage": {
+      "total_tests": 73,
+      "by_type": {
+        "path_coverage": 15,
+        "state_coverage": 1,
+        "gate_boundary": 0,
+        "negative": 51,
+        "property_based": 6,
+        "contract": 0
+      },
+      "state_coverage": {
+        "total": 17,
+        "covered": 16,
+        "percentage": 94.11764705882352
+      },
+      "transition_coverage": {
+        "total": 16,
+        "covered": 15,
+        "percentage": 93.75
+      },
+      "gate_coverage": {
+        "total": 0,
+        "covered": 0,
+        "percentage": 0
+      }
+    }
+  },
+  "compute_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_decoded_jobs_compute.py",
+    "units": 19,
+    "units_list": [
+      "impl:self._load_jobs",
+      "impl:OUTPUT_DIR.exists",
+      "impl:OUTPUT_DIR.iterdir",
+      "impl:pmid_dir.is_dir",
+      "impl:pmid_dir.name.startswith",
+      "impl:self._detect_status_from_files",
+      "impl:job.get",
+      "impl:detected_status.get",
+      "impl:logger.info",
+      "impl:datetime.now.isoformat",
+      "impl:datetime.now",
+      "impl:uuid.uuid4",
+      "impl:{'_type': 'Subscript', 'value': {'_type': 'Name', 'id': 'data', 'ctx': {'_type': 'Load'}, 'lineno': 224}, 'slice': {'_type': 'Constant', 'value': 'queue', 'kind': None, 'lineno': 224}, 'ctx': {'_type': 'Load'}, 'lineno': 224}.append",
+      "impl:self._update_statistics",
+      "impl:self._save_jobs",
+      "impl:Job",
+      "impl:jobs.append",
+      "impl:jobs.sort",
+      "impl:JobListResponse"
+    ]
+  },
+  "total_tests": 149
+}

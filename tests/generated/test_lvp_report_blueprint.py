@@ -22,24 +22,53 @@ def operator():
 
 def test_path_2(operator):
     """
+    Path: idle -> generating
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('REPORT', {})
+
+    # Verify final state
+    assert operator.state == 'generating'
+
+
+def test_path_3(operator):
+    """
     Path: idle -> generating -> error
     Type: path_coverage
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Dispatch events
@@ -50,55 +79,26 @@ def test_path_2(operator):
     assert operator.state == 'error'
 
 
-def test_path_3(operator):
-    """
-    Path: idle -> generating
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('REPORT', {})
-
-    # Verify final state
-    assert operator.state == 'generating'
-
-
 def test_path_4(operator):
     """
     Path: idle -> generating -> done
     Type: path_coverage
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Dispatch events
@@ -115,20 +115,20 @@ def test_state_coverage_1(operator):
     Type: state_coverage
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Dispatch events
@@ -145,20 +145,20 @@ def test_state_coverage_2(operator):
     Type: state_coverage
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Dispatch events
@@ -175,20 +175,20 @@ def test_gate_null_1(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
     operator.context['bone_json'] = None
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Dispatch events
@@ -206,20 +206,20 @@ def test_gate_null_2(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
     operator.context['bone_json'] = 'some_value'
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Dispatch events
@@ -237,19 +237,19 @@ def test_gate_null_3(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
     operator.context['audit_report'] = None
     operator.context['error'] = ''
 
@@ -268,19 +268,19 @@ def test_gate_null_4(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
     operator.context['audit_report'] = 'some_value'
     operator.context['error'] = ''
 
@@ -299,20 +299,20 @@ def test_gate_null_5(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = None
 
     # Dispatch events
@@ -330,20 +330,20 @@ def test_gate_null_6(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = 'some_value'
 
     # Dispatch events
@@ -361,20 +361,20 @@ def test_gate_null_7(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = None
 
     # Dispatch events
@@ -392,20 +392,20 @@ def test_gate_null_8(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = 'some_value'
 
     # Dispatch events
@@ -423,20 +423,20 @@ def test_negative_invalid_event_1(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     operator._state = 'idle'
@@ -456,20 +456,20 @@ def test_negative_invalid_event_2(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     operator._state = 'generating'
@@ -485,30 +485,30 @@ def test_negative_invalid_event_2(operator):
 
 def test_negative_invalid_event_3(operator):
     """
-    Invalid event 'COMPLETE' in state 'done'
+    Invalid event 'REPORT' in state 'done'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     operator._state = 'done'
 
     # Dispatch events
-    operator.dispatch('COMPLETE', {})
+    operator.dispatch('REPORT', {})
 
     # Verify state unchanged
     assert operator.state == 'done'
@@ -518,30 +518,30 @@ def test_negative_invalid_event_3(operator):
 
 def test_negative_invalid_event_4(operator):
     """
-    Invalid event 'REPORT' in state 'done'
+    Invalid event 'COMPLETE' in state 'done'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     operator._state = 'done'
 
     # Dispatch events
-    operator.dispatch('REPORT', {})
+    operator.dispatch('COMPLETE', {})
 
     # Verify state unchanged
     assert operator.state == 'done'
@@ -551,30 +551,30 @@ def test_negative_invalid_event_4(operator):
 
 def test_negative_invalid_event_5(operator):
     """
-    Invalid event 'COMPLETE' in state 'error'
+    Invalid event 'REPORT' in state 'error'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     operator._state = 'error'
 
     # Dispatch events
-    operator.dispatch('COMPLETE', {})
+    operator.dispatch('REPORT', {})
 
     # Verify state unchanged
     assert operator.state == 'error'
@@ -584,30 +584,30 @@ def test_negative_invalid_event_5(operator):
 
 def test_negative_invalid_event_6(operator):
     """
-    Invalid event 'REPORT' in state 'error'
+    Invalid event 'COMPLETE' in state 'error'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     operator._state = 'error'
 
     # Dispatch events
-    operator.dispatch('REPORT', {})
+    operator.dispatch('COMPLETE', {})
 
     # Verify state unchanged
     assert operator.state == 'error'
@@ -652,19 +652,19 @@ def test_property_1(operator):
     """
     # Set initial context
     operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'target_name' maintains type string
@@ -679,19 +679,19 @@ def test_property_2(operator):
     """
     # Set initial context
     operator.context['target_name'] = 'test'
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'target_name' maintains type string
@@ -705,20 +705,20 @@ def test_property_3(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
+    operator.context['target_name'] = 'test_name'
     operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'target_path' maintains type string
@@ -732,20 +732,20 @@ def test_property_4(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
+    operator.context['target_name'] = 'test_name'
     operator.context['target_path'] = 'test'
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'target_path' maintains type string
@@ -759,20 +759,20 @@ def test_property_5(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
     operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'bone_json' maintains type object
@@ -786,20 +786,20 @@ def test_property_6(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
     operator.context['bone_json'] = {'key': 'value'}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'bone_json' maintains type object
@@ -813,20 +813,20 @@ def test_property_7(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
     operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'threat_model' maintains type object
@@ -840,20 +840,20 @@ def test_property_8(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
     operator.context['threat_model'] = {'key': 'value'}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'threat_model' maintains type object
@@ -867,20 +867,20 @@ def test_property_9(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
     operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'invariants' maintains type array
@@ -894,20 +894,20 @@ def test_property_10(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
     operator.context['invariants'] = ['item']
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'invariants' maintains type array
@@ -921,20 +921,20 @@ def test_property_11(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
     operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'counter_examples' maintains type array
@@ -948,20 +948,20 @@ def test_property_12(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
     operator.context['counter_examples'] = ['item']
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'counter_examples' maintains type array
@@ -975,20 +975,20 @@ def test_property_13(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
     operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'vulnerability_count' maintains type number
@@ -1002,20 +1002,20 @@ def test_property_14(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
     operator.context['vulnerability_count'] = 1
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'vulnerability_count' maintains type number
@@ -1029,20 +1029,20 @@ def test_property_15(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
     operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'exploits' maintains type array
@@ -1056,20 +1056,20 @@ def test_property_16(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
     operator.context['exploits'] = ['item']
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'exploits' maintains type array
@@ -1083,20 +1083,20 @@ def test_property_17(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
     operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'patches' maintains type array
@@ -1110,20 +1110,20 @@ def test_property_18(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
     operator.context['patches'] = ['item']
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'patches' maintains type array
@@ -1137,20 +1137,20 @@ def test_property_19(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
     operator.context['fix_verified'] = True
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'fix_verified' maintains type boolean
@@ -1164,20 +1164,20 @@ def test_property_20(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
     operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'fix_verified' maintains type boolean
@@ -1191,20 +1191,20 @@ def test_property_21(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
     operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'severity_score' maintains type number
@@ -1218,20 +1218,20 @@ def test_property_22(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
     operator.context['severity_score'] = 1
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'severity_score' maintains type number
@@ -1245,20 +1245,20 @@ def test_property_23(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
     operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'output_dir' maintains type string
@@ -1272,20 +1272,20 @@ def test_property_24(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
     operator.context['output_dir'] = 'test'
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'output_dir' maintains type string
@@ -1299,20 +1299,20 @@ def test_property_25(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
     operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'run_id' maintains type string
@@ -1326,20 +1326,20 @@ def test_property_26(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
     operator.context['run_id'] = 'test'
-    operator.context['audit_report'] = {}
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'run_id' maintains type string
@@ -1353,19 +1353,19 @@ def test_property_27(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
     operator.context['audit_report'] = {}
     operator.context['error'] = ''
 
@@ -1380,19 +1380,19 @@ def test_property_28(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
     operator.context['audit_report'] = {'key': 'value'}
     operator.context['error'] = ''
 
@@ -1407,20 +1407,20 @@ def test_property_29(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Verify property 'error' maintains type string
@@ -1434,20 +1434,20 @@ def test_property_30(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = 'test'
 
     # Verify property 'error' maintains type string
@@ -1461,20 +1461,20 @@ def test_contract_1(operator):
     Type: contract_output
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Dispatch events
@@ -1493,20 +1493,20 @@ def test_contract_2(operator):
     Type: contract_invariant
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Dispatch events
@@ -1526,20 +1526,20 @@ def test_contract_3(operator):
     Type: contract_output
     """
     # Set initial context
-    operator.context['target_name'] = ''
-    operator.context['target_path'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['threat_model'] = {}
-    operator.context['invariants'] = []
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['exploits'] = []
-    operator.context['patches'] = []
-    operator.context['fix_verified'] = False
-    operator.context['severity_score'] = 0
-    operator.context['output_dir'] = ''
-    operator.context['run_id'] = ''
-    operator.context['audit_report'] = {}
+    operator.context['target_name'] = 'test_name'
+    operator.context['target_path'] = '/test/path'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['threat_model'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['exploits'] = ['test_item']
+    operator.context['patches'] = ['test_item']
+    operator.context['fix_verified'] = True
+    operator.context['severity_score'] = 1
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['run_id'] = 'test_value'
+    operator.context['audit_report'] = {'test': True}
     operator.context['error'] = ''
 
     # Dispatch events

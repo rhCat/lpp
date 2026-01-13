@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1",
+  "$schema": "lpp/v0.2.0",
   "id": "logic_decoder",
   "name": "Python Logic Decoder",
   "version": "1.0.0",
@@ -73,18 +73,20 @@
     "generating": {
       "name": "Generating Blueprint",
       "description": "Assembling final L++ blueprint"
-    },
-    "complete": {
-      "name": "Complete",
-      "description": "Blueprint generated successfully"
-    },
-    "error": {
-      "name": "Error",
-      "description": "Decoding failed"
     }
   },
   "entry_state": "idle",
-  "terminal_states": {},
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    },
+    "complete": {}
+  },
   "gates": {
     "hasFilePath": {
       "type": "compute",

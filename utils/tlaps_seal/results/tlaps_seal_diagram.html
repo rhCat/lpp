@@ -55,7 +55,6 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
         state_rejected[["rejected<br>Blueprint failed verification"]]:::terminal
         state_certified[["certified<br>TLAPS certification complete - Seal gran"]]:::terminal
     end
-        state_error[["error<br>Error during certification process"]]:::errorState
 
     %% Transitions
     act_t0s0[["setPath"]]:::action
@@ -109,62 +108,24 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
     act_t10s0[["setRejected"]]:::action
     gate_t10s0 -- ✓ --> act_t10s0
     act_t10s0 --> state_rejected
-    gate_t11s0{{"error is not None?"}}:::gate
-    state_idle -- "ERROR" --> gate_t11s0
-    act_t11s0[["log_error"]]:::action
-    gate_t11s0 -- ✓ --> act_t11s0
-    act_t11s0 --> state_error
-    gate_t11s1{{"error is not None?"}}:::gate
-    state_loading -- "ERROR" --> gate_t11s1
-    act_t11s1[["log_error"]]:::action
-    gate_t11s1 -- ✓ --> act_t11s1
-    act_t11s1 --> state_error
-    gate_t11s2{{"error is not None?"}}:::gate
-    state_auditing -- "ERROR" --> gate_t11s2
-    act_t11s2[["log_error"]]:::action
-    gate_t11s2 -- ✓ --> act_t11s2
-    act_t11s2 --> state_error
-    gate_t11s3{{"error is not None?"}}:::gate
-    state_generating_tla -- "ERROR" --> gate_t11s3
-    act_t11s3[["log_error"]]:::action
-    gate_t11s3 -- ✓ --> act_t11s3
-    act_t11s3 --> state_error
-    gate_t11s4{{"error is not None?"}}:::gate
-    state_tlc_verifying -- "ERROR" --> gate_t11s4
-    act_t11s4[["log_error"]]:::action
-    gate_t11s4 -- ✓ --> act_t11s4
-    act_t11s4 --> state_error
-    gate_t11s5{{"error is not None?"}}:::gate
-    state_tlc_verified -- "ERROR" --> gate_t11s5
-    act_t11s5[["log_error"]]:::action
-    gate_t11s5 -- ✓ --> act_t11s5
-    act_t11s5 --> state_error
-    gate_t11s6{{"error is not None?"}}:::gate
-    state_tlaps_proving -- "ERROR" --> gate_t11s6
-    act_t11s6[["log_error"]]:::action
-    gate_t11s6 -- ✓ --> act_t11s6
-    act_t11s6 --> state_error
     act_t12s0[["resetContext"]]:::action
-    state_error -- "RESET" --> act_t12s0
+    state_loading -- "RESET" --> act_t12s0
     act_t12s0 --> state_idle
     act_t12s1[["resetContext"]]:::action
-    state_loading -- "RESET" --> act_t12s1
+    state_auditing -- "RESET" --> act_t12s1
     act_t12s1 --> state_idle
     act_t12s2[["resetContext"]]:::action
-    state_auditing -- "RESET" --> act_t12s2
+    state_generating_tla -- "RESET" --> act_t12s2
     act_t12s2 --> state_idle
     act_t12s3[["resetContext"]]:::action
-    state_generating_tla -- "RESET" --> act_t12s3
+    state_tlc_verifying -- "RESET" --> act_t12s3
     act_t12s3 --> state_idle
     act_t12s4[["resetContext"]]:::action
-    state_tlc_verifying -- "RESET" --> act_t12s4
+    state_tlc_verified -- "RESET" --> act_t12s4
     act_t12s4 --> state_idle
     act_t12s5[["resetContext"]]:::action
-    state_tlc_verified -- "RESET" --> act_t12s5
+    state_tlaps_proving -- "RESET" --> act_t12s5
     act_t12s5 --> state_idle
-    act_t12s6[["resetContext"]]:::action
-    state_tlaps_proving -- "RESET" --> act_t12s6
-    act_t12s6 --> state_idle
     gate_t13s0{{"tlapsResult is not None and...?"}}:::gate
     state_certified -- "VIEW" --> gate_t13s0
     gate_t13s0 -- ✓ --> state_certified

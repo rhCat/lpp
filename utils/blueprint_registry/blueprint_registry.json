@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1.2",
+  "$schema": "lpp/v0.2.0",
   "id": "lpp_blueprint_registry",
   "name": "L++ Blueprint Registry",
   "version": "1.0.0",
@@ -87,13 +87,19 @@
     },
     "comparing": {
       "description": "Comparing two versions"
-    },
-    "error": {
-      "description": "Error state"
     }
   },
   "entry_state": "idle",
-  "terminal_states": {},
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
   "gates": {
     "has_registry": {
       "type": "expression",

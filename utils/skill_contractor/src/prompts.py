@@ -35,7 +35,7 @@ ALL outputs MUST be L++ Skills following schema v0.1.2:
    CRITICAL: states/gates/actions are DICTIONARIES, but transitions is an ARRAY!
    
    {{
-     "$schema": "lpp/v0.1.2",
+     "$schema": "lpp/v0.2.0",
      "id": "my_skill",
      "name": "My Skill",
      "version": "1.0.0",

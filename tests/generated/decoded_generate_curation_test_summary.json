@@ -1,0 +1,53 @@
+{
+  "blueprint_id": "decoded_generate_curation",
+  "blueprint_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_decoded_generate_curation_blueprint.py",
+    "count": 13,
+    "coverage": {
+      "total_tests": 13,
+      "by_type": {
+        "path_coverage": 2,
+        "state_coverage": 1,
+        "gate_boundary": 0,
+        "negative": 6,
+        "property_based": 4,
+        "contract": 0
+      },
+      "state_coverage": {
+        "total": 4,
+        "covered": 3,
+        "percentage": 75.0
+      },
+      "transition_coverage": {
+        "total": 3,
+        "covered": 2,
+        "percentage": 66.66666666666666
+      },
+      "gate_coverage": {
+        "total": 0,
+        "covered": 0,
+        "percentage": 0
+      }
+    }
+  },
+  "compute_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_decoded_generate_curation_compute.py",
+    "units": 13,
+    "units_list": [
+      "impl:logger.info",
+      "impl:canano_curator_template",
+      "impl:condensed_corpus.items",
+      "impl:json.dumps",
+      "impl:load_config",
+      "impl:create_chat_completion",
+      "impl:response_dict.get",
+      "impl:response.strip",
+      "impl:content.startswith",
+      "impl:content.endswith",
+      "impl:json.loads",
+      "impl:logger.error",
+      "impl:logger.debug"
+    ]
+  },
+  "total_tests": 65
+}

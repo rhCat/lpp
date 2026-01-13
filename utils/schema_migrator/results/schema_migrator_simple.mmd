@@ -2,31 +2,18 @@ stateDiagram-v2
     %% L++ State Diagram: L++ Schema Migrator
     [*] --> idle
     idle --> loaded : LOAD [blueprint is None]
-    idle --> error : LOAD_FAILED
     loaded --> loaded : LOAD
-    complete --> loaded : LOAD
     loaded --> planning : SET_TARGET [blueprint is not None]
     loaded --> planning : MIGRATE_LATEST [blueprint is not None]
     planning --> planned : PLAN
     loaded --> planned : PLAN_TO [blueprint is not None]
     loaded --> planned : PLAN_LATEST [blueprint is not None]
-    planned --> complete : DRY_RUN [migration_plan is not None ...]
     planned --> migrating : EXECUTE [migration_plan is not None ...]
     migrating --> validating : VALIDATE [migrated_blueprint is not None]
     migrating --> validating : AUTO_CONTINUE [migrated_blueprint is not None]
-    validating --> complete : FINALIZE [validation_result is not No...]
-    validating --> complete : FORCE_FINALIZE
-    loaded --> complete : MIGRATE_ALL [blueprint is not None]
-    loaded --> complete : PREVIEW_ALL [blueprint is not None]
-    complete --> complete : EXPORT [migrated_blueprint is not None]
     idle --> batch_mode : BATCH
     idle --> batch_mode : BATCH_TO
-    batch_mode --> complete : RUN_BATCH [batch_paths is not None and...]
     planned --> loaded : BACK
-    complete --> loaded : BACK
     planned --> planning : REPLAN
     loaded --> idle : UNLOAD
-    complete --> idle : UNLOAD
     planned --> idle : UNLOAD
-    error --> idle : CLEAR
-    error --> loaded : RETRY [blueprint is not None]

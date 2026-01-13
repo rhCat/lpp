@@ -80,8 +80,25 @@
   },
   "entry_state": "init",
   "terminal_states": {
-    "done": {},
-    "error": {}
+    "done": {
+      "output_schema": {
+        "result": {
+          "type": "string",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": [
+        "result_produced"
+      ]
+    },
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
   },
   "gates": {
     "has_blueprint": {

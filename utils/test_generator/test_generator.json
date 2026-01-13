@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1.2",
+  "$schema": "lpp/v0.2.0",
   "id": "test_generator",
   "name": "L++ Test Case Generator",
   "version": "1.0.0",
@@ -84,16 +84,20 @@
     },
     "generating": {
       "description": "Generating test cases"
-    },
-    "complete": {
-      "description": "Tests generated, ready to export"
-    },
-    "error": {
-      "description": "Error state"
     }
   },
   "entry_state": "idle",
-  "terminal_states": {},
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    },
+    "complete": {}
+  },
   "gates": {
     "has_blueprint": {
       "type": "expression",

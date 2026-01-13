@@ -117,47 +117,80 @@
     "a_parse_ast": {
       "type": "compute",
       "compute_unit": "impl:ast.parse",
-      "description": "Parse expression to AST"
+      "description": "Parse expression to AST",
+      "input_map": {},
+      "output_map": {}
     },
     "a_validate_ast": {
       "type": "compute",
       "compute_unit": "impl:_validate_ast",
-      "description": "Validate AST is safe"
+      "description": "Validate AST is safe",
+      "input_map": {},
+      "output_map": {}
     },
     "a_check_complexity": {
       "type": "compute",
       "compute_unit": "impl:self._check_complexity",
-      "description": "Check expression complexity"
+      "description": "Check expression complexity",
+      "input_map": {},
+      "output_map": {}
     },
     "a_visit_node": {
       "type": "compute",
       "compute_unit": "impl:self.visit",
-      "description": "Visit AST node"
+      "description": "Visit AST node",
+      "input_map": {},
+      "output_map": {}
     },
     "a_resolve_name": {
       "type": "compute",
       "compute_unit": "impl:_resolve_name",
-      "description": "Resolve variable name"
+      "description": "Resolve variable name",
+      "input_map": {},
+      "output_map": {}
     },
     "a_resolve_attr": {
       "type": "compute",
       "compute_unit": "impl:_resolve_attr",
-      "description": "Resolve attribute access"
+      "description": "Resolve attribute access",
+      "input_map": {},
+      "output_map": {}
     },
     "a_safe_call": {
       "type": "compute",
       "compute_unit": "impl:SAFE_FUNCTIONS.get",
-      "description": "Get safe function"
+      "description": "Get safe function",
+      "input_map": {},
+      "output_map": {}
     },
     "a_raise_error": {
       "type": "compute",
       "compute_unit": "impl:SafeEvalError",
-      "description": "Raise safe eval error"
+      "description": "Raise safe eval error",
+      "input_map": {},
+      "output_map": {}
     }
   },
   "entry_state": "idle",
   "terminal_states": {
-    "complete": {},
-    "error": {}
+    "complete": {
+      "output_schema": {
+        "result": {
+          "type": "object",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": [
+        "result_produced"
+      ]
+    },
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
   }
 }

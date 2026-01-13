@@ -360,6 +360,10 @@ def decodeLogic(params: dict) -> dict:
 
 def generateBlueprints(params: dict) -> dict:
     """Generate L++ blueprints using logic_decoder or blueprint_builder."""
+    # Ensure results dict exists for tracking
+    if "results" not in _state:
+        _state["results"] = {"modulesFound": 0, "blueprintsGenerated": 0,
+                             "docsGenerated": 0, "errors": []}
     modules = _state.get("decodedLogic") or _state.get("extractedModules", [])
     outputPath = _state.get("outputPath", "")
     blueprints = []

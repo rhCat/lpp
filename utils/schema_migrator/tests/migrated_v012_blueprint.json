@@ -29,7 +29,17 @@
   },
   "entry_state": "idle",
   "terminal_states": {
-    "done": {}
+    "done": {
+      "output_schema": {
+        "data": {
+          "type": "object",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": [
+        "result_produced"
+      ]
+    }
   },
   "gates": {
     "has_data": {

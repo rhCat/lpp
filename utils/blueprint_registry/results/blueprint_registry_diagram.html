@@ -49,7 +49,6 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
         state_viewing(["viewing<br>Viewing a specific blueprint"]):::state
         state_comparing(["comparing<br>Comparing two versions"]):::state
     end
-        state_error[["error<br>Error state"]]:::errorState
 
     %% Transitions
     act_t0s0[["init_registry, save_registry"]]:::action
@@ -167,24 +166,6 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
     act_t26s0[["clear_diff"]]:::action
     state_comparing -- "BACK" --> act_t26s0
     act_t26s0 --> state_viewing
-    act_t27s0[["clear_error"]]:::action
-    state_error -- "CLEAR" --> act_t27s0
-    act_t27s0 --> state_idle
-    act_t28s0[["set_error"]]:::action
-    state_idle -- "LOAD_FAILED" --> act_t28s0
-    act_t28s0 --> state_error
-    act_t28s1[["set_error"]]:::action
-    state_ready -- "LOAD_FAILED" --> act_t28s1
-    act_t28s1 --> state_error
-    act_t28s2[["set_error"]]:::action
-    state_searching -- "LOAD_FAILED" --> act_t28s2
-    act_t28s2 --> state_error
-    act_t28s3[["set_error"]]:::action
-    state_viewing -- "LOAD_FAILED" --> act_t28s3
-    act_t28s3 --> state_error
-    act_t28s4[["set_error"]]:::action
-    state_comparing -- "LOAD_FAILED" --> act_t28s4
-    act_t28s4 --> state_error
 
     %% Styling - ALL shapes have explicit fill and black text
     classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000

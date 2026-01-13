@@ -92,32 +92,59 @@
     "a_get_state": {
       "type": "compute",
       "compute_unit": "impl:states.get",
-      "description": "Get state by ID"
+      "description": "Get state by ID",
+      "input_map": {},
+      "output_map": {}
     },
     "a_get_transitions": {
       "type": "compute",
       "compute_unit": "impl:get_transitions_from",
-      "description": "Get transitions from a state"
+      "description": "Get transitions from a state",
+      "input_map": {},
+      "output_map": {}
     },
     "a_get_gate": {
       "type": "compute",
       "compute_unit": "impl:gates.get",
-      "description": "Get gate by ID"
+      "description": "Get gate by ID",
+      "input_map": {},
+      "output_map": {}
     },
     "a_get_action": {
       "type": "compute",
       "compute_unit": "impl:actions.get",
-      "description": "Get action by ID"
+      "description": "Get action by ID",
+      "input_map": {},
+      "output_map": {}
     },
     "a_raise_key_error": {
       "type": "compute",
       "compute_unit": "impl:KeyError",
-      "description": "Raise KeyError for missing item"
+      "description": "Raise KeyError for missing item",
+      "input_map": {},
+      "output_map": {}
     }
   },
   "entry_state": "idle",
   "terminal_states": {
-    "complete": {},
-    "error": {}
+    "complete": {
+      "output_schema": {
+        "result": {
+          "type": "object",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": [
+        "result_produced"
+      ]
+    },
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
   }
 }

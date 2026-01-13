@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1.2",
+  "$schema": "lpp/v0.2.0",
   "id": "lpp_blueprint_linter",
   "name": "L++ Blueprint Linter",
   "version": "1.0.0",
@@ -49,16 +49,20 @@
     },
     "linting": {
       "description": "Running lint checks"
-    },
-    "complete": {
-      "description": "Linting complete, results available"
-    },
-    "error": {
-      "description": "Error state"
     }
   },
   "entry_state": "idle",
-  "terminal_states": {},
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    },
+    "complete": {}
+  },
   "gates": {
     "has_blueprint": {
       "type": "expression",

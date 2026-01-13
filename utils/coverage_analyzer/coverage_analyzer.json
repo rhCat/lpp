@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1.2",
+  "$schema": "lpp/v0.2.0",
   "id": "coverage_analyzer",
   "name": "L++ Coverage Analyzer",
   "version": "1.0.0",
@@ -91,13 +91,19 @@
     },
     "reporting": {
       "description": "Generating reports"
-    },
-    "error": {
-      "description": "Error state"
     }
   },
   "entry_state": "idle",
-  "terminal_states": {},
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
   "gates": {
     "has_blueprint": {
       "type": "expression",

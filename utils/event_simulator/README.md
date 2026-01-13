@@ -21,7 +21,6 @@ stateDiagram-v2
     %% L++ State Diagram: L++ Event Sequence Simulator
     [*] --> idle
     idle --> ready : LOAD [blueprint is None]
-    idle --> error : LOAD_FAILED
     ready --> ready : LOAD
     simulating --> ready : LOAD
     ready --> simulating : START [blueprint is not None]
@@ -45,7 +44,6 @@ stateDiagram-v2
     simulating --> ready : STOP
     ready --> idle : UNLOAD
     simulating --> idle : UNLOAD
-    error --> idle : CLEAR
 ```
 > **Interactive View:** [Open zoomable diagram](results/event_simulator_diagram.html) for pan/zoom controls
 

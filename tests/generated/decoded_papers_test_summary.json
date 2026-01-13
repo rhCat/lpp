@@ -1,0 +1,60 @@
+{
+  "blueprint_id": "decoded_papers",
+  "blueprint_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_decoded_papers_blueprint.py",
+    "count": 27,
+    "coverage": {
+      "total_tests": 27,
+      "by_type": {
+        "path_coverage": 4,
+        "state_coverage": 1,
+        "gate_boundary": 0,
+        "negative": 18,
+        "property_based": 4,
+        "contract": 0
+      },
+      "state_coverage": {
+        "total": 6,
+        "covered": 5,
+        "percentage": 83.33333333333334
+      },
+      "transition_coverage": {
+        "total": 5,
+        "covered": 4,
+        "percentage": 80.0
+      },
+      "gate_coverage": {
+        "total": 0,
+        "covered": 0,
+        "percentage": 0
+      }
+    }
+  },
+  "compute_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_decoded_papers_compute.py",
+    "units": 20,
+    "units_list": [
+      "impl:extraction_dir.exists",
+      "impl:{'_type': 'BinOp', 'left': {'_type': 'Name', 'id': 'extraction_dir', 'ctx': {'_type': 'Load'}, 'lineno': 62}, 'op': {'_type': 'Div'}, 'right': {'_type': 'Constant', 'value': 'structured_corpus.json', 'kind': None, 'lineno': 62}, 'lineno': 62}.exists",
+      "impl:{'_type': 'BinOp', 'left': {'_type': 'Name', 'id': 'extraction_dir', 'ctx': {'_type': 'Load'}, 'lineno': 63}, 'op': {'_type': 'Div'}, 'right': {'_type': 'Constant', 'value': 'figure_mapping.json', 'kind': None, 'lineno': 63}, 'lineno': 63}.exists",
+      "impl:{'_type': 'BinOp', 'left': {'_type': 'Name', 'id': 'paper_dir', 'ctx': {'_type': 'Load'}, 'lineno': 64}, 'op': {'_type': 'Div'}, 'right': {'_type': 'Constant', 'value': 'condensed_corpus.json', 'kind': None, 'lineno': 64}, 'lineno': 64}.exists",
+      "impl:{'_type': 'BinOp', 'left': {'_type': 'Name', 'id': 'paper_dir', 'ctx': {'_type': 'Load'}, 'lineno': 65}, 'op': {'_type': 'Div'}, 'right': {'_type': 'Constant', 'value': 'final_curation.json', 'kind': None, 'lineno': 65}, 'lineno': 65}.exists",
+      "impl:paper_dir.exists",
+      "impl:paper_dir.stat",
+      "impl:datetime.fromtimestamp.isoformat",
+      "impl:datetime.fromtimestamp",
+      "impl:OUTPUT_DIR.exists",
+      "impl:PaperListResponse",
+      "impl:OUTPUT_DIR.iterdir",
+      "impl:paper_dir.is_dir",
+      "impl:paper_dir.name.startswith",
+      "impl:get_paper_status",
+      "impl:get_paper_timestamps",
+      "impl:curation_file.exists",
+      "impl:open",
+      "impl:json.load",
+      "impl:curation.get"
+    ]
+  },
+  "total_tests": 107
+}

@@ -104,7 +104,6 @@ stateDiagram-v2
     %% L++ State Diagram: L++ Blueprint Visualizer
     [*] --> idle
     idle --> loaded : LOAD
-    idle --> error : LOAD_FAILED
     loaded --> loaded : LOAD
     viewing --> loaded : LOAD
     loaded --> viewing : VIEW
@@ -122,7 +121,6 @@ stateDiagram-v2
     viewing --> idle : UNLOAD
     loaded --> loaded : EXPORT_README
     viewing --> viewing : EXPORT_README
-    error --> idle : CLEAR
     idle --> loaded : LOAD_TREE
     loaded --> loaded : SET_TREE
     loaded --> viewing : VIEW_TREE [tree is not None]

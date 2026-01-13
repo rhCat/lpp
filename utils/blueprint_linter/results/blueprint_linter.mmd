@@ -5,8 +5,6 @@ flowchart TD
         state_loaded(["loaded<br>Blueprint loaded, ready to lint"]):::state
         state_linting(["linting<br>Running lint checks"]):::state
     end
-        state_complete(["complete<br>Linting complete, results available"]):::state
-        state_error[["error<br>Error state"]]:::errorState
 
     %% Transitions
     gate_t0s0{{"blueprint is None?"}}:::gate
@@ -14,15 +12,9 @@ flowchart TD
     act_t0s0[["load_blueprint"]]:::action
     gate_t0s0 -- ✓ --> act_t0s0
     act_t0s0 --> state_loaded
-    act_t1s0[["set_error"]]:::action
-    state_idle -- "LOAD_FAILED" --> act_t1s0
-    act_t1s0 --> state_error
     act_t2s0[["load_blueprint, clear_findings"]]:::action
     state_loaded -- "LOAD" --> act_t2s0
     act_t2s0 --> state_loaded
-    act_t3s0[["load_blueprint, clear_findings"]]:::action
-    state_complete -- "LOAD" --> act_t3s0
-    act_t3s0 --> state_loaded
     gate_t4s0{{"blueprint is not None?"}}:::gate
     state_loaded -- "LINT" --> gate_t4s0
     act_t4s0[["init_lint"]]:::action
@@ -58,37 +50,15 @@ flowchart TD
     act_t14s0[["check_naming_conventions"]]:::action
     state_linting -- "CHECK_NAMING" --> act_t14s0
     act_t14s0 --> state_linting
-    act_t15s0[["compute_metrics, compute_summary, generate_report"]]:::action
-    state_linting -- "FINALIZE" --> act_t15s0
-    act_t15s0 --> state_complete
-    gate_t16s0{{"blueprint is not None?"}}:::gate
-    state_loaded -- "LINT_ALL" --> gate_t16s0
-    act_t16s0[["init_lint, check_unreachable_states, check_dead_end_states +11"]]:::action
-    gate_t16s0 -- ✓ --> act_t16s0
-    act_t16s0 --> state_complete
-    gate_t17s0{{"blueprint is not None?"}}:::gate
-    state_complete -- "LINT_ALL" --> gate_t17s0
-    act_t17s0[["init_lint, check_unreachable_states, check_dead_end_states +11"]]:::action
-    gate_t17s0 -- ✓ --> act_t17s0
-    act_t17s0 --> state_complete
-    act_t18s0[["clear_findings"]]:::action
-    state_complete -- "BACK" --> act_t18s0
-    act_t18s0 --> state_loaded
     act_t19s0[["unload_blueprint"]]:::action
     state_loaded -- "UNLOAD" --> act_t19s0
     act_t19s0 --> state_idle
-    act_t20s0[["unload_blueprint, clear_findings"]]:::action
-    state_complete -- "UNLOAD" --> act_t20s0
-    act_t20s0 --> state_idle
     act_t21s0[["set_config"]]:::action
     state_idle -- "CONFIGURE" --> act_t21s0
     act_t21s0 --> state_idle
     act_t22s0[["set_config"]]:::action
     state_loaded -- "CONFIGURE" --> act_t22s0
     act_t22s0 --> state_loaded
-    act_t23s0[["clear_error"]]:::action
-    state_error -- "CLEAR" --> act_t23s0
-    act_t23s0 --> state_idle
 
     %% Styling - ALL shapes have explicit fill and black text
     classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000

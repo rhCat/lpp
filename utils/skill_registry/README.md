@@ -24,9 +24,6 @@ stateDiagram-v2
     scanned --> scanned : EXPORT
     viewing --> viewing : EXPORT
     scanned --> idle : RESET
-    error --> idle : RETRY
-    idle --> error : ERROR [error is not None]
-    scanned --> error : ERROR [error is not None]
 ```
 > **Interactive View:** [Open zoomable diagram](results/skill_registry_diagram.html) for pan/zoom controls
 

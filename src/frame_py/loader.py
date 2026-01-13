@@ -182,21 +182,39 @@ class BlueprintLoader:
         gates = set(self.raw.get("gates", {}).keys())
         actions = set(self.raw.get("actions", {}).keys())
 
+        # Get terminal states - handle both v0.1.x (list) and v0.2.0 (dict)
+        terminal_raw = self.raw.get("terminal_states", {})
+        if isinstance(terminal_raw, list):
+            # v0.1.x: terminal_states is a list of state IDs
+            terminal_states = set(terminal_raw)
+        elif isinstance(terminal_raw, dict):
+            # v0.2.0: terminal_states is a dict with contracts
+            terminal_states = set(terminal_raw.keys())
+        else:
+            terminal_states = set()
+
+        # All valid state references include states + terminal_states
+        all_states = states | terminal_states
+
         # Validate entry_state
         entry = self.raw["entry_state"]
-        if entry not in states:
+        if entry not in all_states:
             raise BlueprintValidationError(
                 f"Entry state '{entry}' not defined",
                 path="entry_state"
             )
 
-        # Validate terminal_states
-        for ts in self.raw["terminal_states"]:
-            if ts not in states:
-                raise BlueprintValidationError(
-                    f"Terminal state '{ts}' not defined",
-                    path="terminal_states"
-                )
+        # Validate terminal_states exist (for v0.1.x where terminals are in states)
+        schema_version = self.raw.get("$schema", "")
+        if "v0.1" in schema_version:
+            # v0.1.x: terminal states must be defined in states
+            for ts in terminal_states:
+                if ts not in states:
+                    raise BlueprintValidationError(
+                        f"Terminal state '{ts}' not defined",
+                        path="terminal_states"
+                    )
+        # v0.2.0: terminal states are separate from states (no validation needed)
 
         # Validate transitions
         for i, trans in enumerate(self.raw.get("transitions", [])):
@@ -204,15 +222,15 @@ class BlueprintLoader:
 
             # from_state
             from_s = trans.get("from", "")
-            if from_s != "*" and from_s not in states:
+            if from_s != "*" and from_s not in all_states:
                 raise BlueprintValidationError(
                     f"Unknown from_state: '{from_s}'",
                     path=path
                 )
 
-            # to_state
+            # to_state - can be a regular state or terminal state
             to_s = trans.get("to", "")
-            if to_s not in states:
+            if to_s not in all_states:
                 raise BlueprintValidationError(
                     f"Unknown to_state: '{to_s}'",
                     path=path
@@ -251,8 +269,9 @@ class BlueprintLoader:
                     )
 
     def _load_states(self) -> dict[str, State]:
-        """Load state definitions."""
+        """Load state definitions including terminal states."""
         states = {}
+        # Load regular states
         for state_id, raw_state in self.raw.get("states", {}).items():
             states[state_id] = State(
                 id=state_id,
@@ -262,6 +281,26 @@ class BlueprintLoader:
                 on_exit=tuple(raw_state.get("on_exit", [])),
                 metadata=raw_state.get("metadata", {}),
             )
+
+        # Load terminal states (v0.2.0: terminal_states is a dict with contracts)
+        terminal_raw = self.raw.get("terminal_states", {})
+        if isinstance(terminal_raw, dict):
+            for state_id, contract in terminal_raw.items():
+                if state_id not in states:  # Don't overwrite if already defined
+                    states[state_id] = State(
+                        id=state_id,
+                        name=contract.get("name", state_id),
+                        description=contract.get("description"),
+                        on_enter=tuple(),
+                        on_exit=tuple(),
+                        metadata={
+                            "is_terminal": True,
+                            "output_schema": contract.get("output_schema", {}),
+                            "invariants_guaranteed": contract.get(
+                                "invariants_guaranteed", []
+                            ),
+                        },
+                    )
         return states
 
     def _load_transitions(self) -> tuple[Transition, ...]:

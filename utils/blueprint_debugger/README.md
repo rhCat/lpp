@@ -117,7 +117,6 @@ stateDiagram-v2
     %% L++ State Diagram: L++ Blueprint Debugger
     [*] --> idle
     idle --> loaded : LOAD [blueprint is None]
-    idle --> error : LOAD_FAILED
     loaded --> loaded : LOAD
     debugging --> loaded : LOAD
     loaded --> debugging : START [blueprint is not None]
@@ -164,7 +163,6 @@ stateDiagram-v2
     loaded --> idle : UNLOAD
     debugging --> idle : UNLOAD
     paused --> idle : UNLOAD
-    error --> idle : CLEAR
 ```
 > **Interactive View:** [Open zoomable diagram](results/blueprint_debugger_diagram.html) for pan/zoom controls
 

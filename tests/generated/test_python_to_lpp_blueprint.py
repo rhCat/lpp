@@ -20,57 +20,27 @@ def operator():
     pass
 
 
-def test_path_2(operator):
-    """
-    Path: idle -> error
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('REFACTOR', {})
-
-    # Verify final state
-    assert operator.state == 'error'
-
-
-def test_path_3(operator):
+def test_path_1(operator):
     """
     Path: idle -> scanning -> analyzing -> extracting -> generating_blueprints -> generating_compute -> validating -> complete
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -86,60 +56,58 @@ def test_path_3(operator):
     assert operator.state == 'complete'
 
 
-def test_path_4(operator):
+def test_path_2(operator):
     """
-    Path: idle -> scanning -> analyzing -> extracting -> generating_blueprints
+    Path: idle -> scanning -> analyzing
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
     operator.dispatch('REFACTOR', {})
     operator.dispatch('DONE', {})
-    operator.dispatch('DONE', {})
-    operator.dispatch('DONE', {})
 
     # Verify final state
-    assert operator.state == 'generating_blueprints'
+    assert operator.state == 'analyzing'
 
 
-def test_path_5(operator):
+def test_path_3(operator):
     """
     Path: idle -> scanning -> analyzing -> extracting -> generating_blueprints -> generating_compute
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -153,59 +121,57 @@ def test_path_5(operator):
     assert operator.state == 'generating_compute'
 
 
-def test_path_6(operator):
+def test_path_4(operator):
     """
-    Path: idle -> scanning -> analyzing -> extracting
+    Path: idle -> scanning
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
     operator.dispatch('REFACTOR', {})
-    operator.dispatch('DONE', {})
-    operator.dispatch('DONE', {})
 
     # Verify final state
-    assert operator.state == 'extracting'
+    assert operator.state == 'scanning'
 
 
-def test_path_7(operator):
+def test_path_6(operator):
     """
     Path: idle -> scanning -> analyzing -> extracting -> generating_blueprints -> generating_compute -> generating_docs
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -220,57 +186,122 @@ def test_path_7(operator):
     assert operator.state == 'generating_docs'
 
 
-def test_path_8(operator):
+def test_path_7(operator):
     """
-    Path: idle -> scanning
+    Path: idle -> scanning -> analyzing -> extracting
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('REFACTOR', {})
+    operator.dispatch('DONE', {})
+    operator.dispatch('DONE', {})
+
+    # Verify final state
+    assert operator.state == 'extracting'
+
+
+def test_path_8(operator):
+    """
+    Path: idle -> scanning -> analyzing -> extracting -> generating_blueprints
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('REFACTOR', {})
+    operator.dispatch('DONE', {})
+    operator.dispatch('DONE', {})
+    operator.dispatch('DONE', {})
+
+    # Verify final state
+    assert operator.state == 'generating_blueprints'
+
+
+def test_path_9(operator):
+    """
+    Path: idle -> error
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
     operator.dispatch('REFACTOR', {})
 
     # Verify final state
-    assert operator.state == 'scanning'
+    assert operator.state == 'error'
 
 
-def test_path_9(operator):
+def test_path_10(operator):
     """
     Path: idle -> scanning -> analyzing -> extracting -> generating_blueprints -> generating_compute -> validating
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -283,101 +314,64 @@ def test_path_9(operator):
 
     # Verify final state
     assert operator.state == 'validating'
-
-
-def test_path_10(operator):
-    """
-    Path: idle -> scanning -> analyzing
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('REFACTOR', {})
-    operator.dispatch('DONE', {})
-
-    # Verify final state
-    assert operator.state == 'analyzing'
 
 
 def test_path_11(operator):
-    """
-    Path: idle -> scanning -> analyzing -> extracting -> generating_blueprints -> generating_compute -> generating_docs -> validating
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('REFACTOR', {})
-    operator.dispatch('DONE', {})
-    operator.dispatch('DONE', {})
-    operator.dispatch('DONE', {})
-    operator.dispatch('DONE', {})
-    operator.dispatch('DONE', {})
-    operator.dispatch('DONE', {})
-
-    # Verify final state
-    assert operator.state == 'validating'
-
-
-def test_path_12(operator):
     """
     Path: idle -> error -> idle
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
     operator.dispatch('REFACTOR', {})
     operator.dispatch('RESET', {})
+
+    # Verify final state
+    assert operator.state == 'idle'
+
+
+def test_path_12(operator):
+    """
+    Path: idle -> idle
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('START', {})
 
     # Verify final state
     assert operator.state == 'idle'
@@ -389,21 +383,21 @@ def test_path_13(operator):
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -416,32 +410,38 @@ def test_path_13(operator):
 
 def test_path_14(operator):
     """
-    Path: idle -> idle
+    Path: idle -> scanning -> analyzing -> extracting -> generating_blueprints -> generating_compute -> generating_docs -> validating
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
-    operator.dispatch('START', {})
+    operator.dispatch('REFACTOR', {})
+    operator.dispatch('DONE', {})
+    operator.dispatch('DONE', {})
+    operator.dispatch('DONE', {})
+    operator.dispatch('DONE', {})
+    operator.dispatch('DONE', {})
+    operator.dispatch('DONE', {})
 
     # Verify final state
-    assert operator.state == 'idle'
+    assert operator.state == 'validating'
 
 
 def test_path_15(operator):
@@ -450,21 +450,21 @@ def test_path_15(operator):
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -487,21 +487,21 @@ def test_state_coverage_1(operator):
     Type: state_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -523,21 +523,21 @@ def test_state_coverage_2(operator):
     Type: state_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -559,21 +559,21 @@ def test_state_coverage_3(operator):
     Type: state_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -591,20 +591,20 @@ def test_gate_null_1(operator):
     """
     # Set initial context
     operator.context['projectPath'] = None
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -623,20 +623,20 @@ def test_gate_null_2(operator):
     """
     # Set initial context
     operator.context['projectPath'] = 'some_value'
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -655,20 +655,20 @@ def test_gate_null_3(operator):
     """
     # Set initial context
     operator.context['projectPath'] = None
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -687,20 +687,20 @@ def test_gate_null_4(operator):
     """
     # Set initial context
     operator.context['projectPath'] = 'some_value'
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -718,21 +718,21 @@ def test_gate_null_5(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
     operator.context['pythonFiles'] = None
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -750,21 +750,21 @@ def test_gate_null_6(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
     operator.context['pythonFiles'] = 'some_value'
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -782,21 +782,21 @@ def test_gate_null_7(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
     operator.context['pythonFiles'] = None
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -814,21 +814,21 @@ def test_gate_null_8(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
     operator.context['pythonFiles'] = 'some_value'
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -846,21 +846,21 @@ def test_gate_null_9(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['extractedModules'] = None
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -878,21 +878,21 @@ def test_gate_null_10(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['extractedModules'] = 'some_value'
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -910,21 +910,21 @@ def test_gate_null_11(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
     operator.context['blueprints'] = None
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -942,21 +942,21 @@ def test_gate_null_12(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
     operator.context['blueprints'] = 'some_value'
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -974,21 +974,21 @@ def test_gate_null_13(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = None
 
     # Dispatch events
@@ -1006,21 +1006,21 @@ def test_gate_null_14(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = 'some_value'
 
     # Dispatch events
@@ -1038,21 +1038,21 @@ def test_gate_null_15(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = None
 
     # Dispatch events
@@ -1070,21 +1070,21 @@ def test_gate_null_16(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = 'some_value'
 
     # Dispatch events
@@ -1098,25 +1098,59 @@ def test_gate_null_16(operator):
 
 def test_negative_invalid_event_1(operator):
     """
+    Invalid event 'RESET' in state 'idle'
+    Type: negative_invalid_event
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
+    operator.context['error'] = ''
+
+    operator._state = 'idle'
+
+    # Dispatch events
+    operator.dispatch('RESET', {})
+
+    # Verify state unchanged
+    assert operator.state == 'idle'
+    # Verify no transition occurred
+    assert operator.state == 'idle'
+
+
+def test_negative_invalid_event_2(operator):
+    """
     Invalid event 'DONE' in state 'idle'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'idle'
@@ -1130,67 +1164,33 @@ def test_negative_invalid_event_1(operator):
     assert operator.state == 'idle'
 
 
-def test_negative_invalid_event_2(operator):
-    """
-    Invalid event 'RESET' in state 'idle'
-    Type: negative_invalid_event
-    """
-    # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
-    operator.context['error'] = ''
-
-    operator._state = 'idle'
-
-    # Dispatch events
-    operator.dispatch('RESET', {})
-
-    # Verify state unchanged
-    assert operator.state == 'idle'
-    # Verify no transition occurred
-    assert operator.state == 'idle'
-
-
 def test_negative_invalid_event_3(operator):
     """
-    Invalid event 'RESET' in state 'scanning'
+    Invalid event 'REFACTOR' in state 'scanning'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'scanning'
 
     # Dispatch events
-    operator.dispatch('RESET', {})
+    operator.dispatch('REFACTOR', {})
 
     # Verify state unchanged
     assert operator.state == 'scanning'
@@ -1204,21 +1204,21 @@ def test_negative_invalid_event_4(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'scanning'
@@ -1234,31 +1234,31 @@ def test_negative_invalid_event_4(operator):
 
 def test_negative_invalid_event_5(operator):
     """
-    Invalid event 'REFACTOR' in state 'scanning'
+    Invalid event 'RESET' in state 'scanning'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'scanning'
 
     # Dispatch events
-    operator.dispatch('REFACTOR', {})
+    operator.dispatch('RESET', {})
 
     # Verify state unchanged
     assert operator.state == 'scanning'
@@ -1268,31 +1268,31 @@ def test_negative_invalid_event_5(operator):
 
 def test_negative_invalid_event_6(operator):
     """
-    Invalid event 'RESET' in state 'analyzing'
+    Invalid event 'REFACTOR' in state 'analyzing'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'analyzing'
 
     # Dispatch events
-    operator.dispatch('RESET', {})
+    operator.dispatch('REFACTOR', {})
 
     # Verify state unchanged
     assert operator.state == 'analyzing'
@@ -1306,21 +1306,21 @@ def test_negative_invalid_event_7(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'analyzing'
@@ -1336,31 +1336,31 @@ def test_negative_invalid_event_7(operator):
 
 def test_negative_invalid_event_8(operator):
     """
-    Invalid event 'REFACTOR' in state 'analyzing'
+    Invalid event 'RESET' in state 'analyzing'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'analyzing'
 
     # Dispatch events
-    operator.dispatch('REFACTOR', {})
+    operator.dispatch('RESET', {})
 
     # Verify state unchanged
     assert operator.state == 'analyzing'
@@ -1370,31 +1370,31 @@ def test_negative_invalid_event_8(operator):
 
 def test_negative_invalid_event_9(operator):
     """
-    Invalid event 'RESET' in state 'extracting'
+    Invalid event 'REFACTOR' in state 'extracting'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'extracting'
 
     # Dispatch events
-    operator.dispatch('RESET', {})
+    operator.dispatch('REFACTOR', {})
 
     # Verify state unchanged
     assert operator.state == 'extracting'
@@ -1408,21 +1408,21 @@ def test_negative_invalid_event_10(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'extracting'
@@ -1438,31 +1438,31 @@ def test_negative_invalid_event_10(operator):
 
 def test_negative_invalid_event_11(operator):
     """
-    Invalid event 'REFACTOR' in state 'extracting'
+    Invalid event 'RESET' in state 'extracting'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'extracting'
 
     # Dispatch events
-    operator.dispatch('REFACTOR', {})
+    operator.dispatch('RESET', {})
 
     # Verify state unchanged
     assert operator.state == 'extracting'
@@ -1472,31 +1472,31 @@ def test_negative_invalid_event_11(operator):
 
 def test_negative_invalid_event_12(operator):
     """
-    Invalid event 'RESET' in state 'generating_blueprints'
+    Invalid event 'REFACTOR' in state 'generating_blueprints'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'generating_blueprints'
 
     # Dispatch events
-    operator.dispatch('RESET', {})
+    operator.dispatch('REFACTOR', {})
 
     # Verify state unchanged
     assert operator.state == 'generating_blueprints'
@@ -1510,21 +1510,21 @@ def test_negative_invalid_event_13(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'generating_blueprints'
@@ -1540,31 +1540,31 @@ def test_negative_invalid_event_13(operator):
 
 def test_negative_invalid_event_14(operator):
     """
-    Invalid event 'REFACTOR' in state 'generating_blueprints'
+    Invalid event 'RESET' in state 'generating_blueprints'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'generating_blueprints'
 
     # Dispatch events
-    operator.dispatch('REFACTOR', {})
+    operator.dispatch('RESET', {})
 
     # Verify state unchanged
     assert operator.state == 'generating_blueprints'
@@ -1574,31 +1574,31 @@ def test_negative_invalid_event_14(operator):
 
 def test_negative_invalid_event_15(operator):
     """
-    Invalid event 'RESET' in state 'generating_compute'
+    Invalid event 'REFACTOR' in state 'generating_compute'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'generating_compute'
 
     # Dispatch events
-    operator.dispatch('RESET', {})
+    operator.dispatch('REFACTOR', {})
 
     # Verify state unchanged
     assert operator.state == 'generating_compute'
@@ -1612,21 +1612,21 @@ def test_negative_invalid_event_16(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'generating_compute'
@@ -1642,31 +1642,31 @@ def test_negative_invalid_event_16(operator):
 
 def test_negative_invalid_event_17(operator):
     """
-    Invalid event 'REFACTOR' in state 'generating_compute'
+    Invalid event 'RESET' in state 'generating_compute'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'generating_compute'
 
     # Dispatch events
-    operator.dispatch('REFACTOR', {})
+    operator.dispatch('RESET', {})
 
     # Verify state unchanged
     assert operator.state == 'generating_compute'
@@ -1676,31 +1676,31 @@ def test_negative_invalid_event_17(operator):
 
 def test_negative_invalid_event_18(operator):
     """
-    Invalid event 'RESET' in state 'generating_docs'
+    Invalid event 'REFACTOR' in state 'generating_docs'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'generating_docs'
 
     # Dispatch events
-    operator.dispatch('RESET', {})
+    operator.dispatch('REFACTOR', {})
 
     # Verify state unchanged
     assert operator.state == 'generating_docs'
@@ -1714,21 +1714,21 @@ def test_negative_invalid_event_19(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'generating_docs'
@@ -1744,31 +1744,31 @@ def test_negative_invalid_event_19(operator):
 
 def test_negative_invalid_event_20(operator):
     """
-    Invalid event 'REFACTOR' in state 'generating_docs'
+    Invalid event 'RESET' in state 'generating_docs'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'generating_docs'
 
     # Dispatch events
-    operator.dispatch('REFACTOR', {})
+    operator.dispatch('RESET', {})
 
     # Verify state unchanged
     assert operator.state == 'generating_docs'
@@ -1778,31 +1778,31 @@ def test_negative_invalid_event_20(operator):
 
 def test_negative_invalid_event_21(operator):
     """
-    Invalid event 'RESET' in state 'validating'
+    Invalid event 'REFACTOR' in state 'validating'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'validating'
 
     # Dispatch events
-    operator.dispatch('RESET', {})
+    operator.dispatch('REFACTOR', {})
 
     # Verify state unchanged
     assert operator.state == 'validating'
@@ -1816,21 +1816,21 @@ def test_negative_invalid_event_22(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'validating'
@@ -1846,31 +1846,31 @@ def test_negative_invalid_event_22(operator):
 
 def test_negative_invalid_event_23(operator):
     """
-    Invalid event 'REFACTOR' in state 'validating'
+    Invalid event 'RESET' in state 'validating'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'validating'
 
     # Dispatch events
-    operator.dispatch('REFACTOR', {})
+    operator.dispatch('RESET', {})
 
     # Verify state unchanged
     assert operator.state == 'validating'
@@ -1880,31 +1880,31 @@ def test_negative_invalid_event_23(operator):
 
 def test_negative_invalid_event_24(operator):
     """
-    Invalid event 'DONE' in state 'complete'
+    Invalid event 'REFACTOR' in state 'complete'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'complete'
 
     # Dispatch events
-    operator.dispatch('DONE', {})
+    operator.dispatch('REFACTOR', {})
 
     # Verify state unchanged
     assert operator.state == 'complete'
@@ -1918,21 +1918,21 @@ def test_negative_invalid_event_25(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'complete'
@@ -1948,31 +1948,31 @@ def test_negative_invalid_event_25(operator):
 
 def test_negative_invalid_event_26(operator):
     """
-    Invalid event 'REFACTOR' in state 'complete'
+    Invalid event 'DONE' in state 'complete'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'complete'
 
     # Dispatch events
-    operator.dispatch('REFACTOR', {})
+    operator.dispatch('DONE', {})
 
     # Verify state unchanged
     assert operator.state == 'complete'
@@ -1982,31 +1982,31 @@ def test_negative_invalid_event_26(operator):
 
 def test_negative_invalid_event_27(operator):
     """
-    Invalid event 'DONE' in state 'error'
+    Invalid event 'REFACTOR' in state 'error'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'error'
 
     # Dispatch events
-    operator.dispatch('DONE', {})
+    operator.dispatch('REFACTOR', {})
 
     # Verify state unchanged
     assert operator.state == 'error'
@@ -2020,21 +2020,21 @@ def test_negative_invalid_event_28(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'error'
@@ -2050,31 +2050,31 @@ def test_negative_invalid_event_28(operator):
 
 def test_negative_invalid_event_29(operator):
     """
-    Invalid event 'REFACTOR' in state 'error'
+    Invalid event 'DONE' in state 'error'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'error'
 
     # Dispatch events
-    operator.dispatch('REFACTOR', {})
+    operator.dispatch('DONE', {})
 
     # Verify state unchanged
     assert operator.state == 'error'
@@ -2219,20 +2219,20 @@ def test_property_1(operator):
     """
     # Set initial context
     operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'projectPath' maintains type string
@@ -2247,20 +2247,20 @@ def test_property_2(operator):
     """
     # Set initial context
     operator.context['projectPath'] = 'test'
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'projectPath' maintains type string
@@ -2274,21 +2274,21 @@ def test_property_3(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
+    operator.context['projectPath'] = '/test/path'
     operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'outputPath' maintains type string
@@ -2302,21 +2302,21 @@ def test_property_4(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
+    operator.context['projectPath'] = '/test/path'
     operator.context['outputPath'] = 'test'
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'outputPath' maintains type string
@@ -2330,21 +2330,21 @@ def test_property_5(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
     operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'projectName' maintains type string
@@ -2358,21 +2358,21 @@ def test_property_6(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
     operator.context['projectName'] = 'test'
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'projectName' maintains type string
@@ -2386,21 +2386,21 @@ def test_property_7(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
     operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'pythonFiles' maintains type array
@@ -2414,21 +2414,21 @@ def test_property_8(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
     operator.context['pythonFiles'] = ['item']
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'pythonFiles' maintains type array
@@ -2442,21 +2442,21 @@ def test_property_9(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'extractedModules' maintains type array
@@ -2470,21 +2470,21 @@ def test_property_10(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['extractedModules'] = ['item']
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'extractedModules' maintains type array
@@ -2498,21 +2498,21 @@ def test_property_11(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
     operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'blueprints' maintains type array
@@ -2526,21 +2526,21 @@ def test_property_12(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
     operator.context['blueprints'] = ['item']
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'blueprints' maintains type array
@@ -2554,21 +2554,21 @@ def test_property_13(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
     operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'computeFunctions' maintains type array
@@ -2582,21 +2582,21 @@ def test_property_14(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
     operator.context['computeFunctions'] = ['item']
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'computeFunctions' maintains type array
@@ -2610,21 +2610,21 @@ def test_property_15(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
     operator.context['generateDocs'] = True
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'generateDocs' maintains type boolean
@@ -2638,21 +2638,21 @@ def test_property_16(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
     operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'generateDocs' maintains type boolean
@@ -2666,21 +2666,21 @@ def test_property_17(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
     operator.context['includeTests'] = True
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'includeTests' maintains type boolean
@@ -2694,21 +2694,21 @@ def test_property_18(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
     operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'includeTests' maintains type boolean
@@ -2722,21 +2722,21 @@ def test_property_19(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
     operator.context['preserveOriginal'] = True
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'preserveOriginal' maintains type boolean
@@ -2750,21 +2750,21 @@ def test_property_20(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
     operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'preserveOriginal' maintains type boolean
@@ -2778,21 +2778,21 @@ def test_property_21(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
     operator.context['verbose'] = True
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'verbose' maintains type boolean
@@ -2806,21 +2806,21 @@ def test_property_22(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
     operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'verbose' maintains type boolean
@@ -2834,21 +2834,21 @@ def test_property_23(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
     operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'modulesFound' maintains type number
@@ -2862,21 +2862,21 @@ def test_property_24(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
     operator.context['modulesFound'] = 1
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'modulesFound' maintains type number
@@ -2890,21 +2890,21 @@ def test_property_25(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
     operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'blueprintsGenerated' maintains type number
@@ -2918,21 +2918,21 @@ def test_property_26(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
     operator.context['blueprintsGenerated'] = 1
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'blueprintsGenerated' maintains type number
@@ -2946,21 +2946,21 @@ def test_property_27(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
     operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'docsGenerated' maintains type number
@@ -2974,21 +2974,21 @@ def test_property_28(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
     operator.context['docsGenerated'] = 1
-    operator.context['errors'] = []
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'docsGenerated' maintains type number
@@ -3002,20 +3002,20 @@ def test_property_29(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
     operator.context['errors'] = []
     operator.context['error'] = ''
 
@@ -3030,20 +3030,20 @@ def test_property_30(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
     operator.context['errors'] = ['item']
     operator.context['error'] = ''
 
@@ -3058,21 +3058,21 @@ def test_property_31(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'error' maintains type string
@@ -3086,24 +3086,56 @@ def test_property_32(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['generateDocs'] = False
-    operator.context['includeTests'] = False
-    operator.context['preserveOriginal'] = False
-    operator.context['verbose'] = False
-    operator.context['modulesFound'] = 0
-    operator.context['blueprintsGenerated'] = 0
-    operator.context['docsGenerated'] = 0
-    operator.context['errors'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
     operator.context['error'] = 'test'
 
     # Verify property 'error' maintains type string
     assert 'error' in operator.context
     assert isinstance(operator.context['error'], str)
+
+
+def test_contract_1(operator):
+    """
+    Terminal 'error' output contract: error must be non-null
+    Type: contract_output
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeFunctions'] = ['test_item']
+    operator.context['generateDocs'] = True
+    operator.context['includeTests'] = True
+    operator.context['preserveOriginal'] = True
+    operator.context['verbose'] = True
+    operator.context['modulesFound'] = 1
+    operator.context['blueprintsGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['errors'] = ['test_item']
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('REFACTOR', {})
+
+    # Verify final state
+    assert operator.state == 'error'
+    # Verify output contract: non-null fields
+    assert operator.context.get('error') is not None, "'error' must be non-null at terminal state"
 

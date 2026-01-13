@@ -43,16 +43,6 @@ stateDiagram-v2
     auditing --> rejected : AUTO [error is not None]
     tlc_verifying --> rejected : AUTO [error is not None]
     tlaps_proving --> rejected : AUTO [error is not None]
-    idle --> error : ERROR [error is not None]
-    loading --> error : ERROR [error is not None]
-    auditing --> error : ERROR [error is not None]
-    generating_tla --> error : ERROR [error is not None]
-    rejected --> error : ERROR [error is not None]
-    tlc_verifying --> error : ERROR [error is not None]
-    tlc_verified --> error : ERROR [error is not None]
-    certified --> error : ERROR [error is not None]
-    tlaps_proving --> error : ERROR [error is not None]
-    error --> idle : RESET
     loading --> idle : RESET
     auditing --> idle : RESET
     generating_tla --> idle : RESET

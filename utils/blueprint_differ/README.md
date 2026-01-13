@@ -165,15 +165,6 @@ stateDiagram-v2
     ready --> idle : CLEAR
     diff_complete --> idle : CLEAR
     merge_complete --> idle : CLEAR
-    error --> idle : CLEAR
-    idle --> error : LOAD_FAILED
-    left_loaded --> error : LOAD_FAILED
-    ready --> error : LOAD_FAILED
-    diff_complete --> error : LOAD_FAILED
-    diffing --> error : LOAD_FAILED
-    merge_complete --> error : LOAD_FAILED
-    merging --> error : LOAD_FAILED
-    conflict --> error : LOAD_FAILED
 ```
 > **Interactive View:** [Open zoomable diagram](results/blueprint_differ_diagram.html) for pan/zoom controls
 

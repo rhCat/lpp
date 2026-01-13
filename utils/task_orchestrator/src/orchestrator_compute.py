@@ -363,7 +363,7 @@ Purpose: {tool.get('purpose', '')}
 Return valid JSON blueprint (schema v0.1.2):
 ```json
 {{
-  "$schema": "lpp/v0.1.2",
+  "$schema": "lpp/v0.2.0",
   "id": "{name}",
   "name": "...",
   "description": "...",

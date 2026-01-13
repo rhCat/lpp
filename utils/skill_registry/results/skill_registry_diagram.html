@@ -47,7 +47,6 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
         state_scanned(["scanned<br>Skills discovered"]):::state
         state_viewing(["viewing<br>Viewing skill detail"]):::state
     end
-        state_error[["error<br>Error occurred"]]:::errorState
 
     %% Transitions
     act_t0s0[["setBasePath, scanSkills"]]:::action
@@ -74,19 +73,6 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
     act_t7s0[["clearSelection"]]:::action
     state_scanned -- "RESET" --> act_t7s0
     act_t7s0 --> state_idle
-    act_t8s0[["clearError"]]:::action
-    state_error -- "RETRY" --> act_t8s0
-    act_t8s0 --> state_idle
-    gate_t9s0{{"error is not None?"}}:::gate
-    state_idle -- "ERROR" --> gate_t9s0
-    act_t9s0[["log_error"]]:::action
-    gate_t9s0 -- ✓ --> act_t9s0
-    act_t9s0 --> state_error
-    gate_t10s0{{"error is not None?"}}:::gate
-    state_scanned -- "ERROR" --> gate_t10s0
-    act_t10s0[["log_error"]]:::action
-    gate_t10s0 -- ✓ --> act_t10s0
-    act_t10s0 --> state_error
 
     %% Styling - ALL shapes have explicit fill and black text
     classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000

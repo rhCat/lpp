@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1",
+  "$schema": "lpp/v0.2.0",
   "id": "research_scraper",
   "name": "Research Scraper",
   "version": "1.0.1",
@@ -46,13 +46,19 @@
     },
     "hasResults": {
       "description": "Results available"
-    },
-    "error": {
-      "description": "Error occurred"
     }
   },
   "entry_state": "idle",
-  "terminal_states": {},
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
   "gates": {
     "hasQuery": {
       "type": "expression",

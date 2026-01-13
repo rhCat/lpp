@@ -67,9 +67,7 @@ stateDiagram-v2
     %% L++ State Diagram: L++ Blueprint Linter
     [*] --> idle
     idle --> loaded : LOAD [blueprint is None]
-    idle --> error : LOAD_FAILED
     loaded --> loaded : LOAD
-    complete --> loaded : LOAD
     loaded --> linting : LINT [blueprint is not None]
     linting --> linting : CHECK_UNREACHABLE
     linting --> linting : CHECK_DEAD_END
@@ -81,15 +79,9 @@ stateDiagram-v2
     linting --> linting : CHECK_ACTION_REFS
     linting --> linting : CHECK_DUPLICATES
     linting --> linting : CHECK_NAMING
-    linting --> complete : FINALIZE
-    loaded --> complete : LINT_ALL [blueprint is not None]
-    complete --> complete : LINT_ALL [blueprint is not None]
-    complete --> loaded : BACK
     loaded --> idle : UNLOAD
-    complete --> idle : UNLOAD
     idle --> idle : CONFIGURE
     loaded --> loaded : CONFIGURE
-    error --> idle : CLEAR
 ```
 > **Interactive View:** [Open zoomable diagram](results/blueprint_linter_diagram.html) for pan/zoom controls
 

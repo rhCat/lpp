@@ -22,13 +22,31 @@ def operator():
 
 def test_path_2(operator):
     """
+    Path: idle -> generating
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('GENERATE', {})
+
+    # Verify final state
+    assert operator.state == 'generating'
+
+
+def test_path_3(operator):
+    """
     Path: idle -> generating -> error
     Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -39,33 +57,15 @@ def test_path_2(operator):
     assert operator.state == 'error'
 
 
-def test_path_3(operator):
-    """
-    Path: idle -> generating
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('GENERATE', {})
-
-    # Verify final state
-    assert operator.state == 'generating'
-
-
 def test_path_4(operator):
     """
     Path: idle -> generating -> done
     Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -82,9 +82,9 @@ def test_state_coverage_1(operator):
     Type: state_coverage
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -101,9 +101,9 @@ def test_state_coverage_2(operator):
     Type: state_coverage
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -121,8 +121,8 @@ def test_gate_null_1(operator):
     """
     # Set initial context
     operator.context['blueprints'] = None
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -141,8 +141,8 @@ def test_gate_null_2(operator):
     """
     # Set initial context
     operator.context['blueprints'] = 'some_value'
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -154,15 +154,75 @@ def test_gate_null_2(operator):
     assert operator.state is not None  # State machine responded
 
 
-def test_gate_null_3(operator):
+def test_gate_boundary_3(operator):
     """
-    Gate has_compute: computeFunctions = None
+    Gate has_compute: computeGenerated gt 0.0 with value=-1.0
+    Type: gate_boundary
+    """
+    # Set initial context
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = -1.0
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('COMPLETE', {})
+
+    # Verify gate 'has_compute' evaluates to False
+    # Gate expression determines transition eligibility
+    # From state: generating
+    assert operator.state is not None  # State machine responded
+
+
+def test_gate_boundary_4(operator):
+    """
+    Gate has_compute: computeGenerated gt 0.0 with value=0.0
+    Type: gate_boundary
+    """
+    # Set initial context
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 0.0
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('COMPLETE', {})
+
+    # Verify gate 'has_compute' evaluates to False
+    # Gate expression determines transition eligibility
+    # From state: generating
+    assert operator.state is not None  # State machine responded
+
+
+def test_gate_boundary_5(operator):
+    """
+    Gate has_compute: computeGenerated gt 0.0 with value=1.0
+    Type: gate_boundary
+    """
+    # Set initial context
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1.0
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('COMPLETE', {})
+
+    # Verify gate 'has_compute' evaluates to True
+    # Gate expression determines transition eligibility
+    # From state: generating
+    assert operator.state is not None  # State machine responded
+
+
+def test_gate_null_6(operator):
+    """
+    Gate has_compute: computeGenerated = None
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = None
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = None
     operator.context['error'] = ''
 
     # Dispatch events
@@ -174,15 +234,15 @@ def test_gate_null_3(operator):
     assert operator.state is not None  # State machine responded
 
 
-def test_gate_null_4(operator):
+def test_gate_null_7(operator):
     """
-    Gate has_compute: computeFunctions = some_value
+    Gate has_compute: computeGenerated = some_value
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = 'some_value'
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 'some_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -194,15 +254,15 @@ def test_gate_null_4(operator):
     assert operator.state is not None  # State machine responded
 
 
-def test_gate_null_5(operator):
+def test_gate_null_8(operator):
     """
     Gate has_error: error = None
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = None
 
     # Dispatch events
@@ -214,15 +274,15 @@ def test_gate_null_5(operator):
     assert operator.state is not None  # State machine responded
 
 
-def test_gate_null_6(operator):
+def test_gate_null_9(operator):
     """
     Gate has_error: error = some_value
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = 'some_value'
 
     # Dispatch events
@@ -234,15 +294,15 @@ def test_gate_null_6(operator):
     assert operator.state is not None  # State machine responded
 
 
-def test_gate_null_7(operator):
+def test_gate_null_10(operator):
     """
     Gate no_error: error = None
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = None
 
     # Dispatch events
@@ -254,15 +314,15 @@ def test_gate_null_7(operator):
     assert operator.state is not None  # State machine responded
 
 
-def test_gate_null_8(operator):
+def test_gate_null_11(operator):
     """
     Gate no_error: error = some_value
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = 'some_value'
 
     # Dispatch events
@@ -280,9 +340,9 @@ def test_negative_invalid_event_1(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     operator._state = 'idle'
@@ -302,9 +362,9 @@ def test_negative_invalid_event_2(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     operator._state = 'generating'
@@ -320,19 +380,19 @@ def test_negative_invalid_event_2(operator):
 
 def test_negative_invalid_event_3(operator):
     """
-    Invalid event 'COMPLETE' in state 'done'
+    Invalid event 'GENERATE' in state 'done'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     operator._state = 'done'
 
     # Dispatch events
-    operator.dispatch('COMPLETE', {})
+    operator.dispatch('GENERATE', {})
 
     # Verify state unchanged
     assert operator.state == 'done'
@@ -342,19 +402,19 @@ def test_negative_invalid_event_3(operator):
 
 def test_negative_invalid_event_4(operator):
     """
-    Invalid event 'GENERATE' in state 'done'
+    Invalid event 'COMPLETE' in state 'done'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     operator._state = 'done'
 
     # Dispatch events
-    operator.dispatch('GENERATE', {})
+    operator.dispatch('COMPLETE', {})
 
     # Verify state unchanged
     assert operator.state == 'done'
@@ -364,19 +424,19 @@ def test_negative_invalid_event_4(operator):
 
 def test_negative_invalid_event_5(operator):
     """
-    Invalid event 'COMPLETE' in state 'error'
+    Invalid event 'GENERATE' in state 'error'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     operator._state = 'error'
 
     # Dispatch events
-    operator.dispatch('COMPLETE', {})
+    operator.dispatch('GENERATE', {})
 
     # Verify state unchanged
     assert operator.state == 'error'
@@ -386,19 +446,19 @@ def test_negative_invalid_event_5(operator):
 
 def test_negative_invalid_event_6(operator):
     """
-    Invalid event 'GENERATE' in state 'error'
+    Invalid event 'COMPLETE' in state 'error'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     operator._state = 'error'
 
     # Dispatch events
-    operator.dispatch('GENERATE', {})
+    operator.dispatch('COMPLETE', {})
 
     # Verify state unchanged
     assert operator.state == 'error'
@@ -443,8 +503,8 @@ def test_property_1(operator):
     """
     # Set initial context
     operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     # Verify property 'blueprints' maintains type array
@@ -459,8 +519,8 @@ def test_property_2(operator):
     """
     # Set initial context
     operator.context['blueprints'] = ['item']
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     # Verify property 'blueprints' maintains type array
@@ -474,9 +534,9 @@ def test_property_3(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprints'] = []
+    operator.context['blueprints'] = ['test_item']
     operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     # Verify property 'extractedModules' maintains type array
@@ -490,9 +550,9 @@ def test_property_4(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprints'] = []
+    operator.context['blueprints'] = ['test_item']
     operator.context['extractedModules'] = ['item']
-    operator.context['computeFunctions'] = []
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     # Verify property 'extractedModules' maintains type array
@@ -502,34 +562,34 @@ def test_property_4(operator):
 
 def test_property_5(operator):
     """
-    Property computeFunctions = []
+    Property computeGenerated = 0
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 0
     operator.context['error'] = ''
 
-    # Verify property 'computeFunctions' maintains type array
-    assert 'computeFunctions' in operator.context
-    assert isinstance(operator.context['computeFunctions'], list)
+    # Verify property 'computeGenerated' maintains type number
+    assert 'computeGenerated' in operator.context
+    assert isinstance(operator.context['computeGenerated'], (int, float))
 
 
 def test_property_6(operator):
     """
-    Property computeFunctions = ['item']
+    Property computeGenerated = 1
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = ['item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
-    # Verify property 'computeFunctions' maintains type array
-    assert 'computeFunctions' in operator.context
-    assert isinstance(operator.context['computeFunctions'], list)
+    # Verify property 'computeGenerated' maintains type number
+    assert 'computeGenerated' in operator.context
+    assert isinstance(operator.context['computeGenerated'], (int, float))
 
 
 def test_property_7(operator):
@@ -538,9 +598,9 @@ def test_property_7(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     # Verify property 'error' maintains type string
@@ -554,9 +614,9 @@ def test_property_8(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = 'test'
 
     # Verify property 'error' maintains type string
@@ -566,13 +626,13 @@ def test_property_8(operator):
 
 def test_contract_1(operator):
     """
-    Terminal 'done' output contract: computeFunctions must be non-null
+    Terminal 'done' output contract: computeGenerated must be non-null
     Type: contract_output
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -582,7 +642,7 @@ def test_contract_1(operator):
     # Verify final state
     assert operator.state == 'done'
     # Verify output contract: non-null fields
-    assert operator.context.get('computeFunctions') is not None, "'computeFunctions' must be non-null at terminal state"
+    assert operator.context.get('computeGenerated') is not None, "'computeGenerated' must be non-null at terminal state"
 
 
 def test_contract_2(operator):
@@ -591,9 +651,9 @@ def test_contract_2(operator):
     Type: contract_invariant
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -613,9 +673,9 @@ def test_contract_3(operator):
     Type: contract_output
     """
     # Set initial context
-    operator.context['blueprints'] = []
-    operator.context['extractedModules'] = []
-    operator.context['computeFunctions'] = []
+    operator.context['blueprints'] = ['test_item']
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['computeGenerated'] = 1
     operator.context['error'] = ''
 
     # Dispatch events

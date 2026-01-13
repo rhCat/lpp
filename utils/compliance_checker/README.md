@@ -21,7 +21,6 @@ stateDiagram-v2
     %% L++ State Diagram: L++ Compliance Checker
     [*] --> idle
     idle --> blueprint_loaded : LOAD_BLUEPRINT [blueprint is None]
-    idle --> error : LOAD_FAILED
     blueprint_loaded --> blueprint_loaded : LOAD_BLUEPRINT
     ready --> ready : LOAD_BLUEPRINT
     report_ready --> ready : LOAD_BLUEPRINT
@@ -41,12 +40,6 @@ stateDiagram-v2
     blueprint_loaded --> idle : UNLOAD
     ready --> idle : UNLOAD
     report_ready --> idle : UNLOAD
-    error --> idle : CLEAR
-    idle --> error : ERROR
-    blueprint_loaded --> error : ERROR
-    ready --> error : ERROR
-    checking --> error : ERROR
-    report_ready --> error : ERROR
 ```
 > **Interactive View:** [Open zoomable diagram](results/compliance_checker_diagram.html) for pan/zoom controls
 

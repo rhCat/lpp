@@ -39,7 +39,14 @@
   "entry_state": "idle",
   "terminal_states": {
     "complete": {},
-    "error": {}
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
   },
   "context_schema": {
     "properties": {
@@ -150,39 +157,57 @@
   "actions": {
     "init": {
       "type": "compute",
-      "unit": "py2lpp:init"
+      "unit": "py2lpp:init",
+      "input_map": {},
+      "output_map": {}
     },
     "scan_project": {
       "type": "compute",
-      "unit": "py2lpp:scanProject"
+      "unit": "py2lpp:scanProject",
+      "input_map": {},
+      "output_map": {}
     },
     "analyze_patterns": {
       "type": "compute",
-      "unit": "py2lpp:analyzePatterns"
+      "unit": "py2lpp:analyzePatterns",
+      "input_map": {},
+      "output_map": {}
     },
     "extract_modules": {
       "type": "compute",
-      "unit": "py2lpp:extractModules"
+      "unit": "py2lpp:extractModules",
+      "input_map": {},
+      "output_map": {}
     },
     "generate_blueprints": {
       "type": "compute",
-      "unit": "py2lpp:generateBlueprints"
+      "unit": "py2lpp:generateBlueprints",
+      "input_map": {},
+      "output_map": {}
     },
     "generate_compute": {
       "type": "compute",
-      "unit": "py2lpp:generateCompute"
+      "unit": "py2lpp:generateCompute",
+      "input_map": {},
+      "output_map": {}
     },
     "generate_docs": {
       "type": "compute",
-      "unit": "py2lpp:generateDocs"
+      "unit": "py2lpp:generateDocs",
+      "input_map": {},
+      "output_map": {}
     },
     "validate": {
       "type": "compute",
-      "unit": "py2lpp:validate"
+      "unit": "py2lpp:validate",
+      "input_map": {},
+      "output_map": {}
     },
     "finalize": {
       "type": "compute",
-      "unit": "py2lpp:finalize"
+      "unit": "py2lpp:finalize",
+      "input_map": {},
+      "output_map": {}
     }
   },
   "transitions": [

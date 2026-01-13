@@ -1,0 +1,59 @@
+{
+  "blueprint_id": "decoded_main",
+  "blueprint_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_decoded_main_blueprint.py",
+    "count": 35,
+    "coverage": {
+      "total_tests": 35,
+      "by_type": {
+        "path_coverage": 6,
+        "state_coverage": 1,
+        "gate_boundary": 0,
+        "negative": 24,
+        "property_based": 4,
+        "contract": 0
+      },
+      "state_coverage": {
+        "total": 8,
+        "covered": 7,
+        "percentage": 87.5
+      },
+      "transition_coverage": {
+        "total": 7,
+        "covered": 6,
+        "percentage": 85.71428571428571
+      },
+      "gate_coverage": {
+        "total": 0,
+        "covered": 0,
+        "percentage": 0
+      }
+    }
+  },
+  "compute_tests": {
+    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_decoded_main_compute.py",
+    "units": 19,
+    "units_list": [
+      "impl:logger.info",
+      "impl:OUTPUT_DIR.mkdir",
+      "impl:HTTPException",
+      "impl:str",
+      "impl:work_dir.exists",
+      "impl:_write_article_log",
+      "impl:load_blueprint",
+      "impl:run_to_completion",
+      "impl:final_context.get",
+      "impl:len",
+      "impl:context.get",
+      "impl:background_tasks.add_task",
+      "impl:{'_type': 'BinOp', 'left': {'_type': 'Name', 'id': 'work_dir', 'ctx': {'_type': 'Load'}, 'lineno': 444}, 'op': {'_type': 'Div'}, 'right': {'_type': 'Constant', 'value': 'condensed_corpus.json', 'kind': None, 'lineno': 444}, 'lineno': 444}.exists",
+      "impl:{'_type': 'BinOp', 'left': {'_type': 'Name', 'id': 'work_dir', 'ctx': {'_type': 'Load'}, 'lineno': 447}, 'op': {'_type': 'Div'}, 'right': {'_type': 'Constant', 'value': 'synthesis.in_progress', 'kind': None, 'lineno': 447}, 'lineno': 447}.exists",
+      "impl:{'_type': 'BinOp', 'left': {'_type': 'Name', 'id': 'work_dir', 'ctx': {'_type': 'Load'}, 'lineno': 448}, 'op': {'_type': 'Div'}, 'right': {'_type': 'Constant', 'value': 'synthesis.done', 'kind': None, 'lineno': 448}, 'lineno': 448}.exists",
+      "impl:curate_error_path.exists",
+      "impl:curate_error_path.read_text.strip",
+      "impl:curate_error_path.read_text",
+      "impl:{'_type': 'BinOp', 'left': {'_type': 'Name', 'id': 'work_dir', 'ctx': {'_type': 'Load'}, 'lineno': 452}, 'op': {'_type': 'Div'}, 'right': {'_type': 'Constant', 'value': 'final_curation.json', 'kind': None, 'lineno': 452}, 'lineno': 452}.exists"
+    ]
+  },
+  "total_tests": 111
+}

@@ -22,29 +22,12 @@ def operator():
 
 def test_path_2(operator):
     """
-    Path: idle -> scanning
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('SCAN', {})
-
-    # Verify final state
-    assert operator.state == 'scanning'
-
-
-def test_path_3(operator):
-    """
     Path: idle -> scanning -> error
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -55,14 +38,31 @@ def test_path_3(operator):
     assert operator.state == 'error'
 
 
+def test_path_3(operator):
+    """
+    Path: idle -> scanning
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('SCAN', {})
+
+    # Verify final state
+    assert operator.state == 'scanning'
+
+
 def test_path_4(operator):
     """
     Path: idle -> scanning -> done
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -79,8 +79,8 @@ def test_path_5(operator):
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -97,8 +97,8 @@ def test_state_coverage_1(operator):
     Type: state_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -115,8 +115,8 @@ def test_state_coverage_2(operator):
     Type: state_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -134,7 +134,7 @@ def test_gate_null_1(operator):
     """
     # Set initial context
     operator.context['projectPath'] = None
-    operator.context['pythonFiles'] = []
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -153,7 +153,7 @@ def test_gate_null_2(operator):
     """
     # Set initial context
     operator.context['projectPath'] = 'some_value'
-    operator.context['pythonFiles'] = []
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -171,7 +171,7 @@ def test_gate_null_3(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
+    operator.context['projectPath'] = '/test/path'
     operator.context['pythonFiles'] = None
     operator.context['error'] = ''
 
@@ -190,7 +190,7 @@ def test_gate_null_4(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
+    operator.context['projectPath'] = '/test/path'
     operator.context['pythonFiles'] = 'some_value'
     operator.context['error'] = ''
 
@@ -209,7 +209,7 @@ def test_gate_null_5(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
+    operator.context['projectPath'] = '/test/path'
     operator.context['pythonFiles'] = None
     operator.context['error'] = ''
 
@@ -228,7 +228,7 @@ def test_gate_null_6(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
+    operator.context['projectPath'] = '/test/path'
     operator.context['pythonFiles'] = 'some_value'
     operator.context['error'] = ''
 
@@ -247,8 +247,8 @@ def test_gate_null_7(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = None
 
     # Dispatch events
@@ -266,8 +266,8 @@ def test_gate_null_8(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = 'some_value'
 
     # Dispatch events
@@ -285,8 +285,8 @@ def test_gate_null_9(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = None
 
     # Dispatch events
@@ -304,8 +304,8 @@ def test_gate_null_10(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = 'some_value'
 
     # Dispatch events
@@ -323,8 +323,8 @@ def test_negative_invalid_event_1(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'idle'
@@ -344,8 +344,8 @@ def test_negative_invalid_event_2(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'scanning'
@@ -361,18 +361,18 @@ def test_negative_invalid_event_2(operator):
 
 def test_negative_invalid_event_3(operator):
     """
-    Invalid event 'COMPLETE' in state 'done'
+    Invalid event 'SCAN' in state 'done'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'done'
 
     # Dispatch events
-    operator.dispatch('COMPLETE', {})
+    operator.dispatch('SCAN', {})
 
     # Verify state unchanged
     assert operator.state == 'done'
@@ -382,18 +382,18 @@ def test_negative_invalid_event_3(operator):
 
 def test_negative_invalid_event_4(operator):
     """
-    Invalid event 'SCAN' in state 'done'
+    Invalid event 'COMPLETE' in state 'done'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'done'
 
     # Dispatch events
-    operator.dispatch('SCAN', {})
+    operator.dispatch('COMPLETE', {})
 
     # Verify state unchanged
     assert operator.state == 'done'
@@ -403,18 +403,18 @@ def test_negative_invalid_event_4(operator):
 
 def test_negative_invalid_event_5(operator):
     """
-    Invalid event 'COMPLETE' in state 'error'
+    Invalid event 'SCAN' in state 'error'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'error'
 
     # Dispatch events
-    operator.dispatch('COMPLETE', {})
+    operator.dispatch('SCAN', {})
 
     # Verify state unchanged
     assert operator.state == 'error'
@@ -424,18 +424,18 @@ def test_negative_invalid_event_5(operator):
 
 def test_negative_invalid_event_6(operator):
     """
-    Invalid event 'SCAN' in state 'error'
+    Invalid event 'COMPLETE' in state 'error'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     operator._state = 'error'
 
     # Dispatch events
-    operator.dispatch('SCAN', {})
+    operator.dispatch('COMPLETE', {})
 
     # Verify state unchanged
     assert operator.state == 'error'
@@ -490,7 +490,7 @@ def test_property_1(operator):
     """
     # Set initial context
     operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'projectPath' maintains type string
@@ -505,7 +505,7 @@ def test_property_2(operator):
     """
     # Set initial context
     operator.context['projectPath'] = 'test'
-    operator.context['pythonFiles'] = []
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'projectPath' maintains type string
@@ -519,7 +519,7 @@ def test_property_3(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
+    operator.context['projectPath'] = '/test/path'
     operator.context['pythonFiles'] = []
     operator.context['error'] = ''
 
@@ -534,7 +534,7 @@ def test_property_4(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
+    operator.context['projectPath'] = '/test/path'
     operator.context['pythonFiles'] = ['item']
     operator.context['error'] = ''
 
@@ -549,8 +549,8 @@ def test_property_5(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     # Verify property 'error' maintains type string
@@ -564,8 +564,8 @@ def test_property_6(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = 'test'
 
     # Verify property 'error' maintains type string
@@ -579,8 +579,8 @@ def test_contract_1(operator):
     Type: contract_output
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -599,8 +599,8 @@ def test_contract_2(operator):
     Type: contract_invariant
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events
@@ -620,8 +620,8 @@ def test_contract_3(operator):
     Type: contract_output
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['error'] = ''
 
     # Dispatch events

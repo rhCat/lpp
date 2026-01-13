@@ -47,7 +47,7 @@
       "required_terminals": ["done", "error"],
       "input_map": {
         "blueprints": "blueprint_gen.output.blueprints",
-        "computeFunctions": "compute_gen.output.computeFunctions",
+        "computeGenerated": "compute_gen.output.computeGenerated",
         "projectName": "assembly.context.projectName"
       }
     },
@@ -56,7 +56,7 @@
       "required_terminals": ["valid", "invalid", "error"],
       "input_map": {
         "blueprints": "blueprint_gen.output.blueprints",
-        "computeFunctions": "compute_gen.output.computeFunctions"
+        "computeGenerated": "compute_gen.output.computeGenerated"
       }
     }
   },
@@ -98,17 +98,25 @@
         "type": "array",
         "source": "blueprint_gen.output.blueprints"
       },
-      "computeFunctions": {
-        "type": "array",
-        "source": "compute_gen.output.computeFunctions"
+      "computeGenerated": {
+        "type": "number",
+        "source": "compute_gen.output.computeGenerated"
       },
-      "docs": {
-        "type": "array",
-        "source": "doc_gen.output.docs"
+      "docsGenerated": {
+        "type": "number",
+        "source": "doc_gen.output.docsGenerated"
       },
-      "validationResult": {
-        "type": "object",
-        "source": "validator.output.validationResult"
+      "valid": {
+        "type": "boolean",
+        "source": "validator.output.valid"
+      },
+      "validationErrors": {
+        "type": "array",
+        "source": "validator.output.errors"
+      },
+      "validationWarnings": {
+        "type": "array",
+        "source": "validator.output.warnings"
       },
       "error_source": {
         "type": "string"
@@ -400,18 +408,18 @@
     },
     "a_capture_compute": {
       "type": "set",
-      "target": "computeFunctions",
-      "value_from": "compute_gen.output.computeFunctions"
+      "target": "computeGenerated",
+      "value_from": "compute_gen.output.computeGenerated"
     },
     "a_capture_docs": {
       "type": "set",
-      "target": "docs",
-      "value_from": "doc_gen.output.docs"
+      "target": "docsGenerated",
+      "value_from": "doc_gen.output.docsGenerated"
     },
     "a_capture_validation": {
       "type": "set",
-      "target": "validationResult",
-      "value_from": "validator.output.validationResult"
+      "target": "valid",
+      "value_from": "validator.output.valid"
     },
     "a_set_error_scan": {
       "type": "set",

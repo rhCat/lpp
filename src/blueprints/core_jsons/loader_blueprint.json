@@ -110,57 +110,94 @@
     "a_read_file": {
       "type": "compute",
       "compute_unit": "impl:open",
-      "description": "Read blueprint file from disk"
+      "description": "Read blueprint file from disk",
+      "input_map": {},
+      "output_map": {}
     },
     "a_parse_json": {
       "type": "compute",
       "compute_unit": "impl:json.load",
-      "description": "Parse JSON content"
+      "description": "Parse JSON content",
+      "input_map": {},
+      "output_map": {}
     },
     "a_validate_required": {
       "type": "compute",
       "compute_unit": "impl:self._validate_required_fields",
-      "description": "Validate required blueprint fields"
+      "description": "Validate required blueprint fields",
+      "input_map": {},
+      "output_map": {}
     },
     "a_validate_refs": {
       "type": "compute",
       "compute_unit": "impl:self._validate_references",
-      "description": "Validate internal references"
+      "description": "Validate internal references",
+      "input_map": {},
+      "output_map": {}
     },
     "a_load_states": {
       "type": "compute",
       "compute_unit": "impl:self._load_states",
-      "description": "Load state definitions"
+      "description": "Load state definitions",
+      "input_map": {},
+      "output_map": {}
     },
     "a_load_transitions": {
       "type": "compute",
       "compute_unit": "impl:self._load_transitions",
-      "description": "Load transition definitions"
+      "description": "Load transition definitions",
+      "input_map": {},
+      "output_map": {}
     },
     "a_load_gates": {
       "type": "compute",
       "compute_unit": "impl:self._load_gates",
-      "description": "Load gate definitions"
+      "description": "Load gate definitions",
+      "input_map": {},
+      "output_map": {}
     },
     "a_load_actions": {
       "type": "compute",
       "compute_unit": "impl:self._load_actions",
-      "description": "Load action definitions"
+      "description": "Load action definitions",
+      "input_map": {},
+      "output_map": {}
     },
     "a_load_schema": {
       "type": "compute",
       "compute_unit": "impl:self._load_context_schema",
-      "description": "Load context schema"
+      "description": "Load context schema",
+      "input_map": {},
+      "output_map": {}
     },
     "a_create_blueprint": {
       "type": "compute",
       "compute_unit": "impl:Blueprint",
-      "description": "Create Blueprint object"
+      "description": "Create Blueprint object",
+      "input_map": {},
+      "output_map": {}
     }
   },
   "entry_state": "idle",
   "terminal_states": {
-    "complete": {},
-    "error": {}
+    "complete": {
+      "output_schema": {
+        "result": {
+          "type": "object",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": [
+        "result_produced"
+      ]
+    },
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
   }
 }

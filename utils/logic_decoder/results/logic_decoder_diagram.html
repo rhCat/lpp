@@ -49,8 +49,6 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
         state_inferring(["inferring<br>Inferring states, transitions, gates fro"]):::state
         state_generating(["generating<br>Assembling final L++ blueprint"]):::state
     end
-        state_complete(["complete<br>Blueprint generated successfully"]):::state
-        state_error[["error<br>Decoding failed"]]:::errorState
 
     %% Transitions
     act_t0s0[["loadFile"]]:::action
@@ -65,24 +63,6 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
     act_t3s0[["inferStates, inferTransitions, inferActions"]]:::action
     state_inferring -- "AUTO" --> act_t3s0
     act_t3s0 --> state_generating
-    act_t4s0[["generateBlueprint"]]:::action
-    state_generating -- "AUTO" --> act_t4s0
-    act_t4s0 --> state_complete
-    act_t5s0[["setError, log_error"]]:::action
-    state_parsing -- "ERROR" --> act_t5s0
-    act_t5s0 --> state_error
-    act_t6s0[["setError, log_error"]]:::action
-    state_analyzing -- "ERROR" --> act_t6s0
-    act_t6s0 --> state_error
-    act_t7s0[["setError, log_error"]]:::action
-    state_inferring -- "ERROR" --> act_t7s0
-    act_t7s0 --> state_error
-    act_t8s0[["clearState"]]:::action
-    state_complete -- "RESET" --> act_t8s0
-    act_t8s0 --> state_idle
-    act_t9s0[["clearError, clearState"]]:::action
-    state_error -- "RESET" --> act_t9s0
-    act_t9s0 --> state_idle
 
     %% Styling - ALL shapes have explicit fill and black text
     classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000

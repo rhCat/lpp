@@ -51,8 +51,6 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
         state_planning(["planning<br>Planning migration path"]):::state
         state_migrating(["migrating<br>Applying migration steps"]):::state
     end
-        state_complete(["complete<br>Migration complete, ready to export"]):::state
-        state_error[["error<br>Error state"]]:::errorState
 
     %% Transitions
     gate_t0s0{{"blueprint is None?"}}:::gate
@@ -60,15 +58,9 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
     act_t0s0[["load_blueprint, detect_version, list_migrations"]]:::action
     gate_t0s0 -- ✓ --> act_t0s0
     act_t0s0 --> state_loaded
-    act_t1s0[["set_error"]]:::action
-    state_idle -- "LOAD_FAILED" --> act_t1s0
-    act_t1s0 --> state_error
     act_t2s0[["load_blueprint, detect_version, clear_migration"]]:::action
     state_loaded -- "LOAD" --> act_t2s0
     act_t2s0 --> state_loaded
-    act_t3s0[["load_blueprint, detect_version, clear_migration"]]:::action
-    state_complete -- "LOAD" --> act_t3s0
-    act_t3s0 --> state_loaded
     gate_t4s0{{"blueprint is not None?"}}:::gate
     state_loaded -- "SET_TARGET" --> gate_t4s0
     act_t4s0[["set_target_version"]]:::action
@@ -92,11 +84,6 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
     act_t8s0[["set_target_latest, plan_migration, analyze_changes"]]:::action
     gate_t8s0 -- ✓ --> act_t8s0
     act_t8s0 --> state_planned
-    gate_t9s0{{"migration_plan is not None ...?"}}:::gate
-    state_planned -- "DRY_RUN" --> gate_t9s0
-    act_t9s0[["set_dry_run_on, dry_run, generate_report"]]:::action
-    gate_t9s0 -- ✓ --> act_t9s0
-    act_t9s0 --> state_complete
     gate_t10s0{{"migration_plan is not None ...?"}}:::gate
     state_planned -- "EXECUTE" --> gate_t10s0
     act_t10s0[["set_dry_run_off, apply_migration"]]:::action
@@ -112,66 +99,24 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
     act_t12s0[["validate_blueprint"]]:::action
     gate_t12s0 -- ✓ --> act_t12s0
     act_t12s0 --> state_validating
-    gate_t13s0{{"validation_result is not No...?"}}:::gate
-    state_validating -- "FINALIZE" --> gate_t13s0
-    act_t13s0[["generate_report"]]:::action
-    gate_t13s0 -- ✓ --> act_t13s0
-    act_t13s0 --> state_complete
-    act_t14s0[["generate_report"]]:::action
-    state_validating -- "FORCE_FINALIZE" --> act_t14s0
-    act_t14s0 --> state_complete
-    gate_t15s0{{"blueprint is not None?"}}:::gate
-    state_loaded -- "MIGRATE_ALL" --> gate_t15s0
-    act_t15s0[["set_target_latest, plan_migration, analyze_changes +4"]]:::action
-    gate_t15s0 -- ✓ --> act_t15s0
-    act_t15s0 --> state_complete
-    gate_t16s0{{"blueprint is not None?"}}:::gate
-    state_loaded -- "PREVIEW_ALL" --> gate_t16s0
-    act_t16s0[["set_target_latest, plan_migration, analyze_changes +3"]]:::action
-    gate_t16s0 -- ✓ --> act_t16s0
-    act_t16s0 --> state_complete
-    gate_t17s0{{"migrated_blueprint is not None?"}}:::gate
-    state_complete -- "EXPORT" --> gate_t17s0
-    act_t17s0[["export_migrated"]]:::action
-    gate_t17s0 -- ✓ --> act_t17s0
-    act_t17s0 --> state_complete
     act_t18s0[["set_batch_paths, set_target_latest"]]:::action
     state_idle -- "BATCH" --> act_t18s0
     act_t18s0 --> state_batch_mode
     act_t19s0[["set_batch_paths, set_target_version"]]:::action
     state_idle -- "BATCH_TO" --> act_t19s0
     act_t19s0 --> state_batch_mode
-    gate_t20s0{{"batch_paths is not None and...?"}}:::gate
-    state_batch_mode -- "RUN_BATCH" --> gate_t20s0
-    act_t20s0[["batch_migrate, generate_report"]]:::action
-    gate_t20s0 -- ✓ --> act_t20s0
-    act_t20s0 --> state_complete
     act_t21s0[["clear_migration"]]:::action
     state_planned -- "BACK" --> act_t21s0
     act_t21s0 --> state_loaded
-    act_t22s0[["clear_migration"]]:::action
-    state_complete -- "BACK" --> act_t22s0
-    act_t22s0 --> state_loaded
     act_t23s0[["clear_migration"]]:::action
     state_planned -- "REPLAN" --> act_t23s0
     act_t23s0 --> state_planning
     act_t24s0[["unload_blueprint"]]:::action
     state_loaded -- "UNLOAD" --> act_t24s0
     act_t24s0 --> state_idle
-    act_t25s0[["unload_blueprint"]]:::action
-    state_complete -- "UNLOAD" --> act_t25s0
-    act_t25s0 --> state_idle
     act_t26s0[["unload_blueprint"]]:::action
     state_planned -- "UNLOAD" --> act_t26s0
     act_t26s0 --> state_idle
-    act_t27s0[["clear_error, unload_blueprint"]]:::action
-    state_error -- "CLEAR" --> act_t27s0
-    act_t27s0 --> state_idle
-    gate_t28s0{{"blueprint is not None?"}}:::gate
-    state_error -- "RETRY" --> gate_t28s0
-    act_t28s0[["clear_error"]]:::action
-    gate_t28s0 -- ✓ --> act_t28s0
-    act_t28s0 --> state_loaded
 
     %% Styling - ALL shapes have explicit fill and black text
     classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000

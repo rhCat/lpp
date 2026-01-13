@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1",
+  "$schema": "lpp/v0.2.0",
   "id": "calculator",
   "name": "L++ Calculator",
   "version": "1.0.0",
@@ -9,9 +9,6 @@
     },
     "has_operator": {
       "description": "Has operator, waiting for next operand"
-    },
-    "error": {
-      "description": "Error state"
     }
   },
   "entry_state": "has_operand",
@@ -134,7 +131,16 @@
       "value": null
     }
   },
-  "terminal_states": {},
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
   "transitions": [
     {
       "id": "t_set_operator",

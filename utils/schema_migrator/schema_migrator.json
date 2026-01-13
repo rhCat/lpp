@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1.2",
+  "$schema": "lpp/v0.2.0",
   "id": "lpp_schema_migrator",
   "name": "L++ Schema Migrator",
   "version": "1.0.0",
@@ -83,18 +83,22 @@
     "validating": {
       "description": "Validating migrated blueprint"
     },
-    "complete": {
-      "description": "Migration complete, ready to export"
-    },
     "batch_mode": {
       "description": "Processing batch migration"
-    },
-    "error": {
-      "description": "Error state"
     }
   },
   "entry_state": "idle",
-  "terminal_states": {},
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    },
+    "complete": {}
+  },
   "gates": {
     "has_blueprint": {
       "type": "expression",

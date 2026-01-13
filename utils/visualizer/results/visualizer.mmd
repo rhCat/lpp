@@ -5,15 +5,11 @@ flowchart TD
         state_loaded(["loaded<br>Blueprint loaded, ready to visualize"]):::state
         state_viewing(["viewing<br>Actively viewing/exploring the blueprint"]):::state
     end
-        state_error[["error<br>Error state"]]:::errorState
 
     %% Transitions
     act_t0s0[["load_blueprint, init_defaults"]]:::action
     state_idle -- "LOAD" --> act_t0s0
     act_t0s0 --> state_loaded
-    act_t1s0[["set_error"]]:::action
-    state_idle -- "LOAD_FAILED" --> act_t1s0
-    act_t1s0 --> state_error
     act_t2s0[["load_blueprint"]]:::action
     state_loaded -- "LOAD" --> act_t2s0
     act_t2s0 --> state_loaded
@@ -65,9 +61,6 @@ flowchart TD
     act_t18s0[["generate_readme, write_readme"]]:::action
     state_viewing -- "EXPORT_README" --> act_t18s0
     act_t18s0 --> state_viewing
-    act_t19s0[["clear_error"]]:::action
-    state_error -- "CLEAR" --> act_t19s0
-    act_t19s0 --> state_idle
     act_t20s0[["load_tree, init_defaults"]]:::action
     state_idle -- "LOAD_TREE" --> act_t20s0
     act_t20s0 --> state_loaded

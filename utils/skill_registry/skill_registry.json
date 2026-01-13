@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1",
+  "$schema": "lpp/v0.2.0",
   "id": "skill_registry",
   "name": "Skill Registry",
   "version": "1.0.0",
@@ -37,13 +37,19 @@
     },
     "viewing": {
       "description": "Viewing skill detail"
-    },
-    "error": {
-      "description": "Error occurred"
     }
   },
   "entry_state": "idle",
-  "terminal_states": {},
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
   "gates": {
     "hasPath": {
       "type": "expression",

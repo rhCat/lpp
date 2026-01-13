@@ -20,204 +20,25 @@ def operator():
     pass
 
 
-def test_path_2(operator):
-    """
-    Path: idle -> phase_scan -> phase_analyze -> phase_extract -> phase_blueprint -> phase_compute -> phase_docs
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
-    operator.context['error_source'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('REFACTOR', {})
-    operator.dispatch('scanner:TERMINAL', {})
-    operator.dispatch('analyzer:TERMINAL', {})
-    operator.dispatch('extractor:TERMINAL', {})
-    operator.dispatch('blueprint_gen:TERMINAL', {})
-    operator.dispatch('compute_gen:TERMINAL', {})
-
-    # Verify final state
-    assert operator.state == 'phase_docs'
-
-
-def test_path_3(operator):
-    """
-    Path: idle -> phase_scan -> error
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
-    operator.context['error_source'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('REFACTOR', {})
-    operator.dispatch('scanner:TERMINAL', {})
-
-    # Verify final state
-    assert operator.state == 'error'
-
-
-def test_path_4(operator):
-    """
-    Path: idle -> phase_scan -> phase_analyze -> phase_extract -> phase_blueprint
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
-    operator.context['error_source'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('REFACTOR', {})
-    operator.dispatch('scanner:TERMINAL', {})
-    operator.dispatch('analyzer:TERMINAL', {})
-    operator.dispatch('extractor:TERMINAL', {})
-
-    # Verify final state
-    assert operator.state == 'phase_blueprint'
-
-
-def test_path_5(operator):
-    """
-    Path: idle -> phase_scan -> phase_analyze -> phase_extract -> phase_blueprint -> phase_compute -> phase_validate
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
-    operator.context['error_source'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('REFACTOR', {})
-    operator.dispatch('scanner:TERMINAL', {})
-    operator.dispatch('analyzer:TERMINAL', {})
-    operator.dispatch('extractor:TERMINAL', {})
-    operator.dispatch('blueprint_gen:TERMINAL', {})
-    operator.dispatch('compute_gen:TERMINAL', {})
-
-    # Verify final state
-    assert operator.state == 'phase_validate'
-
-
-def test_path_6(operator):
-    """
-    Path: idle -> phase_scan -> phase_analyze -> phase_extract -> phase_blueprint -> phase_compute
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
-    operator.context['error_source'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('REFACTOR', {})
-    operator.dispatch('scanner:TERMINAL', {})
-    operator.dispatch('analyzer:TERMINAL', {})
-    operator.dispatch('extractor:TERMINAL', {})
-    operator.dispatch('blueprint_gen:TERMINAL', {})
-
-    # Verify final state
-    assert operator.state == 'phase_compute'
-
-
-def test_path_7(operator):
-    """
-    Path: idle -> phase_scan -> phase_analyze
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
-    operator.context['error_source'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('REFACTOR', {})
-    operator.dispatch('scanner:TERMINAL', {})
-
-    # Verify final state
-    assert operator.state == 'phase_analyze'
-
-
-def test_path_8(operator):
+def test_path_1(operator):
     """
     Path: idle -> phase_scan -> phase_analyze -> phase_extract
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -230,50 +51,25 @@ def test_path_8(operator):
     assert operator.state == 'phase_extract'
 
 
-def test_path_9(operator):
-    """
-    Path: idle -> phase_scan
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
-    operator.context['error_source'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('REFACTOR', {})
-
-    # Verify final state
-    assert operator.state == 'phase_scan'
-
-
-def test_path_10(operator):
+def test_path_2(operator):
     """
     Path: idle -> phase_scan -> phase_analyze -> phase_extract -> phase_blueprint -> phase_compute -> phase_validate -> complete
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -290,23 +86,25 @@ def test_path_10(operator):
     assert operator.state == 'complete'
 
 
-def test_path_11(operator):
+def test_path_3(operator):
     """
-    Path: idle -> phase_scan -> phase_analyze -> error
+    Path: idle -> phase_scan -> phase_analyze -> phase_extract -> phase_blueprint -> phase_compute
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -314,6 +112,229 @@ def test_path_11(operator):
     operator.dispatch('REFACTOR', {})
     operator.dispatch('scanner:TERMINAL', {})
     operator.dispatch('analyzer:TERMINAL', {})
+    operator.dispatch('extractor:TERMINAL', {})
+    operator.dispatch('blueprint_gen:TERMINAL', {})
+
+    # Verify final state
+    assert operator.state == 'phase_compute'
+
+
+def test_path_4(operator):
+    """
+    Path: idle -> phase_scan -> phase_analyze
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
+    operator.context['error_source'] = ''
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('REFACTOR', {})
+    operator.dispatch('scanner:TERMINAL', {})
+
+    # Verify final state
+    assert operator.state == 'phase_analyze'
+
+
+def test_path_5(operator):
+    """
+    Path: idle -> phase_scan
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
+    operator.context['error_source'] = ''
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('REFACTOR', {})
+
+    # Verify final state
+    assert operator.state == 'phase_scan'
+
+
+def test_path_7(operator):
+    """
+    Path: idle -> phase_scan -> phase_analyze -> phase_extract -> phase_blueprint -> phase_compute -> phase_validate
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
+    operator.context['error_source'] = ''
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('REFACTOR', {})
+    operator.dispatch('scanner:TERMINAL', {})
+    operator.dispatch('analyzer:TERMINAL', {})
+    operator.dispatch('extractor:TERMINAL', {})
+    operator.dispatch('blueprint_gen:TERMINAL', {})
+    operator.dispatch('compute_gen:TERMINAL', {})
+
+    # Verify final state
+    assert operator.state == 'phase_validate'
+
+
+def test_path_8(operator):
+    """
+    Path: idle -> phase_scan -> phase_analyze -> phase_extract -> phase_blueprint
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
+    operator.context['error_source'] = ''
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('REFACTOR', {})
+    operator.dispatch('scanner:TERMINAL', {})
+    operator.dispatch('analyzer:TERMINAL', {})
+    operator.dispatch('extractor:TERMINAL', {})
+
+    # Verify final state
+    assert operator.state == 'phase_blueprint'
+
+
+def test_path_9(operator):
+    """
+    Path: idle -> phase_scan -> error
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
+    operator.context['error_source'] = ''
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('REFACTOR', {})
+    operator.dispatch('scanner:TERMINAL', {})
+
+    # Verify final state
+    assert operator.state == 'error'
+
+
+def test_path_10(operator):
+    """
+    Path: idle -> phase_scan -> phase_analyze -> phase_extract -> phase_blueprint -> phase_compute -> phase_docs
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
+    operator.context['error_source'] = ''
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('REFACTOR', {})
+    operator.dispatch('scanner:TERMINAL', {})
+    operator.dispatch('analyzer:TERMINAL', {})
+    operator.dispatch('extractor:TERMINAL', {})
+    operator.dispatch('blueprint_gen:TERMINAL', {})
+    operator.dispatch('compute_gen:TERMINAL', {})
+
+    # Verify final state
+    assert operator.state == 'phase_docs'
+
+
+def test_path_11(operator):
+    """
+    Path: idle -> phase_scan -> phase_analyze -> phase_extract -> error
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
+    operator.context['error_source'] = ''
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('REFACTOR', {})
+    operator.dispatch('scanner:TERMINAL', {})
+    operator.dispatch('analyzer:TERMINAL', {})
+    operator.dispatch('extractor:TERMINAL', {})
 
     # Verify final state
     assert operator.state == 'error'
@@ -325,17 +346,19 @@ def test_path_12(operator):
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -352,21 +375,23 @@ def test_path_12(operator):
 
 def test_path_13(operator):
     """
-    Path: idle -> phase_scan -> phase_analyze -> phase_extract -> phase_blueprint -> phase_compute -> phase_validate -> error
+    Path: idle -> phase_scan -> phase_analyze -> phase_extract -> phase_blueprint -> phase_compute -> phase_validate -> complete
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -380,26 +405,28 @@ def test_path_13(operator):
     operator.dispatch('validator:TERMINAL', {})
 
     # Verify final state
-    assert operator.state == 'error'
+    assert operator.state == 'complete'
 
 
 def test_path_14(operator):
     """
-    Path: idle -> phase_scan -> phase_analyze -> phase_extract -> error
+    Path: idle -> phase_scan -> phase_analyze -> phase_extract -> phase_blueprint -> phase_compute -> error
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -408,6 +435,8 @@ def test_path_14(operator):
     operator.dispatch('scanner:TERMINAL', {})
     operator.dispatch('analyzer:TERMINAL', {})
     operator.dispatch('extractor:TERMINAL', {})
+    operator.dispatch('blueprint_gen:TERMINAL', {})
+    operator.dispatch('compute_gen:TERMINAL', {})
 
     # Verify final state
     assert operator.state == 'error'
@@ -419,17 +448,19 @@ def test_path_15(operator):
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -448,21 +479,23 @@ def test_path_15(operator):
 
 def test_path_16(operator):
     """
-    Path: idle -> phase_scan -> phase_analyze -> phase_extract -> phase_blueprint -> phase_compute -> phase_validate -> complete
+    Path: idle -> phase_scan -> phase_analyze -> error
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -470,13 +503,9 @@ def test_path_16(operator):
     operator.dispatch('REFACTOR', {})
     operator.dispatch('scanner:TERMINAL', {})
     operator.dispatch('analyzer:TERMINAL', {})
-    operator.dispatch('extractor:TERMINAL', {})
-    operator.dispatch('blueprint_gen:TERMINAL', {})
-    operator.dispatch('compute_gen:TERMINAL', {})
-    operator.dispatch('validator:TERMINAL', {})
 
     # Verify final state
-    assert operator.state == 'complete'
+    assert operator.state == 'error'
 
 
 def test_path_17(operator):
@@ -485,17 +514,19 @@ def test_path_17(operator):
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -514,21 +545,23 @@ def test_path_17(operator):
 
 def test_path_18(operator):
     """
-    Path: idle -> phase_scan -> phase_analyze -> phase_extract -> phase_blueprint -> phase_compute -> error
+    Path: idle -> phase_scan -> phase_analyze -> phase_extract -> phase_blueprint -> phase_compute -> phase_validate -> error
     Type: path_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -539,6 +572,7 @@ def test_path_18(operator):
     operator.dispatch('extractor:TERMINAL', {})
     operator.dispatch('blueprint_gen:TERMINAL', {})
     operator.dispatch('compute_gen:TERMINAL', {})
+    operator.dispatch('validator:TERMINAL', {})
 
     # Verify final state
     assert operator.state == 'error'
@@ -550,17 +584,19 @@ def test_state_coverage_1(operator):
     Type: state_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -579,54 +615,23 @@ def test_state_coverage_1(operator):
 
 def test_state_coverage_2(operator):
     """
-    Covers states: idle, phase_scan, phase_analyze, phase_extract, phase_blueprint, phase_compute, phase_validate, error
-    Type: state_coverage
-    """
-    # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
-    operator.context['error_source'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('REFACTOR', {})
-    operator.dispatch('scanner:TERMINAL', {})
-    operator.dispatch('analyzer:TERMINAL', {})
-    operator.dispatch('extractor:TERMINAL', {})
-    operator.dispatch('blueprint_gen:TERMINAL', {})
-    operator.dispatch('compute_gen:TERMINAL', {})
-    operator.dispatch('validator:TERMINAL', {})
-
-    # Verify final state
-    assert operator.state == 'error'
-
-
-def test_state_coverage_3(operator):
-    """
     Covers states: idle, phase_scan, phase_analyze, phase_extract, phase_blueprint, phase_compute, phase_docs, phase_validate
     Type: state_coverage
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -643,6 +648,41 @@ def test_state_coverage_3(operator):
     assert operator.state == 'phase_validate'
 
 
+def test_state_coverage_3(operator):
+    """
+    Covers states: idle, phase_scan, phase_analyze, phase_extract, phase_blueprint, phase_compute, phase_validate, error
+    Type: state_coverage
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
+    operator.context['error_source'] = ''
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('REFACTOR', {})
+    operator.dispatch('scanner:TERMINAL', {})
+    operator.dispatch('analyzer:TERMINAL', {})
+    operator.dispatch('extractor:TERMINAL', {})
+    operator.dispatch('blueprint_gen:TERMINAL', {})
+    operator.dispatch('compute_gen:TERMINAL', {})
+    operator.dispatch('validator:TERMINAL', {})
+
+    # Verify final state
+    assert operator.state == 'error'
+
+
 def test_gate_null_1(operator):
     """
     Gate g_has_project: projectPath = None
@@ -650,16 +690,18 @@ def test_gate_null_1(operator):
     """
     # Set initial context
     operator.context['projectPath'] = None
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -679,16 +721,18 @@ def test_gate_null_2(operator):
     """
     # Set initial context
     operator.context['projectPath'] = 'some_value'
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -703,28 +747,30 @@ def test_gate_null_2(operator):
 
 def test_negative_invalid_event_1(operator):
     """
-    Invalid event 'blueprint_gen:TERMINAL' in state 'idle'
+    Invalid event 'analyzer:TERMINAL' in state 'idle'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'idle'
 
     # Dispatch events
-    operator.dispatch('blueprint_gen:TERMINAL', {})
+    operator.dispatch('analyzer:TERMINAL', {})
 
     # Verify state unchanged
     assert operator.state == 'idle'
@@ -734,28 +780,30 @@ def test_negative_invalid_event_1(operator):
 
 def test_negative_invalid_event_2(operator):
     """
-    Invalid event 'analyzer:TERMINAL' in state 'idle'
+    Invalid event 'doc_gen:TERMINAL' in state 'idle'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'idle'
 
     # Dispatch events
-    operator.dispatch('analyzer:TERMINAL', {})
+    operator.dispatch('doc_gen:TERMINAL', {})
 
     # Verify state unchanged
     assert operator.state == 'idle'
@@ -765,28 +813,30 @@ def test_negative_invalid_event_2(operator):
 
 def test_negative_invalid_event_3(operator):
     """
-    Invalid event 'extractor:TERMINAL' in state 'idle'
+    Invalid event 'validator:TERMINAL' in state 'idle'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'idle'
 
     # Dispatch events
-    operator.dispatch('extractor:TERMINAL', {})
+    operator.dispatch('validator:TERMINAL', {})
 
     # Verify state unchanged
     assert operator.state == 'idle'
@@ -796,52 +846,23 @@ def test_negative_invalid_event_3(operator):
 
 def test_negative_invalid_event_4(operator):
     """
-    Invalid event 'blueprint_gen:TERMINAL' in state 'phase_scan'
-    Type: negative_invalid_event
-    """
-    # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
-    operator.context['error_source'] = ''
-    operator.context['error'] = ''
-
-    operator._state = 'phase_scan'
-
-    # Dispatch events
-    operator.dispatch('blueprint_gen:TERMINAL', {})
-
-    # Verify state unchanged
-    assert operator.state == 'phase_scan'
-    # Verify no transition occurred
-    assert operator.state == 'phase_scan'
-
-
-def test_negative_invalid_event_5(operator):
-    """
     Invalid event 'analyzer:TERMINAL' in state 'phase_scan'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -856,30 +877,65 @@ def test_negative_invalid_event_5(operator):
     assert operator.state == 'phase_scan'
 
 
-def test_negative_invalid_event_6(operator):
+def test_negative_invalid_event_5(operator):
     """
-    Invalid event 'extractor:TERMINAL' in state 'phase_scan'
+    Invalid event 'doc_gen:TERMINAL' in state 'phase_scan'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'phase_scan'
 
     # Dispatch events
-    operator.dispatch('extractor:TERMINAL', {})
+    operator.dispatch('doc_gen:TERMINAL', {})
+
+    # Verify state unchanged
+    assert operator.state == 'phase_scan'
+    # Verify no transition occurred
+    assert operator.state == 'phase_scan'
+
+
+def test_negative_invalid_event_6(operator):
+    """
+    Invalid event 'REFACTOR' in state 'phase_scan'
+    Type: negative_invalid_event
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
+    operator.context['error_source'] = ''
+    operator.context['error'] = ''
+
+    operator._state = 'phase_scan'
+
+    # Dispatch events
+    operator.dispatch('REFACTOR', {})
 
     # Verify state unchanged
     assert operator.state == 'phase_scan'
@@ -889,28 +945,30 @@ def test_negative_invalid_event_6(operator):
 
 def test_negative_invalid_event_7(operator):
     """
-    Invalid event 'blueprint_gen:TERMINAL' in state 'phase_analyze'
+    Invalid event 'doc_gen:TERMINAL' in state 'phase_analyze'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'phase_analyze'
 
     # Dispatch events
-    operator.dispatch('blueprint_gen:TERMINAL', {})
+    operator.dispatch('doc_gen:TERMINAL', {})
 
     # Verify state unchanged
     assert operator.state == 'phase_analyze'
@@ -920,52 +978,23 @@ def test_negative_invalid_event_7(operator):
 
 def test_negative_invalid_event_8(operator):
     """
-    Invalid event 'extractor:TERMINAL' in state 'phase_analyze'
-    Type: negative_invalid_event
-    """
-    # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
-    operator.context['error_source'] = ''
-    operator.context['error'] = ''
-
-    operator._state = 'phase_analyze'
-
-    # Dispatch events
-    operator.dispatch('extractor:TERMINAL', {})
-
-    # Verify state unchanged
-    assert operator.state == 'phase_analyze'
-    # Verify no transition occurred
-    assert operator.state == 'phase_analyze'
-
-
-def test_negative_invalid_event_9(operator):
-    """
     Invalid event 'REFACTOR' in state 'phase_analyze'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -980,54 +1009,58 @@ def test_negative_invalid_event_9(operator):
     assert operator.state == 'phase_analyze'
 
 
-def test_negative_invalid_event_10(operator):
+def test_negative_invalid_event_9(operator):
     """
-    Invalid event 'blueprint_gen:TERMINAL' in state 'phase_extract'
+    Invalid event 'validator:TERMINAL' in state 'phase_analyze'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
-    operator._state = 'phase_extract'
+    operator._state = 'phase_analyze'
 
     # Dispatch events
-    operator.dispatch('blueprint_gen:TERMINAL', {})
+    operator.dispatch('validator:TERMINAL', {})
 
     # Verify state unchanged
-    assert operator.state == 'phase_extract'
+    assert operator.state == 'phase_analyze'
     # Verify no transition occurred
-    assert operator.state == 'phase_extract'
+    assert operator.state == 'phase_analyze'
 
 
-def test_negative_invalid_event_11(operator):
+def test_negative_invalid_event_10(operator):
     """
     Invalid event 'analyzer:TERMINAL' in state 'phase_extract'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -1042,23 +1075,58 @@ def test_negative_invalid_event_11(operator):
     assert operator.state == 'phase_extract'
 
 
+def test_negative_invalid_event_11(operator):
+    """
+    Invalid event 'doc_gen:TERMINAL' in state 'phase_extract'
+    Type: negative_invalid_event
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
+    operator.context['error_source'] = ''
+    operator.context['error'] = ''
+
+    operator._state = 'phase_extract'
+
+    # Dispatch events
+    operator.dispatch('doc_gen:TERMINAL', {})
+
+    # Verify state unchanged
+    assert operator.state == 'phase_extract'
+    # Verify no transition occurred
+    assert operator.state == 'phase_extract'
+
+
 def test_negative_invalid_event_12(operator):
     """
     Invalid event 'REFACTOR' in state 'phase_extract'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -1079,17 +1147,19 @@ def test_negative_invalid_event_13(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -1106,28 +1176,30 @@ def test_negative_invalid_event_13(operator):
 
 def test_negative_invalid_event_14(operator):
     """
-    Invalid event 'extractor:TERMINAL' in state 'phase_blueprint'
+    Invalid event 'doc_gen:TERMINAL' in state 'phase_blueprint'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'phase_blueprint'
 
     # Dispatch events
-    operator.dispatch('extractor:TERMINAL', {})
+    operator.dispatch('doc_gen:TERMINAL', {})
 
     # Verify state unchanged
     assert operator.state == 'phase_blueprint'
@@ -1141,17 +1213,19 @@ def test_negative_invalid_event_15(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -1168,28 +1242,30 @@ def test_negative_invalid_event_15(operator):
 
 def test_negative_invalid_event_16(operator):
     """
-    Invalid event 'blueprint_gen:TERMINAL' in state 'phase_compute'
+    Invalid event 'analyzer:TERMINAL' in state 'phase_compute'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'phase_compute'
 
     # Dispatch events
-    operator.dispatch('blueprint_gen:TERMINAL', {})
+    operator.dispatch('analyzer:TERMINAL', {})
 
     # Verify state unchanged
     assert operator.state == 'phase_compute'
@@ -1199,28 +1275,30 @@ def test_negative_invalid_event_16(operator):
 
 def test_negative_invalid_event_17(operator):
     """
-    Invalid event 'analyzer:TERMINAL' in state 'phase_compute'
+    Invalid event 'doc_gen:TERMINAL' in state 'phase_compute'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'phase_compute'
 
     # Dispatch events
-    operator.dispatch('analyzer:TERMINAL', {})
+    operator.dispatch('doc_gen:TERMINAL', {})
 
     # Verify state unchanged
     assert operator.state == 'phase_compute'
@@ -1230,28 +1308,30 @@ def test_negative_invalid_event_17(operator):
 
 def test_negative_invalid_event_18(operator):
     """
-    Invalid event 'extractor:TERMINAL' in state 'phase_compute'
+    Invalid event 'REFACTOR' in state 'phase_compute'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'phase_compute'
 
     # Dispatch events
-    operator.dispatch('extractor:TERMINAL', {})
+    operator.dispatch('REFACTOR', {})
 
     # Verify state unchanged
     assert operator.state == 'phase_compute'
@@ -1261,28 +1341,30 @@ def test_negative_invalid_event_18(operator):
 
 def test_negative_invalid_event_19(operator):
     """
-    Invalid event 'blueprint_gen:TERMINAL' in state 'phase_docs'
+    Invalid event 'analyzer:TERMINAL' in state 'phase_docs'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'phase_docs'
 
     # Dispatch events
-    operator.dispatch('blueprint_gen:TERMINAL', {})
+    operator.dispatch('analyzer:TERMINAL', {})
 
     # Verify state unchanged
     assert operator.state == 'phase_docs'
@@ -1292,28 +1374,30 @@ def test_negative_invalid_event_19(operator):
 
 def test_negative_invalid_event_20(operator):
     """
-    Invalid event 'analyzer:TERMINAL' in state 'phase_docs'
+    Invalid event 'REFACTOR' in state 'phase_docs'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'phase_docs'
 
     # Dispatch events
-    operator.dispatch('analyzer:TERMINAL', {})
+    operator.dispatch('REFACTOR', {})
 
     # Verify state unchanged
     assert operator.state == 'phase_docs'
@@ -1323,28 +1407,30 @@ def test_negative_invalid_event_20(operator):
 
 def test_negative_invalid_event_21(operator):
     """
-    Invalid event 'extractor:TERMINAL' in state 'phase_docs'
+    Invalid event 'validator:TERMINAL' in state 'phase_docs'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'phase_docs'
 
     # Dispatch events
-    operator.dispatch('extractor:TERMINAL', {})
+    operator.dispatch('validator:TERMINAL', {})
 
     # Verify state unchanged
     assert operator.state == 'phase_docs'
@@ -1354,28 +1440,30 @@ def test_negative_invalid_event_21(operator):
 
 def test_negative_invalid_event_22(operator):
     """
-    Invalid event 'blueprint_gen:TERMINAL' in state 'phase_validate'
+    Invalid event 'analyzer:TERMINAL' in state 'phase_validate'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'phase_validate'
 
     # Dispatch events
-    operator.dispatch('blueprint_gen:TERMINAL', {})
+    operator.dispatch('analyzer:TERMINAL', {})
 
     # Verify state unchanged
     assert operator.state == 'phase_validate'
@@ -1385,28 +1473,30 @@ def test_negative_invalid_event_22(operator):
 
 def test_negative_invalid_event_23(operator):
     """
-    Invalid event 'analyzer:TERMINAL' in state 'phase_validate'
+    Invalid event 'doc_gen:TERMINAL' in state 'phase_validate'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'phase_validate'
 
     # Dispatch events
-    operator.dispatch('analyzer:TERMINAL', {})
+    operator.dispatch('doc_gen:TERMINAL', {})
 
     # Verify state unchanged
     assert operator.state == 'phase_validate'
@@ -1416,28 +1506,30 @@ def test_negative_invalid_event_23(operator):
 
 def test_negative_invalid_event_24(operator):
     """
-    Invalid event 'extractor:TERMINAL' in state 'phase_validate'
+    Invalid event 'REFACTOR' in state 'phase_validate'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'phase_validate'
 
     # Dispatch events
-    operator.dispatch('extractor:TERMINAL', {})
+    operator.dispatch('REFACTOR', {})
 
     # Verify state unchanged
     assert operator.state == 'phase_validate'
@@ -1447,28 +1539,30 @@ def test_negative_invalid_event_24(operator):
 
 def test_negative_invalid_event_25(operator):
     """
-    Invalid event 'blueprint_gen:TERMINAL' in state 'complete'
+    Invalid event 'analyzer:TERMINAL' in state 'complete'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'complete'
 
     # Dispatch events
-    operator.dispatch('blueprint_gen:TERMINAL', {})
+    operator.dispatch('analyzer:TERMINAL', {})
 
     # Verify state unchanged
     assert operator.state == 'complete'
@@ -1478,28 +1572,30 @@ def test_negative_invalid_event_25(operator):
 
 def test_negative_invalid_event_26(operator):
     """
-    Invalid event 'analyzer:TERMINAL' in state 'complete'
+    Invalid event 'doc_gen:TERMINAL' in state 'complete'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'complete'
 
     # Dispatch events
-    operator.dispatch('analyzer:TERMINAL', {})
+    operator.dispatch('doc_gen:TERMINAL', {})
 
     # Verify state unchanged
     assert operator.state == 'complete'
@@ -1509,28 +1605,30 @@ def test_negative_invalid_event_26(operator):
 
 def test_negative_invalid_event_27(operator):
     """
-    Invalid event 'extractor:TERMINAL' in state 'complete'
+    Invalid event 'REFACTOR' in state 'complete'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'complete'
 
     # Dispatch events
-    operator.dispatch('extractor:TERMINAL', {})
+    operator.dispatch('REFACTOR', {})
 
     # Verify state unchanged
     assert operator.state == 'complete'
@@ -1540,52 +1638,23 @@ def test_negative_invalid_event_27(operator):
 
 def test_negative_invalid_event_28(operator):
     """
-    Invalid event 'blueprint_gen:TERMINAL' in state 'error'
-    Type: negative_invalid_event
-    """
-    # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
-    operator.context['error_source'] = ''
-    operator.context['error'] = ''
-
-    operator._state = 'error'
-
-    # Dispatch events
-    operator.dispatch('blueprint_gen:TERMINAL', {})
-
-    # Verify state unchanged
-    assert operator.state == 'error'
-    # Verify no transition occurred
-    assert operator.state == 'error'
-
-
-def test_negative_invalid_event_29(operator):
-    """
     Invalid event 'analyzer:TERMINAL' in state 'error'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -1600,30 +1669,65 @@ def test_negative_invalid_event_29(operator):
     assert operator.state == 'error'
 
 
-def test_negative_invalid_event_30(operator):
+def test_negative_invalid_event_29(operator):
     """
-    Invalid event 'extractor:TERMINAL' in state 'error'
+    Invalid event 'doc_gen:TERMINAL' in state 'error'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
     operator._state = 'error'
 
     # Dispatch events
-    operator.dispatch('extractor:TERMINAL', {})
+    operator.dispatch('doc_gen:TERMINAL', {})
+
+    # Verify state unchanged
+    assert operator.state == 'error'
+    # Verify no transition occurred
+    assert operator.state == 'error'
+
+
+def test_negative_invalid_event_30(operator):
+    """
+    Invalid event 'REFACTOR' in state 'error'
+    Type: negative_invalid_event
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
+    operator.context['error_source'] = ''
+    operator.context['error'] = ''
+
+    operator._state = 'error'
+
+    # Dispatch events
+    operator.dispatch('REFACTOR', {})
 
     # Verify state unchanged
     assert operator.state == 'error'
@@ -1808,16 +1912,18 @@ def test_property_1(operator):
     """
     # Set initial context
     operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -1833,16 +1939,18 @@ def test_property_2(operator):
     """
     # Set initial context
     operator.context['projectPath'] = 'test'
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -1857,17 +1965,19 @@ def test_property_3(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
+    operator.context['projectPath'] = '/test/path'
     operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -1882,17 +1992,19 @@ def test_property_4(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
+    operator.context['projectPath'] = '/test/path'
     operator.context['outputPath'] = 'test'
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -1907,17 +2019,19 @@ def test_property_5(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
     operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -1932,17 +2046,19 @@ def test_property_6(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
     operator.context['projectName'] = 'test'
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -1957,17 +2073,19 @@ def test_property_7(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
     operator.context['generateDocs'] = True
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -1982,17 +2100,19 @@ def test_property_8(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
     operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -2007,17 +2127,19 @@ def test_property_9(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
     operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -2032,17 +2154,19 @@ def test_property_10(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
     operator.context['pythonFiles'] = ['item']
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -2057,17 +2181,19 @@ def test_property_11(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -2082,17 +2208,19 @@ def test_property_12(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
     operator.context['patterns'] = {'key': 'value'}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -2107,17 +2235,19 @@ def test_property_13(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
     operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -2132,17 +2262,19 @@ def test_property_14(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
     operator.context['extractedModules'] = ['item']
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -2157,17 +2289,19 @@ def test_property_15(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
     operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -2182,17 +2316,19 @@ def test_property_16(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
     operator.context['blueprints'] = ['item']
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -2203,171 +2339,293 @@ def test_property_16(operator):
 
 def test_property_17(operator):
     """
-    Property computeFunctions = []
+    Property computeGenerated = 0
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 0
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
-    # Verify property 'computeFunctions' maintains type array
-    assert 'computeFunctions' in operator.context
-    assert isinstance(operator.context['computeFunctions'], list)
+    # Verify property 'computeGenerated' maintains type number
+    assert 'computeGenerated' in operator.context
+    assert isinstance(operator.context['computeGenerated'], (int, float))
 
 
 def test_property_18(operator):
     """
-    Property computeFunctions = ['item']
+    Property computeGenerated = 1
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = ['item']
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
-    # Verify property 'computeFunctions' maintains type array
-    assert 'computeFunctions' in operator.context
-    assert isinstance(operator.context['computeFunctions'], list)
+    # Verify property 'computeGenerated' maintains type number
+    assert 'computeGenerated' in operator.context
+    assert isinstance(operator.context['computeGenerated'], (int, float))
 
 
 def test_property_19(operator):
     """
-    Property docs = []
+    Property docsGenerated = 0
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 0
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
-    # Verify property 'docs' maintains type array
-    assert 'docs' in operator.context
-    assert isinstance(operator.context['docs'], list)
+    # Verify property 'docsGenerated' maintains type number
+    assert 'docsGenerated' in operator.context
+    assert isinstance(operator.context['docsGenerated'], (int, float))
 
 
 def test_property_20(operator):
     """
-    Property docs = ['item']
+    Property docsGenerated = 1
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = ['item']
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
-    # Verify property 'docs' maintains type array
-    assert 'docs' in operator.context
-    assert isinstance(operator.context['docs'], list)
+    # Verify property 'docsGenerated' maintains type number
+    assert 'docsGenerated' in operator.context
+    assert isinstance(operator.context['docsGenerated'], (int, float))
 
 
 def test_property_21(operator):
     """
-    Property validationResult = {}
+    Property valid = True
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
-    # Verify property 'validationResult' maintains type object
-    assert 'validationResult' in operator.context
-    assert isinstance(operator.context['validationResult'], dict)
+    # Verify property 'valid' maintains type boolean
+    assert 'valid' in operator.context
+    assert isinstance(operator.context['valid'], bool)
 
 
 def test_property_22(operator):
     """
-    Property validationResult = {'key': 'value'}
+    Property valid = False
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {'key': 'value'}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = False
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
-    # Verify property 'validationResult' maintains type object
-    assert 'validationResult' in operator.context
-    assert isinstance(operator.context['validationResult'], dict)
+    # Verify property 'valid' maintains type boolean
+    assert 'valid' in operator.context
+    assert isinstance(operator.context['valid'], bool)
 
 
 def test_property_23(operator):
+    """
+    Property validationErrors = []
+    Type: property_based
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = []
+    operator.context['validationWarnings'] = ['test_item']
+    operator.context['error_source'] = ''
+    operator.context['error'] = ''
+
+    # Verify property 'validationErrors' maintains type array
+    assert 'validationErrors' in operator.context
+    assert isinstance(operator.context['validationErrors'], list)
+
+
+def test_property_24(operator):
+    """
+    Property validationErrors = ['item']
+    Type: property_based
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['item']
+    operator.context['validationWarnings'] = ['test_item']
+    operator.context['error_source'] = ''
+    operator.context['error'] = ''
+
+    # Verify property 'validationErrors' maintains type array
+    assert 'validationErrors' in operator.context
+    assert isinstance(operator.context['validationErrors'], list)
+
+
+def test_property_25(operator):
+    """
+    Property validationWarnings = []
+    Type: property_based
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = []
+    operator.context['error_source'] = ''
+    operator.context['error'] = ''
+
+    # Verify property 'validationWarnings' maintains type array
+    assert 'validationWarnings' in operator.context
+    assert isinstance(operator.context['validationWarnings'], list)
+
+
+def test_property_26(operator):
+    """
+    Property validationWarnings = ['item']
+    Type: property_based
+    """
+    # Set initial context
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['item']
+    operator.context['error_source'] = ''
+    operator.context['error'] = ''
+
+    # Verify property 'validationWarnings' maintains type array
+    assert 'validationWarnings' in operator.context
+    assert isinstance(operator.context['validationWarnings'], list)
+
+
+def test_property_27(operator):
     """
     Property error_source = ''
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -2376,23 +2634,25 @@ def test_property_23(operator):
     assert isinstance(operator.context['error_source'], str)
 
 
-def test_property_24(operator):
+def test_property_28(operator):
     """
     Property error_source = 'test'
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = 'test'
     operator.context['error'] = ''
 
@@ -2401,23 +2661,25 @@ def test_property_24(operator):
     assert isinstance(operator.context['error_source'], str)
 
 
-def test_property_25(operator):
+def test_property_29(operator):
     """
     Property error = ''
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = ''
 
@@ -2426,23 +2688,25 @@ def test_property_25(operator):
     assert isinstance(operator.context['error'], str)
 
 
-def test_property_26(operator):
+def test_property_30(operator):
     """
     Property error = 'test'
     Type: property_based
     """
     # Set initial context
-    operator.context['projectPath'] = ''
-    operator.context['outputPath'] = ''
-    operator.context['projectName'] = ''
-    operator.context['generateDocs'] = False
-    operator.context['pythonFiles'] = []
-    operator.context['patterns'] = {}
-    operator.context['extractedModules'] = []
-    operator.context['blueprints'] = []
-    operator.context['computeFunctions'] = []
-    operator.context['docs'] = []
-    operator.context['validationResult'] = {}
+    operator.context['projectPath'] = '/test/path'
+    operator.context['outputPath'] = '/test/path'
+    operator.context['projectName'] = 'test_name'
+    operator.context['generateDocs'] = True
+    operator.context['pythonFiles'] = ['test_item']
+    operator.context['patterns'] = {'test': True}
+    operator.context['extractedModules'] = ['test_item']
+    operator.context['blueprints'] = ['test_item']
+    operator.context['computeGenerated'] = 1
+    operator.context['docsGenerated'] = 1
+    operator.context['valid'] = True
+    operator.context['validationErrors'] = ['test_item']
+    operator.context['validationWarnings'] = ['test_item']
     operator.context['error_source'] = ''
     operator.context['error'] = 'test'
 

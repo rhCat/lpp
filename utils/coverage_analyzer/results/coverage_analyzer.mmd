@@ -7,7 +7,6 @@ flowchart TD
         state_tracking(["tracking<br>Actively tracking coverage data"]):::state
         state_reporting(["reporting<br>Generating reports"]):::state
     end
-        state_error[["error<br>Error state"]]:::errorState
 
     %% Transitions
     gate_t0s0{{"blueprint is None?"}}:::gate
@@ -143,24 +142,6 @@ flowchart TD
     act_t34s0[["clear_all"]]:::action
     state_reporting -- "UNLOAD" --> act_t34s0
     act_t34s0 --> state_idle
-    act_t35s0[["set_error"]]:::action
-    state_idle -- "ERROR" --> act_t35s0
-    act_t35s0 --> state_error
-    act_t35s1[["set_error"]]:::action
-    state_loaded -- "ERROR" --> act_t35s1
-    act_t35s1 --> state_error
-    act_t35s2[["set_error"]]:::action
-    state_analyzing -- "ERROR" --> act_t35s2
-    act_t35s2 --> state_error
-    act_t35s3[["set_error"]]:::action
-    state_tracking -- "ERROR" --> act_t35s3
-    act_t35s3 --> state_error
-    act_t35s4[["set_error"]]:::action
-    state_reporting -- "ERROR" --> act_t35s4
-    act_t35s4 --> state_error
-    act_t36s0[["clear_error, clear_all"]]:::action
-    state_error -- "CLEAR" --> act_t36s0
-    act_t36s0 --> state_idle
 
     %% Styling - ALL shapes have explicit fill and black text
     classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000

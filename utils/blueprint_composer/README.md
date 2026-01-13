@@ -223,14 +223,6 @@ stateDiagram-v2
     validated --> idle : RESET
     parent_loaded --> idle : CLEAR
     child_loaded --> idle : CLEAR
-    error --> idle : CLEAR
-    idle --> error : LOAD_FAILED
-    composed --> error : LOAD_FAILED
-    parent_loaded --> error : LOAD_FAILED
-    embedding_ready --> error : LOAD_FAILED
-    validated --> error : LOAD_FAILED
-    child_loaded --> error : LOAD_FAILED
-    defining_embedding --> error : LOAD_FAILED
 ```
 > **Interactive View:** [Open zoomable diagram](results/blueprint_composer_diagram.html) for pan/zoom controls
 

@@ -2,15 +2,15 @@
   "blueprint_id": "py2lpp_doc_gen",
   "blueprint_tests": {
     "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_py2lpp_doc_gen_blueprint.py",
-    "count": 37,
+    "count": 38,
     "coverage": {
-      "total_tests": 37,
+      "total_tests": 38,
       "by_type": {
         "path_coverage": 3,
         "state_coverage": 2,
-        "gate_boundary": 8,
+        "gate_boundary": 11,
         "negative": 9,
-        "property_based": 12,
+        "property_based": 10,
         "contract": 3
       },
       "state_coverage": {
@@ -37,5 +37,5 @@
       "py2lpp:generateDocs"
     ]
   },
-  "total_tests": 41
+  "total_tests": 42
 }

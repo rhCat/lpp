@@ -7,11 +7,11 @@
       "total_tests": 189,
       "by_type": {
         "path_coverage": 46,
-        "state_coverage": 8,
+        "state_coverage": 7,
         "gate_boundary": 5,
         "negative": 50,
         "property_based": 80,
-        "contract": 0
+        "contract": 1
       },
       "state_coverage": {
         "total": 12,

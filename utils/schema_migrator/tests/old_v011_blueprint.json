@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1.1",
+  "$schema": "lpp/v0.2.0",
   "id": "test_old_workflow",
   "name": "Test Old Workflow",
   "version": "1.0.0",
@@ -58,7 +58,9 @@
       "to": "processing",
       "on_event": "START",
       "guard": "has_data",
-      "actions": ["set_processing"]
+      "actions": [
+        "set_processing"
+      ]
     },
     {
       "id": "t_complete",
@@ -66,7 +68,9 @@
       "to": "done",
       "on_event": "COMPLETE",
       "guard": "is_valid",
-      "actions": ["set_done"]
+      "actions": [
+        "set_done"
+      ]
     }
   ]
 }

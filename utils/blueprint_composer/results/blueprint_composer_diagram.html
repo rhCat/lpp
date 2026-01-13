@@ -51,7 +51,6 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
         state_child_loaded(["child_loaded<br>Both parent and child loaded, ready to d"]):::state
         state_defining_embedding(["defining_embedding<br>Defining embedding parameters (target st"]):::state
     end
-        state_error[["error<br>Error state"]]:::errorState
 
     %% Transitions
     act_t0s0[["load_parent"]]:::action
@@ -156,30 +155,6 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
     act_t25s0[["clear_all"]]:::action
     state_child_loaded -- "CLEAR" --> act_t25s0
     act_t25s0 --> state_idle
-    act_t26s0[["clear_error, clear_all"]]:::action
-    state_error -- "CLEAR" --> act_t26s0
-    act_t26s0 --> state_idle
-    act_t27s0[["set_error"]]:::action
-    state_idle -- "LOAD_FAILED" --> act_t27s0
-    act_t27s0 --> state_error
-    act_t27s1[["set_error"]]:::action
-    state_composed -- "LOAD_FAILED" --> act_t27s1
-    act_t27s1 --> state_error
-    act_t27s2[["set_error"]]:::action
-    state_parent_loaded -- "LOAD_FAILED" --> act_t27s2
-    act_t27s2 --> state_error
-    act_t27s3[["set_error"]]:::action
-    state_embedding_ready -- "LOAD_FAILED" --> act_t27s3
-    act_t27s3 --> state_error
-    act_t27s4[["set_error"]]:::action
-    state_validated -- "LOAD_FAILED" --> act_t27s4
-    act_t27s4 --> state_error
-    act_t27s5[["set_error"]]:::action
-    state_child_loaded -- "LOAD_FAILED" --> act_t27s5
-    act_t27s5 --> state_error
-    act_t27s6[["set_error"]]:::action
-    state_defining_embedding -- "LOAD_FAILED" --> act_t27s6
-    act_t27s6 --> state_error
 
     %% Styling - ALL shapes have explicit fill and black text
     classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000

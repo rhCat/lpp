@@ -54,7 +54,6 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
         state_diff_complete(["diff_complete<br>Diff computed, results available"]):::state
         state_merge_complete(["merge_complete<br>Merge complete, result available"]):::state
     end
-        state_error[["error<br>Error state"]]:::errorState
 
     %% Transitions
     act_t0s0[["load_left"]]:::action
@@ -157,33 +156,6 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
     act_t25s0[["clear_all"]]:::action
     state_merge_complete -- "CLEAR" --> act_t25s0
     act_t25s0 --> state_idle
-    act_t26s0[["clear_error, clear_all"]]:::action
-    state_error -- "CLEAR" --> act_t26s0
-    act_t26s0 --> state_idle
-    act_t27s0[["set_error"]]:::action
-    state_idle -- "LOAD_FAILED" --> act_t27s0
-    act_t27s0 --> state_error
-    act_t27s1[["set_error"]]:::action
-    state_left_loaded -- "LOAD_FAILED" --> act_t27s1
-    act_t27s1 --> state_error
-    act_t27s2[["set_error"]]:::action
-    state_ready -- "LOAD_FAILED" --> act_t27s2
-    act_t27s2 --> state_error
-    act_t27s3[["set_error"]]:::action
-    state_diff_complete -- "LOAD_FAILED" --> act_t27s3
-    act_t27s3 --> state_error
-    act_t27s4[["set_error"]]:::action
-    state_diffing -- "LOAD_FAILED" --> act_t27s4
-    act_t27s4 --> state_error
-    act_t27s5[["set_error"]]:::action
-    state_merge_complete -- "LOAD_FAILED" --> act_t27s5
-    act_t27s5 --> state_error
-    act_t27s6[["set_error"]]:::action
-    state_merging -- "LOAD_FAILED" --> act_t27s6
-    act_t27s6 --> state_error
-    act_t27s7[["set_error"]]:::action
-    state_conflict -- "LOAD_FAILED" --> act_t27s7
-    act_t27s7 --> state_error
 
     %% Styling - ALL shapes have explicit fill and black text
     classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000

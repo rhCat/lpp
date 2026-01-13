@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1.2",
+  "$schema": "lpp/v0.2.0",
   "id": "lpp_canvas",
   "name": "L++ Canvas",
   "version": "1.0.0",
@@ -207,9 +207,6 @@
     },
     "saving": {
       "description": "Saving blueprint to file"
-    },
-    "error": {
-      "description": "Error state"
     }
   },
   "transitions": [
@@ -1083,5 +1080,14 @@
     }
   },
   "entry_state": "idle",
-  "terminal_states": {}
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  }
 }

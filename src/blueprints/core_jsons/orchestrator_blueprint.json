@@ -123,37 +123,66 @@
     "a_find_transition": {
       "type": "compute",
       "compute_unit": "impl:_find_transition",
-      "description": "Find matching transition for event"
+      "description": "Find matching transition for event",
+      "input_map": {},
+      "output_map": {}
     },
     "a_evaluate_gate": {
       "type": "compute",
       "compute_unit": "impl:atom_EVALUATE",
-      "description": "Evaluate gate expression"
+      "description": "Evaluate gate expression",
+      "input_map": {},
+      "output_map": {}
     },
     "a_mutate_context": {
       "type": "compute",
       "compute_unit": "impl:atom_MUTATE",
-      "description": "Mutate context value"
+      "description": "Mutate context value",
+      "input_map": {},
+      "output_map": {}
     },
     "a_dispatch_compute": {
       "type": "compute",
       "compute_unit": "impl:atom_DISPATCH",
-      "description": "Dispatch compute operation"
+      "description": "Dispatch compute operation",
+      "input_map": {},
+      "output_map": {}
     },
     "a_transition": {
       "type": "compute",
       "compute_unit": "impl:atom_TRANSITION",
-      "description": "Perform state transition"
+      "description": "Perform state transition",
+      "input_map": {},
+      "output_map": {}
     },
     "a_append_trace": {
       "type": "compute",
       "compute_unit": "impl:traces.append",
-      "description": "Append transition trace"
+      "description": "Append transition trace",
+      "input_map": {},
+      "output_map": {}
     }
   },
   "entry_state": "idle",
   "terminal_states": {
-    "complete": {},
-    "error": {}
+    "complete": {
+      "output_schema": {
+        "result": {
+          "type": "object",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": [
+        "result_produced"
+      ]
+    },
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
   }
 }

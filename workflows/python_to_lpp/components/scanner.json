@@ -84,7 +84,7 @@
         "projectPath": "projectPath"
       },
       "output_map": {
-        "pythonFiles": "pythonFiles",
+        "pythonFiles": "files",
         "error": "error"
       }
     }

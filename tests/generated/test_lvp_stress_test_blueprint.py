@@ -20,146 +20,26 @@ def operator():
     pass
 
 
-def test_path_2(operator):
-    """
-    Path: idle -> generating_tla -> error
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('TEST', {})
-    operator.dispatch('CONTINUE', {})
-
-    # Verify final state
-    assert operator.state == 'error'
-
-
-def test_path_3(operator):
-    """
-    Path: idle -> generating_tla -> running_tlc -> secure
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('TEST', {})
-    operator.dispatch('CONTINUE', {})
-    operator.dispatch('COMPLETE', {})
-
-    # Verify final state
-    assert operator.state == 'secure'
-
-
-def test_path_4(operator):
-    """
-    Path: idle -> generating_tla -> running_tlc
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('TEST', {})
-    operator.dispatch('CONTINUE', {})
-
-    # Verify final state
-    assert operator.state == 'running_tlc'
-
-
-def test_path_5(operator):
-    """
-    Path: idle -> generating_tla
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('TEST', {})
-
-    # Verify final state
-    assert operator.state == 'generating_tla'
-
-
-def test_path_6(operator):
+def test_path_1(operator):
     """
     Path: idle -> generating_tla -> running_tlc -> analyzing -> vulnerable
     Type: path_coverage
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -172,26 +52,26 @@ def test_path_6(operator):
     assert operator.state == 'vulnerable'
 
 
-def test_path_7(operator):
+def test_path_2(operator):
     """
     Path: idle -> generating_tla -> running_tlc -> analyzing
     Type: path_coverage
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -203,32 +83,151 @@ def test_path_7(operator):
     assert operator.state == 'analyzing'
 
 
-def test_path_8(operator):
+def test_path_4(operator):
     """
-    Path: idle -> generating_tla -> running_tlc -> analyzing -> error
+    Path: idle -> generating_tla
     Type: path_coverage
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('TEST', {})
+
+    # Verify final state
+    assert operator.state == 'generating_tla'
+
+
+def test_path_5(operator):
+    """
+    Path: idle -> generating_tla -> running_tlc -> secure
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
     operator.dispatch('TEST', {})
     operator.dispatch('CONTINUE', {})
     operator.dispatch('COMPLETE', {})
+
+    # Verify final state
+    assert operator.state == 'secure'
+
+
+def test_path_6(operator):
+    """
+    Path: idle -> generating_tla -> running_tlc
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('TEST', {})
+    operator.dispatch('CONTINUE', {})
+
+    # Verify final state
+    assert operator.state == 'running_tlc'
+
+
+def test_path_7(operator):
+    """
+    Path: idle -> generating_tla -> error
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('TEST', {})
+    operator.dispatch('CONTINUE', {})
+
+    # Verify final state
+    assert operator.state == 'error'
+
+
+def test_path_8(operator):
+    """
+    Path: idle -> generating_tla -> running_tlc -> error
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('TEST', {})
+    operator.dispatch('CONTINUE', {})
     operator.dispatch('COMPLETE', {})
 
     # Verify final state
@@ -237,29 +236,30 @@ def test_path_8(operator):
 
 def test_path_9(operator):
     """
-    Path: idle -> generating_tla -> running_tlc -> error
+    Path: idle -> generating_tla -> running_tlc -> analyzing -> error
     Type: path_coverage
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
     operator.dispatch('TEST', {})
     operator.dispatch('CONTINUE', {})
+    operator.dispatch('COMPLETE', {})
     operator.dispatch('COMPLETE', {})
 
     # Verify final state
@@ -272,20 +272,20 @@ def test_state_coverage_1(operator):
     Type: state_coverage
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -304,20 +304,20 @@ def test_state_coverage_2(operator):
     Type: state_coverage
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -336,20 +336,20 @@ def test_state_coverage_3(operator):
     Type: state_coverage
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -367,20 +367,20 @@ def test_gate_null_1(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['bone_json'] = {}
+    operator.context['bone_json'] = {'test': True}
     operator.context['invariants'] = None
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -398,20 +398,20 @@ def test_gate_null_2(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['bone_json'] = {}
+    operator.context['bone_json'] = {'test': True}
     operator.context['invariants'] = 'some_value'
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -429,20 +429,20 @@ def test_gate_null_3(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
     operator.context['tla_spec'] = None
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -460,20 +460,20 @@ def test_gate_null_4(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
     operator.context['tla_spec'] = 'some_value'
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -491,20 +491,20 @@ def test_gate_null_5(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
     operator.context['counter_examples'] = None
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -522,20 +522,20 @@ def test_gate_null_6(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
     operator.context['counter_examples'] = 'some_value'
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -553,20 +553,20 @@ def test_gate_null_7(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
     operator.context['counter_examples'] = None
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -584,20 +584,20 @@ def test_gate_null_8(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
     operator.context['counter_examples'] = 'some_value'
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -615,20 +615,20 @@ def test_gate_null_9(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = None
 
     # Dispatch events
@@ -646,20 +646,20 @@ def test_gate_null_10(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = 'some_value'
 
     # Dispatch events
@@ -677,20 +677,20 @@ def test_gate_null_11(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = None
 
     # Dispatch events
@@ -708,20 +708,20 @@ def test_gate_null_12(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = 'some_value'
 
     # Dispatch events
@@ -735,57 +735,24 @@ def test_gate_null_12(operator):
 
 def test_negative_invalid_event_1(operator):
     """
-    Invalid event 'COMPLETE' in state 'idle'
-    Type: negative_invalid_event
-    """
-    # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
-    operator.context['error'] = ''
-
-    operator._state = 'idle'
-
-    # Dispatch events
-    operator.dispatch('COMPLETE', {})
-
-    # Verify state unchanged
-    assert operator.state == 'idle'
-    # Verify no transition occurred
-    assert operator.state == 'idle'
-
-
-def test_negative_invalid_event_2(operator):
-    """
     Invalid event 'CONTINUE' in state 'idle'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     operator._state = 'idle'
@@ -799,59 +766,59 @@ def test_negative_invalid_event_2(operator):
     assert operator.state == 'idle'
 
 
-def test_negative_invalid_event_3(operator):
+def test_negative_invalid_event_2(operator):
     """
-    Invalid event 'COMPLETE' in state 'generating_tla'
+    Invalid event 'COMPLETE' in state 'idle'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
-    operator._state = 'generating_tla'
+    operator._state = 'idle'
 
     # Dispatch events
     operator.dispatch('COMPLETE', {})
 
     # Verify state unchanged
-    assert operator.state == 'generating_tla'
+    assert operator.state == 'idle'
     # Verify no transition occurred
-    assert operator.state == 'generating_tla'
+    assert operator.state == 'idle'
 
 
-def test_negative_invalid_event_4(operator):
+def test_negative_invalid_event_3(operator):
     """
     Invalid event 'TEST' in state 'generating_tla'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     operator._state = 'generating_tla'
@@ -865,26 +832,59 @@ def test_negative_invalid_event_4(operator):
     assert operator.state == 'generating_tla'
 
 
+def test_negative_invalid_event_4(operator):
+    """
+    Invalid event 'COMPLETE' in state 'generating_tla'
+    Type: negative_invalid_event
+    """
+    # Set initial context
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
+    operator.context['error'] = ''
+
+    operator._state = 'generating_tla'
+
+    # Dispatch events
+    operator.dispatch('COMPLETE', {})
+
+    # Verify state unchanged
+    assert operator.state == 'generating_tla'
+    # Verify no transition occurred
+    assert operator.state == 'generating_tla'
+
+
 def test_negative_invalid_event_5(operator):
     """
     Invalid event 'TEST' in state 'running_tlc'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     operator._state = 'running_tlc'
@@ -904,20 +904,20 @@ def test_negative_invalid_event_6(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     operator._state = 'running_tlc'
@@ -937,20 +937,20 @@ def test_negative_invalid_event_7(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     operator._state = 'analyzing'
@@ -970,20 +970,20 @@ def test_negative_invalid_event_8(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     operator._state = 'analyzing'
@@ -999,30 +999,30 @@ def test_negative_invalid_event_8(operator):
 
 def test_negative_invalid_event_9(operator):
     """
-    Invalid event 'COMPLETE' in state 'vulnerable'
+    Invalid event 'TEST' in state 'vulnerable'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     operator._state = 'vulnerable'
 
     # Dispatch events
-    operator.dispatch('COMPLETE', {})
+    operator.dispatch('TEST', {})
 
     # Verify state unchanged
     assert operator.state == 'vulnerable'
@@ -1032,30 +1032,30 @@ def test_negative_invalid_event_9(operator):
 
 def test_negative_invalid_event_10(operator):
     """
-    Invalid event 'TEST' in state 'vulnerable'
+    Invalid event 'CONTINUE' in state 'vulnerable'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     operator._state = 'vulnerable'
 
     # Dispatch events
-    operator.dispatch('TEST', {})
+    operator.dispatch('CONTINUE', {})
 
     # Verify state unchanged
     assert operator.state == 'vulnerable'
@@ -1065,30 +1065,30 @@ def test_negative_invalid_event_10(operator):
 
 def test_negative_invalid_event_11(operator):
     """
-    Invalid event 'CONTINUE' in state 'vulnerable'
+    Invalid event 'COMPLETE' in state 'vulnerable'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     operator._state = 'vulnerable'
 
     # Dispatch events
-    operator.dispatch('CONTINUE', {})
+    operator.dispatch('COMPLETE', {})
 
     # Verify state unchanged
     assert operator.state == 'vulnerable'
@@ -1098,30 +1098,30 @@ def test_negative_invalid_event_11(operator):
 
 def test_negative_invalid_event_12(operator):
     """
-    Invalid event 'COMPLETE' in state 'secure'
+    Invalid event 'TEST' in state 'secure'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     operator._state = 'secure'
 
     # Dispatch events
-    operator.dispatch('COMPLETE', {})
+    operator.dispatch('TEST', {})
 
     # Verify state unchanged
     assert operator.state == 'secure'
@@ -1131,30 +1131,30 @@ def test_negative_invalid_event_12(operator):
 
 def test_negative_invalid_event_13(operator):
     """
-    Invalid event 'TEST' in state 'secure'
+    Invalid event 'CONTINUE' in state 'secure'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     operator._state = 'secure'
 
     # Dispatch events
-    operator.dispatch('TEST', {})
+    operator.dispatch('CONTINUE', {})
 
     # Verify state unchanged
     assert operator.state == 'secure'
@@ -1164,30 +1164,30 @@ def test_negative_invalid_event_13(operator):
 
 def test_negative_invalid_event_14(operator):
     """
-    Invalid event 'CONTINUE' in state 'secure'
+    Invalid event 'COMPLETE' in state 'secure'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     operator._state = 'secure'
 
     # Dispatch events
-    operator.dispatch('CONTINUE', {})
+    operator.dispatch('COMPLETE', {})
 
     # Verify state unchanged
     assert operator.state == 'secure'
@@ -1197,57 +1197,24 @@ def test_negative_invalid_event_14(operator):
 
 def test_negative_invalid_event_15(operator):
     """
-    Invalid event 'COMPLETE' in state 'error'
-    Type: negative_invalid_event
-    """
-    # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
-    operator.context['error'] = ''
-
-    operator._state = 'error'
-
-    # Dispatch events
-    operator.dispatch('COMPLETE', {})
-
-    # Verify state unchanged
-    assert operator.state == 'error'
-    # Verify no transition occurred
-    assert operator.state == 'error'
-
-
-def test_negative_invalid_event_16(operator):
-    """
     Invalid event 'TEST' in state 'error'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     operator._state = 'error'
@@ -1261,32 +1228,65 @@ def test_negative_invalid_event_16(operator):
     assert operator.state == 'error'
 
 
-def test_negative_invalid_event_17(operator):
+def test_negative_invalid_event_16(operator):
     """
     Invalid event 'CONTINUE' in state 'error'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     operator._state = 'error'
 
     # Dispatch events
     operator.dispatch('CONTINUE', {})
+
+    # Verify state unchanged
+    assert operator.state == 'error'
+    # Verify no transition occurred
+    assert operator.state == 'error'
+
+
+def test_negative_invalid_event_17(operator):
+    """
+    Invalid event 'COMPLETE' in state 'error'
+    Type: negative_invalid_event
+    """
+    # Set initial context
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
+    operator.context['error'] = ''
+
+    operator._state = 'error'
+
+    # Dispatch events
+    operator.dispatch('COMPLETE', {})
 
     # Verify state unchanged
     assert operator.state == 'error'
@@ -1381,19 +1381,19 @@ def test_property_1(operator):
     """
     # Set initial context
     operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'bone_json' maintains type object
@@ -1408,19 +1408,19 @@ def test_property_2(operator):
     """
     # Set initial context
     operator.context['bone_json'] = {'key': 'value'}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'bone_json' maintains type object
@@ -1434,20 +1434,20 @@ def test_property_3(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
+    operator.context['bone_json'] = {'test': True}
     operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'invariants' maintains type array
@@ -1461,20 +1461,20 @@ def test_property_4(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
+    operator.context['bone_json'] = {'test': True}
     operator.context['invariants'] = ['item']
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'invariants' maintains type array
@@ -1488,20 +1488,20 @@ def test_property_5(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
     operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'threat_model' maintains type object
@@ -1515,20 +1515,20 @@ def test_property_6(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
     operator.context['threat_model'] = {'key': 'value'}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'threat_model' maintains type object
@@ -1542,20 +1542,20 @@ def test_property_7(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
     operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'output_dir' maintains type string
@@ -1569,20 +1569,20 @@ def test_property_8(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
     operator.context['output_dir'] = 'test'
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'output_dir' maintains type string
@@ -1596,20 +1596,20 @@ def test_property_9(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
     operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'lpp_root' maintains type string
@@ -1623,20 +1623,20 @@ def test_property_10(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
     operator.context['lpp_root'] = 'test'
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'lpp_root' maintains type string
@@ -1650,20 +1650,20 @@ def test_property_11(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
     operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'api_key' maintains type string
@@ -1677,20 +1677,20 @@ def test_property_12(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
     operator.context['api_key'] = 'test'
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'api_key' maintains type string
@@ -1704,20 +1704,20 @@ def test_property_13(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
     operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'api_base' maintains type string
@@ -1731,20 +1731,20 @@ def test_property_14(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
     operator.context['api_base'] = 'test'
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'api_base' maintains type string
@@ -1758,20 +1758,20 @@ def test_property_15(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
     operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'model' maintains type string
@@ -1785,20 +1785,20 @@ def test_property_16(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
     operator.context['model'] = 'test'
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'model' maintains type string
@@ -1812,20 +1812,20 @@ def test_property_17(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
     operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'tla_spec' maintains type string
@@ -1839,20 +1839,20 @@ def test_property_18(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
     operator.context['tla_spec'] = 'test'
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'tla_spec' maintains type string
@@ -1866,20 +1866,20 @@ def test_property_19(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
     operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'tla_path' maintains type string
@@ -1893,20 +1893,20 @@ def test_property_20(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
     operator.context['tla_path'] = 'test'
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'tla_path' maintains type string
@@ -1920,20 +1920,20 @@ def test_property_21(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
     operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'tlc_result' maintains type object
@@ -1947,20 +1947,20 @@ def test_property_22(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
     operator.context['tlc_result'] = {'key': 'value'}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'tlc_result' maintains type object
@@ -1974,20 +1974,20 @@ def test_property_23(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
     operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'counter_examples' maintains type array
@@ -2001,20 +2001,20 @@ def test_property_24(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
     operator.context['counter_examples'] = ['item']
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'counter_examples' maintains type array
@@ -2028,20 +2028,20 @@ def test_property_25(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
     operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'vulnerability_count' maintains type number
@@ -2055,20 +2055,20 @@ def test_property_26(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
     operator.context['vulnerability_count'] = 1
-    operator.context['severity_score'] = 0
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'vulnerability_count' maintains type number
@@ -2082,19 +2082,19 @@ def test_property_27(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
     operator.context['severity_score'] = 0
     operator.context['error'] = ''
 
@@ -2109,19 +2109,19 @@ def test_property_28(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
     operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
@@ -2136,20 +2136,20 @@ def test_property_29(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Verify property 'error' maintains type string
@@ -2163,20 +2163,20 @@ def test_property_30(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = 'test'
 
     # Verify property 'error' maintains type string
@@ -2190,20 +2190,20 @@ def test_contract_1(operator):
     Type: contract_output
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -2226,20 +2226,20 @@ def test_contract_2(operator):
     Type: contract_invariant
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -2261,20 +2261,20 @@ def test_contract_3(operator):
     Type: contract_output
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -2294,20 +2294,20 @@ def test_contract_4(operator):
     Type: contract_invariant
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events
@@ -2328,20 +2328,20 @@ def test_contract_5(operator):
     Type: contract_output
     """
     # Set initial context
-    operator.context['bone_json'] = {}
-    operator.context['invariants'] = []
-    operator.context['threat_model'] = {}
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['tla_spec'] = ''
-    operator.context['tla_path'] = ''
-    operator.context['tlc_result'] = {}
-    operator.context['counter_examples'] = []
-    operator.context['vulnerability_count'] = 0
-    operator.context['severity_score'] = 0
+    operator.context['bone_json'] = {'test': True}
+    operator.context['invariants'] = ['test_item']
+    operator.context['threat_model'] = {'test': True}
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['tla_spec'] = 'test_value'
+    operator.context['tla_path'] = '/test/path'
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['counter_examples'] = ['test_item']
+    operator.context['vulnerability_count'] = 1
+    operator.context['severity_score'] = 1
     operator.context['error'] = ''
 
     # Dispatch events

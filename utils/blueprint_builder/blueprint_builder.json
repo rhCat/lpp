@@ -21,7 +21,14 @@
   "entry_state": "idle",
   "terminal_states": {
     "complete": {},
-    "error": {}
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
   },
   "gates": {
     "has_module": {
@@ -36,35 +43,51 @@
   "actions": {
     "build_from_class": {
       "type": "compute",
-      "unit": "blueprint:buildFromClass"
+      "unit": "blueprint:buildFromClass",
+      "input_map": {},
+      "output_map": {}
     },
     "build_from_patterns": {
       "type": "compute",
-      "unit": "blueprint:buildFromPatterns"
+      "unit": "blueprint:buildFromPatterns",
+      "input_map": {},
+      "output_map": {}
     },
     "add_states": {
       "type": "compute",
-      "unit": "blueprint:addStates"
+      "unit": "blueprint:addStates",
+      "input_map": {},
+      "output_map": {}
     },
     "add_transitions": {
       "type": "compute",
-      "unit": "blueprint:addTransitions"
+      "unit": "blueprint:addTransitions",
+      "input_map": {},
+      "output_map": {}
     },
     "add_gates": {
       "type": "compute",
-      "unit": "blueprint:addGates"
+      "unit": "blueprint:addGates",
+      "input_map": {},
+      "output_map": {}
     },
     "add_actions": {
       "type": "compute",
-      "unit": "blueprint:addActions"
+      "unit": "blueprint:addActions",
+      "input_map": {},
+      "output_map": {}
     },
     "validate": {
       "type": "compute",
-      "unit": "blueprint:validate"
+      "unit": "blueprint:validate",
+      "input_map": {},
+      "output_map": {}
     },
     "to_json": {
       "type": "compute",
-      "unit": "blueprint:toJson"
+      "unit": "blueprint:toJson",
+      "input_map": {},
+      "output_map": {}
     }
   },
   "transitions": [

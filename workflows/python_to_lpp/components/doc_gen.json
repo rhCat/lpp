@@ -10,17 +10,13 @@
         "type": "array",
         "description": "Generated blueprints"
       },
-      "computeFunctions": {
-        "type": "array",
-        "description": "Generated compute functions"
+      "computeGenerated": {
+        "type": "number",
+        "description": "Count of generated compute modules"
       },
       "projectName": {
         "type": "string",
         "description": "Project name"
-      },
-      "docs": {
-        "type": "array",
-        "description": "Generated documentation"
       },
       "docsGenerated": {
         "type": "number",
@@ -50,10 +46,6 @@
   "terminal_states": {
     "done": {
       "output_schema": {
-        "docs": {
-          "type": "array",
-          "non_null": true
-        },
         "docsGenerated": {
           "type": "number",
           "non_null": true
@@ -77,7 +69,7 @@
     },
     "has_docs": {
       "type": "expression",
-      "expression": "docs is not None"
+      "expression": "docsGenerated is not None and docsGenerated > 0"
     },
     "has_error": {
       "type": "expression",
@@ -94,13 +86,11 @@
       "compute_unit": "py2lpp:generateDocs",
       "input_map": {
         "blueprints": "blueprints",
-        "computeFunctions": "computeFunctions",
+        "computeGenerated": "computeGenerated",
         "projectName": "projectName"
       },
       "output_map": {
-        "docs": "docs",
-        "docsGenerated": "docsGenerated",
-        "error": "error"
+        "docsGenerated": "generated"
       }
     }
   },

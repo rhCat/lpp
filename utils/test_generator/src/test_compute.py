@@ -102,8 +102,13 @@ def build_graph(params: Dict[str, Any]) -> Dict[str, Any]:
     if not bp:
         return {"graph": None}
 
+    # Collect all states (regular + terminal)
+    all_states = set(bp["states"].keys())
+    terminals = set(bp.get("terminal_states", []))
+    all_states |= terminals
+
     # Build adjacency list: state -> [(event, target, transition_id, gates)]
-    adj = {sid: [] for sid in bp["states"]}
+    adj = {sid: [] for sid in all_states}
     wildcardEdges = []
 
     for t in bp["transitions"]:
@@ -129,7 +134,7 @@ def build_graph(params: Dict[str, Any]) -> Dict[str, Any]:
         adj[sid].extend(wildcardEdges)
 
     # Build reverse adjacency for reachability analysis
-    reverseAdj = {sid: [] for sid in bp["states"]}
+    reverseAdj = {sid: [] for sid in all_states}
     for sid, edges in adj.items():
         for edge in edges:
             if edge["to"] in reverseAdj:
@@ -141,8 +146,8 @@ def build_graph(params: Dict[str, Any]) -> Dict[str, Any]:
             "adjacency": adj,
             "reverse": reverseAdj,
             "entry": bp["entry_state"],
-            "terminals": bp["terminal_states"],
-            "states": list(bp["states"].keys()),
+            "terminals": list(terminals),
+            "states": list(all_states),
             "transition_count": len(bp["transitions"])
         }
     }
@@ -401,6 +406,126 @@ def _extractVariables(expr: str) -> List[str]:
     return list(set(w for w in words if w not in keywords))
 
 
+def _genContextForPath(bp: Dict, transitionIds: List[str]) -> Dict:
+    """Generate context values that satisfy all gates in a path.
+
+    Analyzes gate expressions for each transition and generates values
+    that will make all gates pass.
+    """
+    ctx = _genDefaultContext(bp)
+    gates = bp.get("gates", {})
+    transitions = bp.get("transitions", [])
+
+    # Collect all gates used in this path
+    pathGates = set()
+    for transId in transitionIds:
+        trans = next((t for t in transitions if t["id"] == transId), None)
+        if trans:
+            pathGates.update(trans.get("gates", []))
+
+    # For each gate, analyze and set context values to make it pass
+    for gateId in pathGates:
+        gate = gates.get(gateId, {})
+        expr = gate.get("expression", "")
+        _applyGateConstraints(ctx, expr, bp)
+
+    return ctx
+
+
+def _applyGateConstraints(ctx: Dict, expr: str, bp: Dict) -> None:
+    """Apply constraints from a gate expression to context.
+
+    Modifies ctx in-place to satisfy the gate conditions.
+    """
+    schema = bp.get("context_schema", {}).get("properties", {})
+
+    # Handle "x is not None" - ensure value is not None
+    for match in re.finditer(r"(\w+)\s+is\s+not\s+None", expr):
+        var = match.group(1)
+        if var in ctx and ctx[var] is None:
+            propType = schema.get(var, {}).get("type", "string")
+            ctx[var] = _getNonNullValue(var, propType)
+
+    # Handle "x is not None and x != ''" - ensure non-empty string
+    for match in re.finditer(r"(\w+)\s+is\s+not\s+None\s+and\s+\1\s*!=\s*['\"]", expr):
+        var = match.group(1)
+        if var in ctx and (ctx[var] is None or ctx[var] == ""):
+            ctx[var] = _getNonNullValue(var, "string")
+
+    # Handle "len(x) > N" - ensure array/string has enough items
+    for match in re.finditer(r"len\((\w+)\)\s*>\s*(\d+)", expr):
+        var = match.group(1)
+        minLen = int(match.group(2)) + 1
+        if var in ctx:
+            propType = schema.get(var, {}).get("type", "array")
+            if propType == "array" and len(ctx.get(var, [])) < minLen:
+                ctx[var] = ["item"] * minLen
+            elif propType == "string" and len(ctx.get(var, "")) < minLen:
+                ctx[var] = "x" * minLen
+
+    # Handle "x > N" - numeric comparisons
+    for match in re.finditer(r"(\w+)\s*>\s*(\d+(?:\.\d+)?)", expr):
+        var = match.group(1)
+        minVal = float(match.group(2))
+        if var in ctx and var not in ["len"]:  # Skip 'len' function
+            ctx[var] = minVal + 1
+
+    # Handle "x >= N" - numeric comparisons
+    for match in re.finditer(r"(\w+)\s*>=\s*(\d+(?:\.\d+)?)", expr):
+        var = match.group(1)
+        minVal = float(match.group(2))
+        if var in ctx:
+            ctx[var] = minVal
+
+    # Handle "x == True" or just boolean checks
+    for match in re.finditer(r"(\w+)\s*==\s*True", expr):
+        var = match.group(1)
+        if var in ctx:
+            ctx[var] = True
+
+    # Handle "x == False"
+    for match in re.finditer(r"(\w+)\s*==\s*False", expr):
+        var = match.group(1)
+        if var in ctx:
+            ctx[var] = False
+
+    # Handle "error is None" or "error == None" - set error to empty/None
+    for match in re.finditer(r"(\w*error\w*)\s+is\s+None", expr, re.IGNORECASE):
+        var = match.group(1)
+        if var in ctx:
+            ctx[var] = ""  # Empty string for error fields
+
+
+def _getNonNullValue(varName: str, propType: str) -> Any:
+    """Generate a non-null value based on property type and name."""
+    if propType == "number":
+        return 1
+    elif propType == "boolean":
+        return True
+    elif propType == "array":
+        return ["test_item"]
+    elif propType == "object":
+        return {"test": True}
+    elif propType == "string":
+        # Use meaningful placeholders based on property name
+        nameLower = varName.lower()
+        if "path" in nameLower:
+            return "/test/path"
+        elif "dir" in nameLower:
+            return "/test/dir"
+        elif "name" in nameLower:
+            return "test_name"
+        elif "key" in nameLower:
+            return "test_key"
+        elif "url" in nameLower:
+            return "https://test.example.com"
+        elif "error" in nameLower:
+            return ""
+        else:
+            return "test_value"
+    return "test_default"
+
+
 # =============================================================================
 # Test Generation
 # =============================================================================
@@ -421,17 +546,21 @@ def generate_path_tests(params: Dict[str, Any]) -> Dict[str, Any]:
         testId = f"path_{i+1}"
         finalState = path["states"][-1] if path["states"] else bp["entry_state"]
 
+        # Generate context that satisfies all gates in this path
+        transitionIds = path.get("transitions", [])
+        ctx = _genContextForPath(bp, transitionIds)
+
         test = {
             "id": testId,
             "type": "path_coverage",
             "description": f"Path: {' -> '.join(path['states'])}",
-            "initial_context": _genDefaultContext(bp),
+            "initial_context": ctx,
             "events": [
                 {"event": evt, "payload": {}}
                 for evt in path["events"]
             ],
             "expected_final_state": finalState,
-            "transitions_covered": path["transitions"],
+            "transitions_covered": transitionIds,
             "is_complete_path": path.get("is_complete", False)
         }
         tests.append(test)
@@ -475,11 +604,15 @@ def generate_state_tests(params: Dict[str, Any]) -> Dict[str, Any]:
         if not path["events"]:
             continue
 
+        # Generate context that satisfies all gates in this path
+        transitionIds = path.get("transitions", [])
+        ctx = _genContextForPath(bp, transitionIds)
+
         test = {
             "id": f"state_coverage_{i+1}",
             "type": "state_coverage",
             "description": f"Covers states: {', '.join(path['states'])}",
-            "initial_context": _genDefaultContext(bp),
+            "initial_context": ctx,
             "events": [
                 {"event": evt, "payload": {}}
                 for evt in path["events"]
@@ -744,6 +877,10 @@ def generate_contract_tests(params: Dict[str, Any]) -> Dict[str, Any]:
             {"event": evt, "payload": {}} for evt in path.get("events", [])
         ]
 
+        # Generate context that satisfies all gates in this path
+        transitionIds = path.get("transitions", [])
+        ctx = _genContextForPath(bp, transitionIds)
+
         # Generate test for output_schema (non_null checks)
         if outputSchema:
             testIdx += 1
@@ -758,7 +895,7 @@ def generate_contract_tests(params: Dict[str, Any]) -> Dict[str, Any]:
                     "type": "contract_output",
                     "description": f"Terminal '{termState}' output contract: {', '.join(nonNullFields)} must be non-null",
                     "terminal_state": termState,
-                    "initial_context": _genDefaultContext(bp),
+                    "initial_context": ctx,
                     "events": pathEvents,
                     "expected_final_state": termState,
                     "contract_checks": [
@@ -776,7 +913,7 @@ def generate_contract_tests(params: Dict[str, Any]) -> Dict[str, Any]:
                 "type": "contract_invariant",
                 "description": f"Terminal '{termState}' guarantees: {inv}",
                 "terminal_state": termState,
-                "initial_context": _genDefaultContext(bp),
+                "initial_context": ctx,  # Use path-specific context
                 "events": pathEvents,
                 "expected_final_state": termState,
                 "invariant": inv,
@@ -788,7 +925,11 @@ def generate_contract_tests(params: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _genDefaultContext(bp: Dict) -> Dict:
-    """Generate default context values from schema."""
+    """Generate default context values from schema.
+
+    Uses non-empty placeholder values that are more likely to satisfy
+    gate conditions (which often check for non-null/non-empty values).
+    """
     schema = bp.get("context_schema", {})
     props = schema.get("properties", {})
     ctx = {}
@@ -800,17 +941,31 @@ def _genDefaultContext(bp: Dict) -> Dict:
         if default is not None:
             ctx[propName] = default
         elif propType == "number":
-            ctx[propName] = 0
+            ctx[propName] = 1  # Non-zero to pass > 0 checks
         elif propType == "boolean":
-            ctx[propName] = False
+            ctx[propName] = True  # True to pass boolean gates
         elif propType == "string":
-            ctx[propName] = ""
+            # Use meaningful placeholders based on property name
+            if "path" in propName.lower():
+                ctx[propName] = "/test/path"
+            elif "dir" in propName.lower():
+                ctx[propName] = "/test/dir"
+            elif "name" in propName.lower():
+                ctx[propName] = "test_name"
+            elif "key" in propName.lower():
+                ctx[propName] = "test_key"
+            elif "url" in propName.lower():
+                ctx[propName] = "https://test.example.com"
+            elif "error" in propName.lower():
+                ctx[propName] = ""  # Errors should be empty for success path
+            else:
+                ctx[propName] = "test_value"
         elif propType == "array":
-            ctx[propName] = []
+            ctx[propName] = ["test_item"]  # Non-empty array
         elif propType == "object":
-            ctx[propName] = {}
+            ctx[propName] = {"test": True}  # Non-empty object
         else:
-            ctx[propName] = None
+            ctx[propName] = "test_default"
 
     return ctx
 

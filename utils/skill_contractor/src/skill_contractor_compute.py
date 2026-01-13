@@ -277,11 +277,11 @@ def _sanitizeBlueprint(bp: dict, verbose: bool = True) -> tuple:
 
     # Auto-fix: Add default $schema if missing
     if "$schema" not in bp:
-        bp["$schema"] = "lpp/v0.1.2"
+        bp["$schema"] = "lpp/v0.2.0"
         corrections.append({
             "field": "$schema",
             "issue": "Missing $schema field",
-            "fix": "Added default: lpp/v0.1.2",
+            "fix": "Added default: lpp/v0.2.0",
             "auto_fixed": True
         })
 
@@ -747,7 +747,7 @@ YOUR BROKEN OUTPUT:
 {logContext}
 
 FIX THE JSON STRUCTURE! For L++ blueprints you MUST include:
-- "$schema": "lpp/v0.1.2"
+- "$schema": "lpp/v0.2.0"
 - "id", "name", "version", "description"
 - "states": {{"state_name": {{"description": "..."}}, ...}}  (DICT not array!)
 - "gates": {{"gate_name": {{"type": "expression", "expression": "..."}}, ...}}

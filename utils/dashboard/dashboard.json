@@ -57,14 +57,19 @@
     },
     "complete": {
       "description": "Dashboard generation complete"
-    },
-    "error": {
-      "description": "Error during processing"
     }
   },
   "entry_state": "idle",
   "terminal_states": {
-    "complete": {}
+    "complete": {},
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
   },
   "gates": {
     "hasUtilsPath": {

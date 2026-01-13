@@ -18,7 +18,6 @@ stateDiagram-v2
     %% L++ State Diagram: L++ Execution Tracer
     [*] --> idle
     idle --> configured : INIT
-    idle --> error : INIT_FAILED
     configured --> configured : INIT
     configured --> tracing : START_TRACE [config is not None]
     idle --> tracing : START_TRACE
@@ -50,7 +49,6 @@ stateDiagram-v2
     configured --> idle : RESET
     tracing --> idle : RESET
     completed --> idle : RESET
-    error --> idle : CLEAR
 ```
 > **Interactive View:** [Open zoomable diagram](results/execution_tracer_diagram.html) for pan/zoom controls
 

@@ -5,7 +5,6 @@ flowchart TD
         state_ready(["ready<br>Blueprint loaded, ready to simulate"]):::state
         state_simulating(["simulating<br>Actively simulating, can dispatch events"]):::state
     end
-        state_error[["error<br>Error state"]]:::errorState
 
     %% Transitions
     gate_t0s0{{"blueprint is None?"}}:::gate
@@ -13,9 +12,6 @@ flowchart TD
     act_t0s0[["load_blueprint"]]:::action
     gate_t0s0 -- ✓ --> act_t0s0
     act_t0s0 --> state_ready
-    act_t1s0[["set_error"]]:::action
-    state_idle -- "LOAD_FAILED" --> act_t1s0
-    act_t1s0 --> state_error
     act_t2s0[["load_blueprint"]]:::action
     state_ready -- "LOAD" --> act_t2s0
     act_t2s0 --> state_ready
@@ -97,9 +93,6 @@ flowchart TD
     act_t24s0[["unload_blueprint"]]:::action
     state_simulating -- "UNLOAD" --> act_t24s0
     act_t24s0 --> state_idle
-    act_t25s0[["clear_error"]]:::action
-    state_error -- "CLEAR" --> act_t25s0
-    act_t25s0 --> state_idle
 
     %% Styling - ALL shapes have explicit fill and black text
     classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000

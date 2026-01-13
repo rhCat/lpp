@@ -20,40 +20,18 @@ def operator():
     pass
 
 
-def test_path_2(operator):
-    """
-    Path: idle -> extracting -> error
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('EXTRACT', {})
-    operator.dispatch('COMPLETE', {})
-
-    # Verify final state
-    assert operator.state == 'error'
-
-
-def test_path_3(operator):
+def test_path_1(operator):
     """
     Path: idle -> extracting
     Type: path_coverage
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -63,18 +41,18 @@ def test_path_3(operator):
     assert operator.state == 'extracting'
 
 
-def test_path_4(operator):
+def test_path_3(operator):
     """
     Path: idle -> extracting -> done
     Type: path_coverage
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -85,18 +63,18 @@ def test_path_4(operator):
     assert operator.state == 'done'
 
 
-def test_state_coverage_1(operator):
+def test_path_4(operator):
     """
-    Covers states: idle, extracting, error
-    Type: state_coverage
+    Path: idle -> extracting -> error
+    Type: path_coverage
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -107,18 +85,18 @@ def test_state_coverage_1(operator):
     assert operator.state == 'error'
 
 
-def test_state_coverage_2(operator):
+def test_state_coverage_1(operator):
     """
     Covers states: idle, extracting, done
     Type: state_coverage
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -129,6 +107,28 @@ def test_state_coverage_2(operator):
     assert operator.state == 'done'
 
 
+def test_state_coverage_2(operator):
+    """
+    Covers states: idle, extracting, error
+    Type: state_coverage
+    """
+    # Set initial context
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('EXTRACT', {})
+    operator.dispatch('COMPLETE', {})
+
+    # Verify final state
+    assert operator.state == 'error'
+
+
 def test_gate_null_1(operator):
     """
     Gate has_target: target_path = None
@@ -136,11 +136,11 @@ def test_gate_null_1(operator):
     """
     # Set initial context
     operator.context['target_path'] = None
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -159,11 +159,11 @@ def test_gate_null_2(operator):
     """
     # Set initial context
     operator.context['target_path'] = 'some_value'
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -181,12 +181,12 @@ def test_gate_null_3(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
     operator.context['bone_json'] = None
-    operator.context['bone_path'] = ''
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -204,12 +204,12 @@ def test_gate_null_4(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
     operator.context['bone_json'] = 'some_value'
-    operator.context['bone_path'] = ''
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -227,12 +227,12 @@ def test_gate_null_5(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = None
 
     # Dispatch events
@@ -250,12 +250,12 @@ def test_gate_null_6(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = 'some_value'
 
     # Dispatch events
@@ -273,12 +273,12 @@ def test_gate_null_7(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = None
 
     # Dispatch events
@@ -296,12 +296,12 @@ def test_gate_null_8(operator):
     Type: gate_null_check
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = 'some_value'
 
     # Dispatch events
@@ -319,12 +319,12 @@ def test_negative_invalid_event_1(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     operator._state = 'idle'
@@ -344,12 +344,12 @@ def test_negative_invalid_event_2(operator):
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     operator._state = 'extracting'
@@ -365,22 +365,22 @@ def test_negative_invalid_event_2(operator):
 
 def test_negative_invalid_event_3(operator):
     """
-    Invalid event 'COMPLETE' in state 'done'
+    Invalid event 'EXTRACT' in state 'done'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     operator._state = 'done'
 
     # Dispatch events
-    operator.dispatch('COMPLETE', {})
+    operator.dispatch('EXTRACT', {})
 
     # Verify state unchanged
     assert operator.state == 'done'
@@ -390,22 +390,22 @@ def test_negative_invalid_event_3(operator):
 
 def test_negative_invalid_event_4(operator):
     """
-    Invalid event 'EXTRACT' in state 'done'
+    Invalid event 'COMPLETE' in state 'done'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     operator._state = 'done'
 
     # Dispatch events
-    operator.dispatch('EXTRACT', {})
+    operator.dispatch('COMPLETE', {})
 
     # Verify state unchanged
     assert operator.state == 'done'
@@ -415,22 +415,22 @@ def test_negative_invalid_event_4(operator):
 
 def test_negative_invalid_event_5(operator):
     """
-    Invalid event 'COMPLETE' in state 'error'
+    Invalid event 'EXTRACT' in state 'error'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     operator._state = 'error'
 
     # Dispatch events
-    operator.dispatch('COMPLETE', {})
+    operator.dispatch('EXTRACT', {})
 
     # Verify state unchanged
     assert operator.state == 'error'
@@ -440,22 +440,22 @@ def test_negative_invalid_event_5(operator):
 
 def test_negative_invalid_event_6(operator):
     """
-    Invalid event 'EXTRACT' in state 'error'
+    Invalid event 'COMPLETE' in state 'error'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     operator._state = 'error'
 
     # Dispatch events
-    operator.dispatch('EXTRACT', {})
+    operator.dispatch('COMPLETE', {})
 
     # Verify state unchanged
     assert operator.state == 'error'
@@ -500,11 +500,11 @@ def test_property_1(operator):
     """
     # Set initial context
     operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Verify property 'target_path' maintains type string
@@ -519,11 +519,11 @@ def test_property_2(operator):
     """
     # Set initial context
     operator.context['target_path'] = 'test'
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Verify property 'target_path' maintains type string
@@ -537,12 +537,12 @@ def test_property_3(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_path'] = ''
+    operator.context['target_path'] = '/test/path'
     operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Verify property 'target_name' maintains type string
@@ -556,12 +556,12 @@ def test_property_4(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_path'] = ''
+    operator.context['target_path'] = '/test/path'
     operator.context['target_name'] = 'test'
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Verify property 'target_name' maintains type string
@@ -575,12 +575,12 @@ def test_property_5(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
     operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Verify property 'output_dir' maintains type string
@@ -594,12 +594,12 @@ def test_property_6(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
     operator.context['output_dir'] = 'test'
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Verify property 'output_dir' maintains type string
@@ -613,12 +613,12 @@ def test_property_7(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
     operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Verify property 'lpp_root' maintains type string
@@ -632,12 +632,12 @@ def test_property_8(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
     operator.context['lpp_root'] = 'test'
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Verify property 'lpp_root' maintains type string
@@ -651,12 +651,12 @@ def test_property_9(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
     operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Verify property 'bone_json' maintains type object
@@ -670,12 +670,12 @@ def test_property_10(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
     operator.context['bone_json'] = {'key': 'value'}
-    operator.context['bone_path'] = ''
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Verify property 'bone_json' maintains type object
@@ -689,11 +689,11 @@ def test_property_11(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
     operator.context['bone_path'] = ''
     operator.context['error'] = ''
 
@@ -708,11 +708,11 @@ def test_property_12(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
     operator.context['bone_path'] = 'test'
     operator.context['error'] = ''
 
@@ -727,12 +727,12 @@ def test_property_13(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Verify property 'error' maintains type string
@@ -746,12 +746,12 @@ def test_property_14(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = 'test'
 
     # Verify property 'error' maintains type string
@@ -765,12 +765,12 @@ def test_contract_1(operator):
     Type: contract_output
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -790,12 +790,12 @@ def test_contract_2(operator):
     Type: contract_invariant
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -815,12 +815,12 @@ def test_contract_3(operator):
     Type: contract_output
     """
     # Set initial context
-    operator.context['target_path'] = ''
-    operator.context['target_name'] = ''
-    operator.context['output_dir'] = ''
-    operator.context['lpp_root'] = ''
-    operator.context['bone_json'] = {}
-    operator.context['bone_path'] = ''
+    operator.context['target_path'] = '/test/path'
+    operator.context['target_name'] = 'test_name'
+    operator.context['output_dir'] = '/test/dir'
+    operator.context['lpp_root'] = 'test_value'
+    operator.context['bone_json'] = {'test': True}
+    operator.context['bone_path'] = '/test/path'
     operator.context['error'] = ''
 
     # Dispatch events

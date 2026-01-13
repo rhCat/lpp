@@ -47,10 +47,6 @@ stateDiagram-v2
     simulating --> simulating : EXPORT [blueprint_json is not None ...]
     editing --> idle : UNLOAD
     simulating --> idle : UNLOAD
-    editing --> error : ERROR
-    simulating --> error : ERROR
-    error --> idle : CLEAR
-    error --> editing : RETRY [blueprint_json is not None ...]
 ```
 > **Interactive View:** [Open zoomable diagram](results/blueprint_playground_diagram.html) for pan/zoom controls
 

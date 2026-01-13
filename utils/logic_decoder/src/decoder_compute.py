@@ -950,7 +950,14 @@ def inferTransitions(params: dict) -> dict:
 
 
 def inferActions(params: dict) -> dict:
-    """Infer actions from function calls and side effects."""
+    """Infer actions from function calls and side effects.
+
+    For v0.2.0 schema, actions include:
+    - type: "compute"
+    - compute_unit: module reference
+    - input_map: maps context fields to function args
+    - output_map: maps function returns to context fields
+    """
     functions = params.get("functions", [])
     imports = params.get("imports", [])
     controlFlow = params.get("controlFlow", {})
@@ -960,6 +967,10 @@ def inferActions(params: dict) -> dict:
 
     importSemantics = {i.get("module", "").split(".")[0]: i.get("semantic", {})
                        for i in imports if i.get("module")}
+
+    # Build function arg map for input_map inference
+    fnArgMap = {fn.get("name"): fn.get("args", []) for fn in functions}
+    fnReturnMap = {fn.get("name"): fn.get("returns", "Any") for fn in functions}
 
     for fn in functions:
         name = fn.get("name", "")
@@ -980,11 +991,32 @@ def inferActions(params: dict) -> dict:
                 elif cat in ("filesystem", "database"):
                     actionType = "compute"
 
+                # Infer input_map from function args
+                input_map = {}
+                calledFnName = callName.split(".")[-1]
+                if calledFnName in fnArgMap:
+                    for arg in fnArgMap[calledFnName]:
+                        if arg and arg != "self":
+                            input_map[arg] = arg  # Map arg name to context field
+
+                # Infer output_map from function returns
+                output_map = {}
+                if calledFnName in fnReturnMap:
+                    retType = fnReturnMap[calledFnName]
+                    if retType and retType != "None":
+                        # Map result to context field named after function
+                        output_map["result"] = f"{calledFnName}_result"
+                        # Common patterns: functions often set error field
+                        if "error" not in output_map:
+                            output_map["error"] = "error"
+
                 actions.append({
                     "id": f"a{aId}",
                     "name": f"call_{callName.replace('.', '_')}",
                     "type": actionType,
                     "compute_unit": f"impl:{callName}",
+                    "input_map": input_map,
+                    "output_map": output_map,
                     "inferred_from": f"function:{name}",
                     "line": effect.get("line")
                 })
@@ -1002,7 +1034,13 @@ def inferActions(params: dict) -> dict:
 
 
 def generateBlueprint(params: dict) -> dict:
-    """Assemble final L++ blueprint."""
+    """Assemble final L++ blueprint using v0.2.0 schema.
+
+    v0.2.0 features:
+    - terminal_states as dict with output_schema and invariants_guaranteed
+    - actions with input_map and output_map
+    - Proper contract definitions
+    """
     filePath = params.get("filePath", "decoded")
     states = params.get("inferredStates", [])
     transitions = params.get("inferredTransitions", [])
@@ -1012,8 +1050,8 @@ def generateBlueprint(params: dict) -> dict:
     constants = params.get("constants", [])
     classes = params.get("classes", [])
 
-    baseName = os.path.basename(filePath).replace(".py", "") if filePath else \
-        "decoded"
+    baseName = os.path.basename(filePath).replace(".py", "") if filePath \
+        else "decoded"
 
     # Build context schema from function args
     contextProps = {}
@@ -1031,7 +1069,6 @@ def generateBlueprint(params: dict) -> dict:
         prop_def = {"type": const.get("type", "any")}
         value = const.get("value")
         if value is not None:
-            # For JSON serialization, convert tuples to lists
             if isinstance(value, tuple):
                 value = list(value)
             prop_def["default"] = value
@@ -1058,13 +1095,32 @@ def generateBlueprint(params: dict) -> dict:
                 cls_meta["fields"].append(field_def)
             dataclasses_meta.append(cls_meta)
 
-    # Build states dict
+    # Build states dict (non-terminal states only)
     statesDict = {}
+    terminalIds = {"complete", "error"}
     for s in states:
-        statesDict[s["id"]] = {
-            "name": s.get("name", s["id"]),
-            "description": s.get("description", "")
+        if s["id"] not in terminalIds:
+            statesDict[s["id"]] = {
+                "description": s.get("description", "")
+            }
+
+    # Build terminal_states dict with contracts (v0.2.0)
+    terminalStates = {}
+
+    # Complete terminal - success output
+    terminalStates["complete"] = {
+        "output_schema": {
+            "result": {"type": "object", "non_null": True}
+        },
+        "invariants_guaranteed": ["result_produced"]
+    }
+
+    # Error terminal - error output
+    terminalStates["error"] = {
+        "output_schema": {
+            "error": {"type": "string", "non_null": True}
         }
+    }
 
     # Build gates dict
     gatesDict = {}
@@ -1074,14 +1130,20 @@ def generateBlueprint(params: dict) -> dict:
             "expression": g.get("expression", "true")
         }
 
-    # Build actions dict
+    # Build actions dict with input_map/output_map (v0.2.0)
     actionsDict = {}
     for a in actions:
-        actionsDict[a["id"]] = {
+        actionDef = {
             "type": a.get("type", "compute"),
-            "compute_unit": a.get("compute_unit", ""),
-            "description": f"Inferred from {a.get('inferred_from', 'code')}"
+            "compute_unit": a.get("compute_unit", "")
         }
+        # Include input_map if present
+        if a.get("input_map"):
+            actionDef["input_map"] = a["input_map"]
+        # Include output_map if present
+        if a.get("output_map"):
+            actionDef["output_map"] = a["output_map"]
+        actionsDict[a["id"]] = actionDef
 
     # Build transitions array
     transArr = []
@@ -1092,24 +1154,23 @@ def generateBlueprint(params: dict) -> dict:
             "to": t["to"],
             "on_event": t["on_event"]
         }
-        # Include gates if present
         if t.get("gates"):
             trans["gates"] = t["gates"]
         transArr.append(trans)
 
     blueprint = {
-        "$schema": "lpp/v0.1",
+        "$schema": "lpp/v0.2.0",
         "id": f"decoded_{baseName}",
         "name": f"Decoded: {baseName}",
         "version": "1.0.0",
         "description": f"Auto-decoded from {filePath}",
         "context_schema": {"properties": contextProps},
         "states": statesDict,
-        "transitions": transArr,
+        "entry_state": states[0]["id"] if states else "idle",
+        "terminal_states": terminalStates,
         "gates": gatesDict,
         "actions": actionsDict,
-        "entry_state": states[0]["id"] if states else "idle",
-        "terminal_states": ["complete", "error"]
+        "transitions": transArr
     }
 
     # Add dataclasses metadata if any were found
@@ -1118,6 +1179,7 @@ def generateBlueprint(params: dict) -> dict:
 
     report = {
         "source": filePath,
+        "schema_version": "lpp/v0.2.0",
         "statesCount": len(states),
         "transitionsCount": len(transitions),
         "gatesCount": len(gates),
@@ -1125,8 +1187,9 @@ def generateBlueprint(params: dict) -> dict:
         "constantsExtracted": len(constants),
         "dataclassesFound": len(dataclasses_meta),
         "importsAnalyzed": len(imports),
-        "importCategories": list(set(i.get("semantic", {}).get("category")
-                                     for i in imports))
+        "importCategories": list(set(
+            i.get("semantic", {}).get("category") for i in imports
+        ))
     }
 
     return {

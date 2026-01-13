@@ -89,15 +89,20 @@
     },
     "rejected": {
       "description": "Blueprint failed verification"
-    },
-    "error": {
-      "description": "Error during certification process"
     }
   },
   "entry_state": "idle",
   "terminal_states": {
     "certified": {},
-    "rejected": {}
+    "rejected": {},
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
   },
   "gates": {
     "hasBlueprint": {

@@ -6,7 +6,6 @@ flowchart TD
         state_debugging(["debugging<br>Actively debugging, can step through exe"]):::state
         state_paused(["paused<br>Paused at a breakpoint"]):::state
     end
-        state_error[["error<br>Error state"]]:::errorState
 
     %% Transitions
     gate_t0s0{{"blueprint is None?"}}:::gate
@@ -14,9 +13,6 @@ flowchart TD
     act_t0s0[["load_blueprint"]]:::action
     gate_t0s0 -- ✓ --> act_t0s0
     act_t0s0 --> state_loaded
-    act_t1s0[["set_error"]]:::action
-    state_idle -- "LOAD_FAILED" --> act_t1s0
-    act_t1s0 --> state_error
     act_t2s0[["load_blueprint"]]:::action
     state_loaded -- "LOAD" --> act_t2s0
     act_t2s0 --> state_loaded
@@ -163,9 +159,6 @@ flowchart TD
     act_t47s0[["unload_blueprint, clear_hit_breakpoint"]]:::action
     state_paused -- "UNLOAD" --> act_t47s0
     act_t47s0 --> state_idle
-    act_t48s0[["clear_error"]]:::action
-    state_error -- "CLEAR" --> act_t48s0
-    act_t48s0 --> state_idle
 
     %% Styling - ALL shapes have explicit fill and black text
     classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000

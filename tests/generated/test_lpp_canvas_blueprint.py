@@ -20,544 +20,51 @@ def operator():
     pass
 
 
-def test_path_2(operator):
-    """
-    Path: idle -> loaded -> clustering
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('CLUSTER', {})
-
-    # Verify final state
-    assert operator.state == 'clustering'
-
-
-def test_path_3(operator):
-    """
-    Path: idle -> error
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('LOAD', {})
-
-    # Verify final state
-    assert operator.state == 'error'
-
-
-def test_path_4(operator):
-    """
-    Path: idle -> loaded -> generating
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('GENERATE', {})
-
-    # Verify final state
-    assert operator.state == 'generating'
-
-
-def test_path_5(operator):
-    """
-    Path: idle -> loaded -> simulating
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('SIMULATE', {})
-
-    # Verify final state
-    assert operator.state == 'simulating'
-
-
-def test_path_6(operator):
-    """
-    Path: idle -> loaded -> editing
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('SELECT', {})
-
-    # Verify final state
-    assert operator.state == 'editing'
-
-
-def test_path_7(operator):
-    """
-    Path: idle -> loaded
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-
-    # Verify final state
-    assert operator.state == 'loaded'
-
-
-def test_path_8(operator):
-    """
-    Path: idle -> loaded -> llm_assist
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('LLM_ASSIST', {})
-
-    # Verify final state
-    assert operator.state == 'llm_assist'
-
-
-def test_path_9(operator):
-    """
-    Path: idle -> loaded -> saving
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('SAVE', {})
-
-    # Verify final state
-    assert operator.state == 'saving'
-
-
-def test_path_10(operator):
-    """
-    Path: idle -> loaded -> validating
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('VALIDATE', {})
-
-    # Verify final state
-    assert operator.state == 'validating'
-
-
-def test_path_11(operator):
+def test_path_1(operator):
     """
     Path: idle -> loaded -> analyzing
     Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -568,51 +75,489 @@ def test_path_11(operator):
     assert operator.state == 'analyzing'
 
 
-def test_path_12(operator):
+def test_path_2(operator):
+    """
+    Path: idle -> loaded -> generating
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('GENERATE', {})
+
+    # Verify final state
+    assert operator.state == 'generating'
+
+
+def test_path_3(operator):
+    """
+    Path: idle -> loaded
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+
+    # Verify final state
+    assert operator.state == 'loaded'
+
+
+def test_path_4(operator):
+    """
+    Path: idle -> loaded -> saving
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('SAVE', {})
+
+    # Verify final state
+    assert operator.state == 'saving'
+
+
+def test_path_6(operator):
+    """
+    Path: idle -> loaded -> llm_assist
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('LLM_ASSIST', {})
+
+    # Verify final state
+    assert operator.state == 'llm_assist'
+
+
+def test_path_7(operator):
+    """
+    Path: idle -> loaded -> simulating
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('SIMULATE', {})
+
+    # Verify final state
+    assert operator.state == 'simulating'
+
+
+def test_path_8(operator):
+    """
+    Path: idle -> loaded -> validating
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('VALIDATE', {})
+
+    # Verify final state
+    assert operator.state == 'validating'
+
+
+def test_path_9(operator):
+    """
+    Path: idle -> loaded -> clustering
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('CLUSTER', {})
+
+    # Verify final state
+    assert operator.state == 'clustering'
+
+
+def test_path_10(operator):
+    """
+    Path: idle -> error
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('LOAD', {})
+
+    # Verify final state
+    assert operator.state == 'error'
+
+
+def test_path_11(operator):
     """
     Path: idle -> loaded -> reviewing
     Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -623,57 +568,112 @@ def test_path_12(operator):
     assert operator.state == 'reviewing'
 
 
-def test_path_13(operator):
+def test_path_12(operator):
     """
-    Path: idle -> loaded -> editing -> loaded
+    Path: idle -> loaded -> editing
     Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
     operator.dispatch('NEW', {})
     operator.dispatch('SELECT', {})
-    operator.dispatch('ADD_STATE', {})
+
+    # Verify final state
+    assert operator.state == 'editing'
+
+
+def test_path_13(operator):
+    """
+    Path: idle -> loaded -> reviewing -> loaded
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('REVIEW', {})
+    operator.dispatch('REJECT', {})
 
     # Verify final state
     assert operator.state == 'loaded'
@@ -681,55 +681,55 @@ def test_path_13(operator):
 
 def test_path_14(operator):
     """
-    Path: idle -> loaded -> llm_assist -> loaded
+    Path: idle -> loaded -> analyzing -> loaded
     Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
     operator.dispatch('NEW', {})
-    operator.dispatch('LLM_ASSIST', {})
-    operator.dispatch('APPLY', {})
+    operator.dispatch('ANALYZE', {})
+    operator.dispatch('DONE', {})
 
     # Verify final state
     assert operator.state == 'loaded'
@@ -737,105 +737,272 @@ def test_path_14(operator):
 
 def test_path_15(operator):
     """
-    Path: idle -> loaded -> editing -> loaded
+    Path: idle -> loaded -> simulating -> simulating
     Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
     operator.dispatch('NEW', {})
-    operator.dispatch('SELECT', {})
-    operator.dispatch('ADD_ACTION', {})
+    operator.dispatch('SIMULATE', {})
+    operator.dispatch('RESET', {})
+
+    # Verify final state
+    assert operator.state == 'simulating'
+
+
+def test_path_16(operator):
+    """
+    Path: idle -> loaded -> simulating -> simulating
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('SIMULATE', {})
+    operator.dispatch('STEP', {})
+
+    # Verify final state
+    assert operator.state == 'simulating'
+
+
+def test_path_17(operator):
+    """
+    Path: idle -> loaded -> saving -> loaded
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('SAVE', {})
+    operator.dispatch('DONE', {})
 
     # Verify final state
     assert operator.state == 'loaded'
 
 
-def test_path_16(operator):
+def test_path_18(operator):
+    """
+    Path: idle -> loaded -> idle
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('CLOSE', {})
+
+    # Verify final state
+    assert operator.state == 'idle'
+
+
+def test_path_19(operator):
     """
     Path: idle -> loaded -> validating -> loaded
     Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -847,218 +1014,51 @@ def test_path_16(operator):
     assert operator.state == 'loaded'
 
 
-def test_path_17(operator):
-    """
-    Path: idle -> loaded -> simulating -> simulating
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('SIMULATE', {})
-    operator.dispatch('RESET', {})
-
-    # Verify final state
-    assert operator.state == 'simulating'
-
-
-def test_path_18(operator):
-    """
-    Path: idle -> loaded -> editing -> loaded
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('SELECT', {})
-    operator.dispatch('DELETE', {})
-
-    # Verify final state
-    assert operator.state == 'loaded'
-
-
-def test_path_19(operator):
-    """
-    Path: idle -> error -> idle
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('LOAD', {})
-    operator.dispatch('RESET', {})
-
-    # Verify final state
-    assert operator.state == 'idle'
-
-
 def test_path_20(operator):
     """
     Path: idle -> loaded -> simulating -> simulating
     Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -1072,771 +1072,49 @@ def test_path_20(operator):
 
 def test_path_21(operator):
     """
-    Path: idle -> loaded -> analyzing -> loaded
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('ANALYZE', {})
-    operator.dispatch('DONE', {})
-
-    # Verify final state
-    assert operator.state == 'loaded'
-
-
-def test_path_22(operator):
-    """
-    Path: idle -> loaded
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('SET_BLUEPRINT', {})
-
-    # Verify final state
-    assert operator.state == 'loaded'
-
-
-def test_path_23(operator):
-    """
-    Path: idle -> loaded
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('LOAD', {})
-
-    # Verify final state
-    assert operator.state == 'loaded'
-
-
-def test_path_24(operator):
-    """
-    Path: idle -> loaded -> clustering -> loaded
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('CLUSTER', {})
-    operator.dispatch('DONE', {})
-
-    # Verify final state
-    assert operator.state == 'loaded'
-
-
-def test_path_25(operator):
-    """
-    Path: idle -> loaded -> llm_assist -> llm_assist
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('LLM_ASSIST', {})
-    operator.dispatch('QUERY', {})
-
-    # Verify final state
-    assert operator.state == 'llm_assist'
-
-
-def test_path_26(operator):
-    """
-    Path: idle -> error -> loaded
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('LOAD', {})
-    operator.dispatch('RETRY', {})
-
-    # Verify final state
-    assert operator.state == 'loaded'
-
-
-def test_path_27(operator):
-    """
-    Path: idle -> loaded -> generating -> loaded
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('GENERATE', {})
-    operator.dispatch('DONE', {})
-
-    # Verify final state
-    assert operator.state == 'loaded'
-
-
-def test_path_28(operator):
-    """
-    Path: idle -> loaded -> llm_assist -> loaded
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('LLM_ASSIST', {})
-    operator.dispatch('CANCEL', {})
-
-    # Verify final state
-    assert operator.state == 'loaded'
-
-
-def test_path_29(operator):
-    """
-    Path: idle -> loaded -> reviewing -> loaded
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('REVIEW', {})
-    operator.dispatch('REJECT', {})
-
-    # Verify final state
-    assert operator.state == 'loaded'
-
-
-def test_path_30(operator):
-    """
-    Path: idle -> loaded -> idle
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('CLOSE', {})
-
-    # Verify final state
-    assert operator.state == 'idle'
-
-
-def test_path_31(operator):
-    """
-    Path: idle -> loaded -> saving -> error
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('SAVE', {})
-    operator.dispatch('ERROR', {})
-
-    # Verify final state
-    assert operator.state == 'error'
-
-
-def test_path_32(operator):
-    """
-    Path: idle -> loaded -> validating -> error
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('VALIDATE', {})
-    operator.dispatch('ERROR', {})
-
-    # Verify final state
-    assert operator.state == 'error'
-
-
-def test_path_33(operator):
-    """
-    Path: idle -> loaded -> reviewing -> loaded
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('REVIEW', {})
-    operator.dispatch('DONE', {})
-
-    # Verify final state
-    assert operator.state == 'loaded'
-
-
-def test_path_34(operator):
-    """
     Path: idle -> loaded -> editing -> loaded
     Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -1848,163 +1126,107 @@ def test_path_34(operator):
     assert operator.state == 'loaded'
 
 
-def test_path_35(operator):
+def test_path_22(operator):
     """
-    Path: idle -> loaded -> simulating -> loaded
+    Path: idle -> loaded -> validating -> generating
     Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
     operator.dispatch('NEW', {})
-    operator.dispatch('SIMULATE', {})
-    operator.dispatch('DONE', {})
+    operator.dispatch('VALIDATE', {})
+    operator.dispatch('GENERATE', {})
 
     # Verify final state
-    assert operator.state == 'loaded'
+    assert operator.state == 'generating'
 
 
-def test_path_36(operator):
-    """
-    Path: idle -> loaded -> reviewing -> reviewing
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('REVIEW', {})
-    operator.dispatch('ADD_NOTE', {})
-
-    # Verify final state
-    assert operator.state == 'reviewing'
-
-
-def test_path_37(operator):
+def test_path_23(operator):
     """
     Path: idle -> loaded -> editing -> loaded
     Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -2016,51 +1238,219 @@ def test_path_37(operator):
     assert operator.state == 'loaded'
 
 
-def test_path_38(operator):
+def test_path_24(operator):
+    """
+    Path: idle -> loaded -> simulating -> loaded
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('SIMULATE', {})
+    operator.dispatch('DONE', {})
+
+    # Verify final state
+    assert operator.state == 'loaded'
+
+
+def test_path_25(operator):
+    """
+    Path: idle -> loaded -> clustering -> loaded
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('CLUSTER', {})
+    operator.dispatch('DONE', {})
+
+    # Verify final state
+    assert operator.state == 'loaded'
+
+
+def test_path_26(operator):
+    """
+    Path: idle -> loaded -> editing -> llm_assist
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('SELECT', {})
+    operator.dispatch('LLM_ASSIST', {})
+
+    # Verify final state
+    assert operator.state == 'llm_assist'
+
+
+def test_path_27(operator):
     """
     Path: idle -> loaded -> reviewing -> loaded
     Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -2072,51 +1462,440 @@ def test_path_38(operator):
     assert operator.state == 'loaded'
 
 
-def test_path_39(operator):
+def test_path_28(operator):
+    """
+    Path: idle -> loaded -> editing -> analyzing
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('SELECT', {})
+    operator.dispatch('ANALYZE', {})
+
+    # Verify final state
+    assert operator.state == 'analyzing'
+
+
+def test_path_29(operator):
+    """
+    Path: idle -> loaded -> llm_assist -> loaded
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('LLM_ASSIST', {})
+    operator.dispatch('CANCEL', {})
+
+    # Verify final state
+    assert operator.state == 'loaded'
+
+
+def test_path_30(operator):
     """
     Path: idle -> loaded -> editing -> loaded
     Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('SELECT', {})
+    operator.dispatch('ADD_STATE', {})
+
+    # Verify final state
+    assert operator.state == 'loaded'
+
+
+def test_path_31(operator):
+    """
+    Path: idle -> loaded -> editing -> loaded
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('SELECT', {})
+    operator.dispatch('ADD_ACTION', {})
+
+    # Verify final state
+    assert operator.state == 'loaded'
+
+
+def test_path_32(operator):
+    """
+    Path: idle -> loaded
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('SET_BLUEPRINT', {})
+
+    # Verify final state
+    assert operator.state == 'loaded'
+
+
+def test_path_33(operator):
+    """
+    Path: idle -> loaded -> llm_assist -> llm_assist
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('LLM_ASSIST', {})
+    operator.dispatch('QUERY', {})
+
+    # Verify final state
+    assert operator.state == 'llm_assist'
+
+
+def test_path_34(operator):
+    """
+    Path: idle -> error -> loaded
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('LOAD', {})
+    operator.dispatch('RETRY', {})
+
+    # Verify final state
+    assert operator.state == 'loaded'
+
+
+def test_path_35(operator):
+    """
+    Path: idle -> loaded -> editing -> loaded
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -2128,386 +1907,51 @@ def test_path_39(operator):
     assert operator.state == 'loaded'
 
 
-def test_path_40(operator):
-    """
-    Path: idle -> loaded -> llm_assist -> loaded
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('LLM_ASSIST', {})
-    operator.dispatch('DONE', {})
-
-    # Verify final state
-    assert operator.state == 'loaded'
-
-
-def test_path_41(operator):
-    """
-    Path: idle -> loaded -> validating -> generating
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('VALIDATE', {})
-    operator.dispatch('GENERATE', {})
-
-    # Verify final state
-    assert operator.state == 'generating'
-
-
-def test_path_42(operator):
-    """
-    Path: idle -> loaded -> saving -> loaded
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('SAVE', {})
-    operator.dispatch('DONE', {})
-
-    # Verify final state
-    assert operator.state == 'loaded'
-
-
-def test_path_43(operator):
-    """
-    Path: idle -> loaded -> loaded
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('LOAD', {})
-
-    # Verify final state
-    assert operator.state == 'loaded'
-
-
-def test_path_44(operator):
-    """
-    Path: idle -> loaded -> editing -> analyzing
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('SELECT', {})
-    operator.dispatch('ANALYZE', {})
-
-    # Verify final state
-    assert operator.state == 'analyzing'
-
-
-def test_path_45(operator):
-    """
-    Path: idle -> loaded -> simulating -> simulating
-    Type: path_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('SIMULATE', {})
-    operator.dispatch('STEP', {})
-
-    # Verify final state
-    assert operator.state == 'simulating'
-
-
-def test_path_46(operator):
+def test_path_36(operator):
     """
     Path: idle -> loaded -> editing -> loaded
     Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -2519,107 +1963,163 @@ def test_path_46(operator):
     assert operator.state == 'loaded'
 
 
-def test_path_47(operator):
+def test_path_37(operator):
     """
-    Path: idle -> loaded -> editing -> llm_assist
+    Path: idle -> loaded -> reviewing -> loaded
     Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
     operator.dispatch('NEW', {})
-    operator.dispatch('SELECT', {})
-    operator.dispatch('LLM_ASSIST', {})
+    operator.dispatch('REVIEW', {})
+    operator.dispatch('DONE', {})
 
     # Verify final state
-    assert operator.state == 'llm_assist'
+    assert operator.state == 'loaded'
 
 
-def test_state_coverage_1(operator):
+def test_path_38(operator):
     """
-    Covers states: idle, loaded, saving, error
-    Type: state_coverage
+    Path: idle -> loaded -> llm_assist -> loaded
+    Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('LLM_ASSIST', {})
+    operator.dispatch('DONE', {})
+
+    # Verify final state
+    assert operator.state == 'loaded'
+
+
+def test_path_39(operator):
+    """
+    Path: idle -> loaded -> saving -> error
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -2631,51 +2131,51 @@ def test_state_coverage_1(operator):
     assert operator.state == 'error'
 
 
-def test_state_coverage_2(operator):
+def test_path_40(operator):
     """
-    Covers states: idle, loaded, validating, error
-    Type: state_coverage
+    Path: idle -> loaded -> validating -> error
+    Type: path_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -2687,51 +2187,439 @@ def test_state_coverage_2(operator):
     assert operator.state == 'error'
 
 
-def test_state_coverage_3(operator):
+def test_path_41(operator):
+    """
+    Path: idle -> loaded -> loaded
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('LOAD', {})
+
+    # Verify final state
+    assert operator.state == 'loaded'
+
+
+def test_path_42(operator):
+    """
+    Path: idle -> loaded
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('LOAD', {})
+
+    # Verify final state
+    assert operator.state == 'loaded'
+
+
+def test_path_43(operator):
+    """
+    Path: idle -> loaded -> editing -> loaded
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('SELECT', {})
+    operator.dispatch('DELETE', {})
+
+    # Verify final state
+    assert operator.state == 'loaded'
+
+
+def test_path_44(operator):
+    """
+    Path: idle -> error -> idle
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('LOAD', {})
+    operator.dispatch('RESET', {})
+
+    # Verify final state
+    assert operator.state == 'idle'
+
+
+def test_path_45(operator):
+    """
+    Path: idle -> loaded -> reviewing -> reviewing
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('REVIEW', {})
+    operator.dispatch('ADD_NOTE', {})
+
+    # Verify final state
+    assert operator.state == 'reviewing'
+
+
+def test_path_46(operator):
+    """
+    Path: idle -> loaded -> llm_assist -> loaded
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('LLM_ASSIST', {})
+    operator.dispatch('APPLY', {})
+
+    # Verify final state
+    assert operator.state == 'loaded'
+
+
+def test_path_47(operator):
+    """
+    Path: idle -> loaded -> generating -> loaded
+    Type: path_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('GENERATE', {})
+    operator.dispatch('DONE', {})
+
+    # Verify final state
+    assert operator.state == 'loaded'
+
+
+def test_state_coverage_1(operator):
     """
     Covers states: idle, loaded, validating, generating
     Type: state_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -2743,107 +2631,51 @@ def test_state_coverage_3(operator):
     assert operator.state == 'generating'
 
 
-def test_state_coverage_4(operator):
-    """
-    Covers states: idle, loaded, editing, analyzing
-    Type: state_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('SELECT', {})
-    operator.dispatch('ANALYZE', {})
-
-    # Verify final state
-    assert operator.state == 'analyzing'
-
-
-def test_state_coverage_5(operator):
+def test_state_coverage_2(operator):
     """
     Covers states: idle, loaded, editing, llm_assist
     Type: state_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -2855,51 +2687,218 @@ def test_state_coverage_5(operator):
     assert operator.state == 'llm_assist'
 
 
+def test_state_coverage_3(operator):
+    """
+    Covers states: idle, loaded, editing, analyzing
+    Type: state_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('SELECT', {})
+    operator.dispatch('ANALYZE', {})
+
+    # Verify final state
+    assert operator.state == 'analyzing'
+
+
+def test_state_coverage_4(operator):
+    """
+    Covers states: idle, loaded, saving, error
+    Type: state_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('SAVE', {})
+    operator.dispatch('ERROR', {})
+
+    # Verify final state
+    assert operator.state == 'error'
+
+
+def test_state_coverage_5(operator):
+    """
+    Covers states: idle, loaded, simulating
+    Type: state_coverage
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('NEW', {})
+    operator.dispatch('SIMULATE', {})
+
+    # Verify final state
+    assert operator.state == 'simulating'
+
+
 def test_state_coverage_6(operator):
     """
     Covers states: idle, loaded, clustering
     Type: state_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -2912,104 +2911,49 @@ def test_state_coverage_6(operator):
 
 def test_state_coverage_7(operator):
     """
-    Covers states: idle, loaded, simulating
-    Type: state_coverage
-    """
-    # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
-    operator.context['error'] = ''
-
-    # Dispatch events
-    operator.dispatch('NEW', {})
-    operator.dispatch('SIMULATE', {})
-
-    # Verify final state
-    assert operator.state == 'simulating'
-
-
-def test_state_coverage_8(operator):
-    """
     Covers states: idle, loaded, reviewing
     Type: state_coverage
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -3026,45 +2970,45 @@ def test_gate_boolean_1(operator):
     Type: gate_boolean
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
     operator.context['is_dirty'] = True
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -3082,45 +3026,45 @@ def test_gate_boolean_2(operator):
     Type: gate_boolean
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
     operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -3138,45 +3082,45 @@ def test_gate_boundary_3(operator):
     Type: gate_boundary
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
     operator.context['sim_step_count'] = 999.0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -3194,45 +3138,45 @@ def test_gate_boundary_4(operator):
     Type: gate_boundary
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
     operator.context['sim_step_count'] = 1000.0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -3250,45 +3194,45 @@ def test_gate_boundary_5(operator):
     Type: gate_boundary
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
     operator.context['sim_step_count'] = 1001.0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Dispatch events
@@ -3302,55 +3246,55 @@ def test_gate_boundary_5(operator):
 
 def test_negative_invalid_event_1(operator):
     """
-    Invalid event 'ADD_STATE' in state 'idle'
+    Invalid event 'RETRY' in state 'idle'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'idle'
 
     # Dispatch events
-    operator.dispatch('ADD_STATE', {})
+    operator.dispatch('RETRY', {})
 
     # Verify state unchanged
     assert operator.state == 'idle'
@@ -3360,55 +3304,55 @@ def test_negative_invalid_event_1(operator):
 
 def test_negative_invalid_event_2(operator):
     """
-    Invalid event 'SAVE' in state 'idle'
+    Invalid event 'SIMULATE' in state 'idle'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'idle'
 
     # Dispatch events
-    operator.dispatch('SAVE', {})
+    operator.dispatch('SIMULATE', {})
 
     # Verify state unchanged
     assert operator.state == 'idle'
@@ -3418,55 +3362,55 @@ def test_negative_invalid_event_2(operator):
 
 def test_negative_invalid_event_3(operator):
     """
-    Invalid event 'GENERATE' in state 'idle'
+    Invalid event 'ADD_NOTE' in state 'idle'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'idle'
 
     # Dispatch events
-    operator.dispatch('GENERATE', {})
+    operator.dispatch('ADD_NOTE', {})
 
     # Verify state unchanged
     assert operator.state == 'idle'
@@ -3476,55 +3420,55 @@ def test_negative_invalid_event_3(operator):
 
 def test_negative_invalid_event_4(operator):
     """
-    Invalid event 'ADD_STATE' in state 'loaded'
+    Invalid event 'RETRY' in state 'loaded'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'loaded'
 
     # Dispatch events
-    operator.dispatch('ADD_STATE', {})
+    operator.dispatch('RETRY', {})
 
     # Verify state unchanged
     assert operator.state == 'loaded'
@@ -3534,55 +3478,55 @@ def test_negative_invalid_event_4(operator):
 
 def test_negative_invalid_event_5(operator):
     """
-    Invalid event 'DONE' in state 'loaded'
+    Invalid event 'REJECT' in state 'loaded'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'loaded'
 
     # Dispatch events
-    operator.dispatch('DONE', {})
+    operator.dispatch('REJECT', {})
 
     # Verify state unchanged
     assert operator.state == 'loaded'
@@ -3592,55 +3536,55 @@ def test_negative_invalid_event_5(operator):
 
 def test_negative_invalid_event_6(operator):
     """
-    Invalid event 'APPROVE' in state 'loaded'
+    Invalid event 'RESET' in state 'loaded'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'loaded'
 
     # Dispatch events
-    operator.dispatch('APPROVE', {})
+    operator.dispatch('RESET', {})
 
     # Verify state unchanged
     assert operator.state == 'loaded'
@@ -3650,55 +3594,55 @@ def test_negative_invalid_event_6(operator):
 
 def test_negative_invalid_event_7(operator):
     """
-    Invalid event 'GENERATE' in state 'editing'
+    Invalid event 'RETRY' in state 'editing'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'editing'
 
     # Dispatch events
-    operator.dispatch('GENERATE', {})
+    operator.dispatch('RETRY', {})
 
     # Verify state unchanged
     assert operator.state == 'editing'
@@ -3708,55 +3652,55 @@ def test_negative_invalid_event_7(operator):
 
 def test_negative_invalid_event_8(operator):
     """
-    Invalid event 'QUERY' in state 'editing'
+    Invalid event 'SIMULATE' in state 'editing'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'editing'
 
     # Dispatch events
-    operator.dispatch('QUERY', {})
+    operator.dispatch('SIMULATE', {})
 
     # Verify state unchanged
     assert operator.state == 'editing'
@@ -3766,55 +3710,55 @@ def test_negative_invalid_event_8(operator):
 
 def test_negative_invalid_event_9(operator):
     """
-    Invalid event 'VALIDATE' in state 'editing'
+    Invalid event 'ADD_NOTE' in state 'editing'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'editing'
 
     # Dispatch events
-    operator.dispatch('VALIDATE', {})
+    operator.dispatch('ADD_NOTE', {})
 
     # Verify state unchanged
     assert operator.state == 'editing'
@@ -3824,55 +3768,55 @@ def test_negative_invalid_event_9(operator):
 
 def test_negative_invalid_event_10(operator):
     """
-    Invalid event 'ADD_STATE' in state 'reviewing'
+    Invalid event 'RETRY' in state 'reviewing'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'reviewing'
 
     # Dispatch events
-    operator.dispatch('ADD_STATE', {})
+    operator.dispatch('RETRY', {})
 
     # Verify state unchanged
     assert operator.state == 'reviewing'
@@ -3882,55 +3826,55 @@ def test_negative_invalid_event_10(operator):
 
 def test_negative_invalid_event_11(operator):
     """
-    Invalid event 'SAVE' in state 'reviewing'
+    Invalid event 'SIMULATE' in state 'reviewing'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'reviewing'
 
     # Dispatch events
-    operator.dispatch('SAVE', {})
+    operator.dispatch('SIMULATE', {})
 
     # Verify state unchanged
     assert operator.state == 'reviewing'
@@ -3940,55 +3884,55 @@ def test_negative_invalid_event_11(operator):
 
 def test_negative_invalid_event_12(operator):
     """
-    Invalid event 'GENERATE' in state 'reviewing'
+    Invalid event 'ADD_TRANSITION' in state 'reviewing'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'reviewing'
 
     # Dispatch events
-    operator.dispatch('GENERATE', {})
+    operator.dispatch('ADD_TRANSITION', {})
 
     # Verify state unchanged
     assert operator.state == 'reviewing'
@@ -3998,55 +3942,55 @@ def test_negative_invalid_event_12(operator):
 
 def test_negative_invalid_event_13(operator):
     """
-    Invalid event 'ADD_STATE' in state 'validating'
+    Invalid event 'RETRY' in state 'validating'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'validating'
 
     # Dispatch events
-    operator.dispatch('ADD_STATE', {})
+    operator.dispatch('RETRY', {})
 
     # Verify state unchanged
     assert operator.state == 'validating'
@@ -4056,55 +4000,55 @@ def test_negative_invalid_event_13(operator):
 
 def test_negative_invalid_event_14(operator):
     """
-    Invalid event 'SAVE' in state 'validating'
+    Invalid event 'SIMULATE' in state 'validating'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'validating'
 
     # Dispatch events
-    operator.dispatch('SAVE', {})
+    operator.dispatch('SIMULATE', {})
 
     # Verify state unchanged
     assert operator.state == 'validating'
@@ -4114,55 +4058,55 @@ def test_negative_invalid_event_14(operator):
 
 def test_negative_invalid_event_15(operator):
     """
-    Invalid event 'ADD_ACTION' in state 'validating'
+    Invalid event 'ADD_NOTE' in state 'validating'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'validating'
 
     # Dispatch events
-    operator.dispatch('ADD_ACTION', {})
+    operator.dispatch('ADD_NOTE', {})
 
     # Verify state unchanged
     assert operator.state == 'validating'
@@ -4172,55 +4116,55 @@ def test_negative_invalid_event_15(operator):
 
 def test_negative_invalid_event_16(operator):
     """
-    Invalid event 'ADD_STATE' in state 'analyzing'
+    Invalid event 'RETRY' in state 'analyzing'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'analyzing'
 
     # Dispatch events
-    operator.dispatch('ADD_STATE', {})
+    operator.dispatch('RETRY', {})
 
     # Verify state unchanged
     assert operator.state == 'analyzing'
@@ -4230,55 +4174,55 @@ def test_negative_invalid_event_16(operator):
 
 def test_negative_invalid_event_17(operator):
     """
-    Invalid event 'SAVE' in state 'analyzing'
+    Invalid event 'SIMULATE' in state 'analyzing'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'analyzing'
 
     # Dispatch events
-    operator.dispatch('SAVE', {})
+    operator.dispatch('SIMULATE', {})
 
     # Verify state unchanged
     assert operator.state == 'analyzing'
@@ -4288,55 +4232,55 @@ def test_negative_invalid_event_17(operator):
 
 def test_negative_invalid_event_18(operator):
     """
-    Invalid event 'GENERATE' in state 'analyzing'
+    Invalid event 'ADD_NOTE' in state 'analyzing'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'analyzing'
 
     # Dispatch events
-    operator.dispatch('GENERATE', {})
+    operator.dispatch('ADD_NOTE', {})
 
     # Verify state unchanged
     assert operator.state == 'analyzing'
@@ -4346,55 +4290,55 @@ def test_negative_invalid_event_18(operator):
 
 def test_negative_invalid_event_19(operator):
     """
-    Invalid event 'ADD_STATE' in state 'simulating'
+    Invalid event 'RETRY' in state 'simulating'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'simulating'
 
     # Dispatch events
-    operator.dispatch('ADD_STATE', {})
+    operator.dispatch('RETRY', {})
 
     # Verify state unchanged
     assert operator.state == 'simulating'
@@ -4404,55 +4348,55 @@ def test_negative_invalid_event_19(operator):
 
 def test_negative_invalid_event_20(operator):
     """
-    Invalid event 'SAVE' in state 'simulating'
+    Invalid event 'SIMULATE' in state 'simulating'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'simulating'
 
     # Dispatch events
-    operator.dispatch('SAVE', {})
+    operator.dispatch('SIMULATE', {})
 
     # Verify state unchanged
     assert operator.state == 'simulating'
@@ -4462,55 +4406,55 @@ def test_negative_invalid_event_20(operator):
 
 def test_negative_invalid_event_21(operator):
     """
-    Invalid event 'GENERATE' in state 'simulating'
+    Invalid event 'ADD_NOTE' in state 'simulating'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'simulating'
 
     # Dispatch events
-    operator.dispatch('GENERATE', {})
+    operator.dispatch('ADD_NOTE', {})
 
     # Verify state unchanged
     assert operator.state == 'simulating'
@@ -4520,55 +4464,55 @@ def test_negative_invalid_event_21(operator):
 
 def test_negative_invalid_event_22(operator):
     """
-    Invalid event 'ADD_STATE' in state 'clustering'
+    Invalid event 'RETRY' in state 'clustering'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'clustering'
 
     # Dispatch events
-    operator.dispatch('ADD_STATE', {})
+    operator.dispatch('RETRY', {})
 
     # Verify state unchanged
     assert operator.state == 'clustering'
@@ -4578,55 +4522,55 @@ def test_negative_invalid_event_22(operator):
 
 def test_negative_invalid_event_23(operator):
     """
-    Invalid event 'SAVE' in state 'clustering'
+    Invalid event 'SIMULATE' in state 'clustering'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'clustering'
 
     # Dispatch events
-    operator.dispatch('SAVE', {})
+    operator.dispatch('SIMULATE', {})
 
     # Verify state unchanged
     assert operator.state == 'clustering'
@@ -4636,55 +4580,55 @@ def test_negative_invalid_event_23(operator):
 
 def test_negative_invalid_event_24(operator):
     """
-    Invalid event 'GENERATE' in state 'clustering'
+    Invalid event 'ADD_NOTE' in state 'clustering'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'clustering'
 
     # Dispatch events
-    operator.dispatch('GENERATE', {})
+    operator.dispatch('ADD_NOTE', {})
 
     # Verify state unchanged
     assert operator.state == 'clustering'
@@ -4694,55 +4638,55 @@ def test_negative_invalid_event_24(operator):
 
 def test_negative_invalid_event_25(operator):
     """
-    Invalid event 'ADD_STATE' in state 'llm_assist'
+    Invalid event 'RETRY' in state 'llm_assist'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'llm_assist'
 
     # Dispatch events
-    operator.dispatch('ADD_STATE', {})
+    operator.dispatch('RETRY', {})
 
     # Verify state unchanged
     assert operator.state == 'llm_assist'
@@ -4752,55 +4696,55 @@ def test_negative_invalid_event_25(operator):
 
 def test_negative_invalid_event_26(operator):
     """
-    Invalid event 'SAVE' in state 'llm_assist'
+    Invalid event 'SIMULATE' in state 'llm_assist'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'llm_assist'
 
     # Dispatch events
-    operator.dispatch('SAVE', {})
+    operator.dispatch('SIMULATE', {})
 
     # Verify state unchanged
     assert operator.state == 'llm_assist'
@@ -4810,55 +4754,55 @@ def test_negative_invalid_event_26(operator):
 
 def test_negative_invalid_event_27(operator):
     """
-    Invalid event 'GENERATE' in state 'llm_assist'
+    Invalid event 'ADD_NOTE' in state 'llm_assist'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'llm_assist'
 
     # Dispatch events
-    operator.dispatch('GENERATE', {})
+    operator.dispatch('ADD_NOTE', {})
 
     # Verify state unchanged
     assert operator.state == 'llm_assist'
@@ -4868,55 +4812,55 @@ def test_negative_invalid_event_27(operator):
 
 def test_negative_invalid_event_28(operator):
     """
-    Invalid event 'ADD_STATE' in state 'generating'
+    Invalid event 'RETRY' in state 'generating'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'generating'
 
     # Dispatch events
-    operator.dispatch('ADD_STATE', {})
+    operator.dispatch('RETRY', {})
 
     # Verify state unchanged
     assert operator.state == 'generating'
@@ -4926,55 +4870,55 @@ def test_negative_invalid_event_28(operator):
 
 def test_negative_invalid_event_29(operator):
     """
-    Invalid event 'SAVE' in state 'generating'
+    Invalid event 'SIMULATE' in state 'generating'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'generating'
 
     # Dispatch events
-    operator.dispatch('SAVE', {})
+    operator.dispatch('SIMULATE', {})
 
     # Verify state unchanged
     assert operator.state == 'generating'
@@ -4984,55 +4928,55 @@ def test_negative_invalid_event_29(operator):
 
 def test_negative_invalid_event_30(operator):
     """
-    Invalid event 'GENERATE' in state 'generating'
+    Invalid event 'ADD_NOTE' in state 'generating'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'generating'
 
     # Dispatch events
-    operator.dispatch('GENERATE', {})
+    operator.dispatch('ADD_NOTE', {})
 
     # Verify state unchanged
     assert operator.state == 'generating'
@@ -5042,55 +4986,55 @@ def test_negative_invalid_event_30(operator):
 
 def test_negative_invalid_event_31(operator):
     """
-    Invalid event 'ADD_STATE' in state 'saving'
+    Invalid event 'RETRY' in state 'saving'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'saving'
 
     # Dispatch events
-    operator.dispatch('ADD_STATE', {})
+    operator.dispatch('RETRY', {})
 
     # Verify state unchanged
     assert operator.state == 'saving'
@@ -5100,55 +5044,55 @@ def test_negative_invalid_event_31(operator):
 
 def test_negative_invalid_event_32(operator):
     """
-    Invalid event 'SAVE' in state 'saving'
+    Invalid event 'SIMULATE' in state 'saving'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'saving'
 
     # Dispatch events
-    operator.dispatch('SAVE', {})
+    operator.dispatch('SIMULATE', {})
 
     # Verify state unchanged
     assert operator.state == 'saving'
@@ -5158,55 +5102,55 @@ def test_negative_invalid_event_32(operator):
 
 def test_negative_invalid_event_33(operator):
     """
-    Invalid event 'GENERATE' in state 'saving'
+    Invalid event 'ADD_NOTE' in state 'saving'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'saving'
 
     # Dispatch events
-    operator.dispatch('GENERATE', {})
+    operator.dispatch('ADD_NOTE', {})
 
     # Verify state unchanged
     assert operator.state == 'saving'
@@ -5216,55 +5160,55 @@ def test_negative_invalid_event_33(operator):
 
 def test_negative_invalid_event_34(operator):
     """
-    Invalid event 'ADD_STATE' in state 'error'
+    Invalid event 'SIMULATE' in state 'error'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'error'
 
     # Dispatch events
-    operator.dispatch('ADD_STATE', {})
+    operator.dispatch('SIMULATE', {})
 
     # Verify state unchanged
     assert operator.state == 'error'
@@ -5274,55 +5218,55 @@ def test_negative_invalid_event_34(operator):
 
 def test_negative_invalid_event_35(operator):
     """
-    Invalid event 'SAVE' in state 'error'
+    Invalid event 'ADD_NOTE' in state 'error'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'error'
 
     # Dispatch events
-    operator.dispatch('SAVE', {})
+    operator.dispatch('ADD_NOTE', {})
 
     # Verify state unchanged
     assert operator.state == 'error'
@@ -5332,55 +5276,55 @@ def test_negative_invalid_event_35(operator):
 
 def test_negative_invalid_event_36(operator):
     """
-    Invalid event 'GENERATE' in state 'error'
+    Invalid event 'ADD_TRANSITION' in state 'error'
     Type: negative_invalid_event
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     operator._state = 'error'
 
     # Dispatch events
-    operator.dispatch('GENERATE', {})
+    operator.dispatch('ADD_TRANSITION', {})
 
     # Verify state unchanged
     assert operator.state == 'error'
@@ -5535,44 +5479,44 @@ def test_property_1(operator):
     """
     # Set initial context
     operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'blueprint' maintains type object
@@ -5587,44 +5531,44 @@ def test_property_2(operator):
     """
     # Set initial context
     operator.context['blueprint'] = {'key': 'value'}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'blueprint' maintains type object
@@ -5638,45 +5582,45 @@ def test_property_3(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
+    operator.context['blueprint'] = {'test': True}
     operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'blueprint_path' maintains type string
@@ -5690,45 +5634,45 @@ def test_property_4(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
+    operator.context['blueprint'] = {'test': True}
     operator.context['blueprint_path'] = 'test'
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'blueprint_path' maintains type string
@@ -5742,45 +5686,45 @@ def test_property_5(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
     operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'blueprint_json' maintains type string
@@ -5794,45 +5738,45 @@ def test_property_6(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
     operator.context['blueprint_json'] = 'test'
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'blueprint_json' maintains type string
@@ -5846,45 +5790,45 @@ def test_property_7(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
     operator.context['is_dirty'] = True
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'is_dirty' maintains type boolean
@@ -5898,45 +5842,45 @@ def test_property_8(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
     operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'is_dirty' maintains type boolean
@@ -5950,45 +5894,45 @@ def test_property_9(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
     operator.context['mode'] = 'create'
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'mode' maintains type string
@@ -6002,45 +5946,45 @@ def test_property_10(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
     operator.context['mode'] = 'edit'
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'mode' maintains type string
@@ -6054,45 +5998,45 @@ def test_property_11(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
     operator.context['llm_enabled'] = True
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'llm_enabled' maintains type boolean
@@ -6106,45 +6050,45 @@ def test_property_12(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
     operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'llm_enabled' maintains type boolean
@@ -6158,45 +6102,45 @@ def test_property_13(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
     operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'api_key' maintains type string
@@ -6210,45 +6154,45 @@ def test_property_14(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
     operator.context['api_key'] = 'test'
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'api_key' maintains type string
@@ -6262,45 +6206,45 @@ def test_property_15(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
     operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'api_base' maintains type string
@@ -6314,45 +6258,45 @@ def test_property_16(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
     operator.context['api_base'] = 'test'
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'api_base' maintains type string
@@ -6366,45 +6310,45 @@ def test_property_17(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
     operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'model' maintains type string
@@ -6418,45 +6362,45 @@ def test_property_18(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
     operator.context['model'] = 'test'
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'model' maintains type string
@@ -6470,45 +6414,45 @@ def test_property_19(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
     operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'prompt' maintains type string
@@ -6522,45 +6466,45 @@ def test_property_20(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
     operator.context['prompt'] = 'test'
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'prompt' maintains type string
@@ -6574,45 +6518,45 @@ def test_property_21(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
     operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'llm_response' maintains type string
@@ -6626,45 +6570,45 @@ def test_property_22(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
     operator.context['llm_response'] = 'test'
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'llm_response' maintains type string
@@ -6678,45 +6622,45 @@ def test_property_23(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
     operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'suggestions' maintains type array
@@ -6730,45 +6674,45 @@ def test_property_24(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
     operator.context['suggestions'] = ['item']
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'suggestions' maintains type array
@@ -6782,45 +6726,45 @@ def test_property_25(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
     operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'selected_node' maintains type string
@@ -6834,45 +6778,45 @@ def test_property_26(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
     operator.context['selected_node'] = 'test'
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'selected_node' maintains type string
@@ -6886,45 +6830,45 @@ def test_property_27(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
     operator.context['selected_type'] = 'state'
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'selected_type' maintains type string
@@ -6938,45 +6882,45 @@ def test_property_28(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
     operator.context['selected_type'] = 'transition'
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'selected_type' maintains type string
@@ -6990,45 +6934,45 @@ def test_property_29(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
     operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'node_data' maintains type object
@@ -7042,45 +6986,45 @@ def test_property_30(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
     operator.context['node_data'] = {'key': 'value'}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'node_data' maintains type object
@@ -7094,45 +7038,45 @@ def test_property_31(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
     operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'edit_buffer' maintains type object
@@ -7146,45 +7090,45 @@ def test_property_32(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
     operator.context['edit_buffer'] = {'key': 'value'}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'edit_buffer' maintains type object
@@ -7198,45 +7142,45 @@ def test_property_33(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
     operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'tlc_result' maintains type object
@@ -7250,45 +7194,45 @@ def test_property_34(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
     operator.context['tlc_result'] = {'key': 'value'}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'tlc_result' maintains type object
@@ -7302,45 +7246,45 @@ def test_property_35(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
     operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'tlc_errors' maintains type array
@@ -7354,45 +7298,45 @@ def test_property_36(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
     operator.context['tlc_errors'] = ['item']
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'tlc_errors' maintains type array
@@ -7406,45 +7350,45 @@ def test_property_37(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
     operator.context['tlc_passed'] = True
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'tlc_passed' maintains type boolean
@@ -7458,45 +7402,45 @@ def test_property_38(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
     operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'tlc_passed' maintains type boolean
@@ -7510,45 +7454,45 @@ def test_property_39(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
     operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'paths' maintains type array
@@ -7562,45 +7506,45 @@ def test_property_40(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
     operator.context['paths'] = ['item']
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'paths' maintains type array
@@ -7614,45 +7558,45 @@ def test_property_41(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
     operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'path_count' maintains type number
@@ -7666,45 +7610,45 @@ def test_property_42(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
     operator.context['path_count'] = 1
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'path_count' maintains type number
@@ -7718,45 +7662,45 @@ def test_property_43(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
     operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'states_list' maintains type array
@@ -7770,45 +7714,45 @@ def test_property_44(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
     operator.context['states_list'] = ['item']
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'states_list' maintains type array
@@ -7822,45 +7766,45 @@ def test_property_45(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
     operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'state_count' maintains type number
@@ -7874,45 +7818,45 @@ def test_property_46(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
     operator.context['state_count'] = 1
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'state_count' maintains type number
@@ -7926,45 +7870,45 @@ def test_property_47(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
     operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'reachability' maintains type object
@@ -7978,45 +7922,45 @@ def test_property_48(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
     operator.context['reachability'] = {'key': 'value'}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'reachability' maintains type object
@@ -8030,45 +7974,45 @@ def test_property_49(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
     operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'deadlocks' maintains type array
@@ -8082,45 +8026,45 @@ def test_property_50(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
     operator.context['deadlocks'] = ['item']
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'deadlocks' maintains type array
@@ -8134,45 +8078,45 @@ def test_property_51(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
     operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'sim_state' maintains type string
@@ -8186,45 +8130,45 @@ def test_property_52(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
     operator.context['sim_state'] = 'test'
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'sim_state' maintains type string
@@ -8238,45 +8182,45 @@ def test_property_53(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
     operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'sim_context' maintains type object
@@ -8290,45 +8234,45 @@ def test_property_54(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
     operator.context['sim_context'] = {'key': 'value'}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'sim_context' maintains type object
@@ -8342,45 +8286,45 @@ def test_property_55(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
     operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'sim_history' maintains type array
@@ -8394,45 +8338,45 @@ def test_property_56(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
     operator.context['sim_history'] = ['item']
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'sim_history' maintains type array
@@ -8446,45 +8390,45 @@ def test_property_57(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
     operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'sim_available_events' maintains type array
@@ -8498,45 +8442,45 @@ def test_property_58(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
     operator.context['sim_available_events'] = ['item']
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'sim_available_events' maintains type array
@@ -8550,45 +8494,45 @@ def test_property_59(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
     operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'sim_step_count' maintains type number
@@ -8602,45 +8546,45 @@ def test_property_60(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
     operator.context['sim_step_count'] = 1
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'sim_step_count' maintains type number
@@ -8654,45 +8598,45 @@ def test_property_61(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
     operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'clusters' maintains type array
@@ -8706,45 +8650,45 @@ def test_property_62(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
     operator.context['clusters'] = ['item']
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'clusters' maintains type array
@@ -8758,45 +8702,45 @@ def test_property_63(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
     operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'dependencies' maintains type object
@@ -8810,45 +8754,45 @@ def test_property_64(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
     operator.context['dependencies'] = {'key': 'value'}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'dependencies' maintains type object
@@ -8862,45 +8806,45 @@ def test_property_65(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
     operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'sorted_states' maintains type array
@@ -8914,45 +8858,45 @@ def test_property_66(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
     operator.context['sorted_states'] = ['item']
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'sorted_states' maintains type array
@@ -8966,45 +8910,45 @@ def test_property_67(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
     operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'audit_log' maintains type array
@@ -9018,45 +8962,45 @@ def test_property_68(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
     operator.context['audit_log'] = ['item']
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'audit_log' maintains type array
@@ -9070,45 +9014,45 @@ def test_property_69(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
     operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'review_notes' maintains type array
@@ -9122,45 +9066,45 @@ def test_property_70(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
     operator.context['review_notes'] = ['item']
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'review_notes' maintains type array
@@ -9174,45 +9118,45 @@ def test_property_71(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
     operator.context['review_status'] = 'pending'
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'review_status' maintains type string
@@ -9226,45 +9170,45 @@ def test_property_72(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
     operator.context['review_status'] = 'approved'
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'review_status' maintains type string
@@ -9278,45 +9222,45 @@ def test_property_73(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
     operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'coverage' maintains type object
@@ -9330,45 +9274,45 @@ def test_property_74(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
     operator.context['coverage'] = {'key': 'value'}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'coverage' maintains type object
@@ -9382,45 +9326,45 @@ def test_property_75(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
     operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'graph_html' maintains type string
@@ -9434,45 +9378,45 @@ def test_property_76(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
     operator.context['graph_html'] = 'test'
-    operator.context['mermaid'] = ''
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'graph_html' maintains type string
@@ -9486,44 +9430,44 @@ def test_property_77(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
     operator.context['mermaid'] = ''
     operator.context['error'] = ''
 
@@ -9538,44 +9482,44 @@ def test_property_78(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
     operator.context['mermaid'] = 'test'
     operator.context['error'] = ''
 
@@ -9590,45 +9534,45 @@ def test_property_79(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = ''
 
     # Verify property 'error' maintains type string
@@ -9642,48 +9586,104 @@ def test_property_80(operator):
     Type: property_based
     """
     # Set initial context
-    operator.context['blueprint'] = {}
-    operator.context['blueprint_path'] = ''
-    operator.context['blueprint_json'] = ''
-    operator.context['is_dirty'] = False
-    operator.context['mode'] = ''
-    operator.context['llm_enabled'] = False
-    operator.context['api_key'] = ''
-    operator.context['api_base'] = ''
-    operator.context['model'] = ''
-    operator.context['prompt'] = ''
-    operator.context['llm_response'] = ''
-    operator.context['suggestions'] = []
-    operator.context['selected_node'] = ''
-    operator.context['selected_type'] = ''
-    operator.context['node_data'] = {}
-    operator.context['edit_buffer'] = {}
-    operator.context['tlc_result'] = {}
-    operator.context['tlc_errors'] = []
-    operator.context['tlc_passed'] = False
-    operator.context['paths'] = []
-    operator.context['path_count'] = 0
-    operator.context['states_list'] = []
-    operator.context['state_count'] = 0
-    operator.context['reachability'] = {}
-    operator.context['deadlocks'] = []
-    operator.context['sim_state'] = ''
-    operator.context['sim_context'] = {}
-    operator.context['sim_history'] = []
-    operator.context['sim_available_events'] = []
-    operator.context['sim_step_count'] = 0
-    operator.context['clusters'] = []
-    operator.context['dependencies'] = {}
-    operator.context['sorted_states'] = []
-    operator.context['audit_log'] = []
-    operator.context['review_notes'] = []
-    operator.context['review_status'] = ''
-    operator.context['coverage'] = {}
-    operator.context['graph_html'] = ''
-    operator.context['mermaid'] = ''
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
     operator.context['error'] = 'test'
 
     # Verify property 'error' maintains type string
     assert 'error' in operator.context
     assert isinstance(operator.context['error'], str)
+
+
+def test_contract_1(operator):
+    """
+    Terminal 'error' output contract: error must be non-null
+    Type: contract_output
+    """
+    # Set initial context
+    operator.context['blueprint'] = {'test': True}
+    operator.context['blueprint_path'] = '/test/path'
+    operator.context['blueprint_json'] = 'test_value'
+    operator.context['is_dirty'] = True
+    operator.context['mode'] = 'test_value'
+    operator.context['llm_enabled'] = True
+    operator.context['api_key'] = 'test_key'
+    operator.context['api_base'] = 'test_value'
+    operator.context['model'] = 'test_value'
+    operator.context['prompt'] = 'test_value'
+    operator.context['llm_response'] = 'test_value'
+    operator.context['suggestions'] = ['test_item']
+    operator.context['selected_node'] = 'test_value'
+    operator.context['selected_type'] = 'test_value'
+    operator.context['node_data'] = {'test': True}
+    operator.context['edit_buffer'] = {'test': True}
+    operator.context['tlc_result'] = {'test': True}
+    operator.context['tlc_errors'] = ['test_item']
+    operator.context['tlc_passed'] = True
+    operator.context['paths'] = ['test_item']
+    operator.context['path_count'] = 1
+    operator.context['states_list'] = ['test_item']
+    operator.context['state_count'] = 1
+    operator.context['reachability'] = {'test': True}
+    operator.context['deadlocks'] = ['test_item']
+    operator.context['sim_state'] = 'test_value'
+    operator.context['sim_context'] = {'test': True}
+    operator.context['sim_history'] = ['test_item']
+    operator.context['sim_available_events'] = ['test_item']
+    operator.context['sim_step_count'] = 1
+    operator.context['clusters'] = ['test_item']
+    operator.context['dependencies'] = {'test': True}
+    operator.context['sorted_states'] = ['test_item']
+    operator.context['audit_log'] = ['test_item']
+    operator.context['review_notes'] = ['test_item']
+    operator.context['review_status'] = 'test_value'
+    operator.context['coverage'] = {'test': True}
+    operator.context['graph_html'] = 'test_value'
+    operator.context['mermaid'] = 'test_value'
+    operator.context['error'] = ''
+
+    # Dispatch events
+    operator.dispatch('LOAD', {})
+
+    # Verify final state
+    assert operator.state == 'error'
+    # Verify output contract: non-null fields
+    assert operator.context.get('error') is not None, "'error' must be non-null at terminal state"
 

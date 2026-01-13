@@ -1,7 +1,7 @@
 {
   "blueprint_id": "lvp_xray",
   "blueprint_tests": {
-    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_lvp_xray_blueprint.py",
+    "file": "tests/generated/test_lvp_xray_blueprint.py",
     "count": 39,
     "coverage": {
       "total_tests": 39,
@@ -31,7 +31,7 @@
     }
   },
   "compute_tests": {
-    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_lvp_xray_compute.py",
+    "file": "tests/generated/test_lvp_xray_compute.py",
     "units": 2,
     "units_list": [
       "lvp:set_target_name",

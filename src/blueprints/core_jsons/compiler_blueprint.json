@@ -179,37 +179,66 @@
     "a_open_file": {
       "type": "compute",
       "compute_unit": "impl:open",
-      "description": "Open file for reading"
+      "description": "Open file for reading",
+      "input_map": {},
+      "output_map": {}
     },
     "a_load_json": {
       "type": "compute",
       "compute_unit": "impl:json.load",
-      "description": "Load JSON from file"
+      "description": "Load JSON from file",
+      "input_map": {},
+      "output_map": {}
     },
     "a_validate": {
       "type": "compute",
       "compute_unit": "impl:validate_blueprint",
-      "description": "Validate blueprint"
+      "description": "Validate blueprint",
+      "input_map": {},
+      "output_map": {}
     },
     "a_generate_code": {
       "type": "compute",
       "compute_unit": "impl:_generate_code",
-      "description": "Generate Python code"
+      "description": "Generate Python code",
+      "input_map": {},
+      "output_map": {}
     },
     "a_write_file": {
       "type": "compute",
       "compute_unit": "impl:f.write",
-      "description": "Write output file"
+      "description": "Write output file",
+      "input_map": {},
+      "output_map": {}
     },
     "a_save_tla": {
       "type": "compute",
       "compute_unit": "impl:save_tla",
-      "description": "Save TLA+ specification"
+      "description": "Save TLA+ specification",
+      "input_map": {},
+      "output_map": {}
     }
   },
   "entry_state": "idle",
   "terminal_states": {
-    "complete": {},
-    "error": {}
+    "complete": {
+      "output_schema": {
+        "result": {
+          "type": "object",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": [
+        "result_produced"
+      ]
+    },
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
   }
 }

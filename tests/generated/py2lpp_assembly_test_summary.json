@@ -2,15 +2,15 @@
   "blueprint_id": "py2lpp_assembly",
   "blueprint_tests": {
     "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_py2lpp_assembly_blueprint.py",
-    "count": 95,
+    "count": 99,
     "coverage": {
-      "total_tests": 95,
+      "total_tests": 99,
       "by_type": {
         "path_coverage": 17,
         "state_coverage": 3,
         "gate_boundary": 2,
         "negative": 47,
-        "property_based": 26,
+        "property_based": 30,
         "contract": 0
       },
       "state_coverage": {
@@ -35,5 +35,5 @@
     "units": 0,
     "units_list": []
   },
-  "total_tests": 95
+  "total_tests": 99
 }

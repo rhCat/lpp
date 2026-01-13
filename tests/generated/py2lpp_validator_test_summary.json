@@ -1,16 +1,16 @@
 {
   "blueprint_id": "py2lpp_validator",
   "blueprint_tests": {
-    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_py2lpp_validator_blueprint.py",
-    "count": 39,
+    "file": "tests/generated/test_py2lpp_validator_blueprint.py",
+    "count": 41,
     "coverage": {
-      "total_tests": 39,
+      "total_tests": 41,
       "by_type": {
         "path_coverage": 4,
         "state_coverage": 3,
         "gate_boundary": 6,
         "negative": 12,
-        "property_based": 10,
+        "property_based": 12,
         "contract": 4
       },
       "state_coverage": {
@@ -31,11 +31,11 @@
     }
   },
   "compute_tests": {
-    "file": "/Users/ruihe/mnt/lpp/lpp/tests/generated/test_py2lpp_validator_compute.py",
+    "file": "tests/generated/test_py2lpp_validator_compute.py",
     "units": 1,
     "units_list": [
       "py2lpp:validate"
     ]
   },
-  "total_tests": 43
+  "total_tests": 45
 }

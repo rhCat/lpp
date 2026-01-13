@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1",
+  "$schema": "lpp/v0.2.0",
   "id": "llm_schema_assistant",
   "name": "L++ LLM Schema Assistant",
   "version": "1.0.0",
@@ -65,13 +65,19 @@
     },
     "querying": {
       "description": "Sending query to LLM API"
-    },
-    "error": {
-      "description": "Error state - recoverable"
     }
   },
   "entry_state": "init",
-  "terminal_states": {},
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
   "gates": {
     "has_api_key": {
       "type": "expression",

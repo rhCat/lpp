@@ -134,37 +134,66 @@
     "a_check_required": {
       "type": "compute",
       "compute_unit": "impl:validate_required_fields",
-      "description": "Check required blueprint fields"
+      "description": "Check required blueprint fields",
+      "input_map": {},
+      "output_map": {}
     },
     "a_check_states": {
       "type": "compute",
       "compute_unit": "impl:validate_states",
-      "description": "Validate state definitions"
+      "description": "Validate state definitions",
+      "input_map": {},
+      "output_map": {}
     },
     "a_check_transitions": {
       "type": "compute",
       "compute_unit": "impl:validate_transitions",
-      "description": "Validate transition references"
+      "description": "Validate transition references",
+      "input_map": {},
+      "output_map": {}
     },
     "a_check_gates": {
       "type": "compute",
       "compute_unit": "impl:validate_gates",
-      "description": "Validate gate expressions"
+      "description": "Validate gate expressions",
+      "input_map": {},
+      "output_map": {}
     },
     "a_append_error": {
       "type": "compute",
       "compute_unit": "impl:errors.append",
-      "description": "Append validation error"
+      "description": "Append validation error",
+      "input_map": {},
+      "output_map": {}
     },
     "a_raise_error": {
       "type": "compute",
       "compute_unit": "impl:BlueprintValidationError",
-      "description": "Raise validation error"
+      "description": "Raise validation error",
+      "input_map": {},
+      "output_map": {}
     }
   },
   "entry_state": "idle",
   "terminal_states": {
-    "complete": {},
-    "error": {}
+    "complete": {
+      "output_schema": {
+        "result": {
+          "type": "object",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": [
+        "result_produced"
+      ]
+    },
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
   }
 }

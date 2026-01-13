@@ -1,5 +1,5 @@
 {
-  "$schema": "lpp/v0.1.2",
+  "$schema": "lpp/v0.2.0",
   "id": "function_decoder",
   "name": "Python Function Decoder",
   "version": "1.0.0",
@@ -63,16 +63,20 @@
     },
     "computing": {
       "description": "Computing coupling metrics"
-    },
-    "complete": {
-      "description": "Module graph generated"
-    },
-    "error": {
-      "description": "Analysis failed"
     }
   },
   "entry_state": "idle",
-  "terminal_states": {},
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    },
+    "complete": {}
+  },
   "gates": {
     "hasFilePath": {
       "type": "expression",

@@ -7,15 +7,11 @@ flowchart TD
         state_paused(["paused<br>Tracing paused, can resume"]):::state
     end
         state_completed(["completed<br>Trace completed, ready for export/analys"]):::state
-        state_error[["error<br>Error state"]]:::errorState
 
     %% Transitions
     act_t0s0[["init_tracer"]]:::action
     state_idle -- "INIT" --> act_t0s0
     act_t0s0 --> state_configured
-    act_t1s0[["set_error"]]:::action
-    state_idle -- "INIT_FAILED" --> act_t1s0
-    act_t1s0 --> state_error
     act_t2s0[["init_tracer"]]:::action
     state_configured -- "INIT" --> act_t2s0
     act_t2s0 --> state_configured
@@ -139,9 +135,6 @@ flowchart TD
     act_t32s0[["clear_trace"]]:::action
     state_completed -- "RESET" --> act_t32s0
     act_t32s0 --> state_idle
-    act_t33s0[["clear_error, clear_trace"]]:::action
-    state_error -- "CLEAR" --> act_t33s0
-    act_t33s0 --> state_idle
 
     %% Styling - ALL shapes have explicit fill and black text
     classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000

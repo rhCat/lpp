@@ -44,7 +44,6 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
     %% L++ Logic CAD: Research Scraper
         state_idle(["idle<br>Ready for search query"]):::entry
         state_hasResults(["hasResults<br>Results available"]):::state
-        state_error[["error<br>Error occurred"]]:::errorState
 
     %% Transitions
     act_t0s0[["setQuery, setMaxResults, setSourceArxiv +1"]]:::action
@@ -71,19 +70,6 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
     act_t7s0[["clearResults, clearDetail"]]:::action
     state_hasResults -- "CLEAR" --> act_t7s0
     act_t7s0 --> state_idle
-    act_t8s0[["clearError"]]:::action
-    state_error -- "RETRY" --> act_t8s0
-    act_t8s0 --> state_idle
-    gate_t9s0{{"error is not None?"}}:::gate
-    state_idle -- "ERROR" --> gate_t9s0
-    act_t9s0[["log_error"]]:::action
-    gate_t9s0 -- ✓ --> act_t9s0
-    act_t9s0 --> state_error
-    gate_t10s0{{"error is not None?"}}:::gate
-    state_hasResults -- "ERROR" --> gate_t10s0
-    act_t10s0[["log_error"]]:::action
-    gate_t10s0 -- ✓ --> act_t10s0
-    act_t10s0 --> state_error
 
     %% Styling - ALL shapes have explicit fill and black text
     classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000

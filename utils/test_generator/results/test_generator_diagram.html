@@ -48,8 +48,6 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
         state_analyzing(["analyzing<br>Analyzing blueprint structure"]):::state
         state_generating(["generating<br>Generating test cases"]):::state
     end
-        state_complete(["complete<br>Tests generated, ready to export"]):::state
-        state_error[["error<br>Error state"]]:::errorState
 
     %% Transitions
     gate_t0s0{{"blueprint is None?"}}:::gate
@@ -60,9 +58,6 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
     act_t1s0[["clear_state, load_blueprint"]]:::action
     state_loaded -- "LOAD" --> act_t1s0
     act_t1s0 --> state_loaded
-    act_t2s0[["clear_state, load_blueprint"]]:::action
-    state_complete -- "LOAD" --> act_t2s0
-    act_t2s0 --> state_loaded
     gate_t3s0{{"blueprint is not None?"}}:::gate
     state_loaded -- "ANALYZE" --> gate_t3s0
     act_t3s0[["build_graph, analyze_paths, analyze_gates"]]:::action
@@ -78,51 +73,7 @@ body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; }
     act_t5s0[["build_graph, analyze_paths, analyze_gates +5"]]:::action
     gate_t5s0 -- ✓ --> act_t5s0
     act_t5s0 --> state_generating
-    gate_t6s0{{"path_tests is not None?"}}:::gate
-    state_generating -- "COMBINE" --> gate_t6s0
-    act_t6s0[["combine_tests"]]:::action
-    gate_t6s0 -- ✓ --> act_t6s0
-    act_t6s0 --> state_complete
-    gate_t7s0{{"path_tests is not None?"}}:::gate
-    state_generating -- "AUTO" --> gate_t7s0
-    act_t7s0[["combine_tests"]]:::action
-    gate_t7s0 -- ✓ --> act_t7s0
-    act_t7s0 --> state_complete
-    gate_t8s0{{"all_tests is not None and l...?"}}:::gate
-    state_complete -- "FORMAT_JSON" --> gate_t8s0
-    act_t8s0[["set_format_json, format_as_json"]]:::action
-    gate_t8s0 -- ✓ --> act_t8s0
-    act_t8s0 --> state_complete
-    gate_t9s0{{"all_tests is not None and l...?"}}:::gate
-    state_complete -- "FORMAT_PYTEST" --> gate_t9s0
-    act_t9s0[["set_format_pytest, format_as_pytest"]]:::action
-    gate_t9s0 -- ✓ --> act_t9s0
-    act_t9s0 --> state_complete
-    gate_t10s0{{"formatted_output is not None?"}}:::gate
-    state_complete -- "EXPORT" --> gate_t10s0
-    act_t10s0[["export_tests"]]:::action
-    gate_t10s0 -- ✓ --> act_t10s0
-    act_t10s0 --> state_complete
-    gate_t11s0{{"all_tests is not None and l...?"}}:::gate
-    state_complete -- "COVERAGE" --> gate_t11s0
-    gate_t11s0 -- ✓ --> state_complete
-    act_t12s0[["clear_state"]]:::action
-    state_complete -- "RESET" --> act_t12s0
-    act_t12s0 --> state_idle
-    act_t13s0[["clear_error, clear_state"]]:::action
-    state_error -- "RESET" --> act_t13s0
-    act_t13s0 --> state_idle
-    act_t14s0[["set_error"]]:::action
-    state_idle -- "ERROR" --> act_t14s0
-    act_t14s0 --> state_error
-    act_t15s0[["set_error"]]:::action
-    state_analyzing -- "ERROR" --> act_t15s0
-    act_t15s0 --> state_error
-    act_t16s0[["set_error"]]:::action
-    state_generating -- "ERROR" --> act_t16s0
-    act_t16s0 --> state_error
     state_analyzing -- "BACK" --> state_loaded
-    state_complete -- "BACK" --> state_loaded
 
     %% Styling - ALL shapes have explicit fill and black text
     classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000

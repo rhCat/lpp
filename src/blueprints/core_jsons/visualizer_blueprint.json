@@ -105,37 +105,70 @@
     "a_load_states": {
       "type": "compute",
       "compute_unit": "impl:self.states.get",
-      "description": "Load state data"
+      "description": "Load state data",
+      "input_map": {},
+      "output_map": {}
     },
     "a_render_mermaid": {
       "type": "compute",
       "compute_unit": "impl:as_mermaid_logic",
-      "description": "Render as Mermaid diagram"
+      "description": "Render as Mermaid diagram",
+      "input_map": {},
+      "output_map": {}
     },
     "a_render_ascii": {
       "type": "compute",
       "compute_unit": "impl:as_ascii",
-      "description": "Render as ASCII table"
+      "description": "Render as ASCII table",
+      "input_map": {},
+      "output_map": {}
     },
     "a_enumerate_transitions": {
       "type": "compute",
       "compute_unit": "impl:enumerate",
-      "description": "Enumerate transitions"
+      "description": "Enumerate transitions",
+      "input_map": {},
+      "output_map": {}
     },
     "a_append_line": {
       "type": "compute",
       "compute_unit": "impl:lines.append",
-      "description": "Append output line"
+      "description": "Append output line",
+      "input_map": {},
+      "output_map": {}
     },
     "a_join_output": {
       "type": "compute",
       "compute_unit": "impl:join",
-      "description": "Join output lines"
+      "description": "Join output lines",
+      "input_map": {},
+      "output_map": {}
     }
   },
   "entry_state": "idle",
   "terminal_states": {
-    "complete": {},
-    "error": {}
+    "complete": {
+      "output_schema": {
+        "result": {
+          "type": "object",
+          "non_null": true
+        },
+        "output": {
+          "type": "string",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": [
+        "result_produced"
+      ]
+    },
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
   }
 }
