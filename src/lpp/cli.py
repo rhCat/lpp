@@ -11,6 +11,10 @@ Commands:
     visualize   Generate blueprint visualization
     validate    Validate blueprint or assembly
 
+    docs        Generate documentation (mermaid, dashboard, all)
+    test        Generate and run tests
+    tla         TLA+ validation
+
     util        Run a utility tool
     workflow    Run a workflow
     agent       Manage Claude Code agents
@@ -20,10 +24,12 @@ Commands:
 
 Examples:
     lpp compile blueprint.json output.py
+    lpp docs /path/to/skill          # Generate all docs
+    lpp docs /path/to/skill mermaid  # Mermaid only
+    lpp test /path/to/skill          # Generate and run tests
+    lpp tla /path/to/blueprint.json  # TLA+ validation
     lpp util logic_decoder myfile.py
-    lpp workflow python_to_lpp /path/to/project
     lpp agent deploy /path/to/project
-    lpp list --utils
 """
 
 import sys
