@@ -1,0 +1,385 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "interactive_search",
+  "name": "Refined Interactive Search",
+  "version": "1.0.0",
+  "description": "Interactive search tool with iterative refinement, context-aware results, and drill-down capabilities",
+  "context_schema": {
+    "properties": {
+      "searchPath": {
+        "type": "string",
+        "description": "Root path to search in"
+      },
+      "query": {
+        "type": "string",
+        "description": "Current search query"
+      },
+      "queryHistory": {
+        "type": "array",
+        "description": "History of queries for refinement tracking"
+      },
+      "filePattern": {
+        "type": "string",
+        "description": "Glob pattern to filter files (e.g., *.py, *.json)"
+      },
+      "excludePatterns": {
+        "type": "array",
+        "description": "Patterns to exclude from search"
+      },
+      "caseSensitive": {
+        "type": "boolean",
+        "description": "Case-sensitive search"
+      },
+      "useRegex": {
+        "type": "boolean",
+        "description": "Treat query as regex"
+      },
+      "contextLines": {
+        "type": "number",
+        "description": "Lines of context around matches"
+      },
+      "maxResults": {
+        "type": "number",
+        "description": "Maximum results to return"
+      },
+      "results": {
+        "type": "array",
+        "description": "Current search results"
+      },
+      "resultCount": {
+        "type": "number",
+        "description": "Total number of matches"
+      },
+      "fileCount": {
+        "type": "number",
+        "description": "Number of files with matches"
+      },
+      "selectedIndex": {
+        "type": "number",
+        "description": "Currently selected result index"
+      },
+      "selectedResult": {
+        "type": "object",
+        "description": "Details of selected result"
+      },
+      "refinementType": {
+        "type": "string",
+        "description": "Type of refinement (narrow, expand, filter, exclude)"
+      },
+      "refinementValue": {
+        "type": "string",
+        "description": "Value for refinement"
+      },
+      "exportPath": {
+        "type": "string",
+        "description": "Path to export results"
+      },
+      "exportFormat": {
+        "type": "string",
+        "description": "Export format (json, csv, markdown)"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "Ready to start search"
+    },
+    "searching": {
+      "description": "Executing search query"
+    },
+    "viewing": {
+      "description": "Viewing search results"
+    },
+    "drilling": {
+      "description": "Viewing detailed result"
+    },
+    "refining": {
+      "description": "Refining search parameters"
+    },
+    "exporting": {
+      "description": "Exporting results"
+    },
+    "done": {
+      "description": "Search session complete"
+    },
+    "error": {
+      "description": "Error occurred"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "done": {
+      "output_schema": {
+        "results": { "type": "array" },
+        "queryHistory": { "type": "array" }
+      }
+    },
+    "error": {
+      "output_schema": {
+        "error": { "type": "string", "non_null": true }
+      }
+    }
+  },
+  "gates": {
+    "has_query": {
+      "type": "expression",
+      "expression": "query is not None and query != ''"
+    },
+    "has_results": {
+      "type": "expression",
+      "expression": "results is not None and len(results) > 0"
+    },
+    "no_results": {
+      "type": "expression",
+      "expression": "results is None or len(results) == 0"
+    },
+    "has_selection": {
+      "type": "expression",
+      "expression": "selectedIndex is not None and selectedIndex >= 0"
+    },
+    "has_refinement": {
+      "type": "expression",
+      "expression": "refinementValue is not None and refinementValue != ''"
+    },
+    "has_export_path": {
+      "type": "expression",
+      "expression": "exportPath is not None and exportPath != ''"
+    },
+    "has_error": {
+      "type": "expression",
+      "expression": "error is not None and error != ''"
+    },
+    "no_error": {
+      "type": "expression",
+      "expression": "error is None or error == ''"
+    }
+  },
+  "actions": {
+    "init_search": {
+      "type": "compute",
+      "compute_unit": "search:init",
+      "input_map": {
+        "searchPath": "searchPath"
+      },
+      "output_map": {
+        "searchPath": "path",
+        "excludePatterns": "excludes",
+        "contextLines": "context",
+        "maxResults": "maxResults",
+        "queryHistory": "history"
+      }
+    },
+    "execute_search": {
+      "type": "compute",
+      "compute_unit": "search:execute",
+      "input_map": {
+        "searchPath": "searchPath",
+        "query": "query",
+        "filePattern": "filePattern",
+        "excludePatterns": "excludePatterns",
+        "caseSensitive": "caseSensitive",
+        "useRegex": "useRegex",
+        "contextLines": "contextLines",
+        "maxResults": "maxResults"
+      },
+      "output_map": {
+        "results": "results",
+        "resultCount": "count",
+        "fileCount": "files",
+        "error": "error"
+      }
+    },
+    "get_result_detail": {
+      "type": "compute",
+      "compute_unit": "search:getDetail",
+      "input_map": {
+        "results": "results",
+        "selectedIndex": "index"
+      },
+      "output_map": {
+        "selectedResult": "detail",
+        "error": "error"
+      }
+    },
+    "apply_refinement": {
+      "type": "compute",
+      "compute_unit": "search:refine",
+      "input_map": {
+        "query": "query",
+        "refinementType": "type",
+        "refinementValue": "value",
+        "queryHistory": "history"
+      },
+      "output_map": {
+        "query": "newQuery",
+        "queryHistory": "history",
+        "filePattern": "filePattern",
+        "excludePatterns": "excludes"
+      }
+    },
+    "export_results": {
+      "type": "compute",
+      "compute_unit": "search:export",
+      "input_map": {
+        "results": "results",
+        "query": "query",
+        "exportPath": "path",
+        "exportFormat": "format"
+      },
+      "output_map": {
+        "exportPath": "exported",
+        "error": "error"
+      }
+    },
+    "record_query": {
+      "type": "compute",
+      "compute_unit": "search:recordQuery",
+      "input_map": {
+        "query": "query",
+        "queryHistory": "history",
+        "resultCount": "count"
+      },
+      "output_map": {
+        "queryHistory": "history"
+      }
+    },
+    "clear_selection": {
+      "type": "set",
+      "target": "selectedIndex",
+      "value": null
+    },
+    "clear_refinement": {
+      "type": "set",
+      "target": "refinementValue",
+      "value": null
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_start",
+      "from": "idle",
+      "to": "searching",
+      "on_event": "SEARCH",
+      "gates": ["has_query"],
+      "actions": ["init_search", "execute_search"]
+    },
+    {
+      "id": "t_search_success",
+      "from": "searching",
+      "to": "viewing",
+      "on_event": "COMPLETE",
+      "gates": ["has_results", "no_error"],
+      "actions": ["record_query"]
+    },
+    {
+      "id": "t_search_empty",
+      "from": "searching",
+      "to": "viewing",
+      "on_event": "COMPLETE",
+      "gates": ["no_results", "no_error"]
+    },
+    {
+      "id": "t_search_error",
+      "from": "searching",
+      "to": "error",
+      "on_event": "COMPLETE",
+      "gates": ["has_error"]
+    },
+    {
+      "id": "t_new_search",
+      "from": "viewing",
+      "to": "searching",
+      "on_event": "SEARCH",
+      "gates": ["has_query"],
+      "actions": ["execute_search"]
+    },
+    {
+      "id": "t_select_result",
+      "from": "viewing",
+      "to": "drilling",
+      "on_event": "SELECT",
+      "gates": ["has_selection"],
+      "actions": ["get_result_detail"]
+    },
+    {
+      "id": "t_start_refine",
+      "from": "viewing",
+      "to": "refining",
+      "on_event": "REFINE"
+    },
+    {
+      "id": "t_export",
+      "from": "viewing",
+      "to": "exporting",
+      "on_event": "EXPORT",
+      "gates": ["has_export_path"],
+      "actions": ["export_results"]
+    },
+    {
+      "id": "t_done_from_viewing",
+      "from": "viewing",
+      "to": "done",
+      "on_event": "DONE"
+    },
+    {
+      "id": "t_back_from_drill",
+      "from": "drilling",
+      "to": "viewing",
+      "on_event": "BACK",
+      "actions": ["clear_selection"]
+    },
+    {
+      "id": "t_next_from_drill",
+      "from": "drilling",
+      "to": "drilling",
+      "on_event": "NEXT",
+      "actions": ["get_result_detail"]
+    },
+    {
+      "id": "t_prev_from_drill",
+      "from": "drilling",
+      "to": "drilling",
+      "on_event": "PREV",
+      "actions": ["get_result_detail"]
+    },
+    {
+      "id": "t_apply_refine",
+      "from": "refining",
+      "to": "searching",
+      "on_event": "APPLY",
+      "gates": ["has_refinement"],
+      "actions": ["apply_refinement", "clear_refinement", "execute_search"]
+    },
+    {
+      "id": "t_cancel_refine",
+      "from": "refining",
+      "to": "viewing",
+      "on_event": "CANCEL",
+      "actions": ["clear_refinement"]
+    },
+    {
+      "id": "t_export_done",
+      "from": "exporting",
+      "to": "viewing",
+      "on_event": "COMPLETE",
+      "gates": ["no_error"]
+    },
+    {
+      "id": "t_export_error",
+      "from": "exporting",
+      "to": "error",
+      "on_event": "COMPLETE",
+      "gates": ["has_error"]
+    },
+    {
+      "id": "t_retry",
+      "from": "error",
+      "to": "idle",
+      "on_event": "RETRY"
+    }
+  ]
+}

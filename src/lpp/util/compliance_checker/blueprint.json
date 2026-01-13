@@ -1,0 +1,566 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "compliance_checker",
+  "name": "L++ Compliance Checker",
+  "version": "1.0.0",
+  "description": "Verifies L++ blueprints against compliance policies",
+  "context_schema": {
+    "properties": {
+      "blueprint": {
+        "type": "object",
+        "description": "The loaded blueprint to check"
+      },
+      "blueprint_path": {
+        "type": "string",
+        "description": "Path to the loaded blueprint"
+      },
+      "blueprint_name": {
+        "type": "string",
+        "description": "Name of the loaded blueprint"
+      },
+      "policies": {
+        "type": "array",
+        "description": "List of loaded compliance policies"
+      },
+      "policies_dir": {
+        "type": "string",
+        "description": "Directory containing policy files"
+      },
+      "current_policy": {
+        "type": "object",
+        "description": "Currently selected policy for inspection"
+      },
+      "findings": {
+        "type": "array",
+        "description": "List of compliance findings"
+      },
+      "report": {
+        "type": "object",
+        "description": "Generated compliance report"
+      },
+      "score": {
+        "type": "number",
+        "description": "Compliance score (0-100)"
+      },
+      "summary": {
+        "type": "object",
+        "description": "Summary of pass/fail counts by severity"
+      },
+      "export_path": {
+        "type": "string",
+        "description": "Path where report was exported"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message if any"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "No blueprint loaded, waiting for input"
+    },
+    "blueprint_loaded": {
+      "description": "Blueprint loaded, ready to load policies"
+    },
+    "ready": {
+      "description": "Blueprint and policies loaded, ready to check"
+    },
+    "checking": {
+      "description": "Running compliance checks"
+    },
+    "report_ready": {
+      "description": "Compliance report generated"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
+  "gates": {
+    "has_blueprint": {
+      "type": "expression",
+      "expression": "blueprint is not None"
+    },
+    "no_blueprint": {
+      "type": "expression",
+      "expression": "blueprint is None"
+    },
+    "has_policies": {
+      "type": "expression",
+      "expression": "policies is not None and len(policies) > 0"
+    },
+    "no_policies": {
+      "type": "expression",
+      "expression": "policies is None or len(policies) == 0"
+    },
+    "has_findings": {
+      "type": "expression",
+      "expression": "findings is not None and len(findings) > 0"
+    },
+    "has_report": {
+      "type": "expression",
+      "expression": "report is not None"
+    },
+    "is_idle": {
+      "type": "expression",
+      "expression": "_state == 'idle'"
+    },
+    "is_ready": {
+      "type": "expression",
+      "expression": "_state == 'ready'"
+    },
+    "is_checking": {
+      "type": "expression",
+      "expression": "_state == 'checking'"
+    },
+    "is_report_ready": {
+      "type": "expression",
+      "expression": "_state == 'report_ready'"
+    },
+    "is_error": {
+      "type": "expression",
+      "expression": "_state == 'error'"
+    },
+    "score_passing": {
+      "type": "expression",
+      "expression": "score is not None and score >= 80"
+    },
+    "score_warning": {
+      "type": "expression",
+      "expression": "score is not None and score >= 50 and score < 80"
+    },
+    "score_failing": {
+      "type": "expression",
+      "expression": "score is not None and score < 50"
+    }
+  },
+  "actions": {
+    "load_blueprint": {
+      "type": "compute",
+      "compute_unit": "compliance:load_blueprint",
+      "input_map": {
+        "path": "event.payload.path"
+      },
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprint_path": "blueprint_path",
+        "blueprint_name": "blueprint_name",
+        "error": "error"
+      }
+    },
+    "load_policy": {
+      "type": "compute",
+      "compute_unit": "compliance:load_policy",
+      "input_map": {
+        "path": "event.payload.path"
+      },
+      "output_map": {
+        "policies": "policies",
+        "error": "error"
+      }
+    },
+    "load_policies": {
+      "type": "compute",
+      "compute_unit": "compliance:load_policies",
+      "input_map": {
+        "dir_path": "event.payload.dir_path"
+      },
+      "output_map": {
+        "policies": "policies",
+        "policies_dir": "policies_dir",
+        "error": "error"
+      }
+    },
+    "check_policy": {
+      "type": "compute",
+      "compute_unit": "compliance:check_policy",
+      "input_map": {
+        "blueprint": "blueprint",
+        "policy": "event.payload.policy"
+      },
+      "output_map": {
+        "findings": "findings",
+        "error": "error"
+      }
+    },
+    "check_all_policies": {
+      "type": "compute",
+      "compute_unit": "compliance:check_all_policies",
+      "input_map": {
+        "blueprint": "blueprint",
+        "policies": "policies"
+      },
+      "output_map": {
+        "findings": "findings",
+        "summary": "summary",
+        "error": "error"
+      }
+    },
+    "generate_report": {
+      "type": "compute",
+      "compute_unit": "compliance:generate_report",
+      "input_map": {
+        "blueprint": "blueprint",
+        "blueprint_name": "blueprint_name",
+        "policies": "policies",
+        "findings": "findings",
+        "summary": "summary"
+      },
+      "output_map": {
+        "report": "report",
+        "score": "score"
+      }
+    },
+    "calculate_score": {
+      "type": "compute",
+      "compute_unit": "compliance:calculate_score",
+      "input_map": {
+        "findings": "findings",
+        "policies": "policies"
+      },
+      "output_map": {
+        "score": "score"
+      }
+    },
+    "export_report": {
+      "type": "compute",
+      "compute_unit": "compliance:export_report",
+      "input_map": {
+        "report": "report",
+        "output_path": "event.payload.path",
+        "format": "event.payload.format"
+      },
+      "output_map": {
+        "export_path": "export_path",
+        "error": "error"
+      }
+    },
+    "select_policy": {
+      "type": "set",
+      "target": "current_policy",
+      "value_from": "event.payload.policy"
+    },
+    "clear_policy": {
+      "type": "set",
+      "target": "current_policy",
+      "value": null
+    },
+    "clear_findings": {
+      "type": "set",
+      "target": "findings",
+      "value": null
+    },
+    "clear_report": {
+      "type": "set",
+      "target": "report",
+      "value": null
+    },
+    "set_error": {
+      "type": "set",
+      "target": "error",
+      "value_from": "event.payload.message"
+    },
+    "clear_error": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    },
+    "unload_blueprint": {
+      "type": "set",
+      "target": "blueprint",
+      "value": null
+    },
+    "unload_policies": {
+      "type": "set",
+      "target": "policies",
+      "value": null
+    }
+  },
+  "display": {
+    "rules": [
+      {
+        "gate": "is_error",
+        "template": "ERROR: {error}"
+      },
+      {
+        "gate": "is_idle",
+        "template": "No blueprint loaded. Use LOAD command."
+      },
+      {
+        "gate": "is_report_ready",
+        "template": "Report Ready | Score: {score}% | {blueprint_name}"
+      },
+      {
+        "gate": "is_ready",
+        "template": "Ready | {blueprint_name} | Policies: {policies}"
+      },
+      {
+        "gate": "has_blueprint",
+        "template": "Loaded: {blueprint_name}"
+      },
+      {
+        "template": "L++ Compliance Checker"
+      }
+    ]
+  },
+  "transitions": [
+    {
+      "id": "t_load_blueprint",
+      "from": "idle",
+      "to": "blueprint_loaded",
+      "on_event": "LOAD_BLUEPRINT",
+      "gates": [
+        "no_blueprint"
+      ],
+      "actions": [
+        "load_blueprint"
+      ]
+    },
+    {
+      "id": "t_load_blueprint_error",
+      "from": "idle",
+      "to": "error",
+      "on_event": "LOAD_FAILED",
+      "actions": [
+        "set_error"
+      ]
+    },
+    {
+      "id": "t_reload_blueprint",
+      "from": "blueprint_loaded",
+      "to": "blueprint_loaded",
+      "on_event": "LOAD_BLUEPRINT",
+      "actions": [
+        "load_blueprint",
+        "clear_findings",
+        "clear_report"
+      ]
+    },
+    {
+      "id": "t_reload_blueprint_ready",
+      "from": "ready",
+      "to": "ready",
+      "on_event": "LOAD_BLUEPRINT",
+      "actions": [
+        "load_blueprint",
+        "clear_findings",
+        "clear_report"
+      ]
+    },
+    {
+      "id": "t_reload_blueprint_report",
+      "from": "report_ready",
+      "to": "ready",
+      "on_event": "LOAD_BLUEPRINT",
+      "actions": [
+        "load_blueprint",
+        "clear_findings",
+        "clear_report"
+      ]
+    },
+    {
+      "id": "t_load_policies",
+      "from": "blueprint_loaded",
+      "to": "ready",
+      "on_event": "LOAD_POLICIES",
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "load_policies"
+      ]
+    },
+    {
+      "id": "t_load_single_policy",
+      "from": "blueprint_loaded",
+      "to": "ready",
+      "on_event": "LOAD_POLICY",
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "load_policy"
+      ]
+    },
+    {
+      "id": "t_reload_policies",
+      "from": "ready",
+      "to": "ready",
+      "on_event": "LOAD_POLICIES",
+      "actions": [
+        "load_policies",
+        "clear_findings",
+        "clear_report"
+      ]
+    },
+    {
+      "id": "t_reload_policies_report",
+      "from": "report_ready",
+      "to": "ready",
+      "on_event": "LOAD_POLICIES",
+      "actions": [
+        "load_policies",
+        "clear_findings",
+        "clear_report"
+      ]
+    },
+    {
+      "id": "t_add_policy",
+      "from": "ready",
+      "to": "ready",
+      "on_event": "LOAD_POLICY",
+      "actions": [
+        "load_policy"
+      ]
+    },
+    {
+      "id": "t_check_all",
+      "from": "ready",
+      "to": "checking",
+      "on_event": "CHECK",
+      "gates": [
+        "has_blueprint",
+        "has_policies"
+      ],
+      "actions": [
+        "check_all_policies"
+      ]
+    },
+    {
+      "id": "t_check_single",
+      "from": "ready",
+      "to": "checking",
+      "on_event": "CHECK_POLICY",
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "check_policy"
+      ]
+    },
+    {
+      "id": "t_generate_report",
+      "from": "checking",
+      "to": "report_ready",
+      "on_event": "GENERATE_REPORT",
+      "gates": [
+        "has_findings"
+      ],
+      "actions": [
+        "generate_report"
+      ]
+    },
+    {
+      "id": "t_auto_report",
+      "from": "checking",
+      "to": "report_ready",
+      "on_event": "AUTO",
+      "actions": [
+        "generate_report"
+      ]
+    },
+    {
+      "id": "t_export_report",
+      "from": "report_ready",
+      "to": "report_ready",
+      "on_event": "EXPORT",
+      "gates": [
+        "has_report"
+      ],
+      "actions": [
+        "export_report"
+      ]
+    },
+    {
+      "id": "t_recheck",
+      "from": "report_ready",
+      "to": "checking",
+      "on_event": "CHECK",
+      "gates": [
+        "has_blueprint",
+        "has_policies"
+      ],
+      "actions": [
+        "clear_report",
+        "check_all_policies"
+      ]
+    },
+    {
+      "id": "t_back_to_ready",
+      "from": "report_ready",
+      "to": "ready",
+      "on_event": "BACK",
+      "actions": [
+        "clear_report"
+      ]
+    },
+    {
+      "id": "t_back_to_loaded",
+      "from": "ready",
+      "to": "blueprint_loaded",
+      "on_event": "BACK",
+      "actions": [
+        "unload_policies",
+        "clear_findings"
+      ]
+    },
+    {
+      "id": "t_unload",
+      "from": "blueprint_loaded",
+      "to": "idle",
+      "on_event": "UNLOAD",
+      "actions": [
+        "unload_blueprint"
+      ]
+    },
+    {
+      "id": "t_unload_ready",
+      "from": "ready",
+      "to": "idle",
+      "on_event": "UNLOAD",
+      "actions": [
+        "unload_blueprint",
+        "unload_policies",
+        "clear_findings"
+      ]
+    },
+    {
+      "id": "t_unload_report",
+      "from": "report_ready",
+      "to": "idle",
+      "on_event": "UNLOAD",
+      "actions": [
+        "unload_blueprint",
+        "unload_policies",
+        "clear_findings",
+        "clear_report"
+      ]
+    },
+    {
+      "id": "t_recover",
+      "from": "error",
+      "to": "idle",
+      "on_event": "CLEAR",
+      "actions": [
+        "clear_error"
+      ]
+    },
+    {
+      "id": "t_global_error",
+      "from": "*",
+      "to": "error",
+      "on_event": "ERROR",
+      "actions": [
+        "set_error"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "graph_visualizer",
+  "name": "Graph Visualizer",
+  "version": "1.0.0",
+  "description": "Generates an interactive HTML/SVG state machine diagram from an L++ blueprint.",
+  "context_schema": {
+    "properties": {
+      "blueprint": {
+        "type": "string",
+        "description": "JSON representation of the L++ blueprint"
+      },
+      "html_path": {
+        "type": "string",
+        "description": "Path to the generated HTML file"
+      },
+      "has_blueprint": {
+        "type": "boolean",
+        "default": false
+      },
+      "has_html": {
+        "type": "boolean",
+        "default": false
+      },
+      "error": {
+        "type": "string"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "Waiting for blueprint input"
+    },
+    "generating": {
+      "description": "Generating interactive diagram"
+    },
+    "done": {
+      "description": "Diagram generation complete"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "done": {}
+  },
+  "gates": {
+    "has_blueprint": {
+      "type": "expression",
+      "expression": "has_blueprint == True"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_start",
+      "from": "idle",
+      "to": "generating",
+      "on_event": "start",
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "set_html_path"
+      ]
+    },
+    {
+      "id": "t_generate",
+      "from": "generating",
+      "to": "done",
+      "on_event": "generate",
+      "actions": [
+        "generate_diagram"
+      ]
+    }
+  ],
+  "actions": {
+    "set_html_path": {
+      "type": "set",
+      "target": "html_path",
+      "value_from": "event.payload.html_path"
+    },
+    "generate_diagram": {
+      "type": "compute",
+      "compute_unit": "graph_visualizer:generate",
+      "input_map": {
+        "blueprint": "blueprint"
+      },
+      "output_map": {
+        "html_path": "html_path",
+        "has_html": "has_html"
+      }
+    }
+  }
+}

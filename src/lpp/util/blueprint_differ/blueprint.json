@@ -1,0 +1,682 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "lpp_blueprint_differ",
+  "name": "L++ Blueprint Diff & Merge",
+  "version": "1.0.0",
+  "description": "Semantic diff and merge tool for L++ blueprints",
+  "context_schema": {
+    "properties": {
+      "blueprint_left": {
+        "type": "object",
+        "description": "First blueprint (left/base) for comparison"
+      },
+      "blueprint_right": {
+        "type": "object",
+        "description": "Second blueprint (right/target) for comparison"
+      },
+      "blueprint_base": {
+        "type": "object",
+        "description": "Common ancestor blueprint for 3-way merge"
+      },
+      "path_left": {
+        "type": "string",
+        "description": "Path to left blueprint file"
+      },
+      "path_right": {
+        "type": "string",
+        "description": "Path to right blueprint file"
+      },
+      "path_base": {
+        "type": "string",
+        "description": "Path to base blueprint file"
+      },
+      "diff_result": {
+        "type": "object",
+        "description": "Computed semantic diff between blueprints"
+      },
+      "conflicts": {
+        "type": "array",
+        "description": "List of detected merge conflicts"
+      },
+      "merged_blueprint": {
+        "type": "object",
+        "description": "Result of merge operation"
+      },
+      "merge_strategy": {
+        "type": "string",
+        "description": "Merge strategy: take_left, take_right, manual"
+      },
+      "diff_format": {
+        "type": "string",
+        "description": "Output format: unified, summary, json_patch"
+      },
+      "formatted_diff": {
+        "type": "string",
+        "description": "Formatted diff output for display"
+      },
+      "json_patch": {
+        "type": "array",
+        "description": "RFC 6902 JSON patch operations"
+      },
+      "export_path": {
+        "type": "string",
+        "description": "Path where merged blueprint was exported"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message if any"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "No blueprints loaded, waiting for input"
+    },
+    "left_loaded": {
+      "description": "Left blueprint loaded, waiting for right"
+    },
+    "ready": {
+      "description": "Both blueprints loaded, ready to diff/merge"
+    },
+    "diffing": {
+      "description": "Computing semantic diff"
+    },
+    "diff_complete": {
+      "description": "Diff computed, results available"
+    },
+    "merging": {
+      "description": "Performing merge operation"
+    },
+    "merge_complete": {
+      "description": "Merge complete, result available"
+    },
+    "conflict": {
+      "description": "Merge conflicts detected, awaiting resolution"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
+  "gates": {
+    "has_left": {
+      "type": "expression",
+      "expression": "blueprint_left is not None"
+    },
+    "has_right": {
+      "type": "expression",
+      "expression": "blueprint_right is not None"
+    },
+    "has_both": {
+      "type": "expression",
+      "expression": "blueprint_left is not None and blueprint_right is not None"
+    },
+    "has_base": {
+      "type": "expression",
+      "expression": "blueprint_base is not None"
+    },
+    "has_diff": {
+      "type": "expression",
+      "expression": "diff_result is not None"
+    },
+    "has_conflicts": {
+      "type": "expression",
+      "expression": "conflicts is not None and len(conflicts) > 0"
+    },
+    "no_conflicts": {
+      "type": "expression",
+      "expression": "conflicts is None or len(conflicts) == 0"
+    },
+    "has_merged": {
+      "type": "expression",
+      "expression": "merged_blueprint is not None"
+    },
+    "strategy_is_manual": {
+      "type": "expression",
+      "expression": "merge_strategy == 'manual'"
+    },
+    "is_three_way": {
+      "type": "expression",
+      "expression": "blueprint_base is not None"
+    }
+  },
+  "actions": {
+    "load_left": {
+      "type": "compute",
+      "compute_unit": "diff:load_blueprint",
+      "input_map": {
+        "path": "event.payload.path",
+        "side": "'left'"
+      },
+      "output_map": {
+        "blueprint_left": "blueprint",
+        "path_left": "path",
+        "error": "error"
+      }
+    },
+    "load_right": {
+      "type": "compute",
+      "compute_unit": "diff:load_blueprint",
+      "input_map": {
+        "path": "event.payload.path",
+        "side": "'right'"
+      },
+      "output_map": {
+        "blueprint_right": "blueprint",
+        "path_right": "path",
+        "error": "error"
+      }
+    },
+    "load_base": {
+      "type": "compute",
+      "compute_unit": "diff:load_blueprint",
+      "input_map": {
+        "path": "event.payload.path",
+        "side": "'base'"
+      },
+      "output_map": {
+        "blueprint_base": "blueprint",
+        "path_base": "path",
+        "error": "error"
+      }
+    },
+    "compute_diff": {
+      "type": "compute",
+      "compute_unit": "diff:compute_diff",
+      "input_map": {
+        "left": "blueprint_left",
+        "right": "blueprint_right"
+      },
+      "output_map": {
+        "diff_result": "diff"
+      }
+    },
+    "format_diff_unified": {
+      "type": "compute",
+      "compute_unit": "diff:format_diff",
+      "input_map": {
+        "diff": "diff_result",
+        "format": "'unified'",
+        "path_left": "path_left",
+        "path_right": "path_right"
+      },
+      "output_map": {
+        "formatted_diff": "output",
+        "diff_format": "format"
+      }
+    },
+    "format_diff_summary": {
+      "type": "compute",
+      "compute_unit": "diff:format_diff",
+      "input_map": {
+        "diff": "diff_result",
+        "format": "'summary'",
+        "path_left": "path_left",
+        "path_right": "path_right"
+      },
+      "output_map": {
+        "formatted_diff": "output",
+        "diff_format": "format"
+      }
+    },
+    "generate_json_patch": {
+      "type": "compute",
+      "compute_unit": "diff:generate_json_patch",
+      "input_map": {
+        "diff": "diff_result"
+      },
+      "output_map": {
+        "json_patch": "patch",
+        "formatted_diff": "formatted"
+      }
+    },
+    "detect_conflicts": {
+      "type": "compute",
+      "compute_unit": "diff:detect_conflicts",
+      "input_map": {
+        "left": "blueprint_left",
+        "right": "blueprint_right",
+        "base": "blueprint_base",
+        "diff": "diff_result"
+      },
+      "output_map": {
+        "conflicts": "conflicts"
+      }
+    },
+    "merge_take_left": {
+      "type": "compute",
+      "compute_unit": "diff:merge_blueprints",
+      "input_map": {
+        "left": "blueprint_left",
+        "right": "blueprint_right",
+        "base": "blueprint_base",
+        "strategy": "'take_left'",
+        "conflicts": "conflicts"
+      },
+      "output_map": {
+        "merged_blueprint": "merged",
+        "merge_strategy": "strategy"
+      }
+    },
+    "merge_take_right": {
+      "type": "compute",
+      "compute_unit": "diff:merge_blueprints",
+      "input_map": {
+        "left": "blueprint_left",
+        "right": "blueprint_right",
+        "base": "blueprint_base",
+        "strategy": "'take_right'",
+        "conflicts": "conflicts"
+      },
+      "output_map": {
+        "merged_blueprint": "merged",
+        "merge_strategy": "strategy"
+      }
+    },
+    "merge_auto": {
+      "type": "compute",
+      "compute_unit": "diff:merge_blueprints",
+      "input_map": {
+        "left": "blueprint_left",
+        "right": "blueprint_right",
+        "base": "blueprint_base",
+        "strategy": "'auto'",
+        "conflicts": "conflicts"
+      },
+      "output_map": {
+        "merged_blueprint": "merged",
+        "merge_strategy": "strategy"
+      }
+    },
+    "set_strategy_manual": {
+      "type": "set",
+      "target": "merge_strategy",
+      "value": "manual"
+    },
+    "export_merged": {
+      "type": "compute",
+      "compute_unit": "diff:export_merged",
+      "input_map": {
+        "blueprint": "merged_blueprint",
+        "path": "event.payload.path"
+      },
+      "output_map": {
+        "export_path": "path"
+      }
+    },
+    "set_error": {
+      "type": "set",
+      "target": "error",
+      "value_from": "event.payload.message"
+    },
+    "clear_error": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    },
+    "clear_all": {
+      "type": "compute",
+      "compute_unit": "diff:clear_all",
+      "input_map": {},
+      "output_map": {
+        "blueprint_left": "blueprint_left",
+        "blueprint_right": "blueprint_right",
+        "blueprint_base": "blueprint_base",
+        "diff_result": "diff_result",
+        "conflicts": "conflicts",
+        "merged_blueprint": "merged_blueprint",
+        "formatted_diff": "formatted_diff",
+        "json_patch": "json_patch"
+      }
+    },
+    "clear_diff": {
+      "type": "set",
+      "target": "diff_result",
+      "value": null
+    },
+    "clear_merge": {
+      "type": "set",
+      "target": "merged_blueprint",
+      "value": null
+    }
+  },
+  "display": {
+    "rules": [
+      {
+        "gate": "is_error",
+        "template": "ERROR: {error}"
+      },
+      {
+        "gate": "is_idle",
+        "template": "No blueprints loaded. Use LOAD_LEFT to start."
+      },
+      {
+        "gate": "is_left_loaded",
+        "template": "Left: {path_left} | Use LOAD_RIGHT to continue."
+      },
+      {
+        "gate": "is_ready",
+        "template": "Ready: {path_left} vs {path_right}"
+      },
+      {
+        "gate": "is_diff_complete",
+        "template": "Diff complete. Use SHOW to view results."
+      },
+      {
+        "gate": "is_merge_complete",
+        "template": "Merge complete. Use EXPORT to save."
+      },
+      {
+        "gate": "is_conflict",
+        "template": "Conflicts detected: {conflicts}"
+      },
+      {
+        "template": "L++ Blueprint Differ"
+      }
+    ]
+  },
+  "transitions": [
+    {
+      "id": "t_load_left_from_idle",
+      "from": "idle",
+      "to": "left_loaded",
+      "on_event": "LOAD_LEFT",
+      "actions": [
+        "load_left"
+      ]
+    },
+    {
+      "id": "t_load_right_from_left",
+      "from": "left_loaded",
+      "to": "ready",
+      "on_event": "LOAD_RIGHT",
+      "actions": [
+        "load_right"
+      ]
+    },
+    {
+      "id": "t_load_base_from_ready",
+      "from": "ready",
+      "to": "ready",
+      "on_event": "LOAD_BASE",
+      "actions": [
+        "load_base"
+      ]
+    },
+    {
+      "id": "t_reload_left",
+      "from": "ready",
+      "to": "ready",
+      "on_event": "LOAD_LEFT",
+      "actions": [
+        "load_left",
+        "clear_diff",
+        "clear_merge"
+      ]
+    },
+    {
+      "id": "t_reload_right",
+      "from": "ready",
+      "to": "ready",
+      "on_event": "LOAD_RIGHT",
+      "actions": [
+        "load_right",
+        "clear_diff",
+        "clear_merge"
+      ]
+    },
+    {
+      "id": "t_start_diff",
+      "from": "ready",
+      "to": "diffing",
+      "on_event": "DIFF",
+      "gates": [
+        "has_both"
+      ],
+      "actions": [
+        "compute_diff"
+      ]
+    },
+    {
+      "id": "t_diff_to_complete",
+      "from": "diffing",
+      "to": "diff_complete",
+      "on_event": "DIFF_DONE",
+      "actions": [
+        "format_diff_unified"
+      ]
+    },
+    {
+      "id": "t_auto_diff_complete",
+      "from": "ready",
+      "to": "diff_complete",
+      "on_event": "DIFF_ALL",
+      "gates": [
+        "has_both"
+      ],
+      "actions": [
+        "compute_diff",
+        "format_diff_unified"
+      ]
+    },
+    {
+      "id": "t_show_summary",
+      "from": "diff_complete",
+      "to": "diff_complete",
+      "on_event": "SHOW_SUMMARY",
+      "gates": [
+        "has_diff"
+      ],
+      "actions": [
+        "format_diff_summary"
+      ]
+    },
+    {
+      "id": "t_show_unified",
+      "from": "diff_complete",
+      "to": "diff_complete",
+      "on_event": "SHOW_UNIFIED",
+      "gates": [
+        "has_diff"
+      ],
+      "actions": [
+        "format_diff_unified"
+      ]
+    },
+    {
+      "id": "t_show_patch",
+      "from": "diff_complete",
+      "to": "diff_complete",
+      "on_event": "SHOW_PATCH",
+      "gates": [
+        "has_diff"
+      ],
+      "actions": [
+        "generate_json_patch"
+      ]
+    },
+    {
+      "id": "t_start_merge",
+      "from": "diff_complete",
+      "to": "merging",
+      "on_event": "MERGE",
+      "gates": [
+        "has_diff"
+      ],
+      "actions": [
+        "detect_conflicts"
+      ]
+    },
+    {
+      "id": "t_merge_no_conflict",
+      "from": "merging",
+      "to": "merge_complete",
+      "on_event": "MERGE_AUTO",
+      "gates": [
+        "no_conflicts"
+      ],
+      "actions": [
+        "merge_auto"
+      ]
+    },
+    {
+      "id": "t_merge_conflict_detected",
+      "from": "merging",
+      "to": "conflict",
+      "on_event": "CONFLICT_DETECTED",
+      "gates": [
+        "has_conflicts"
+      ],
+      "actions": [
+        "set_strategy_manual"
+      ]
+    },
+    {
+      "id": "t_resolve_take_left",
+      "from": "conflict",
+      "to": "merge_complete",
+      "on_event": "TAKE_LEFT",
+      "actions": [
+        "merge_take_left"
+      ]
+    },
+    {
+      "id": "t_resolve_take_right",
+      "from": "conflict",
+      "to": "merge_complete",
+      "on_event": "TAKE_RIGHT",
+      "actions": [
+        "merge_take_right"
+      ]
+    },
+    {
+      "id": "t_force_merge_left",
+      "from": "diff_complete",
+      "to": "merge_complete",
+      "on_event": "MERGE_LEFT",
+      "gates": [
+        "has_diff"
+      ],
+      "actions": [
+        "detect_conflicts",
+        "merge_take_left"
+      ]
+    },
+    {
+      "id": "t_force_merge_right",
+      "from": "diff_complete",
+      "to": "merge_complete",
+      "on_event": "MERGE_RIGHT",
+      "gates": [
+        "has_diff"
+      ],
+      "actions": [
+        "detect_conflicts",
+        "merge_take_right"
+      ]
+    },
+    {
+      "id": "t_export",
+      "from": "merge_complete",
+      "to": "merge_complete",
+      "on_event": "EXPORT",
+      "gates": [
+        "has_merged"
+      ],
+      "actions": [
+        "export_merged"
+      ]
+    },
+    {
+      "id": "t_back_to_diff",
+      "from": "merge_complete",
+      "to": "diff_complete",
+      "on_event": "BACK",
+      "actions": [
+        "clear_merge"
+      ]
+    },
+    {
+      "id": "t_back_from_conflict",
+      "from": "conflict",
+      "to": "diff_complete",
+      "on_event": "BACK",
+      "actions": [
+        "clear_merge"
+      ]
+    },
+    {
+      "id": "t_rediff",
+      "from": "diff_complete",
+      "to": "diff_complete",
+      "on_event": "DIFF_ALL",
+      "actions": [
+        "compute_diff",
+        "format_diff_unified"
+      ]
+    },
+    {
+      "id": "t_back_to_ready",
+      "from": "diff_complete",
+      "to": "ready",
+      "on_event": "RESET",
+      "actions": [
+        "clear_diff",
+        "clear_merge"
+      ]
+    },
+    {
+      "id": "t_clear_all",
+      "from": "ready",
+      "to": "idle",
+      "on_event": "CLEAR",
+      "actions": [
+        "clear_all"
+      ]
+    },
+    {
+      "id": "t_clear_from_diff",
+      "from": "diff_complete",
+      "to": "idle",
+      "on_event": "CLEAR",
+      "actions": [
+        "clear_all"
+      ]
+    },
+    {
+      "id": "t_clear_from_merge",
+      "from": "merge_complete",
+      "to": "idle",
+      "on_event": "CLEAR",
+      "actions": [
+        "clear_all"
+      ]
+    },
+    {
+      "id": "t_error_recover",
+      "from": "error",
+      "to": "idle",
+      "on_event": "CLEAR",
+      "actions": [
+        "clear_error",
+        "clear_all"
+      ]
+    },
+    {
+      "id": "t_load_error",
+      "from": "*",
+      "to": "error",
+      "on_event": "LOAD_FAILED",
+      "actions": [
+        "set_error"
+      ]
+    }
+  ]
+}

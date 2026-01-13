@@ -1,0 +1,112 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "py2lpp_analyzer",
+  "name": "Python Code Analyzer",
+  "version": "1.0.0",
+  "description": "Analyzes Python code patterns and identifies state machines",
+  "context_schema": {
+    "properties": {
+      "pythonFiles": {
+        "type": "array",
+        "description": "Python files to analyze"
+      },
+      "patterns": {
+        "type": "object",
+        "description": "Detected code patterns"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "Awaiting analysis request"
+    },
+    "analyzing": {
+      "description": "Analyzing code patterns"
+    },
+    "done": {
+      "description": "Analysis complete"
+    },
+    "error": {
+      "description": "Analysis failed"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "done": {
+      "output_schema": {
+        "patterns": {
+          "type": "object",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": ["patterns_detected"]
+    },
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
+  "gates": {
+    "has_files": {
+      "type": "expression",
+      "expression": "pythonFiles is not None"
+    },
+    "has_patterns": {
+      "type": "expression",
+      "expression": "patterns is not None"
+    },
+    "has_error": {
+      "type": "expression",
+      "expression": "error is not None"
+    },
+    "no_error": {
+      "type": "expression",
+      "expression": "error is None"
+    }
+  },
+  "actions": {
+    "analyze_patterns": {
+      "type": "compute",
+      "compute_unit": "py2lpp:analyzePatterns",
+      "input_map": {
+        "pythonFiles": "pythonFiles"
+      },
+      "output_map": {
+        "patterns": "patterns",
+        "error": "error"
+      }
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_start",
+      "from": "idle",
+      "to": "analyzing",
+      "on_event": "ANALYZE",
+      "gates": ["has_files"],
+      "actions": ["analyze_patterns"]
+    },
+    {
+      "id": "t_done",
+      "from": "analyzing",
+      "to": "done",
+      "on_event": "COMPLETE",
+      "gates": ["has_patterns", "no_error"]
+    },
+    {
+      "id": "t_error",
+      "from": "analyzing",
+      "to": "error",
+      "on_event": "COMPLETE",
+      "gates": ["has_error"]
+    }
+  ]
+}

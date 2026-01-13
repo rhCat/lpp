@@ -1,0 +1,386 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "scholar_chat",
+  "name": "Scholar Chatbot",
+  "version": "1.0.0",
+  "description": "LLM-powered research assistant with deep search capabilities",
+  "context_schema": {
+    "properties": {
+      "apiKey": {
+        "type": "string",
+        "description": "LLM API key"
+      },
+      "apiBase": {
+        "type": "string",
+        "description": "LLM API endpoint"
+      },
+      "model": {
+        "type": "string",
+        "description": "LLM model name"
+      },
+      "query": {
+        "type": "string",
+        "description": "Current research query"
+      },
+      "sources": {
+        "type": "array",
+        "description": "Search sources to use [arxiv, semantic_scholar, web]"
+      },
+      "searchResults": {
+        "type": "array",
+        "description": "Aggregated search results from all sources"
+      },
+      "selectedPapers": {
+        "type": "array",
+        "description": "Papers selected for deep analysis"
+      },
+      "paperDetails": {
+        "type": "array",
+        "description": "Fetched details for selected papers"
+      },
+      "paperLinks": {
+        "type": "array",
+        "description": "URLs for selected papers [{title, url, pdfUrl}]"
+      },
+      "conversation": {
+        "type": "array",
+        "description": "Chat history [{role, content}]"
+      },
+      "synthesis": {
+        "type": "string",
+        "description": "LLM-generated research synthesis"
+      },
+      "followUpQuestions": {
+        "type": "array",
+        "description": "Suggested follow-up questions"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "Ready for research query"
+    },
+    "searching": {
+      "description": "Searching academic sources"
+    },
+    "reviewing": {
+      "description": "Reviewing search results"
+    },
+    "analyzing": {
+      "description": "LLM analyzing selected papers"
+    },
+    "chatting": {
+      "description": "Interactive Q&A about research"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
+  "gates": {
+    "hasQuery": {
+      "type": "expression",
+      "expression": "query is not None"
+    },
+    "hasResults": {
+      "type": "expression",
+      "expression": "searchResults is not None"
+    },
+    "hasSelected": {
+      "type": "expression",
+      "expression": "selectedPapers is not None"
+    },
+    "hasDetails": {
+      "type": "expression",
+      "expression": "paperDetails is not None"
+    },
+    "hasSynthesis": {
+      "type": "expression",
+      "expression": "synthesis is not None"
+    },
+    "hasConversation": {
+      "type": "expression",
+      "expression": "conversation is not None"
+    },
+    "hasError": {
+      "type": "expression",
+      "expression": "error is not None"
+    },
+    "noError": {
+      "type": "expression",
+      "expression": "error is None"
+    }
+  },
+  "actions": {
+    "initConfig": {
+      "type": "compute",
+      "compute_unit": "scholar:initConfig",
+      "input_map": {},
+      "output_map": {
+        "apiKey": "apiKey",
+        "apiBase": "apiBase",
+        "model": "model",
+        "sources": "sources"
+      }
+    },
+    "setQuery": {
+      "type": "set",
+      "target": "query",
+      "value_from": "event.payload.query"
+    },
+    "setSources": {
+      "type": "set",
+      "target": "sources",
+      "value_from": "event.payload.sources"
+    },
+    "searchAll": {
+      "type": "compute",
+      "compute_unit": "scholar:searchAll",
+      "input_map": {
+        "query": "query",
+        "sources": "sources"
+      },
+      "output_map": {
+        "searchResults": "searchResults",
+        "error": "error"
+      }
+    },
+    "selectPapers": {
+      "type": "set",
+      "target": "selectedPapers",
+      "value_from": "event.payload.indices"
+    },
+    "fetchDetails": {
+      "type": "compute",
+      "compute_unit": "scholar:fetchDetails",
+      "input_map": {
+        "searchResults": "searchResults",
+        "selectedPapers": "selectedPapers"
+      },
+      "output_map": {
+        "paperDetails": "paperDetails",
+        "paperLinks": "paperLinks",
+        "error": "error"
+      }
+    },
+    "synthesize": {
+      "type": "compute",
+      "compute_unit": "scholar:synthesize",
+      "input_map": {
+        "query": "query",
+        "paperDetails": "paperDetails",
+        "paperLinks": "paperLinks",
+        "apiKey": "apiKey",
+        "apiBase": "apiBase",
+        "model": "model"
+      },
+      "output_map": {
+        "synthesis": "synthesis",
+        "followUpQuestions": "followUpQuestions",
+        "conversation": "conversation",
+        "error": "error"
+      }
+    },
+    "chat": {
+      "type": "compute",
+      "compute_unit": "scholar:chat",
+      "input_map": {
+        "question": "event.payload.question",
+        "conversation": "conversation",
+        "paperDetails": "paperDetails",
+        "apiKey": "apiKey",
+        "apiBase": "apiBase",
+        "model": "model"
+      },
+      "output_map": {
+        "synthesis": "synthesis",
+        "conversation": "conversation",
+        "error": "error"
+      }
+    },
+    "clearResults": {
+      "type": "set",
+      "target": "searchResults",
+      "value": null
+    },
+    "clearSelection": {
+      "type": "set",
+      "target": "selectedPapers",
+      "value": null
+    },
+    "clearSynthesis": {
+      "type": "set",
+      "target": "synthesis",
+      "value": null
+    },
+    "clearError": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_init",
+      "from": "idle",
+      "to": "idle",
+      "on_event": "INIT",
+      "actions": [
+        "initConfig"
+      ]
+    },
+    {
+      "id": "t_search",
+      "from": "idle",
+      "to": "searching",
+      "on_event": "SEARCH",
+      "actions": [
+        "setQuery",
+        "searchAll"
+      ]
+    },
+    {
+      "id": "t_search_done",
+      "from": "searching",
+      "to": "reviewing",
+      "on_event": "DONE",
+      "gates": [
+        "noError"
+      ]
+    },
+    {
+      "id": "t_search_error",
+      "from": "searching",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": [
+        "hasError"
+      ]
+    },
+    {
+      "id": "t_new_search",
+      "from": "reviewing",
+      "to": "searching",
+      "on_event": "SEARCH",
+      "actions": [
+        "clearSelection",
+        "clearSynthesis",
+        "setQuery",
+        "searchAll"
+      ]
+    },
+    {
+      "id": "t_select",
+      "from": "reviewing",
+      "to": "analyzing",
+      "on_event": "SELECT",
+      "actions": [
+        "selectPapers",
+        "fetchDetails",
+        "synthesize"
+      ]
+    },
+    {
+      "id": "t_analyze_done",
+      "from": "analyzing",
+      "to": "chatting",
+      "on_event": "DONE",
+      "gates": [
+        "noError"
+      ]
+    },
+    {
+      "id": "t_analyze_error",
+      "from": "analyzing",
+      "to": "error",
+      "on_event": "DONE",
+      "gates": [
+        "hasError"
+      ]
+    },
+    {
+      "id": "t_ask",
+      "from": "chatting",
+      "to": "chatting",
+      "on_event": "ASK",
+      "actions": [
+        "chat"
+      ]
+    },
+    {
+      "id": "t_new_search_chat",
+      "from": "chatting",
+      "to": "searching",
+      "on_event": "SEARCH",
+      "actions": [
+        "clearResults",
+        "clearSelection",
+        "clearSynthesis",
+        "setQuery",
+        "searchAll"
+      ]
+    },
+    {
+      "id": "t_reselect",
+      "from": "chatting",
+      "to": "reviewing",
+      "on_event": "BACK",
+      "actions": [
+        "clearSynthesis"
+      ]
+    },
+    {
+      "id": "t_reset",
+      "from": "reviewing",
+      "to": "idle",
+      "on_event": "RESET",
+      "actions": [
+        "clearResults",
+        "clearSelection"
+      ]
+    },
+    {
+      "id": "t_retry",
+      "from": "error",
+      "to": "idle",
+      "on_event": "RETRY",
+      "actions": [
+        "clearError"
+      ]
+    }
+  ],
+  "display": {
+    "rules": [
+      {
+        "gate": "hasError",
+        "template": "Error: {error}"
+      },
+      {
+        "gate": "hasSynthesis",
+        "template": "Research on: {query}"
+      },
+      {
+        "gate": "hasResults",
+        "template": "Found papers for: {query}"
+      },
+      {
+        "gate": "hasQuery",
+        "template": "Searching: {query}"
+      },
+      {
+        "template": "Ready for research"
+      }
+    ]
+  }
+}

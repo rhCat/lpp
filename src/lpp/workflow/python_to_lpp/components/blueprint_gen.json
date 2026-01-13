@@ -1,0 +1,120 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "py2lpp_blueprint_gen",
+  "name": "Blueprint Generator",
+  "version": "1.0.0",
+  "description": "Generates L++ blueprints from extracted modules",
+  "context_schema": {
+    "properties": {
+      "extractedModules": {
+        "type": "array",
+        "description": "Extracted modules"
+      },
+      "blueprints": {
+        "type": "array",
+        "description": "Generated blueprints"
+      },
+      "blueprintsGenerated": {
+        "type": "number",
+        "description": "Count of blueprints"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "Awaiting generation request"
+    },
+    "generating": {
+      "description": "Generating blueprints"
+    },
+    "done": {
+      "description": "Generation complete"
+    },
+    "error": {
+      "description": "Generation failed"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "done": {
+      "output_schema": {
+        "blueprints": {
+          "type": "array",
+          "non_null": true
+        },
+        "blueprintsGenerated": {
+          "type": "number",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": ["blueprints_generated"]
+    },
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
+  "gates": {
+    "has_modules": {
+      "type": "expression",
+      "expression": "extractedModules is not None"
+    },
+    "has_blueprints": {
+      "type": "expression",
+      "expression": "blueprints is not None"
+    },
+    "has_error": {
+      "type": "expression",
+      "expression": "error is not None"
+    },
+    "no_error": {
+      "type": "expression",
+      "expression": "error is None"
+    }
+  },
+  "actions": {
+    "generate_blueprints": {
+      "type": "compute",
+      "compute_unit": "py2lpp:generateBlueprints",
+      "input_map": {
+        "extractedModules": "extractedModules"
+      },
+      "output_map": {
+        "blueprints": "blueprints",
+        "blueprintsGenerated": "count"
+      }
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_start",
+      "from": "idle",
+      "to": "generating",
+      "on_event": "GENERATE",
+      "gates": ["has_modules"],
+      "actions": ["generate_blueprints"]
+    },
+    {
+      "id": "t_done",
+      "from": "generating",
+      "to": "done",
+      "on_event": "COMPLETE",
+      "gates": ["has_blueprints", "no_error"]
+    },
+    {
+      "id": "t_error",
+      "from": "generating",
+      "to": "error",
+      "on_event": "COMPLETE",
+      "gates": ["has_error"]
+    }
+  ]
+}

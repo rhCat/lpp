@@ -1,0 +1,113 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "blueprint_builder",
+  "name": "Blueprint Builder",
+  "version": "1.0.0",
+  "description": "Builds L++ blueprints from extracted patterns and modules",
+  "states": {
+    "idle": {
+      "description": "Awaiting module data"
+    },
+    "building": {
+      "description": "Building blueprint"
+    },
+    "complete": {
+      "description": "Blueprint built"
+    },
+    "error": {
+      "description": "Build error"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "complete": {},
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
+  "gates": {
+    "has_module": {
+      "type": "expression",
+      "expression": "module is not None"
+    },
+    "valid_patterns": {
+      "type": "expression",
+      "expression": "patterns valid"
+    }
+  },
+  "actions": {
+    "build_from_class": {
+      "type": "compute",
+      "unit": "blueprint:buildFromClass",
+      "input_map": {},
+      "output_map": {}
+    },
+    "build_from_patterns": {
+      "type": "compute",
+      "unit": "blueprint:buildFromPatterns",
+      "input_map": {},
+      "output_map": {}
+    },
+    "add_states": {
+      "type": "compute",
+      "unit": "blueprint:addStates",
+      "input_map": {},
+      "output_map": {}
+    },
+    "add_transitions": {
+      "type": "compute",
+      "unit": "blueprint:addTransitions",
+      "input_map": {},
+      "output_map": {}
+    },
+    "add_gates": {
+      "type": "compute",
+      "unit": "blueprint:addGates",
+      "input_map": {},
+      "output_map": {}
+    },
+    "add_actions": {
+      "type": "compute",
+      "unit": "blueprint:addActions",
+      "input_map": {},
+      "output_map": {}
+    },
+    "validate": {
+      "type": "compute",
+      "unit": "blueprint:validate",
+      "input_map": {},
+      "output_map": {}
+    },
+    "to_json": {
+      "type": "compute",
+      "unit": "blueprint:toJson",
+      "input_map": {},
+      "output_map": {}
+    }
+  },
+  "transitions": [
+    {
+      "id": "t0",
+      "from": "idle",
+      "to": "building",
+      "on_event": "BUILD"
+    },
+    {
+      "id": "t1",
+      "from": "building",
+      "to": "complete",
+      "on_event": "DONE"
+    },
+    {
+      "id": "t2",
+      "from": "*",
+      "to": "error",
+      "on_event": "ERROR"
+    }
+  ]
+}

@@ -1,0 +1,411 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "logic_decoder",
+  "name": "Python Logic Decoder",
+  "version": "1.0.0",
+  "description": "Decode Python files into L++ blueprints by analyzing AST, control flow, and import semantics",
+  "context_schema": {
+    "properties": {
+      "filePath": {
+        "type": "string"
+      },
+      "sourceCode": {
+        "type": "string"
+      },
+      "ast": {
+        "type": "object"
+      },
+      "imports": {
+        "type": "array"
+      },
+      "functions": {
+        "type": "array"
+      },
+      "classes": {
+        "type": "array"
+      },
+      "controlFlow": {
+        "type": "object"
+      },
+      "inferredStates": {
+        "type": "array"
+      },
+      "inferredTransitions": {
+        "type": "array"
+      },
+      "inferredActions": {
+        "type": "array"
+      },
+      "inferredGates": {
+        "type": "array"
+      },
+      "blueprint": {
+        "type": "object"
+      },
+      "blueprintJson": {
+        "type": "string"
+      },
+      "analysisReport": {
+        "type": "object"
+      },
+      "error": {
+        "type": "string"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "name": "Idle",
+      "description": "Awaiting file path or source code"
+    },
+    "parsing": {
+      "name": "Parsing",
+      "description": "Parsing Python source into AST"
+    },
+    "analyzing": {
+      "name": "Analyzing",
+      "description": "Analyzing imports, functions, and control flow"
+    },
+    "inferring": {
+      "name": "Inferring Logic",
+      "description": "Inferring states, transitions, gates from code patterns"
+    },
+    "generating": {
+      "name": "Generating Blueprint",
+      "description": "Assembling final L++ blueprint"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    },
+    "complete": {}
+  },
+  "gates": {
+    "hasFilePath": {
+      "type": "compute",
+      "compute_unit": "decoder:hasValue",
+      "input_map": {
+        "field": "'filePath'"
+      }
+    },
+    "hasSourceCode": {
+      "type": "compute",
+      "compute_unit": "decoder:hasValue",
+      "input_map": {
+        "field": "'sourceCode'"
+      }
+    },
+    "hasAst": {
+      "type": "compute",
+      "compute_unit": "decoder:hasValue",
+      "input_map": {
+        "field": "'ast'"
+      }
+    },
+    "hasAnalysis": {
+      "type": "compute",
+      "compute_unit": "decoder:hasValue",
+      "input_map": {
+        "field": "'controlFlow'"
+      }
+    },
+    "hasInferences": {
+      "type": "compute",
+      "compute_unit": "decoder:hasValue",
+      "input_map": {
+        "field": "'inferredStates'"
+      }
+    },
+    "hasError": {
+      "type": "compute",
+      "compute_unit": "decoder:hasValue",
+      "input_map": {
+        "field": "'error'"
+      }
+    }
+  },
+  "actions": {
+    "loadFile": {
+      "type": "compute",
+      "compute_unit": "decoder:loadFile",
+      "input_map": {
+        "filePath": "filePath"
+      },
+      "output_map": {
+        "sourceCode": "sourceCode",
+        "error": "error"
+      },
+      "description": "Load Python file from disk"
+    },
+    "parseAst": {
+      "type": "compute",
+      "compute_unit": "decoder:parseAst",
+      "input_map": {
+        "sourceCode": "sourceCode"
+      },
+      "output_map": {
+        "ast": "ast",
+        "error": "error"
+      },
+      "description": "Parse source code into AST"
+    },
+    "analyzeImports": {
+      "type": "compute",
+      "compute_unit": "decoder:analyzeImports",
+      "input_map": {
+        "ast": "ast"
+      },
+      "output_map": {
+        "imports": "imports"
+      },
+      "description": "Extract and resolve import semantics"
+    },
+    "analyzeFunctions": {
+      "type": "compute",
+      "compute_unit": "decoder:analyzeFunctions",
+      "input_map": {
+        "ast": "ast",
+        "imports": "imports"
+      },
+      "output_map": {
+        "functions": "functions",
+        "classes": "classes"
+      },
+      "description": "Extract function and class definitions"
+    },
+    "analyzeControlFlow": {
+      "type": "compute",
+      "compute_unit": "decoder:analyzeControlFlow",
+      "input_map": {
+        "ast": "ast",
+        "functions": "functions"
+      },
+      "output_map": {
+        "controlFlow": "controlFlow"
+      },
+      "description": "Build control flow graph from AST"
+    },
+    "inferStates": {
+      "type": "compute",
+      "compute_unit": "decoder:inferStates",
+      "input_map": {
+        "functions": "functions",
+        "classes": "classes",
+        "controlFlow": "controlFlow",
+        "imports": "imports"
+      },
+      "output_map": {
+        "inferredStates": "states"
+      },
+      "description": "Infer state machine states from code structure"
+    },
+    "inferTransitions": {
+      "type": "compute",
+      "compute_unit": "decoder:inferTransitions",
+      "input_map": {
+        "controlFlow": "controlFlow",
+        "inferredStates": "inferredStates",
+        "functions": "functions"
+      },
+      "output_map": {
+        "inferredTransitions": "transitions",
+        "inferredGates": "gates"
+      },
+      "description": "Infer transitions and guards from control flow"
+    },
+    "inferActions": {
+      "type": "compute",
+      "compute_unit": "decoder:inferActions",
+      "input_map": {
+        "functions": "functions",
+        "imports": "imports",
+        "controlFlow": "controlFlow"
+      },
+      "output_map": {
+        "inferredActions": "actions"
+      },
+      "description": "Infer actions from function calls and side effects"
+    },
+    "generateBlueprint": {
+      "type": "compute",
+      "compute_unit": "decoder:generateBlueprint",
+      "input_map": {
+        "filePath": "filePath",
+        "inferredStates": "inferredStates",
+        "inferredTransitions": "inferredTransitions",
+        "inferredGates": "inferredGates",
+        "inferredActions": "inferredActions",
+        "imports": "imports"
+      },
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprintJson": "json",
+        "analysisReport": "report"
+      },
+      "description": "Assemble final L++ blueprint"
+    },
+    "setError": {
+      "type": "set",
+      "target": "error",
+      "value_from": "event.payload.message"
+    },
+    "log_error": {
+      "type": "set",
+      "target": "analysisReport",
+      "value_from": "event.payload.message"
+    },
+    "clearError": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    },
+    "clearState": {
+      "type": "compute",
+      "compute_unit": "decoder:clearState",
+      "input_map": {},
+      "output_map": {
+        "ast": "ast",
+        "imports": "imports",
+        "functions": "functions",
+        "classes": "classes",
+        "controlFlow": "controlFlow",
+        "inferredStates": "inferredStates",
+        "inferredTransitions": "inferredTransitions",
+        "inferredActions": "inferredActions",
+        "inferredGates": "inferredGates",
+        "blueprint": "blueprint",
+        "blueprintJson": "blueprintJson",
+        "analysisReport": "analysisReport",
+        "error": "error"
+      },
+      "description": "Reset analysis state"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t1_load",
+      "from": "idle",
+      "to": "parsing",
+      "on_event": "DECODE",
+      "guard": "hasFilePath",
+      "actions": [
+        "loadFile"
+      ]
+    },
+    {
+      "id": "t2_parse",
+      "from": "parsing",
+      "to": "analyzing",
+      "on_event": "AUTO",
+      "guard": "hasSourceCode",
+      "actions": [
+        "parseAst"
+      ]
+    },
+    {
+      "id": "t3_analyze",
+      "from": "analyzing",
+      "to": "inferring",
+      "on_event": "AUTO",
+      "guard": "hasAst",
+      "actions": [
+        "analyzeImports",
+        "analyzeFunctions",
+        "analyzeControlFlow"
+      ]
+    },
+    {
+      "id": "t4_infer",
+      "from": "inferring",
+      "to": "generating",
+      "on_event": "AUTO",
+      "guard": "hasAnalysis",
+      "actions": [
+        "inferStates",
+        "inferTransitions",
+        "inferActions"
+      ]
+    },
+    {
+      "id": "t5_generate",
+      "from": "generating",
+      "to": "complete",
+      "on_event": "AUTO",
+      "guard": "hasInferences",
+      "actions": [
+        "generateBlueprint"
+      ]
+    },
+    {
+      "id": "t6_error_parse",
+      "from": "parsing",
+      "to": "error",
+      "on_event": "ERROR",
+      "actions": [
+        "setError",
+        "log_error"
+      ]
+    },
+    {
+      "id": "t7_error_analyze",
+      "from": "analyzing",
+      "to": "error",
+      "on_event": "ERROR",
+      "actions": [
+        "setError",
+        "log_error"
+      ]
+    },
+    {
+      "id": "t8_error_infer",
+      "from": "inferring",
+      "to": "error",
+      "on_event": "ERROR",
+      "actions": [
+        "setError",
+        "log_error"
+      ]
+    },
+    {
+      "id": "t9_reset",
+      "from": "complete",
+      "to": "idle",
+      "on_event": "RESET",
+      "actions": [
+        "clearState"
+      ]
+    },
+    {
+      "id": "t10_error_reset",
+      "from": "error",
+      "to": "idle",
+      "on_event": "RESET",
+      "actions": [
+        "clearError",
+        "clearState"
+      ]
+    }
+  ],
+  "flanges": {
+    "inputs": [
+      "filePath",
+      "sourceCode"
+    ],
+    "outputs": [
+      "blueprint",
+      "blueprintJson",
+      "analysisReport"
+    ],
+    "stacks": [
+      "code_parser",
+      "ast_analyzer"
+    ]
+  }
+}

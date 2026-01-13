@@ -1,0 +1,270 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "skill_registry",
+  "name": "Skill Registry",
+  "version": "1.0.0",
+  "description": "Scan and document L++ skills for agent blueprint generation",
+  "context_schema": {
+    "properties": {
+      "basePath": {
+        "type": "string",
+        "description": "Base path to scan for skills"
+      },
+      "skills": {
+        "type": "array",
+        "description": "List of discovered skill metadata"
+      },
+      "selectedSkill": {
+        "type": "object",
+        "description": "Currently selected skill details"
+      },
+      "registry": {
+        "type": "object",
+        "description": "Full registry export for agent context"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "Ready to scan"
+    },
+    "scanned": {
+      "description": "Skills discovered"
+    },
+    "viewing": {
+      "description": "Viewing skill detail"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
+  "gates": {
+    "hasPath": {
+      "type": "expression",
+      "expression": "basePath is not None"
+    },
+    "hasSkills": {
+      "type": "expression",
+      "expression": "skills is not None"
+    },
+    "hasSelection": {
+      "type": "expression",
+      "expression": "selectedSkill is not None"
+    },
+    "hasRegistry": {
+      "type": "expression",
+      "expression": "registry is not None"
+    },
+    "hasError": {
+      "type": "expression",
+      "expression": "error is not None"
+    },
+    "noError": {
+      "type": "expression",
+      "expression": "error is None"
+    }
+  },
+  "actions": {
+    "setBasePath": {
+      "type": "set",
+      "target": "basePath",
+      "value_from": "event.payload.path"
+    },
+    "scanSkills": {
+      "type": "compute",
+      "compute_unit": "registry:scan",
+      "input_map": {
+        "basePath": "basePath"
+      },
+      "output_map": {
+        "skills": "skills",
+        "error": "error"
+      }
+    },
+    "setSelectedId": {
+      "type": "set",
+      "target": "selectedId",
+      "value_from": "event.payload.skillId"
+    },
+    "loadSkillDetail": {
+      "type": "compute",
+      "compute_unit": "registry:loadDetail",
+      "input_map": {
+        "skillId": "event.payload.skillId",
+        "basePath": "basePath"
+      },
+      "output_map": {
+        "selectedSkill": "selectedSkill",
+        "error": "error"
+      }
+    },
+    "exportRegistry": {
+      "type": "compute",
+      "compute_unit": "registry:export",
+      "input_map": {
+        "skills": "skills",
+        "basePath": "basePath"
+      },
+      "output_map": {
+        "registry": "registry",
+        "error": "error"
+      }
+    },
+    "clearSelection": {
+      "type": "set",
+      "target": "selectedSkill",
+      "value": null
+    },
+    "clearError": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    },
+    "log_error": {
+      "type": "set",
+      "target": "selectedId",
+      "value": null
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_scan",
+      "from": "idle",
+      "to": "scanned",
+      "on_event": "SCAN",
+      "actions": [
+        "setBasePath",
+        "scanSkills"
+      ]
+    },
+    {
+      "id": "t_rescan",
+      "from": "scanned",
+      "to": "scanned",
+      "on_event": "SCAN",
+      "actions": [
+        "clearSelection",
+        "setBasePath",
+        "scanSkills"
+      ]
+    },
+    {
+      "id": "t_select",
+      "from": "scanned",
+      "to": "viewing",
+      "on_event": "SELECT",
+      "actions": [
+        "loadSkillDetail"
+      ]
+    },
+    {
+      "id": "t_back",
+      "from": "viewing",
+      "to": "scanned",
+      "on_event": "BACK",
+      "actions": [
+        "clearSelection"
+      ]
+    },
+    {
+      "id": "t_select_another",
+      "from": "viewing",
+      "to": "viewing",
+      "on_event": "SELECT",
+      "actions": [
+        "loadSkillDetail"
+      ]
+    },
+    {
+      "id": "t_export",
+      "from": "scanned",
+      "to": "scanned",
+      "on_event": "EXPORT",
+      "actions": [
+        "exportRegistry"
+      ]
+    },
+    {
+      "id": "t_export_viewing",
+      "from": "viewing",
+      "to": "viewing",
+      "on_event": "EXPORT",
+      "actions": [
+        "exportRegistry"
+      ]
+    },
+    {
+      "id": "t_reset",
+      "from": "scanned",
+      "to": "idle",
+      "on_event": "RESET",
+      "actions": [
+        "clearSelection"
+      ]
+    },
+    {
+      "id": "t_retry",
+      "from": "error",
+      "to": "idle",
+      "on_event": "RETRY",
+      "actions": [
+        "clearError"
+      ]
+    },
+    {
+      "id": "t_error_from_idle",
+      "from": "idle",
+      "to": "error",
+      "on_event": "ERROR",
+      "gates": [
+        "hasError"
+      ],
+      "actions": [
+        "log_error"
+      ]
+    },
+    {
+      "id": "t_error_from_scanned",
+      "from": "scanned",
+      "to": "error",
+      "on_event": "ERROR",
+      "gates": [
+        "hasError"
+      ],
+      "actions": [
+        "log_error"
+      ]
+    }
+  ],
+  "display": {
+    "rules": [
+      {
+        "gate": "hasError",
+        "template": "Error: {error}"
+      },
+      {
+        "gate": "hasSelection",
+        "template": "Viewing: {selectedSkill.name}"
+      },
+      {
+        "gate": "hasSkills",
+        "template": "Found {skills.length} skills in {basePath}"
+      },
+      {
+        "template": "Ready to scan"
+      }
+    ]
+  }
+}

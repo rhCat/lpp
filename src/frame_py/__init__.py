@@ -1,34 +1,44 @@
 """
-L++ Frame - Python Package
+DEPRECATED: frame_py is deprecated and will be removed in v2.0.0
 
-The Universal Deterministic Logic Workflow Machine.
+Migration guide:
+    # Old imports (deprecated)
+    from frame_py.loader import BlueprintLoader
+    from frame_py.compiler import compile_blueprint
+    from frame_py import run_frame
 
-Structure:
-    lpp_core.py    - The Four Atomic Operations (Assembly Language)
-    schema.py      - Blueprint Definitions (Immutable)
-    loader.py      - JSON Parser & Validator
-    compiler.py    - JSON to Python Compiler
-    orchestrator.py - The Thin Conductor
+    # New imports (recommended)
+    from lpp.core import BlueprintLoader
+    from lpp.core import compile_blueprint
+    from lpp.core import run_frame
+
+See migration guide at docs/migration/v1_to_v2.md
 """
 
-# ==========================================================================
-# ATOMIC CORE (The Four Atoms)
-# ==========================================================================
+import warnings as _warnings
 
-from .lpp_core import (
+_warnings.warn(
+    "frame_py is deprecated. Use 'lpp.core' instead. "
+    "See migration guide at docs/migration/v1_to_v2.md",
+    DeprecationWarning,
+    stacklevel=2
+)
+
+# Re-export everything from lpp.core for backward compatibility
+from lpp.core import (
+    # Atomic Core
     atom_EVALUATE,
     atom_TRANSITION,
     atom_MUTATE,
     atom_DISPATCH,
     ComputeUnitFunc,
     TransitionTrace,
-)
-
-# ==========================================================================
-# BLUEPRINT INFRASTRUCTURE
-# ==========================================================================
-
-from .schema import (
+    AtomError,
+    EvaluateError,
+    TransitionError,
+    MutateError,
+    DispatchError,
+    # Schema
     Blueprint,
     State,
     Transition,
@@ -37,44 +47,26 @@ from .schema import (
     Action,
     ActionType,
     ContextSchema,
-)
-
-from .loader import (
+    # Loader
     load_blueprint,
     load_blueprint_from_json,
     BlueprintLoader,
     BlueprintValidationError,
-)
-
-# ==========================================================================
-# COMPILER
-# ==========================================================================
-
-from .compiler import compile_blueprint, compile_blueprint_dict
-
-# ==========================================================================
-# ORCHESTRATOR
-# ==========================================================================
-
-from .orchestrator import run_frame
-
-# ==========================================================================
-# OPERATIONAL VALIDATOR
-# ==========================================================================
-
-from .operational_validator import (
+    # Compiler
+    compile_blueprint,
+    compile_blueprint_dict,
+    # Orchestrator
+    run_frame,
+    # Safe Eval
+    safe_eval_bool,
+    SafeEvalError,
+    # Validators
+    validate_blueprint,
     validate_python_file,
     validate_skill_directory,
     validate_skill,
     sanitize_python_code,
     OperationalValidationError,
-)
-
-# ==========================================================================
-# ASSEMBLY VALIDATOR
-# ==========================================================================
-
-from .assembly_validator import (
     loadAssembly,
     validateAssembly,
     validateTerminals,
@@ -83,57 +75,66 @@ from .assembly_validator import (
     AssemblyValidationError,
     ComponentLoadError,
     InterfaceCompatibilityError,
+    generate_tla,
+    validate_tla,
+    save_tla,
+    TLAValidationError,
 )
 
-
-__version__ = "0.1.0"
+__version__ = "0.1.0"  # Legacy version
 
 __all__ = [
     # Atomic Core
-    'atom_EVALUATE',
-    'atom_TRANSITION',
-    'atom_MUTATE',
-    'atom_DISPATCH',
-    'ComputeUnitFunc',
-    'TransitionTrace',
-
+    "atom_EVALUATE",
+    "atom_TRANSITION",
+    "atom_MUTATE",
+    "atom_DISPATCH",
+    "ComputeUnitFunc",
+    "TransitionTrace",
+    "AtomError",
+    "EvaluateError",
+    "TransitionError",
+    "MutateError",
+    "DispatchError",
     # Schema
-    'Blueprint',
-    'State',
-    'Transition',
-    'Gate',
-    'GateType',
-    'Action',
-    'ActionType',
-    'ContextSchema',
-
+    "Blueprint",
+    "State",
+    "Transition",
+    "Gate",
+    "GateType",
+    "Action",
+    "ActionType",
+    "ContextSchema",
     # Loader
-    'load_blueprint',
-    'load_blueprint_from_json',
-    'BlueprintLoader',
-    'BlueprintValidationError',
-
+    "load_blueprint",
+    "load_blueprint_from_json",
+    "BlueprintLoader",
+    "BlueprintValidationError",
     # Compiler
-    'compile_blueprint',
-    'compile_blueprint_dict',
-
+    "compile_blueprint",
+    "compile_blueprint_dict",
     # Orchestrator
-    'run_frame',
-
-    # Operational Validator
-    'validate_python_file',
-    'validate_skill_directory',
-    'validate_skill',
-    'sanitize_python_code',
-    'OperationalValidationError',
-
-    # Assembly Validator
-    'loadAssembly',
-    'validateAssembly',
-    'validateTerminals',
-    'validateInterfaces',
-    'generateAssemblyTla',
-    'AssemblyValidationError',
-    'ComponentLoadError',
-    'InterfaceCompatibilityError',
+    "run_frame",
+    # Safe Eval
+    "safe_eval_bool",
+    "SafeEvalError",
+    # Validators
+    "validate_blueprint",
+    "validate_python_file",
+    "validate_skill_directory",
+    "validate_skill",
+    "sanitize_python_code",
+    "OperationalValidationError",
+    "loadAssembly",
+    "validateAssembly",
+    "validateTerminals",
+    "validateInterfaces",
+    "generateAssemblyTla",
+    "AssemblyValidationError",
+    "ComponentLoadError",
+    "InterfaceCompatibilityError",
+    "generate_tla",
+    "validate_tla",
+    "save_tla",
+    "TLAValidationError",
 ]

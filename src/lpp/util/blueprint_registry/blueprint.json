@@ -1,0 +1,793 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "lpp_blueprint_registry",
+  "name": "L++ Blueprint Registry",
+  "version": "1.0.0",
+  "description": "Centralized blueprint management with version control, dependency tracking, and discovery",
+  "context_schema": {
+    "properties": {
+      "registry_path": {
+        "type": "string",
+        "description": "Path to the registry directory"
+      },
+      "index": {
+        "type": "object",
+        "description": "Registry index containing all blueprint metadata"
+      },
+      "blueprints": {
+        "type": "object",
+        "description": "Map of blueprint IDs to their metadata"
+      },
+      "current_blueprint": {
+        "type": "object",
+        "description": "Currently selected blueprint data"
+      },
+      "current_id": {
+        "type": "string",
+        "description": "ID of currently selected blueprint"
+      },
+      "current_version": {
+        "type": "string",
+        "description": "Version of currently selected blueprint"
+      },
+      "version_history": {
+        "type": "array",
+        "description": "Version history for current blueprint"
+      },
+      "dependency_graph": {
+        "type": "object",
+        "description": "Dependency graph visualization data"
+      },
+      "search_results": {
+        "type": "array",
+        "description": "Results from search operation"
+      },
+      "search_query": {
+        "type": "string",
+        "description": "Current search query"
+      },
+      "diff_result": {
+        "type": "object",
+        "description": "Result of version comparison"
+      },
+      "validation_result": {
+        "type": "object",
+        "description": "Result of blueprint validation"
+      },
+      "export_data": {
+        "type": "object",
+        "description": "Exported registry metadata"
+      },
+      "stats": {
+        "type": "object",
+        "description": "Registry statistics"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message if any"
+      },
+      "message": {
+        "type": "string",
+        "description": "Status message"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "No registry loaded, waiting for initialization"
+    },
+    "ready": {
+      "description": "Registry loaded and ready for operations"
+    },
+    "viewing": {
+      "description": "Viewing a specific blueprint"
+    },
+    "searching": {
+      "description": "Displaying search results"
+    },
+    "comparing": {
+      "description": "Comparing two versions"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
+  "gates": {
+    "has_registry": {
+      "type": "expression",
+      "expression": "index is not None"
+    },
+    "no_registry": {
+      "type": "expression",
+      "expression": "index is None"
+    },
+    "has_blueprints": {
+      "type": "expression",
+      "expression": "blueprints is not None and len(blueprints) > 0"
+    },
+    "has_current": {
+      "type": "expression",
+      "expression": "current_blueprint is not None"
+    },
+    "has_versions": {
+      "type": "expression",
+      "expression": "version_history is not None and len(version_history) > 0"
+    },
+    "has_search_results": {
+      "type": "expression",
+      "expression": "search_results is not None and len(search_results) > 0"
+    },
+    "has_diff": {
+      "type": "expression",
+      "expression": "diff_result is not None"
+    },
+    "has_dependencies": {
+      "type": "expression",
+      "expression": "dependency_graph is not None"
+    },
+    "is_deprecated": {
+      "type": "expression",
+      "expression": "current_blueprint is not None and current_blueprint.get('deprecated', False) == True"
+    },
+    "not_deprecated": {
+      "type": "expression",
+      "expression": "current_blueprint is not None and current_blueprint.get('deprecated', False) == False"
+    },
+    "has_error": {
+      "type": "expression",
+      "expression": "error is not None"
+    },
+    "has_permission": {
+      "type": "expression",
+      "expression": "True"
+    }
+  },
+  "actions": {
+    "init_registry": {
+      "type": "compute",
+      "compute_unit": "bpreg:init_registry",
+      "input_map": {
+        "registry_path": "event.payload.path"
+      },
+      "output_map": {
+        "registry_path": "path",
+        "index": "index",
+        "blueprints": "blueprints",
+        "message": "message",
+        "error": "error"
+      }
+    },
+    "load_registry": {
+      "type": "compute",
+      "compute_unit": "bpreg:load_registry",
+      "input_map": {
+        "registry_path": "event.payload.path"
+      },
+      "output_map": {
+        "registry_path": "path",
+        "index": "index",
+        "blueprints": "blueprints",
+        "stats": "stats",
+        "error": "error"
+      }
+    },
+    "save_registry": {
+      "type": "compute",
+      "compute_unit": "bpreg:save_registry",
+      "input_map": {
+        "registry_path": "registry_path",
+        "index": "index"
+      },
+      "output_map": {
+        "message": "message",
+        "error": "error"
+      }
+    },
+    "register_blueprint": {
+      "type": "compute",
+      "compute_unit": "bpreg:register_blueprint",
+      "input_map": {
+        "registry_path": "registry_path",
+        "index": "index",
+        "blueprint_path": "event.payload.blueprint_path",
+        "tags": "event.payload.tags",
+        "owner": "event.payload.owner"
+      },
+      "output_map": {
+        "index": "index",
+        "blueprints": "blueprints",
+        "message": "message",
+        "error": "error"
+      }
+    },
+    "update_blueprint": {
+      "type": "compute",
+      "compute_unit": "bpreg:update_blueprint",
+      "input_map": {
+        "registry_path": "registry_path",
+        "index": "index",
+        "blueprint_id": "event.payload.blueprint_id",
+        "blueprint_path": "event.payload.blueprint_path",
+        "bump": "event.payload.bump"
+      },
+      "output_map": {
+        "index": "index",
+        "blueprints": "blueprints",
+        "current_blueprint": "updated",
+        "message": "message",
+        "error": "error"
+      }
+    },
+    "get_blueprint": {
+      "type": "compute",
+      "compute_unit": "bpreg:get_blueprint",
+      "input_map": {
+        "registry_path": "registry_path",
+        "index": "index",
+        "blueprint_id": "event.payload.blueprint_id",
+        "version": "event.payload.version"
+      },
+      "output_map": {
+        "current_blueprint": "blueprint",
+        "current_id": "blueprint_id",
+        "current_version": "version",
+        "error": "error"
+      }
+    },
+    "list_blueprints": {
+      "type": "compute",
+      "compute_unit": "bpreg:list_blueprints",
+      "input_map": {
+        "index": "index",
+        "filter_tag": "event.payload.tag",
+        "filter_deprecated": "event.payload.show_deprecated"
+      },
+      "output_map": {
+        "search_results": "results",
+        "stats": "stats"
+      }
+    },
+    "search_blueprints": {
+      "type": "compute",
+      "compute_unit": "bpreg:search_blueprints",
+      "input_map": {
+        "index": "index",
+        "query": "event.payload.query",
+        "search_tags": "event.payload.search_tags",
+        "search_description": "event.payload.search_description"
+      },
+      "output_map": {
+        "search_results": "results",
+        "search_query": "query"
+      }
+    },
+    "get_versions": {
+      "type": "compute",
+      "compute_unit": "bpreg:get_versions",
+      "input_map": {
+        "index": "index",
+        "blueprint_id": "event.payload.blueprint_id"
+      },
+      "output_map": {
+        "version_history": "versions",
+        "current_id": "blueprint_id",
+        "error": "error"
+      }
+    },
+    "compare_versions": {
+      "type": "compute",
+      "compute_unit": "bpreg:compare_versions",
+      "input_map": {
+        "registry_path": "registry_path",
+        "blueprint_id": "event.payload.blueprint_id",
+        "version_a": "event.payload.version_a",
+        "version_b": "event.payload.version_b"
+      },
+      "output_map": {
+        "diff_result": "diff",
+        "error": "error"
+      }
+    },
+    "rollback_version": {
+      "type": "compute",
+      "compute_unit": "bpreg:rollback_version",
+      "input_map": {
+        "registry_path": "registry_path",
+        "index": "index",
+        "blueprint_id": "event.payload.blueprint_id",
+        "target_version": "event.payload.version"
+      },
+      "output_map": {
+        "index": "index",
+        "blueprints": "blueprints",
+        "current_blueprint": "blueprint",
+        "message": "message",
+        "error": "error"
+      }
+    },
+    "get_dependencies": {
+      "type": "compute",
+      "compute_unit": "bpreg:get_dependencies",
+      "input_map": {
+        "registry_path": "registry_path",
+        "index": "index",
+        "blueprint_id": "event.payload.blueprint_id"
+      },
+      "output_map": {
+        "dependency_graph": "graph",
+        "error": "error"
+      }
+    },
+    "check_circular_deps": {
+      "type": "compute",
+      "compute_unit": "bpreg:check_circular_deps",
+      "input_map": {
+        "index": "index",
+        "blueprint_id": "event.payload.blueprint_id"
+      },
+      "output_map": {
+        "validation_result": "result",
+        "error": "error"
+      }
+    },
+    "deprecate_blueprint": {
+      "type": "compute",
+      "compute_unit": "bpreg:deprecate_blueprint",
+      "input_map": {
+        "index": "index",
+        "blueprint_id": "event.payload.blueprint_id",
+        "reason": "event.payload.reason"
+      },
+      "output_map": {
+        "index": "index",
+        "blueprints": "blueprints",
+        "message": "message",
+        "error": "error"
+      }
+    },
+    "delete_blueprint": {
+      "type": "compute",
+      "compute_unit": "bpreg:delete_blueprint",
+      "input_map": {
+        "registry_path": "registry_path",
+        "index": "index",
+        "blueprint_id": "event.payload.blueprint_id",
+        "delete_files": "event.payload.delete_files"
+      },
+      "output_map": {
+        "index": "index",
+        "blueprints": "blueprints",
+        "message": "message",
+        "error": "error"
+      }
+    },
+    "export_registry": {
+      "type": "compute",
+      "compute_unit": "bpreg:export_registry",
+      "input_map": {
+        "index": "index",
+        "format": "event.payload.format"
+      },
+      "output_map": {
+        "export_data": "data",
+        "error": "error"
+      }
+    },
+    "get_stats": {
+      "type": "compute",
+      "compute_unit": "bpreg:get_stats",
+      "input_map": {
+        "index": "index"
+      },
+      "output_map": {
+        "stats": "stats"
+      }
+    },
+    "set_error": {
+      "type": "set",
+      "target": "error",
+      "value_from": "event.payload.message"
+    },
+    "clear_error": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    },
+    "clear_current": {
+      "type": "set",
+      "target": "current_blueprint",
+      "value": null
+    },
+    "clear_search": {
+      "type": "set",
+      "target": "search_results",
+      "value": null
+    },
+    "clear_diff": {
+      "type": "set",
+      "target": "diff_result",
+      "value": null
+    },
+    "log_update": {
+      "type": "set",
+      "target": "message",
+      "value": "Blueprint updated"
+    },
+    "log_delete": {
+      "type": "set",
+      "target": "message",
+      "value": "Blueprint deleted"
+    }
+  },
+  "display": {
+    "rules": [
+      {
+        "gate": "has_error",
+        "template": "ERROR: {error}"
+      },
+      {
+        "gate": "is_idle",
+        "template": "No registry loaded. Use INIT or LOAD to start."
+      },
+      {
+        "gate": "is_viewing",
+        "template": "Viewing: {current_id} v{current_version}"
+      },
+      {
+        "gate": "is_searching",
+        "template": "Search: '{search_query}' - {search_results.length} results"
+      },
+      {
+        "gate": "is_comparing",
+        "template": "Comparing versions of {current_id}"
+      },
+      {
+        "gate": "is_ready",
+        "template": "Registry: {stats.total} blueprints | {stats.active} active"
+      },
+      {
+        "template": "L++ Blueprint Registry"
+      }
+    ]
+  },
+  "transitions": [
+    {
+      "id": "t_init_registry",
+      "from": "idle",
+      "to": "ready",
+      "on_event": "INIT",
+      "actions": [
+        "init_registry",
+        "save_registry"
+      ]
+    },
+    {
+      "id": "t_load_registry",
+      "from": "idle",
+      "to": "ready",
+      "on_event": "LOAD",
+      "actions": [
+        "load_registry"
+      ]
+    },
+    {
+      "id": "t_reload_registry",
+      "from": "ready",
+      "to": "ready",
+      "on_event": "LOAD",
+      "actions": [
+        "load_registry"
+      ]
+    },
+    {
+      "id": "t_register",
+      "from": "ready",
+      "to": "ready",
+      "on_event": "REGISTER",
+      "gates": [
+        "has_registry"
+      ],
+      "actions": [
+        "register_blueprint",
+        "save_registry"
+      ]
+    },
+    {
+      "id": "t_update",
+      "from": "ready",
+      "to": "ready",
+      "on_event": "UPDATE",
+      "gates": [
+        "has_registry",
+        "has_permission"
+      ],
+      "actions": [
+        "update_blueprint",
+        "save_registry",
+        "log_update"
+      ]
+    },
+    {
+      "id": "t_update_from_viewing",
+      "from": "viewing",
+      "to": "viewing",
+      "on_event": "UPDATE",
+      "gates": [
+        "has_current",
+        "has_permission"
+      ],
+      "actions": [
+        "update_blueprint",
+        "save_registry",
+        "log_update"
+      ]
+    },
+    {
+      "id": "t_get",
+      "from": "ready",
+      "to": "viewing",
+      "on_event": "GET",
+      "gates": [
+        "has_registry"
+      ],
+      "actions": [
+        "get_blueprint"
+      ]
+    },
+    {
+      "id": "t_get_another",
+      "from": "viewing",
+      "to": "viewing",
+      "on_event": "GET",
+      "actions": [
+        "get_blueprint"
+      ]
+    },
+    {
+      "id": "t_list",
+      "from": "ready",
+      "to": "searching",
+      "on_event": "LIST",
+      "gates": [
+        "has_registry"
+      ],
+      "actions": [
+        "list_blueprints"
+      ]
+    },
+    {
+      "id": "t_search",
+      "from": "ready",
+      "to": "searching",
+      "on_event": "SEARCH",
+      "gates": [
+        "has_registry"
+      ],
+      "actions": [
+        "search_blueprints"
+      ]
+    },
+    {
+      "id": "t_search_again",
+      "from": "searching",
+      "to": "searching",
+      "on_event": "SEARCH",
+      "actions": [
+        "search_blueprints"
+      ]
+    },
+    {
+      "id": "t_select_from_search",
+      "from": "searching",
+      "to": "viewing",
+      "on_event": "SELECT",
+      "gates": [
+        "has_search_results"
+      ],
+      "actions": [
+        "get_blueprint"
+      ]
+    },
+    {
+      "id": "t_versions",
+      "from": "viewing",
+      "to": "viewing",
+      "on_event": "VERSIONS",
+      "gates": [
+        "has_current"
+      ],
+      "actions": [
+        "get_versions"
+      ]
+    },
+    {
+      "id": "t_compare",
+      "from": "viewing",
+      "to": "comparing",
+      "on_event": "COMPARE",
+      "gates": [
+        "has_versions"
+      ],
+      "actions": [
+        "compare_versions"
+      ]
+    },
+    {
+      "id": "t_compare_again",
+      "from": "comparing",
+      "to": "comparing",
+      "on_event": "COMPARE",
+      "actions": [
+        "compare_versions"
+      ]
+    },
+    {
+      "id": "t_rollback",
+      "from": "viewing",
+      "to": "viewing",
+      "on_event": "ROLLBACK",
+      "gates": [
+        "has_versions"
+      ],
+      "actions": [
+        "rollback_version",
+        "save_registry"
+      ]
+    },
+    {
+      "id": "t_deps",
+      "from": "viewing",
+      "to": "viewing",
+      "on_event": "DEPS",
+      "gates": [
+        "has_current"
+      ],
+      "actions": [
+        "get_dependencies"
+      ]
+    },
+    {
+      "id": "t_check_deps",
+      "from": "viewing",
+      "to": "viewing",
+      "on_event": "CHECK_DEPS",
+      "gates": [
+        "has_current"
+      ],
+      "actions": [
+        "check_circular_deps"
+      ]
+    },
+    {
+      "id": "t_deprecate",
+      "from": "viewing",
+      "to": "viewing",
+      "on_event": "DEPRECATE",
+      "gates": [
+        "has_current",
+        "not_deprecated"
+      ],
+      "actions": [
+        "deprecate_blueprint",
+        "save_registry"
+      ]
+    },
+    {
+      "id": "t_delete",
+      "from": "viewing",
+      "to": "ready",
+      "on_event": "DELETE",
+      "gates": [
+        "has_current",
+        "has_permission"
+      ],
+      "actions": [
+        "delete_blueprint",
+        "save_registry",
+        "clear_current",
+        "log_delete"
+      ]
+    },
+    {
+      "id": "t_delete_from_ready",
+      "from": "ready",
+      "to": "ready",
+      "on_event": "DELETE",
+      "gates": [
+        "has_registry",
+        "has_permission"
+      ],
+      "actions": [
+        "delete_blueprint",
+        "save_registry",
+        "log_delete"
+      ]
+    },
+    {
+      "id": "t_export",
+      "from": "ready",
+      "to": "ready",
+      "on_event": "EXPORT",
+      "gates": [
+        "has_registry"
+      ],
+      "actions": [
+        "export_registry"
+      ]
+    },
+    {
+      "id": "t_export_from_viewing",
+      "from": "viewing",
+      "to": "viewing",
+      "on_event": "EXPORT",
+      "actions": [
+        "export_registry"
+      ]
+    },
+    {
+      "id": "t_stats",
+      "from": "ready",
+      "to": "ready",
+      "on_event": "STATS",
+      "gates": [
+        "has_registry"
+      ],
+      "actions": [
+        "get_stats"
+      ]
+    },
+    {
+      "id": "t_back_from_viewing",
+      "from": "viewing",
+      "to": "ready",
+      "on_event": "BACK",
+      "actions": [
+        "clear_current"
+      ]
+    },
+    {
+      "id": "t_back_from_searching",
+      "from": "searching",
+      "to": "ready",
+      "on_event": "BACK",
+      "actions": [
+        "clear_search"
+      ]
+    },
+    {
+      "id": "t_back_from_comparing",
+      "from": "comparing",
+      "to": "viewing",
+      "on_event": "BACK",
+      "actions": [
+        "clear_diff"
+      ]
+    },
+    {
+      "id": "t_error_recover",
+      "from": "error",
+      "to": "idle",
+      "on_event": "CLEAR",
+      "actions": [
+        "clear_error"
+      ]
+    },
+    {
+      "id": "t_load_failed",
+      "from": "*",
+      "to": "error",
+      "on_event": "LOAD_FAILED",
+      "actions": [
+        "set_error"
+      ]
+    }
+  ]
+}

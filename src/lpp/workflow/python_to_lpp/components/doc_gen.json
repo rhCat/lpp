@@ -1,0 +1,121 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "py2lpp_doc_gen",
+  "name": "Documentation Generator",
+  "version": "1.0.0",
+  "description": "Generates documentation for refactored project",
+  "context_schema": {
+    "properties": {
+      "blueprints": {
+        "type": "array",
+        "description": "Generated blueprints"
+      },
+      "computeGenerated": {
+        "type": "number",
+        "description": "Count of generated compute modules"
+      },
+      "projectName": {
+        "type": "string",
+        "description": "Project name"
+      },
+      "docsGenerated": {
+        "type": "number",
+        "description": "Count of docs generated"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "Awaiting generation request"
+    },
+    "generating": {
+      "description": "Generating documentation"
+    },
+    "done": {
+      "description": "Generation complete"
+    },
+    "error": {
+      "description": "Generation failed"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "done": {
+      "output_schema": {
+        "docsGenerated": {
+          "type": "number",
+          "non_null": true
+        }
+      },
+      "invariants_guaranteed": ["docs_generated"]
+    },
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
+  "gates": {
+    "has_blueprints": {
+      "type": "expression",
+      "expression": "blueprints is not None"
+    },
+    "has_docs": {
+      "type": "expression",
+      "expression": "docsGenerated is not None and docsGenerated > 0"
+    },
+    "has_error": {
+      "type": "expression",
+      "expression": "error is not None"
+    },
+    "no_error": {
+      "type": "expression",
+      "expression": "error is None"
+    }
+  },
+  "actions": {
+    "generate_docs": {
+      "type": "compute",
+      "compute_unit": "py2lpp:generateDocs",
+      "input_map": {
+        "blueprints": "blueprints",
+        "computeGenerated": "computeGenerated",
+        "projectName": "projectName"
+      },
+      "output_map": {
+        "docsGenerated": "generated"
+      }
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_start",
+      "from": "idle",
+      "to": "generating",
+      "on_event": "GENERATE",
+      "gates": ["has_blueprints"],
+      "actions": ["generate_docs"]
+    },
+    {
+      "id": "t_done",
+      "from": "generating",
+      "to": "done",
+      "on_event": "COMPLETE",
+      "gates": ["has_docs", "no_error"]
+    },
+    {
+      "id": "t_error",
+      "from": "generating",
+      "to": "error",
+      "on_event": "COMPLETE",
+      "gates": ["has_error"]
+    }
+  ]
+}

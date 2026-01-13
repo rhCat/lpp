@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lpp"
-version = "1.0.0"
-description = "L++ - The Universal Deterministic Logic Workflow Machine"
+version = "1.1.0"
+description = "L++ Dev Suite - The Universal Deterministic Logic Workflow Machine"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.9"
@@ -14,13 +14,15 @@ authors = [
 ]
 keywords = [
     "state-machine",
-    "workflow", 
+    "workflow",
     "logic",
     "deterministic",
     "blueprint",
     "compiler",
     "fsm",
     "business-logic",
+    "dev-suite",
+    "tla-plus",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -57,8 +59,25 @@ all = [
 ]
 
 [project.scripts]
-lpp-compile = "frame_py.compiler:main"
-lpp-visualize = "frame_py.visualizer:main"
+# Main CLI
+lpp = "lpp.cli:main"
+
+# Core tools
+lpp-compile = "lpp.core.compiler:main"
+lpp-visualize = "lpp.core.visualizer:main"
+
+# Utility CLIs
+lpp-decode = "lpp.util.logic_decoder.cli:main"
+lpp-lint = "lpp.util.blueprint_linter.cli:main"
+lpp-test = "lpp.util.test_generator.cli:main"
+lpp-search = "lpp.util.interactive_search.cli:main"
+
+# Workflow CLIs
+lpp-py2lpp = "lpp.workflow.python_to_lpp.cli:main"
+lpp-lvp = "lpp.workflow.logic_vulnerability_pointer.cli:main"
+
+# Agent CLI
+lpp-agent = "lpp.agent.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/lpp-project/lpp"
@@ -71,9 +90,10 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["lpp*", "frame_py*"]
 
 [tool.setuptools.package-data]
-"*" = ["*.json"]
+"*" = ["*.json", "*.md", "components/*.json"]
 
 [tool.black]
 line-length = 88
@@ -91,15 +111,19 @@ warn_unused_configs = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "--cov=src --cov=utils --cov-report=term-missing --cov-report=html"
+addopts = "--cov=src/lpp --cov-report=term-missing --cov-report=html"
+filterwarnings = [
+    "ignore::DeprecationWarning:frame_py.*",
+]
 
 [tool.coverage.run]
-source = ["src", "utils"]
+source = ["src/lpp"]
 branch = true
 omit = [
     "*/tests/*",
     "*/__pycache__/*",
     "*/results/*",
+    "src/frame_py/*",
 ]
 
 [tool.coverage.report]

@@ -1,0 +1,843 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "coverage_analyzer",
+  "name": "L++ Coverage Analyzer",
+  "version": "1.0.0",
+  "description": "Tracks runtime coverage of blueprints during execution",
+  "context_schema": {
+    "properties": {
+      "blueprint": {
+        "type": "object",
+        "description": "The loaded blueprint being analyzed"
+      },
+      "blueprint_path": {
+        "type": "string",
+        "description": "Path to the loaded blueprint file"
+      },
+      "coverage_data": {
+        "type": "object",
+        "description": "Raw coverage data (hits per element)"
+      },
+      "state_hits": {
+        "type": "object",
+        "description": "Hit counts per state"
+      },
+      "transition_hits": {
+        "type": "object",
+        "description": "Hit counts per transition"
+      },
+      "gate_hits": {
+        "type": "object",
+        "description": "Hit counts per gate (with true/false breakdown)"
+      },
+      "action_hits": {
+        "type": "object",
+        "description": "Hit counts per action"
+      },
+      "event_hits": {
+        "type": "object",
+        "description": "Hit counts per event type"
+      },
+      "metrics": {
+        "type": "object",
+        "description": "Computed coverage metrics"
+      },
+      "summary_report": {
+        "type": "string",
+        "description": "Generated summary report"
+      },
+      "detailed_report": {
+        "type": "string",
+        "description": "Generated detailed report"
+      },
+      "gap_report": {
+        "type": "string",
+        "description": "Generated gap analysis report"
+      },
+      "html_report": {
+        "type": "string",
+        "description": "Generated HTML report"
+      },
+      "json_report": {
+        "type": "string",
+        "description": "Generated JSON report"
+      },
+      "export_path": {
+        "type": "string",
+        "description": "Path where report was exported"
+      },
+      "trace_data": {
+        "type": "array",
+        "description": "Imported trace data"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message if any"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "No blueprint loaded, waiting for input"
+    },
+    "loaded": {
+      "description": "Blueprint loaded, coverage tracking initialized"
+    },
+    "tracking": {
+      "description": "Actively tracking coverage data"
+    },
+    "analyzing": {
+      "description": "Computing coverage metrics"
+    },
+    "reporting": {
+      "description": "Generating reports"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    }
+  },
+  "gates": {
+    "has_blueprint": {
+      "type": "expression",
+      "expression": "blueprint is not None"
+    },
+    "no_blueprint": {
+      "type": "expression",
+      "expression": "blueprint is None"
+    },
+    "has_coverage": {
+      "type": "expression",
+      "expression": "coverage_data is not None"
+    },
+    "has_metrics": {
+      "type": "expression",
+      "expression": "metrics is not None"
+    },
+    "has_summary": {
+      "type": "expression",
+      "expression": "summary_report is not None"
+    },
+    "has_detailed": {
+      "type": "expression",
+      "expression": "detailed_report is not None"
+    },
+    "has_gap": {
+      "type": "expression",
+      "expression": "gap_report is not None"
+    },
+    "has_html": {
+      "type": "expression",
+      "expression": "html_report is not None"
+    },
+    "has_json": {
+      "type": "expression",
+      "expression": "json_report is not None"
+    },
+    "has_trace": {
+      "type": "expression",
+      "expression": "trace_data is not None and len(trace_data) > 0"
+    },
+    "is_tracking": {
+      "type": "expression",
+      "expression": "_state == 'tracking'"
+    },
+    "is_loaded": {
+      "type": "expression",
+      "expression": "_state == 'loaded'"
+    },
+    "can_import": {
+      "type": "expression",
+      "expression": "blueprint is not None"
+    }
+  },
+  "actions": {
+    "load_blueprint": {
+      "type": "compute",
+      "compute_unit": "cov:load_blueprint",
+      "input_map": {
+        "path": "event.payload.path"
+      },
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprint_path": "path",
+        "error": "error"
+      }
+    },
+    "init_coverage": {
+      "type": "compute",
+      "compute_unit": "cov:init_coverage",
+      "input_map": {
+        "blueprint": "blueprint"
+      },
+      "output_map": {
+        "coverage_data": "coverage_data",
+        "state_hits": "state_hits",
+        "transition_hits": "transition_hits",
+        "gate_hits": "gate_hits",
+        "action_hits": "action_hits",
+        "event_hits": "event_hits"
+      }
+    },
+    "record_state": {
+      "type": "compute",
+      "compute_unit": "cov:record_state",
+      "input_map": {
+        "state_hits": "state_hits",
+        "state_id": "event.payload.state_id"
+      },
+      "output_map": {
+        "state_hits": "state_hits"
+      }
+    },
+    "record_transition": {
+      "type": "compute",
+      "compute_unit": "cov:record_transition",
+      "input_map": {
+        "transition_hits": "transition_hits",
+        "transition_id": "event.payload.transition_id"
+      },
+      "output_map": {
+        "transition_hits": "transition_hits"
+      }
+    },
+    "record_gate": {
+      "type": "compute",
+      "compute_unit": "cov:record_gate",
+      "input_map": {
+        "gate_hits": "gate_hits",
+        "gate_id": "event.payload.gate_id",
+        "result": "event.payload.result"
+      },
+      "output_map": {
+        "gate_hits": "gate_hits"
+      }
+    },
+    "record_action": {
+      "type": "compute",
+      "compute_unit": "cov:record_action",
+      "input_map": {
+        "action_hits": "action_hits",
+        "action_id": "event.payload.action_id"
+      },
+      "output_map": {
+        "action_hits": "action_hits"
+      }
+    },
+    "record_event": {
+      "type": "compute",
+      "compute_unit": "cov:record_event",
+      "input_map": {
+        "event_hits": "event_hits",
+        "event_name": "event.payload.event_name"
+      },
+      "output_map": {
+        "event_hits": "event_hits"
+      }
+    },
+    "import_trace": {
+      "type": "compute",
+      "compute_unit": "cov:import_trace",
+      "input_map": {
+        "path": "event.payload.path",
+        "state_hits": "state_hits",
+        "transition_hits": "transition_hits",
+        "gate_hits": "gate_hits",
+        "action_hits": "action_hits",
+        "event_hits": "event_hits"
+      },
+      "output_map": {
+        "trace_data": "trace_data",
+        "state_hits": "state_hits",
+        "transition_hits": "transition_hits",
+        "gate_hits": "gate_hits",
+        "action_hits": "action_hits",
+        "event_hits": "event_hits",
+        "error": "error"
+      }
+    },
+    "compute_metrics": {
+      "type": "compute",
+      "compute_unit": "cov:compute_metrics",
+      "input_map": {
+        "blueprint": "blueprint",
+        "state_hits": "state_hits",
+        "transition_hits": "transition_hits",
+        "gate_hits": "gate_hits",
+        "action_hits": "action_hits",
+        "event_hits": "event_hits"
+      },
+      "output_map": {
+        "metrics": "metrics"
+      }
+    },
+    "generate_summary": {
+      "type": "compute",
+      "compute_unit": "cov:generate_summary",
+      "input_map": {
+        "blueprint": "blueprint",
+        "metrics": "metrics"
+      },
+      "output_map": {
+        "summary_report": "report"
+      }
+    },
+    "generate_detailed": {
+      "type": "compute",
+      "compute_unit": "cov:generate_detailed",
+      "input_map": {
+        "blueprint": "blueprint",
+        "metrics": "metrics",
+        "state_hits": "state_hits",
+        "transition_hits": "transition_hits",
+        "gate_hits": "gate_hits",
+        "action_hits": "action_hits"
+      },
+      "output_map": {
+        "detailed_report": "report"
+      }
+    },
+    "generate_gap_report": {
+      "type": "compute",
+      "compute_unit": "cov:generate_gap_report",
+      "input_map": {
+        "blueprint": "blueprint",
+        "metrics": "metrics",
+        "state_hits": "state_hits",
+        "transition_hits": "transition_hits",
+        "gate_hits": "gate_hits",
+        "action_hits": "action_hits"
+      },
+      "output_map": {
+        "gap_report": "report"
+      }
+    },
+    "export_html": {
+      "type": "compute",
+      "compute_unit": "cov:export_html",
+      "input_map": {
+        "blueprint": "blueprint",
+        "metrics": "metrics",
+        "state_hits": "state_hits",
+        "transition_hits": "transition_hits",
+        "gate_hits": "gate_hits",
+        "action_hits": "action_hits",
+        "path": "event.payload.path"
+      },
+      "output_map": {
+        "html_report": "html",
+        "export_path": "path"
+      }
+    },
+    "export_json": {
+      "type": "compute",
+      "compute_unit": "cov:export_json",
+      "input_map": {
+        "blueprint": "blueprint",
+        "metrics": "metrics",
+        "state_hits": "state_hits",
+        "transition_hits": "transition_hits",
+        "gate_hits": "gate_hits",
+        "action_hits": "action_hits",
+        "event_hits": "event_hits",
+        "path": "event.payload.path"
+      },
+      "output_map": {
+        "json_report": "json",
+        "export_path": "path"
+      }
+    },
+    "reset_coverage": {
+      "type": "compute",
+      "compute_unit": "cov:reset_coverage",
+      "input_map": {
+        "blueprint": "blueprint"
+      },
+      "output_map": {
+        "coverage_data": "coverage_data",
+        "state_hits": "state_hits",
+        "transition_hits": "transition_hits",
+        "gate_hits": "gate_hits",
+        "action_hits": "action_hits",
+        "event_hits": "event_hits",
+        "metrics": "metrics",
+        "summary_report": "summary_report",
+        "detailed_report": "detailed_report",
+        "gap_report": "gap_report",
+        "html_report": "html_report",
+        "json_report": "json_report"
+      }
+    },
+    "clear_all": {
+      "type": "compute",
+      "compute_unit": "cov:clear_all",
+      "input_map": {},
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprint_path": "blueprint_path",
+        "coverage_data": "coverage_data",
+        "state_hits": "state_hits",
+        "transition_hits": "transition_hits",
+        "gate_hits": "gate_hits",
+        "action_hits": "action_hits",
+        "event_hits": "event_hits",
+        "metrics": "metrics",
+        "summary_report": "summary_report",
+        "detailed_report": "detailed_report",
+        "gap_report": "gap_report",
+        "html_report": "html_report",
+        "json_report": "json_report",
+        "trace_data": "trace_data",
+        "error": "error"
+      }
+    },
+    "set_error": {
+      "type": "set",
+      "target": "error",
+      "value_from": "event.payload.message"
+    },
+    "clear_error": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    }
+  },
+  "display": {
+    "rules": [
+      {
+        "gate": "has_metrics",
+        "template": "Coverage: {metrics.overall_percentage}% - States: {metrics.state_percentage}% | Trans: {metrics.transition_percentage}%"
+      },
+      {
+        "gate": "has_blueprint",
+        "template": "Loaded: {blueprint.name} (tracking)"
+      },
+      {
+        "template": "L++ Coverage Analyzer"
+      }
+    ]
+  },
+  "transitions": [
+    {
+      "id": "t_load",
+      "from": "idle",
+      "to": "loaded",
+      "on_event": "LOAD",
+      "gates": [
+        "no_blueprint"
+      ],
+      "actions": [
+        "load_blueprint",
+        "init_coverage"
+      ]
+    },
+    {
+      "id": "t_reload",
+      "from": "loaded",
+      "to": "loaded",
+      "on_event": "LOAD",
+      "actions": [
+        "clear_all",
+        "load_blueprint",
+        "init_coverage"
+      ]
+    },
+    {
+      "id": "t_reload_from_tracking",
+      "from": "tracking",
+      "to": "loaded",
+      "on_event": "LOAD",
+      "actions": [
+        "clear_all",
+        "load_blueprint",
+        "init_coverage"
+      ]
+    },
+    {
+      "id": "t_reload_from_analyzing",
+      "from": "analyzing",
+      "to": "loaded",
+      "on_event": "LOAD",
+      "actions": [
+        "clear_all",
+        "load_blueprint",
+        "init_coverage"
+      ]
+    },
+    {
+      "id": "t_reload_from_reporting",
+      "from": "reporting",
+      "to": "loaded",
+      "on_event": "LOAD",
+      "actions": [
+        "clear_all",
+        "load_blueprint",
+        "init_coverage"
+      ]
+    },
+    {
+      "id": "t_start_tracking",
+      "from": "loaded",
+      "to": "tracking",
+      "on_event": "START",
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": []
+    },
+    {
+      "id": "t_record_state",
+      "from": "tracking",
+      "to": "tracking",
+      "on_event": "STATE",
+      "actions": [
+        "record_state"
+      ]
+    },
+    {
+      "id": "t_record_transition",
+      "from": "tracking",
+      "to": "tracking",
+      "on_event": "TRANSITION",
+      "actions": [
+        "record_transition"
+      ]
+    },
+    {
+      "id": "t_record_gate",
+      "from": "tracking",
+      "to": "tracking",
+      "on_event": "GATE",
+      "actions": [
+        "record_gate"
+      ]
+    },
+    {
+      "id": "t_record_action",
+      "from": "tracking",
+      "to": "tracking",
+      "on_event": "ACTION",
+      "actions": [
+        "record_action"
+      ]
+    },
+    {
+      "id": "t_record_event",
+      "from": "tracking",
+      "to": "tracking",
+      "on_event": "EVENT",
+      "actions": [
+        "record_event"
+      ]
+    },
+    {
+      "id": "t_import_trace_loaded",
+      "from": "loaded",
+      "to": "tracking",
+      "on_event": "IMPORT",
+      "gates": [
+        "has_blueprint",
+        "can_import"
+      ],
+      "actions": [
+        "import_trace"
+      ]
+    },
+    {
+      "id": "t_import_trace_tracking",
+      "from": "tracking",
+      "to": "tracking",
+      "on_event": "IMPORT",
+      "gates": [
+        "can_import"
+      ],
+      "actions": [
+        "import_trace"
+      ]
+    },
+    {
+      "id": "t_analyze",
+      "from": "tracking",
+      "to": "analyzing",
+      "on_event": "ANALYZE",
+      "gates": [
+        "has_coverage"
+      ],
+      "actions": [
+        "compute_metrics"
+      ]
+    },
+    {
+      "id": "t_analyze_from_loaded",
+      "from": "loaded",
+      "to": "analyzing",
+      "on_event": "ANALYZE",
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "compute_metrics"
+      ]
+    },
+    {
+      "id": "t_summary",
+      "from": "analyzing",
+      "to": "reporting",
+      "on_event": "SUMMARY",
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "generate_summary"
+      ]
+    },
+    {
+      "id": "t_detailed",
+      "from": "analyzing",
+      "to": "reporting",
+      "on_event": "DETAILED",
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "generate_detailed"
+      ]
+    },
+    {
+      "id": "t_gap",
+      "from": "analyzing",
+      "to": "reporting",
+      "on_event": "GAP",
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "generate_gap_report"
+      ]
+    },
+    {
+      "id": "t_all_reports",
+      "from": "analyzing",
+      "to": "reporting",
+      "on_event": "ALL_REPORTS",
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "generate_summary",
+        "generate_detailed",
+        "generate_gap_report"
+      ]
+    },
+    {
+      "id": "t_export_html",
+      "from": "reporting",
+      "to": "reporting",
+      "on_event": "EXPORT_HTML",
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "export_html"
+      ]
+    },
+    {
+      "id": "t_export_html_from_analyzing",
+      "from": "analyzing",
+      "to": "reporting",
+      "on_event": "EXPORT_HTML",
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "export_html"
+      ]
+    },
+    {
+      "id": "t_export_json",
+      "from": "reporting",
+      "to": "reporting",
+      "on_event": "EXPORT_JSON",
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "export_json"
+      ]
+    },
+    {
+      "id": "t_export_json_from_analyzing",
+      "from": "analyzing",
+      "to": "reporting",
+      "on_event": "EXPORT_JSON",
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "export_json"
+      ]
+    },
+    {
+      "id": "t_more_summary",
+      "from": "reporting",
+      "to": "reporting",
+      "on_event": "SUMMARY",
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "generate_summary"
+      ]
+    },
+    {
+      "id": "t_more_detailed",
+      "from": "reporting",
+      "to": "reporting",
+      "on_event": "DETAILED",
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "generate_detailed"
+      ]
+    },
+    {
+      "id": "t_more_gap",
+      "from": "reporting",
+      "to": "reporting",
+      "on_event": "GAP",
+      "gates": [
+        "has_metrics"
+      ],
+      "actions": [
+        "generate_gap_report"
+      ]
+    },
+    {
+      "id": "t_reset",
+      "from": "tracking",
+      "to": "loaded",
+      "on_event": "RESET",
+      "actions": [
+        "reset_coverage"
+      ]
+    },
+    {
+      "id": "t_reset_from_analyzing",
+      "from": "analyzing",
+      "to": "loaded",
+      "on_event": "RESET",
+      "actions": [
+        "reset_coverage"
+      ]
+    },
+    {
+      "id": "t_reset_from_reporting",
+      "from": "reporting",
+      "to": "loaded",
+      "on_event": "RESET",
+      "actions": [
+        "reset_coverage"
+      ]
+    },
+    {
+      "id": "t_back_to_tracking",
+      "from": "analyzing",
+      "to": "tracking",
+      "on_event": "BACK",
+      "actions": []
+    },
+    {
+      "id": "t_back_to_analyzing",
+      "from": "reporting",
+      "to": "analyzing",
+      "on_event": "BACK",
+      "actions": []
+    },
+    {
+      "id": "t_unload",
+      "from": "loaded",
+      "to": "idle",
+      "on_event": "UNLOAD",
+      "actions": [
+        "clear_all"
+      ]
+    },
+    {
+      "id": "t_unload_from_tracking",
+      "from": "tracking",
+      "to": "idle",
+      "on_event": "UNLOAD",
+      "actions": [
+        "clear_all"
+      ]
+    },
+    {
+      "id": "t_unload_from_analyzing",
+      "from": "analyzing",
+      "to": "idle",
+      "on_event": "UNLOAD",
+      "actions": [
+        "clear_all"
+      ]
+    },
+    {
+      "id": "t_unload_from_reporting",
+      "from": "reporting",
+      "to": "idle",
+      "on_event": "UNLOAD",
+      "actions": [
+        "clear_all"
+      ]
+    },
+    {
+      "id": "t_error",
+      "from": "*",
+      "to": "error",
+      "on_event": "ERROR",
+      "actions": [
+        "set_error"
+      ]
+    },
+    {
+      "id": "t_recover",
+      "from": "error",
+      "to": "idle",
+      "on_event": "CLEAR",
+      "actions": [
+        "clear_error",
+        "clear_all"
+      ]
+    }
+  ],
+  "flanges": {
+    "inputs": [
+      "path",
+      "state_id",
+      "transition_id",
+      "gate_id",
+      "action_id",
+      "event_name",
+      "result"
+    ],
+    "outputs": [
+      "metrics",
+      "summary_report",
+      "detailed_report",
+      "gap_report",
+      "html_report",
+      "json_report"
+    ],
+    "stacks": [
+      "event_sequence_simulator",
+      "execution_tracer"
+    ]
+  }
+}

@@ -1,0 +1,575 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "test_generator",
+  "name": "L++ Test Case Generator",
+  "version": "1.0.0",
+  "description": "Auto-generates test cases from L++ blueprints for comprehensive testing",
+  "context_schema": {
+    "properties": {
+      "blueprint": {
+        "type": "object",
+        "description": "The loaded blueprint to generate tests for"
+      },
+      "blueprint_path": {
+        "type": "string",
+        "description": "Path to the loaded blueprint file"
+      },
+      "graph": {
+        "type": "object",
+        "description": "Adjacency graph of states and transitions"
+      },
+      "paths": {
+        "type": "array",
+        "description": "All discovered paths through the state machine"
+      },
+      "gate_analysis": {
+        "type": "object",
+        "description": "Boundary conditions extracted from gates"
+      },
+      "path_tests": {
+        "type": "array",
+        "description": "Generated path coverage tests"
+      },
+      "state_tests": {
+        "type": "array",
+        "description": "Generated state coverage tests"
+      },
+      "gate_tests": {
+        "type": "array",
+        "description": "Generated gate boundary tests"
+      },
+      "negative_tests": {
+        "type": "array",
+        "description": "Generated negative/invalid input tests"
+      },
+      "property_tests": {
+        "type": "array",
+        "description": "Generated property-based tests"
+      },
+      "all_tests": {
+        "type": "array",
+        "description": "Combined test suite"
+      },
+      "output_format": {
+        "type": "string",
+        "description": "Export format: json | pytest"
+      },
+      "output_path": {
+        "type": "string",
+        "description": "Path where tests were exported"
+      },
+      "formatted_output": {
+        "type": "string",
+        "description": "Formatted test output string"
+      },
+      "coverage_report": {
+        "type": "object",
+        "description": "Coverage analysis report"
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message if any"
+      }
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "No blueprint loaded, waiting for input"
+    },
+    "loaded": {
+      "description": "Blueprint loaded, ready to analyze"
+    },
+    "analyzing": {
+      "description": "Analyzing blueprint structure"
+    },
+    "generating": {
+      "description": "Generating test cases"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "error": {
+      "output_schema": {
+        "error": {
+          "type": "string",
+          "non_null": true
+        }
+      }
+    },
+    "complete": {}
+  },
+  "gates": {
+    "has_blueprint": {
+      "type": "expression",
+      "expression": "blueprint is not None"
+    },
+    "no_blueprint": {
+      "type": "expression",
+      "expression": "blueprint is None"
+    },
+    "has_graph": {
+      "type": "expression",
+      "expression": "graph is not None"
+    },
+    "has_paths": {
+      "type": "expression",
+      "expression": "paths is not None and len(paths) > 0"
+    },
+    "has_tests": {
+      "type": "expression",
+      "expression": "all_tests is not None and len(all_tests) > 0"
+    },
+    "has_path_tests": {
+      "type": "expression",
+      "expression": "path_tests is not None"
+    },
+    "has_gate_analysis": {
+      "type": "expression",
+      "expression": "gate_analysis is not None"
+    },
+    "format_is_json": {
+      "type": "expression",
+      "expression": "output_format == 'json'"
+    },
+    "format_is_pytest": {
+      "type": "expression",
+      "expression": "output_format == 'pytest'"
+    },
+    "has_output": {
+      "type": "expression",
+      "expression": "formatted_output is not None"
+    }
+  },
+  "actions": {
+    "load_blueprint": {
+      "type": "compute",
+      "compute_unit": "testgen:load_blueprint",
+      "input_map": {
+        "path": "event.payload.path"
+      },
+      "output_map": {
+        "blueprint": "blueprint",
+        "blueprint_path": "path",
+        "error": "error"
+      }
+    },
+    "build_graph": {
+      "type": "compute",
+      "compute_unit": "testgen:build_graph",
+      "input_map": {
+        "blueprint": "blueprint"
+      },
+      "output_map": {
+        "graph": "graph"
+      }
+    },
+    "analyze_paths": {
+      "type": "compute",
+      "compute_unit": "testgen:analyze_paths",
+      "input_map": {
+        "blueprint": "blueprint",
+        "graph": "graph"
+      },
+      "output_map": {
+        "paths": "paths"
+      }
+    },
+    "analyze_gates": {
+      "type": "compute",
+      "compute_unit": "testgen:analyze_gates",
+      "input_map": {
+        "blueprint": "blueprint"
+      },
+      "output_map": {
+        "gate_analysis": "analysis"
+      }
+    },
+    "generate_path_tests": {
+      "type": "compute",
+      "compute_unit": "testgen:generate_path_tests",
+      "input_map": {
+        "blueprint": "blueprint",
+        "paths": "paths"
+      },
+      "output_map": {
+        "path_tests": "tests"
+      }
+    },
+    "generate_state_tests": {
+      "type": "compute",
+      "compute_unit": "testgen:generate_state_tests",
+      "input_map": {
+        "blueprint": "blueprint",
+        "paths": "paths"
+      },
+      "output_map": {
+        "state_tests": "tests"
+      }
+    },
+    "generate_gate_tests": {
+      "type": "compute",
+      "compute_unit": "testgen:generate_gate_tests",
+      "input_map": {
+        "blueprint": "blueprint",
+        "gate_analysis": "gate_analysis"
+      },
+      "output_map": {
+        "gate_tests": "tests"
+      }
+    },
+    "generate_negative_tests": {
+      "type": "compute",
+      "compute_unit": "testgen:generate_negative_tests",
+      "input_map": {
+        "blueprint": "blueprint",
+        "graph": "graph"
+      },
+      "output_map": {
+        "negative_tests": "tests"
+      }
+    },
+    "generate_property_tests": {
+      "type": "compute",
+      "compute_unit": "testgen:generate_property_tests",
+      "input_map": {
+        "blueprint": "blueprint"
+      },
+      "output_map": {
+        "property_tests": "tests"
+      }
+    },
+    "combine_tests": {
+      "type": "compute",
+      "compute_unit": "testgen:combine_tests",
+      "input_map": {
+        "blueprint": "blueprint",
+        "path_tests": "path_tests",
+        "state_tests": "state_tests",
+        "gate_tests": "gate_tests",
+        "negative_tests": "negative_tests",
+        "property_tests": "property_tests"
+      },
+      "output_map": {
+        "all_tests": "tests",
+        "coverage_report": "coverage"
+      }
+    },
+    "set_format_json": {
+      "type": "set",
+      "target": "output_format",
+      "value": "json"
+    },
+    "set_format_pytest": {
+      "type": "set",
+      "target": "output_format",
+      "value": "pytest"
+    },
+    "format_as_json": {
+      "type": "compute",
+      "compute_unit": "testgen:format_json",
+      "input_map": {
+        "blueprint": "blueprint",
+        "tests": "all_tests"
+      },
+      "output_map": {
+        "formatted_output": "output"
+      }
+    },
+    "format_as_pytest": {
+      "type": "compute",
+      "compute_unit": "testgen:format_pytest",
+      "input_map": {
+        "blueprint": "blueprint",
+        "tests": "all_tests"
+      },
+      "output_map": {
+        "formatted_output": "output"
+      }
+    },
+    "export_tests": {
+      "type": "compute",
+      "compute_unit": "testgen:export_tests",
+      "input_map": {
+        "content": "formatted_output",
+        "path": "event.payload.path",
+        "format": "output_format"
+      },
+      "output_map": {
+        "output_path": "path"
+      }
+    },
+    "clear_state": {
+      "type": "compute",
+      "compute_unit": "testgen:clear_state",
+      "input_map": {},
+      "output_map": {
+        "blueprint": "blueprint",
+        "graph": "graph",
+        "paths": "paths",
+        "gate_analysis": "gate_analysis",
+        "path_tests": "path_tests",
+        "state_tests": "state_tests",
+        "gate_tests": "gate_tests",
+        "negative_tests": "negative_tests",
+        "property_tests": "property_tests",
+        "all_tests": "all_tests",
+        "formatted_output": "formatted_output",
+        "error": "error"
+      }
+    },
+    "set_error": {
+      "type": "set",
+      "target": "error",
+      "value_from": "event.payload.message"
+    },
+    "clear_error": {
+      "type": "set",
+      "target": "error",
+      "value": null
+    }
+  },
+  "display": {
+    "rules": [
+      {
+        "gate": "has_tests",
+        "template": "Tests ready: {all_tests|len} tests generated"
+      },
+      {
+        "gate": "has_blueprint",
+        "template": "Loaded: {blueprint.name}"
+      },
+      {
+        "template": "L++ Test Generator"
+      }
+    ]
+  },
+  "transitions": [
+    {
+      "id": "t_load",
+      "from": "idle",
+      "to": "loaded",
+      "on_event": "LOAD",
+      "gates": [
+        "no_blueprint"
+      ],
+      "actions": [
+        "load_blueprint"
+      ]
+    },
+    {
+      "id": "t_reload",
+      "from": "loaded",
+      "to": "loaded",
+      "on_event": "LOAD",
+      "actions": [
+        "clear_state",
+        "load_blueprint"
+      ]
+    },
+    {
+      "id": "t_reload_from_complete",
+      "from": "complete",
+      "to": "loaded",
+      "on_event": "LOAD",
+      "actions": [
+        "clear_state",
+        "load_blueprint"
+      ]
+    },
+    {
+      "id": "t_analyze",
+      "from": "loaded",
+      "to": "analyzing",
+      "on_event": "ANALYZE",
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "build_graph",
+        "analyze_paths",
+        "analyze_gates"
+      ]
+    },
+    {
+      "id": "t_generate_all",
+      "from": "analyzing",
+      "to": "generating",
+      "on_event": "GENERATE",
+      "gates": [
+        "has_paths"
+      ],
+      "actions": [
+        "generate_path_tests",
+        "generate_state_tests",
+        "generate_gate_tests",
+        "generate_negative_tests",
+        "generate_property_tests"
+      ]
+    },
+    {
+      "id": "t_generate_from_loaded",
+      "from": "loaded",
+      "to": "generating",
+      "on_event": "GENERATE_ALL",
+      "gates": [
+        "has_blueprint"
+      ],
+      "actions": [
+        "build_graph",
+        "analyze_paths",
+        "analyze_gates",
+        "generate_path_tests",
+        "generate_state_tests",
+        "generate_gate_tests",
+        "generate_negative_tests",
+        "generate_property_tests"
+      ]
+    },
+    {
+      "id": "t_combine",
+      "from": "generating",
+      "to": "complete",
+      "on_event": "COMBINE",
+      "gates": [
+        "has_path_tests"
+      ],
+      "actions": [
+        "combine_tests"
+      ]
+    },
+    {
+      "id": "t_auto_combine",
+      "from": "generating",
+      "to": "complete",
+      "on_event": "AUTO",
+      "gates": [
+        "has_path_tests"
+      ],
+      "actions": [
+        "combine_tests"
+      ]
+    },
+    {
+      "id": "t_format_json",
+      "from": "complete",
+      "to": "complete",
+      "on_event": "FORMAT_JSON",
+      "gates": [
+        "has_tests"
+      ],
+      "actions": [
+        "set_format_json",
+        "format_as_json"
+      ]
+    },
+    {
+      "id": "t_format_pytest",
+      "from": "complete",
+      "to": "complete",
+      "on_event": "FORMAT_PYTEST",
+      "gates": [
+        "has_tests"
+      ],
+      "actions": [
+        "set_format_pytest",
+        "format_as_pytest"
+      ]
+    },
+    {
+      "id": "t_export",
+      "from": "complete",
+      "to": "complete",
+      "on_event": "EXPORT",
+      "gates": [
+        "has_output"
+      ],
+      "actions": [
+        "export_tests"
+      ]
+    },
+    {
+      "id": "t_view_coverage",
+      "from": "complete",
+      "to": "complete",
+      "on_event": "COVERAGE",
+      "gates": [
+        "has_tests"
+      ],
+      "actions": []
+    },
+    {
+      "id": "t_reset",
+      "from": "complete",
+      "to": "idle",
+      "on_event": "RESET",
+      "actions": [
+        "clear_state"
+      ]
+    },
+    {
+      "id": "t_reset_from_error",
+      "from": "error",
+      "to": "idle",
+      "on_event": "RESET",
+      "actions": [
+        "clear_error",
+        "clear_state"
+      ]
+    },
+    {
+      "id": "t_error_load",
+      "from": "idle",
+      "to": "error",
+      "on_event": "ERROR",
+      "actions": [
+        "set_error"
+      ]
+    },
+    {
+      "id": "t_error_analyze",
+      "from": "analyzing",
+      "to": "error",
+      "on_event": "ERROR",
+      "actions": [
+        "set_error"
+      ]
+    },
+    {
+      "id": "t_error_generate",
+      "from": "generating",
+      "to": "error",
+      "on_event": "ERROR",
+      "actions": [
+        "set_error"
+      ]
+    },
+    {
+      "id": "t_back_to_loaded",
+      "from": "analyzing",
+      "to": "loaded",
+      "on_event": "BACK",
+      "actions": []
+    },
+    {
+      "id": "t_back_from_complete",
+      "from": "complete",
+      "to": "loaded",
+      "on_event": "BACK",
+      "actions": []
+    }
+  ],
+  "flanges": {
+    "inputs": [
+      "path"
+    ],
+    "outputs": [
+      "all_tests",
+      "formatted_output",
+      "coverage_report"
+    ],
+    "stacks": [
+      "graph_analyzer",
+      "test_formatter"
+    ]
+  }
+}
