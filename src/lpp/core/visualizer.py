@@ -417,5 +417,43 @@ def main():
         sys.exit(1)
 
 
+def generate_mermaid(bp: Dict[str, Any]) -> str:
+    """Generate Mermaid diagram from blueprint dict."""
+    viz = LppVisualizer(bp)
+    return viz.as_mermaid_logic()
+
+
+def generate_html(bp: Dict[str, Any]) -> str:
+    """Generate HTML dashboard with embedded Mermaid diagram."""
+    viz = LppVisualizer(bp)
+    mermaid = viz.as_mermaid_logic()
+    ascii_table = viz.as_ascii()
+
+    return f'''<!DOCTYPE html>
+<html>
+<head>
+    <title>L++ Blueprint: {viz.name}</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {{ font-family: -apple-system, sans-serif; margin: 2rem; }}
+        h1 {{ color: #333; }}
+        .mermaid {{ background: #fafafa; padding: 1rem; border-radius: 8px; }}
+        pre {{ background: #1e1e1e; color: #d4d4d4; padding: 1rem;
+               border-radius: 8px; overflow-x: auto; }}
+    </style>
+</head>
+<body>
+    <h1>{viz.name} v{viz.version}</h1>
+    <h2>State Machine Diagram</h2>
+    <div class="mermaid">
+{mermaid}
+    </div>
+    <h2>Transition Table</h2>
+    <pre>{ascii_table}</pre>
+    <script>mermaid.initialize({{startOnLoad:true}});</script>
+</body>
+</html>'''
+
+
 if __name__ == "__main__":
     main()

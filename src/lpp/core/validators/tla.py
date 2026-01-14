@@ -358,9 +358,8 @@ def _python_to_tla(
     domains = domains or {}
 
     # First, convert Python string literals to TLA+ format
-    # Handle both single and double quoted strings
     def convert_string_literal(m):
-        s = m.group(1) or m.group(2)  # Group 1 is single-quoted, 2 is double
+        s = m.group(1)
         # Escape special TLA+ characters
         escaped = _escape_tla_string(s)
         return f'"{escaped}"'

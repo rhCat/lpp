@@ -210,7 +210,7 @@ def _find_transition(
     event_name: str
 ):
     """Find a matching transition for the event."""
-    for trans in blueprint.transitions.values():
+    for trans in blueprint.transitions:
         if trans.on_event != event_name:
             continue
         if trans.from_state == "*" or trans.from_state == current_state:

@@ -616,14 +616,14 @@ def _generate_code(bp: dict) -> str:
     return "\n".join(lines)
 
 
-# CLI
-if __name__ == "__main__":
+def main():
+    """CLI entry point for lpp-compile."""
     import sys
 
     if len(sys.argv) < 2:
-        print(
-            "Usage: python -m frame_py.compiler <blueprint.json> [output.py]")
-        sys.exit(1)
+        print("Usage: lpp compile <blueprint.json> [output.py]")
+        print("       lpp-compile <blueprint.json> [output.py]")
+        return 1
 
     bp_path = sys.argv[1]
     out_path = sys.argv[2] if len(sys.argv) > 2 else None
@@ -632,9 +632,15 @@ if __name__ == "__main__":
 
     if error:
         print(f"[L++ COMPILE ERROR] {error}")
-        sys.exit(1)
+        return 1
 
     if out_path:
         print(f"Compiled: {bp_path} -> {out_path}")
     else:
         print(code)
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(main())

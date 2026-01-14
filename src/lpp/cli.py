@@ -1,35 +1,31 @@
 """
 L++ Dev Suite CLI
 
-Main command-line interface for the L++ development suite.
-
 Usage:
     lpp <command> [args]
 
 Commands:
+    init        Create new L++ skill project with build script
+    build       Run full pipeline: validate → compile → tla → test → docs
+
     compile     Compile blueprint to Python
     visualize   Generate blueprint visualization
     validate    Validate blueprint or assembly
-
-    docs        Generate documentation (mermaid, dashboard, all)
+    docs        Generate documentation (mermaid, dashboard)
     test        Generate and run tests
-    tla         TLA+ validation
+    tla         Generate TLA+ specification
 
     util        Run a utility tool
     workflow    Run a workflow
     agent       Manage Claude Code agents
-
     list        List available utilities/workflows/agents
-    version     Show version information
+    version     Show version
 
 Examples:
-    lpp compile blueprint.json output.py
-    lpp docs /path/to/skill          # Generate all docs
-    lpp docs /path/to/skill mermaid  # Mermaid only
-    lpp test /path/to/skill          # Generate and run tests
-    lpp tla /path/to/blueprint.json  # TLA+ validation
-    lpp util logic_decoder myfile.py
-    lpp agent deploy /path/to/project
+    lpp init my_skill            # Create new skill project
+    lpp build .                  # Run full build pipeline
+    lpp compile blueprint.json   # Compile only
+    lpp docs .                   # Generate docs only
 """
 
 import sys
@@ -87,6 +83,367 @@ def cmd_validate(args: List[str]) -> int:
         except Exception as e:
             print(f"Validation failed: {e}")
             return 1
+
+
+def cmd_docs(args: List[str]) -> int:
+    """Generate documentation for a blueprint or skill directory."""
+    from pathlib import Path
+    import json
+
+    if not args:
+        print("Usage: lpp docs <path> [all|mermaid|dashboard|clean]")
+        return 1
+
+    target = Path(args[0]).resolve()
+    doc_type = args[1] if len(args) > 1 else "all"
+
+    if doc_type == "clean":
+        import shutil
+        rd = target / "results"
+        if rd.exists():
+            shutil.rmtree(rd)
+            print(f"Cleaned: {rd}")
+        return 0
+
+    # Find blueprint
+    bp_file = None
+    for p in [target / "blueprint.json", target / f"{target.name}.json"]:
+        if p.exists():
+            bp_file = p
+            break
+    if not bp_file:
+        if target.suffix == ".json" and target.exists():
+            bp_file = target
+        else:
+            for p in target.glob("*.json"):
+                bp_file = p
+                break
+    if not bp_file:
+        print(f"No blueprint found in {target}")
+        return 1
+
+    with open(bp_file) as f:
+        bp = json.load(f)
+
+    rd = (target if target.is_dir() else target.parent) / "results"
+    rd.mkdir(exist_ok=True)
+
+    if doc_type in ["all", "mermaid"]:
+        from lpp.core.visualizer import generate_mermaid
+        mmd = generate_mermaid(bp)
+        mmd_file = rd / "diagram.mmd"
+        mmd_file.write_text(mmd)
+        print(f"Generated: {mmd_file}")
+
+    if doc_type in ["all", "dashboard"]:
+        from lpp.core.visualizer import generate_html
+        html = generate_html(bp)
+        html_file = rd / "dashboard.html"
+        html_file.write_text(html)
+        print(f"Generated: {html_file}")
+
+    return 0
+
+
+def cmd_test(args: List[str]) -> int:
+    """Generate and run tests for a skill."""
+    import subprocess
+    from pathlib import Path
+
+    if not args:
+        print("Usage: lpp test <path> [--generate|--run|--coverage]")
+        return 1
+
+    target = Path(args[0]).resolve()
+    gen_only = "--generate" in args
+    run_only = "--run" in args
+    cov = "--coverage" in args
+    test_dir = target / "tests"
+
+    if not run_only:
+        # Find compute files
+        compute_files = list(target.glob("*_compute.py"))
+        compute_files += list(target.glob("compute.py"))
+        compute_files += list(target.glob("src/*_compute.py"))
+        for f in compute_files:
+            test_dir.mkdir(exist_ok=True)
+            tf = test_dir / f"test_{f.stem}.py"
+            if not tf.exists():
+                content = f'''"""Auto-generated tests for {f.name}"""
+import pytest
+import sys
+sys.path.insert(0, str({repr(str(f.parent))}))
+from {f.stem} import COMPUTE_REGISTRY
+
+def test_registry_exists():
+    assert COMPUTE_REGISTRY is not None
+    assert len(COMPUTE_REGISTRY) > 0
+
+def test_all_functions_callable():
+    for name, func in COMPUTE_REGISTRY.items():
+        assert callable(func), f"{{name}} is not callable"
+'''
+                tf.write_text(content)
+                print(f"Generated: {tf}")
+            break
+
+    if not gen_only and test_dir.exists():
+        cmd = ["python", "-m", "pytest", str(test_dir), "-v"]
+        if cov:
+            cmd.extend(["--cov", str(target)])
+        return subprocess.run(cmd).returncode
+
+    return 0
+
+
+def cmd_tla(args: List[str]) -> int:
+    """Generate and validate TLA+ specification."""
+    from pathlib import Path
+    import json
+
+    if not args:
+        print("Usage: lpp tla <blueprint.json> [--check] [--output <dir>]")
+        return 1
+
+    bp_path = Path(args[0]).resolve()
+    check = "--check" in args
+    out_dir = bp_path.parent / "tla"
+
+    for i, a in enumerate(args):
+        if a == "--output" and i + 1 < len(args):
+            out_dir = Path(args[i + 1])
+
+    out_dir.mkdir(exist_ok=True)
+
+    with open(bp_path) as f:
+        bp = json.load(f)
+
+    from lpp.core.validators.tla import save_tla, validate_with_tlc
+
+    tla_file, cfg_file = save_tla(bp, str(out_dir))
+    print(f"Generated: {tla_file}")
+    print(f"Generated: {cfg_file}")
+
+    if check:
+        print("Running TLC model checker...")
+        errs = validate_with_tlc(str(tla_file))
+        if errs:
+            for e in errs:
+                print(f"  Error: {e}")
+            return 1
+        print("TLC: No errors found!")
+
+    return 0
+
+
+def cmd_init(args: List[str]) -> int:
+    """Initialize a new L++ skill project."""
+    from pathlib import Path
+
+    if not args:
+        print("Usage: lpp init <skill_name> [--path <dir>]")
+        return 1
+
+    skill_name = args[0]
+    target_dir = Path.cwd()
+
+    for i, a in enumerate(args):
+        if a == "--path" and i + 1 < len(args):
+            target_dir = Path(args[i + 1])
+
+    skill_dir = target_dir / skill_name
+    if skill_dir.exists():
+        print(f"Error: {skill_dir} already exists")
+        return 1
+
+    skill_dir.mkdir(parents=True)
+    (skill_dir / "src").mkdir()
+    (skill_dir / "tests").mkdir()
+    (skill_dir / "results").mkdir()
+    (skill_dir / "tla").mkdir()
+
+    # Create blueprint template
+    blueprint = {
+        "$schema": "lpp/v0.2.0",
+        "id": skill_name,
+        "name": skill_name.replace("_", " ").title(),
+        "version": "1.0.0",
+        "description": f"L++ skill: {skill_name}",
+        "context_schema": {"properties": {}},
+        "states": {
+            "idle": {"description": "Initial state"},
+            "processing": {"description": "Processing"},
+            "done": {"description": "Completed"},
+            "error": {"description": "Error occurred"}
+        },
+        "entry_state": "idle",
+        "terminal_states": {"done": {}, "error": {}},
+        "gates": {},
+        "actions": {},
+        "transitions": [
+            {"id": "t_start", "from": "idle", "to": "processing",
+             "on_event": "START"},
+            {"id": "t_done", "from": "processing", "to": "done",
+             "on_event": "COMPLETE"},
+            {"id": "t_error", "from": "*", "to": "error", "on_event": "ERROR"}
+        ]
+    }
+
+    import json
+    bp_file = skill_dir / "blueprint.json"
+    with open(bp_file, "w") as f:
+        json.dump(blueprint, f, indent=2)
+
+    # Create compute template
+    compute_file = skill_dir / "compute.py"
+    compute_file.write_text(f'''"""
+{skill_name} Compute Functions
+
+Pure functions implementing business logic.
+"""
+
+def process(params: dict) -> dict:
+    """Process input and return result."""
+    return {{"result": "processed", "input": params}}
+
+
+COMPUTE_REGISTRY = {{
+    "{skill_name}:process": process,
+}}
+''')
+
+    # Create build script
+    build_script = skill_dir / "build.sh"
+    build_script.write_text(f'''#!/bin/bash
+# L++ Build Script for {skill_name}
+set -e
+
+SKILL_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SKILL_DIR"
+
+echo "=== L++ Build: {skill_name} ==="
+
+# Create output directories
+mkdir -p results tla tests
+
+# 1. Validate
+echo "Step 1: Validating blueprint..."
+lpp validate blueprint.json
+
+# 2. Compile
+echo "Step 2: Compiling..."
+lpp compile blueprint.json results/compiled.py
+
+# 3. Generate TLA+
+echo "Step 3: Generating TLA+ spec..."
+lpp tla blueprint.json --output tla
+
+# 4. Generate tests
+echo "Step 4: Generating tests..."
+lpp test . --generate
+
+# 5. Run tests
+echo "Step 5: Running tests..."
+lpp test . --run
+
+# 6. Generate documentation
+echo "Step 6: Generating documentation..."
+lpp docs .
+
+echo ""
+echo "=== Build Complete ==="
+echo "Outputs:"
+echo "  results/compiled.py    - Compiled operator"
+echo "  results/diagram.mmd    - Mermaid diagram"
+echo "  results/dashboard.html - HTML dashboard"
+echo "  tla/{skill_name}.tla   - TLA+ specification"
+echo "  tests/                 - Auto-generated tests"
+''')
+    build_script.chmod(0o755)
+
+    # Create README
+    readme = skill_dir / "README.md"
+    readme.write_text(f'''# {skill_name.replace("_", " ").title()}
+
+L++ Skill
+
+## Quick Start
+
+```bash
+./build.sh          # Run full build pipeline
+lpp validate .      # Validate only
+lpp docs .          # Generate docs only
+```
+
+## Structure
+
+```
+{skill_name}/
+├── blueprint.json  # State machine definition
+├── compute.py      # Pure compute functions
+├── build.sh        # Build pipeline script
+├── results/        # Generated artifacts
+├── tla/            # TLA+ specifications
+└── tests/          # Auto-generated tests
+```
+''')
+
+    print(f"Created L++ skill: {skill_dir}")
+    print(f"  blueprint.json  - Edit to define states/transitions")
+    print(f"  compute.py      - Add your compute functions")
+    print(f"  build.sh        - Run to compile/test/document")
+    print()
+    print(f"Next: cd {skill_name} && ./build.sh")
+    return 0
+
+
+def cmd_build(args: List[str]) -> int:
+    """Run full build pipeline: validate → compile → tla → test → docs."""
+    from pathlib import Path
+    import subprocess
+
+    target = Path(args[0]).resolve() if args else Path.cwd()
+
+    # Find blueprint
+    bp_file = None
+    for p in [target / "blueprint.json", target / f"{target.name}.json"]:
+        if p.exists():
+            bp_file = p
+            break
+    if not bp_file:
+        for p in target.glob("*.json"):
+            if "blueprint" in p.name.lower():
+                bp_file = p
+                break
+    if not bp_file:
+        print(f"No blueprint found in {target}")
+        return 1
+
+    print(f"=== L++ Build: {target.name} ===")
+    steps = [
+        ("Validating", ["lpp", "validate", str(bp_file)]),
+        ("Compiling", ["lpp", "compile", str(bp_file),
+                       str(target / "results" / "compiled.py")]),
+        ("Generating TLA+", ["lpp", "tla", str(bp_file)]),
+        ("Generating tests", ["lpp", "test", str(target), "--generate"]),
+        ("Running tests", ["lpp", "test", str(target), "--run"]),
+        ("Generating docs", ["lpp", "docs", str(target)]),
+    ]
+
+    (target / "results").mkdir(exist_ok=True)
+
+    for i, (name, cmd) in enumerate(steps, 1):
+        print(f"\nStep {i}: {name}...")
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"  FAILED: {result.stderr or result.stdout}")
+            return 1
+        for line in result.stdout.strip().split("\n"):
+            if line:
+                print(f"  {line}")
+
+    print("\n=== Build Complete ===")
+    return 0
 
 
 def cmd_util(args: List[str]) -> int:
@@ -233,9 +590,14 @@ def cmd_version(args: List[str]) -> int:
 
 
 COMMANDS = {
+    "init": cmd_init,
+    "build": cmd_build,
     "compile": cmd_compile,
     "visualize": cmd_visualize,
     "validate": cmd_validate,
+    "docs": cmd_docs,
+    "test": cmd_test,
+    "tla": cmd_tla,
     "util": cmd_util,
     "workflow": cmd_workflow,
     "agent": cmd_agent,
