@@ -91,9 +91,15 @@ def run_frame(
     # =========================================================================
     orch_state = OrchestratorState.FINDING_TRANSITION
 
-    transition = _find_transition(blueprint, current_state, event_name)
+    # Build evaluation scope (context + event)
+    eval_scope = dict(context)
+    eval_scope["event"] = {"name": event_name, "payload": event_payload}
 
-    if not transition:
+    # Find all matching transitions and evaluate gates for each
+    matching_transitions = _find_all_transitions(
+        blueprint, current_state, event_name)
+
+    if not matching_transitions:
         # NO_TRANSITION: finding_transition → error
         orch_state = OrchestratorState.ERROR
         return current_state, context, traces, f"NO_TRANSITION: '{event_name}'"
@@ -103,23 +109,34 @@ def run_frame(
     # =========================================================================
     orch_state = OrchestratorState.EVALUATING_GATES
 
-    # Build evaluation scope (context + event)
-    eval_scope = dict(context)
-    eval_scope["event"] = {"name": event_name, "payload": event_payload}
+    # Try each matching transition until one passes all gates
+    transition = None
+    last_gate_error = None
 
-    # EVALUATE: Check gates
-    for gate_id in transition.gates:
-        gate = blueprint.get_gate(gate_id)
-        if gate and gate.expression:
-            result, eval_error = atom_EVALUATE(gate.expression, eval_scope)
-            if eval_error:
-                # GATES_FAILED: evaluating_gates → error
-                orch_state = OrchestratorState.ERROR
-                return current_state, context, traces, f"GATES_FAILED: {eval_error}"
-            if not result:
-                # GATES_FAILED: evaluating_gates → error
-                orch_state = OrchestratorState.ERROR
-                return current_state, context, traces, f"GATES_FAILED: '{gate_id}' blocked"
+    for candidate in matching_transitions:
+        gates_passed = True
+        for gate_id in candidate.gates:
+            gate = blueprint.get_gate(gate_id)
+            if gate and gate.expression:
+                result, eval_error = atom_EVALUATE(gate.expression, eval_scope)
+                if eval_error:
+                    # Gate evaluation error - try next transition
+                    gates_passed = False
+                    last_gate_error = f"GATES_FAILED: {eval_error}"
+                    break
+                if not result:
+                    # Gate returned False - try next transition
+                    gates_passed = False
+                    last_gate_error = f"GATES_FAILED: '{gate_id}' blocked"
+                    break
+        if gates_passed:
+            transition = candidate
+            break
+
+    if not transition:
+        # No transition passed all gates
+        orch_state = OrchestratorState.ERROR
+        return current_state, context, traces, last_gate_error
 
     # =========================================================================
     # GATES_PASSED: evaluating_gates → executing_actions
@@ -216,6 +233,21 @@ def _find_transition(
         if trans.from_state == "*" or trans.from_state == current_state:
             return trans
     return None
+
+
+def _find_all_transitions(
+    blueprint: Blueprint,
+    current_state: str,
+    event_name: str
+):
+    """Find all matching transitions for the event (for gate fallback)."""
+    matches = []
+    for trans in blueprint.transitions:
+        if trans.on_event != event_name:
+            continue
+        if trans.from_state == "*" or trans.from_state == current_state:
+            matches.append(trans)
+    return matches
 
 
 def _resolve_path(path: str, data: dict) -> Any:

@@ -1,7 +1,7 @@
 """
 L++ Doc Generator Utility
 
-Generates all documentation artifacts for L++ blueprints including graphs, Mermaid diagrams, and analysis reports
+Generates documentation artifacts for L++ blueprints.
 """
 from pathlib import Path
 
@@ -13,6 +13,7 @@ try:
     from .compute import COMPUTE_REGISTRY
 except ImportError:
     COMPUTE_REGISTRY = {}
+
 
 def run(params: dict) -> dict:
     """Run the doc_generator utility with given parameters."""
@@ -26,8 +27,16 @@ def run(params: dict) -> dict:
     if error:
         return {"error": error}
 
-    # Initialize context from params
-    context = params.copy()
+    # Initialize context with defaults for required variables
+    context = {
+        "blueprints": [],
+        "options": params.get("options", {"all": True}),
+        "utilsPath": params.get("utilsPath", "."),
+        "outputPath": params.get("outputPath", "./results"),
+        "results": {"generated": 0, "errors": []},
+        "error": None,
+    }
+    context.update(params)
     state = blueprint.entry_state
 
     # Run through state machine until terminal or error
@@ -42,5 +51,6 @@ def run(params: dict) -> dict:
             break
 
     return {"state": state, "context": context}
+
 
 __all__ = ["BLUEPRINT_PATH", "COMPUTE_REGISTRY", "run"]

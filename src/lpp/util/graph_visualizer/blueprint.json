@@ -36,24 +36,41 @@
     },
     "done": {
       "description": "Diagram generation complete"
+    },
+    "error": {
+      "description": "No blueprint provided"
     }
   },
   "entry_state": "idle",
   "terminal_states": {
-    "done": {}
+    "done": {},
+    "error": {}
   },
   "gates": {
     "has_blueprint": {
       "type": "expression",
       "expression": "has_blueprint == True"
+    },
+    "no_blueprint": {
+      "type": "expression",
+      "expression": "has_blueprint != True"
     }
   },
   "transitions": [
     {
+      "id": "t_no_bp",
+      "from": "idle",
+      "to": "error",
+      "on_event": "START",
+      "gates": [
+        "no_blueprint"
+      ]
+    },
+    {
       "id": "t_start",
       "from": "idle",
       "to": "generating",
-      "on_event": "start",
+      "on_event": "START",
       "gates": [
         "has_blueprint"
       ],
@@ -65,7 +82,7 @@
       "id": "t_generate",
       "from": "generating",
       "to": "done",
-      "on_event": "generate",
+      "on_event": "GENERATE",
       "actions": [
         "generate_diagram"
       ]

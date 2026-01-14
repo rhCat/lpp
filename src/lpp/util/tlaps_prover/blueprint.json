@@ -1,0 +1,99 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "tlaps_prover",
+  "name": "TLAPS Proof Generator",
+  "version": "1.0.0",
+  "description": "Generates TLAPS-ready TLA+ specifications with proofs",
+  "context_schema": {
+    "properties": {
+      "blueprintPath": {"type": "string"},
+      "outputDir": {"type": "string"},
+      "verify": {"type": "boolean", "default": false},
+      "tlaSpec": {"type": "string"},
+      "proofResult": {"type": "object"},
+      "error": {"type": "string"}
+    }
+  },
+  "states": {
+    "idle": {"description": "Awaiting input"},
+    "generating": {"description": "Generating TLA+ spec with proofs"},
+    "verifying": {"description": "Running TLAPS verification"},
+    "done": {"description": "Generation complete"},
+    "error": {"description": "Error occurred"}
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "done": {},
+    "error": {}
+  },
+  "gates": {
+    "has_blueprint": {
+      "type": "expression",
+      "expression": "blueprintPath is not None"
+    },
+    "wants_verify": {
+      "type": "expression",
+      "expression": "verify == True"
+    },
+    "skip_verify": {
+      "type": "expression",
+      "expression": "verify != True"
+    },
+    "has_error": {
+      "type": "expression",
+      "expression": "error is not None"
+    }
+  },
+  "actions": {
+    "generate": {
+      "type": "compute",
+      "compute_unit": "tlaps:generate",
+      "input_map": {"blueprintPath": "blueprintPath", "outputDir": "outputDir"},
+      "output_map": {"tlaSpec": "tlaSpec"}
+    },
+    "verify": {
+      "type": "compute",
+      "compute_unit": "tlaps:verify",
+      "input_map": {"tlaSpec": "tlaSpec"},
+      "output_map": {"proofResult": "proofResult"}
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_start",
+      "from": "idle",
+      "to": "generating",
+      "on_event": "START",
+      "gates": ["has_blueprint"],
+      "actions": ["generate"]
+    },
+    {
+      "id": "t_skip_verify",
+      "from": "generating",
+      "to": "done",
+      "on_event": "DONE",
+      "gates": ["skip_verify"]
+    },
+    {
+      "id": "t_verify",
+      "from": "generating",
+      "to": "verifying",
+      "on_event": "DONE",
+      "gates": ["wants_verify"],
+      "actions": ["verify"]
+    },
+    {
+      "id": "t_verified",
+      "from": "verifying",
+      "to": "done",
+      "on_event": "DONE"
+    },
+    {
+      "id": "t_error",
+      "from": "*",
+      "to": "error",
+      "on_event": "ERROR",
+      "gates": ["has_error"]
+    }
+  ]
+}
