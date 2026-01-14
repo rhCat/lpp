@@ -49,8 +49,14 @@ def run(project_path: str = None, output_path: str = None, **options) -> dict:
         **options
     }
     
-    # Start workflow
-    event = "START" if "START" in [t.get("on_event") for t in bp_raw.get("transitions", [])] else "REFACTOR"
+    # Start workflow - find event that progresses from entry state
+    entry = bp_raw.get("entry_state", "idle")
+    entry_events = []
+    for t in bp_raw.get("transitions", []):
+        if t.get("from") == entry and t.get("to") != entry:
+            entry_events.append(t.get("on_event"))
+    event = entry_events[0] if entry_events else "REFACTOR"
+
     new_state, new_ctx, traces, err = run_frame(
         blueprint, context, event, {}, COMPUTE_REGISTRY
     )
