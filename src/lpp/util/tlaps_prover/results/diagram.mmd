@@ -1,0 +1,40 @@
+flowchart TD
+    %% L++ Logic CAD: TLAPS Proof Generator
+        state_idle(["idle<br>Awaiting input"]):::entry
+        state_verifying(["verifying<br>Running TLAPS verification"]):::state
+        state_generating(["generating<br>Generating TLA+ spec with proofs"]):::state
+        state_done[["done<br>Generation complete"]]:::terminal
+        state_error[["error<br>Error occurred"]]:::terminal
+
+    %% Transitions
+    gate_t0s0{{"blueprintPath is not None?"}}:::gate
+    state_idle -- "START" --> gate_t0s0
+    act_t0s0[["generate"]]:::action
+    gate_t0s0 -- ✓ --> act_t0s0
+    act_t0s0 --> state_generating
+    gate_t1s0{{"verify != True?"}}:::gate
+    state_generating -- "DONE" --> gate_t1s0
+    gate_t1s0 -- ✓ --> state_done
+    gate_t2s0{{"verify == True?"}}:::gate
+    state_generating -- "DONE" --> gate_t2s0
+    act_t2s0[["verify"]]:::action
+    gate_t2s0 -- ✓ --> act_t2s0
+    act_t2s0 --> state_verifying
+    state_verifying -- "DONE" --> state_done
+    gate_t4s0{{"error is not None?"}}:::gate
+    state_idle -- "ERROR" --> gate_t4s0
+    gate_t4s0 -- ✓ --> state_error
+    gate_t4s1{{"error is not None?"}}:::gate
+    state_generating -- "ERROR" --> gate_t4s1
+    gate_t4s1 -- ✓ --> state_error
+    gate_t4s2{{"error is not None?"}}:::gate
+    state_verifying -- "ERROR" --> gate_t4s2
+    gate_t4s2 -- ✓ --> state_error
+
+    %% Styling - ALL shapes have explicit fill and black text
+    classDef entry fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
+    classDef terminal fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef errorState fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef state fill:#ffffff,stroke:#6a6aaa,stroke-width:2px,color:#000
+    classDef gate fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#000

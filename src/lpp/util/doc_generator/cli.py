@@ -1,181 +1,108 @@
 #!/usr/bin/env python3
 """
 Documentation Generator CLI
-Generates all documentation artifacts for L++ blueprints.
 
-Works on any L++ project by specifying --project <path>.
+Generates documentation artifacts for L++ blueprints including
+Mermaid diagrams and HTML dashboards.
 
 Usage:
-    python interactive.py [--project <path>] [--all] [--graphs] [--mermaid] ...
+    lpp util doc_generator <path> [options]
+    python -m lpp.util.doc_generator <path>
 
 Examples:
-    python interactive.py                    # Generate docs for L++ utils
-    python interactive.py --project /my/app  # Generate docs for external project
+    lpp util doc_generator .                    # Current directory
+    lpp util doc_generator demo/task_tracker    # Specific project
+    lpp util doc_generator . --mermaid          # Mermaid only
+    lpp util doc_generator . --dashboard        # Dashboard only
+
+Note: This is a wrapper around 'lpp docs' functionality.
 """
-from src.docgen_compute import COMPUTE_REGISTRY
 import sys
-import os
 import argparse
+from pathlib import Path
 from datetime import datetime
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-
-def main():
+def main(args=None):
     parser = argparse.ArgumentParser(
-        description='L++ Documentation Generator - Works on any L++ project'
+        description='Generate L++ documentation artifacts'
     )
-    parser.add_argument('--project', '-p', metavar='PATH',
-                        help='Path to L++ project (default: L++ utils directory)')
-    parser.add_argument('--all', action='store_true',
-                        help='Generate all docs (default)')
-    parser.add_argument('--graphs', action='store_true',
-                        help='Generate HTML graph visualizations')
-    parser.add_argument('--logic', action='store_true',
-                        help='Generate logic graphs from Python')
-    parser.add_argument('--functions', action='store_true',
-                        help='Generate function dependency graphs')
+    parser.add_argument('path', nargs='?', default='.',
+                        help='Path to L++ project or blueprint')
+    parser.add_argument('--output', '-o',
+                        help='Output directory (default: <path>/results)')
     parser.add_argument('--mermaid', action='store_true',
-                        help='Generate Mermaid diagrams')
-    parser.add_argument('--readme', action='store_true',
-                        help='Update README files')
-    parser.add_argument('--report', action='store_true',
-                        help='Generate analysis report')
+                        help='Generate Mermaid diagrams only')
     parser.add_argument('--dashboard', action='store_true',
-                        help='Generate dashboard HTML')
+                        help='Generate dashboard HTML only')
     parser.add_argument('-q', '--quiet', action='store_true',
                         help='Suppress verbose output')
 
-    args = parser.parse_args()
+    parsed = parser.parse_args(args)
 
-    # Default to --all if no specific flags
-    if not any([args.graphs, args.logic, args.functions, args.mermaid,
-                args.readme, args.report, args.dashboard]):
-        args.all = True
-
-    verbose = not args.quiet
-
-    # Determine project path
-    if args.project:
-        projectPath = os.path.abspath(args.project)
-        if not os.path.isdir(projectPath):
-            print(f"ERROR: Project path does not exist: {projectPath}")
-            return 1
-    else:
-        # Default to L++ utils directory
-        projectPath = os.path.dirname(
-            os.path.dirname(os.path.abspath(__file__)))
-
-    print("=" * 60)
-    print("L++ Documentation Generator")
-    print(f"Project: {projectPath}")
-    print(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("=" * 60)
-
-    # Initialize
-    options = {
-        "all": args.all,
-        "graphs": args.graphs,
-        "logic": args.logic,
-        "functions": args.functions,
-        "mermaid": args.mermaid,
-        "readme": args.readme,
-        "report": args.report,
-        "dashboard": args.dashboard,
-    }
-    COMPUTE_REGISTRY["docgen:init"]({"options": options})
-
-    # Discover blueprints
-    print("\nDiscovering blueprints...")
-    result = COMPUTE_REGISTRY["docgen:discoverBlueprints"](
-        {"utilsPath": projectPath})
-    print(f"Found {result['count']} blueprints")
-
-    if result['count'] == 0:
-        print("ERROR: No blueprints found")
+    target = Path(parsed.path).resolve()
+    if not target.exists():
+        print(f"Error: Path not found: {target}")
         return 1
 
-    totalGenerated = 0
-    totalErrors = []
+    # Find blueprint
+    bp_file = None
+    if target.is_file() and target.suffix == ".json":
+        bp_file = target
+        target = target.parent
+    else:
+        for p in [target / "blueprint.json", target / f"{target.name}.json"]:
+            if p.exists():
+                bp_file = p
+                break
+        if not bp_file:
+            for p in target.glob("*.json"):
+                bp_file = p
+                break
 
-    # Generate graphs
-    if args.all or args.graphs:
-        print("\nGenerating HTML Graph Visualizations...")
-        result = COMPUTE_REGISTRY["docgen:generateGraphs"](
-            {"verbose": verbose})
-        totalGenerated += result['generated']
-        totalErrors.extend(result['errors'])
-        print(f"  Generated: {result['generated']}")
+    if not bp_file:
+        print(f"No blueprint found in {target}")
+        return 1
 
-    # Generate logic graphs
-    if args.all or args.logic:
-        print("\nGenerating Logic Graphs...")
-        result = COMPUTE_REGISTRY["docgen:generateLogicGraphs"](
-            {"verbose": verbose})
-        totalGenerated += result['generated']
-        totalErrors.extend(result['errors'])
-        print(f"  Generated: {result['generated']}")
+    output_dir = Path(parsed.output) if parsed.output else target / "results"
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Generate function graphs
-    if args.all or args.functions:
-        print("\nGenerating Function Dependency Graphs...")
-        result = COMPUTE_REGISTRY["docgen:generateFunctionGraphs"](
-            {"verbose": verbose})
-        totalGenerated += result['generated']
-        totalErrors.extend(result['errors'])
-        print(f"  Generated: {result['generated']}")
+    if not parsed.quiet:
+        print("=" * 60)
+        print("L++ Documentation Generator")
+        print(f"Blueprint: {bp_file}")
+        print(f"Output:    {output_dir}")
+        print(f"Time:      {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("=" * 60)
 
-    # Generate Mermaid diagrams
-    if args.all or args.mermaid:
-        print("\nGenerating Mermaid Diagrams...")
-        result = COMPUTE_REGISTRY["docgen:generateMermaid"](
-            {"verbose": verbose})
-        totalGenerated += result['generated']
-        totalErrors.extend(result['errors'])
-        print(f"  Generated: {result['generated']}")
+    import json
+    with open(bp_file) as f:
+        bp = json.load(f)
 
-    # Update READMEs
-    if args.all or args.readme:
-        print("\nUpdating README files...")
-        result = COMPUTE_REGISTRY["docgen:updateReadmes"]({"verbose": verbose})
-        totalGenerated += result['updated']
-        totalErrors.extend(result['errors'])
-        print(f"  Updated: {result['updated']}")
+    from lpp.core.visualizer import generate_mermaid, generate_html
 
-    # Generate report
-    if args.all or args.report:
-        print("\nGenerating Analysis Report...")
-        result = COMPUTE_REGISTRY["docgen:generateReport"](
-            {"utilsPath": projectPath, "verbose": verbose})
-        if result.get('success'):
-            totalGenerated += 1
+    generated = 0
 
-    # Generate dashboard
-    if args.all or args.dashboard:
-        print("\nGenerating Dashboard...")
-        result = COMPUTE_REGISTRY["docgen:generateDashboard"](
-            {"utilsPath": projectPath, "verbose": verbose})
-        if result.get('success'):
-            totalGenerated += 1
+    if not parsed.dashboard:  # mermaid only or both
+        mmd = generate_mermaid(bp)
+        mmd_file = output_dir / "diagram.mmd"
+        mmd_file.write_text(mmd)
+        if not parsed.quiet:
+            print(f"Generated: {mmd_file}")
+        generated += 1
 
-    # Summary
-    print("\n" + "=" * 60)
-    print(f"COMPLETE: Generated {totalGenerated} artifacts")
-    if totalErrors:
-        print(f"ERRORS: {len(totalErrors)}")
-        for name, err in totalErrors[:10]:
-            print(f"  - {name}: {err}")
+    if not parsed.mermaid:  # dashboard only or both
+        html = generate_html(bp)
+        html_file = output_dir / "dashboard.html"
+        html_file.write_text(html)
+        if not parsed.quiet:
+            print(f"Generated: {html_file}")
+        generated += 1
 
-    print("\nOutput locations:")
-    print("  - Graphs:     <tool>/results/<tool>_graph.html")
-    print("  - Logic:      <tool>/results/<tool>_logic_graph.html")
-    print("  - Functions:  <tool>/results/<tool>_functions.html")
-    print("  - Mermaid:    <tool>/results/<tool>.mmd")
-    print("  - Diagrams:   <tool>/results/<tool>_diagram.html")
-    print(f"  - Report:     {projectPath}/analysis_report.md")
-    print(f"  - Dashboard:  {projectPath}/dashboard.html")
+    if not parsed.quiet:
+        print(f"\nTotal: {generated} artifacts generated")
 
-    return 0 if not totalErrors else 1
+    return 0
 
 
 if __name__ == "__main__":

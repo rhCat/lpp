@@ -73,9 +73,6 @@
       "on_event": "START",
       "gates": [
         "has_blueprint"
-      ],
-      "actions": [
-        "set_html_path"
       ]
     },
     {
@@ -89,16 +86,12 @@
     }
   ],
   "actions": {
-    "set_html_path": {
-      "type": "set",
-      "target": "html_path",
-      "value_from": "event.payload.html_path"
-    },
     "generate_diagram": {
       "type": "compute",
       "compute_unit": "graph_visualizer:generate",
       "input_map": {
-        "blueprint": "blueprint"
+        "blueprint": "blueprint",
+        "html_path": "html_path"
       },
       "output_map": {
         "html_path": "html_path",
