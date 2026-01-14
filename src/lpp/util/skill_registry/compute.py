@@ -301,8 +301,8 @@ def formatContext(params: Dict[str, Any]) -> Dict[str, Any]:
 
 
 COMPUTE_REGISTRY = {
-    "registry:scan": scan,
-    "registry:loadDetail": loadDetail,
-    "registry:export": export,
-    "registry:formatContext": formatContext,
+    ("registry", "scan"): scan,
+    ("registry", "loadDetail"): loadDetail,
+    ("registry", "export"): export,
+    ("registry", "formatContext"): formatContext,
 }

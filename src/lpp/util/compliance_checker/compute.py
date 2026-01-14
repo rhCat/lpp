@@ -682,13 +682,16 @@ def _format_report_text(report: dict) -> str:
 # =============================================================================
 
 COMPLIANCE_REGISTRY = {
-    "compliance:load_blueprint": load_blueprint,
-    "compliance:load_policy": load_policy,
-    "compliance:load_policies": load_policies,
-    "compliance:check_policy": check_policy,
-    "compliance:check_all_policies": check_all_policies,
-    "compliance:evaluate_rule": evaluate_rule,
-    "compliance:generate_report": generate_report,
-    "compliance:calculate_score": calculate_score,
-    "compliance:export_report": export_report,
+    ("compliance", "load_blueprint"): load_blueprint,
+    ("compliance", "load_policy"): load_policy,
+    ("compliance", "load_policies"): load_policies,
+    ("compliance", "check_policy"): check_policy,
+    ("compliance", "check_all_policies"): check_all_policies,
+    ("compliance", "evaluate_rule"): evaluate_rule,
+    ("compliance", "generate_report"): generate_report,
+    ("compliance", "calculate_score"): calculate_score,
+    ("compliance", "export_report"): export_report,
 }
+
+# Alias for standard import pattern
+COMPUTE_REGISTRY = COMPLIANCE_REGISTRY

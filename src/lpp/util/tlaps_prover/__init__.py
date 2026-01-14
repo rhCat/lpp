@@ -28,8 +28,10 @@ def run(params: dict) -> dict:
         return {"error": error}
 
     # Initialize context with defaults
+    # Support both blueprintPath and blueprint_path params
+    bp_path = params.get("blueprintPath") or params.get("blueprint_path")
     context = {
-        "blueprintPath": params.get("blueprintPath"),
+        "blueprintPath": bp_path,
         "outputDir": params.get("outputDir", "."),
         "verify": params.get("verify", False),
         "tlaSpec": None,
@@ -37,6 +39,7 @@ def run(params: dict) -> dict:
         "error": None,
     }
     context.update(params)
+    context["blueprintPath"] = bp_path  # Ensure it's set after update
     state = blueprint.entry_state
 
     # Run through state machine

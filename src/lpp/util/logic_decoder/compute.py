@@ -1220,16 +1220,16 @@ def clearState(params: dict) -> dict:
 
 
 COMPUTE_REGISTRY = {
-    "decoder:hasValue": hasValue,
-    "decoder:loadFile": loadFile,
-    "decoder:parseAst": parseAst,
-    "decoder:analyzeImports": analyzeImports,
-    "decoder:analyzeFunctions": analyzeFunctions,
-    "decoder:extractConstants": extractConstants,
-    "decoder:analyzeControlFlow": analyzeControlFlow,
-    "decoder:inferStates": inferStates,
-    "decoder:inferTransitions": inferTransitions,
-    "decoder:inferActions": inferActions,
-    "decoder:generateBlueprint": generateBlueprint,
-    "decoder:clearState": clearState,
+    ("decoder", "hasValue"): hasValue,
+    ("decoder", "loadFile"): loadFile,
+    ("decoder", "parseAst"): parseAst,
+    ("decoder", "analyzeImports"): analyzeImports,
+    ("decoder", "analyzeFunctions"): analyzeFunctions,
+    ("decoder", "extractConstants"): extractConstants,
+    ("decoder", "analyzeControlFlow"): analyzeControlFlow,
+    ("decoder", "inferStates"): inferStates,
+    ("decoder", "inferTransitions"): inferTransitions,
+    ("decoder", "inferActions"): inferActions,
+    ("decoder", "generateBlueprint"): generateBlueprint,
+    ("decoder", "clearState"): clearState,
 }

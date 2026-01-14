@@ -2265,20 +2265,20 @@ def transformImportPaths(params: dict) -> dict:
     }
 
 
-# Compute registry for L++ dispatcher
+# Compute registry for L++ dispatcher (tuple keys)
 COMPUTE_REGISTRY = {
-    "funcdec:loadFile": loadFile,
-    "funcdec:parseAst": parseAst,
-    "funcdec:extractExports": extractExports,
-    "funcdec:extractImports": extractImports,
-    "funcdec:traceInternalCalls": traceInternalCalls,
-    "funcdec:traceExternalCalls": traceExternalCalls,
-    "funcdec:computeCoupling": computeCoupling,
-    "funcdec:generateModuleGraph": generateModuleGraph,
-    "funcdec:visualizeModuleGraph": visualizeModuleGraph,
+    ("funcdec", "loadFile"): loadFile,
+    ("funcdec", "parseAst"): parseAst,
+    ("funcdec", "extractExports"): extractExports,
+    ("funcdec", "extractImports"): extractImports,
+    ("funcdec", "traceInternalCalls"): traceInternalCalls,
+    ("funcdec", "traceExternalCalls"): traceExternalCalls,
+    ("funcdec", "computeCoupling"): computeCoupling,
+    ("funcdec", "generateModuleGraph"): generateModuleGraph,
+    ("funcdec", "visualizeModuleGraph"): visualizeModuleGraph,
     # Dependency resolution
-    "funcdec:resolveImportPath": resolveImportPath,
-    "funcdec:buildProjectDependencyGraph": buildProjectDependencyGraph,
-    "funcdec:getCompileOrder": getCompileOrder,
-    "funcdec:transformImportPaths": transformImportPaths,
+    ("funcdec", "resolveImportPath"): resolveImportPath,
+    ("funcdec", "buildProjectDependencyGraph"): buildProjectDependencyGraph,
+    ("funcdec", "getCompileOrder"): getCompileOrder,
+    ("funcdec", "transformImportPaths"): transformImportPaths,
 }

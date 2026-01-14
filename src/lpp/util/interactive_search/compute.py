@@ -499,10 +499,10 @@ def export(params: Dict[str, Any]) -> Dict[str, Any]:
 
 # Compute registry for L++ framework
 COMPUTE_REGISTRY = {
-    "search:init": init,
-    "search:execute": execute,
-    "search:getDetail": getDetail,
-    "search:refine": refine,
-    "search:recordQuery": recordQuery,
-    "search:export": export,
+    ("search", "init"): init,
+    ("search", "execute"): execute,
+    ("search", "getDetail"): getDetail,
+    ("search", "refine"): refine,
+    ("search", "recordQuery"): recordQuery,
+    ("search", "export"): export,
 }

@@ -169,8 +169,11 @@ def run_frame(
                 parts = action.compute_unit.split(":")
                 if len(parts) == 2:
                     sys_id, op_id = parts
+                    # Build current scope from new_context (includes prior action outputs)
+                    current_scope = dict(new_context)
+                    current_scope["event"] = eval_scope.get("event", {})
                     payload = {
-                        k: _resolve_path(v, eval_scope)
+                        k: _resolve_path(v, current_scope)
                         for k, v in action.input_map.items()
                     }
                     result, dispatch_error = atom_DISPATCH(

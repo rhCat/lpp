@@ -330,9 +330,9 @@ def _callLlmMessages(apiKey: str, apiBase: str, model: str,
 
 
 COMPUTE_REGISTRY = {
-    "scholar:initConfig": initConfig,
-    "scholar:searchAll": searchAll,
-    "scholar:fetchDetails": fetchDetails,
-    "scholar:synthesize": synthesize,
-    "scholar:chat": chat,
+    ("scholar", "initConfig"): initConfig,
+    ("scholar", "searchAll"): searchAll,
+    ("scholar", "fetchDetails"): fetchDetails,
+    ("scholar", "synthesize"): synthesize,
+    ("scholar", "chat"): chat,
 }

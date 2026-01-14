@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>L++ Tools Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #0f0f23;
+    color: #ccc;
+    min-height: 100vh;
+}
+
+/* Header */
+.header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    padding: 30px 40px;
+    border-bottom: 1px solid #333;
+}
+.header h1 {
+    color: #00d4ff;
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+.header .subtitle {
+    color: #888;
+    font-size: 14px;
+}
+
+/* Stats Bar */
+.stats-bar {
+    display: flex;
+    gap: 30px;
+    padding: 20px 40px;
+    background: #16213e;
+    border-bottom: 1px solid #333;
+    flex-wrap: wrap;
+}
+.stat-item {
+    text-align: center;
+}
+.stat-value {
+    font-size: 28px;
+    font-weight: bold;
+    color: #00d4ff;
+}
+.stat-label {
+    font-size: 12px;
+    color: #888;
+    text-transform: uppercase;
+}
+
+/* Controls */
+.controls {
+    padding: 20px 40px;
+    background: #1a1a2e;
+    border-bottom: 1px solid #333;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.search-box {
+    flex: 1;
+    min-width: 250px;
+    max-width: 400px;
+}
+.search-box input {
+    width: 100%;
+    padding: 10px 15px;
+    background: #0f0f23;
+    border: 1px solid #333;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 14px;
+}
+.search-box input:focus {
+    outline: none;
+    border-color: #00d4ff;
+}
+.filter-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.filter-btn {
+    padding: 8px 16px;
+    background: #2a2a4a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+.filter-btn:hover {
+    background: #3a3a5a;
+}
+.filter-btn.active {
+    background: #00d4ff;
+    color: #000;
+    border-color: #00d4ff;
+}
+
+/* Main content */
+.main {
+    display: flex;
+    min-height: calc(100vh - 250px);
+}
+
+/* Sidebar */
+.sidebar {
+    width: 280px;
+    background: #16213e;
+    border-right: 1px solid #333;
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(100vh - 250px);
+}
+.sidebar h3 {
+    color: #00d4ff;
+    font-size: 14px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #333;
+}
+.category-item {
+    padding: 8px 12px;
+    margin-bottom: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+}
+.category-item:hover {
+    background: #2a2a4a;
+}
+.category-item.active {
+    background: #00d4ff;
+    color: #000;
+}
+.category-count {
+    background: #333;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+}
+.category-item.active .category-count {
+    background: rgba(0,0,0,0.3);
+}
+
+/* Content area */
+.content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    max-height: calc(100vh - 250px);
+}
+.content h2 {
+    color: #fff;
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+/* Tool Card */
+.tool-card {
+    background: #1a1a2e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+.tool-card:hover {
+    border-color: #00d4ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.1);
+}
+.tool-card.expanded {
+    grid-column: span 2;
+}
+.card-header {
+    padding: 15px 20px;
+    background: #16213e;
+    border-bottom: 1px solid #333;
+    cursor: pointer;
+}
+.card-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.card-title h3 {
+    color: #00d4ff;
+    font-size: 16px;
+    margin: 0;
+}
+.card-version {
+    color: #666;
+    font-size: 11px;
+}
+.card-description {
+    color: #888;
+    font-size: 13px;
+    margin-top: 8px;
+    line-height: 1.4;
+}
+
+/* Card Stats */
+.card-stats {
+    display: flex;
+    gap: 15px;
+    padding: 12px 20px;
+    border-bottom: 1px solid #333;
+    background: rgba(0, 212, 255, 0.03);
+}
+.card-stat {
+    text-align: center;
+}
+.card-stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+}
+.card-stat-label {
+    font-size: 10px;
+    color: #666;
+    text-transform: uppercase;
+}
+
+/* Card Links */
+.card-links {
+    padding: 12px 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.viz-link {
+    padding: 6px 12px;
+    background: #2a2a4a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #ccc;
+    text-decoration: none;
+    font-size: 11px;
+    transition: all 0.2s;
+}
+.viz-link:hover {
+    background: #3a3a5a;
+    border-color: #00d4ff;
+    color: #00d4ff;
+}
+.viz-link.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+.viz-link.state { border-left: 3px solid #4ecdc4; }
+.viz-link.logic { border-left: 3px solid #f39c12; }
+.viz-link.functions { border-left: 3px solid #9b59b6; }
+.viz-link.mermaid { border-left: 3px solid #e74c3c; }
+
+/* Card Details (expandable) */
+.card-details {
+    display: none;
+    padding: 15px 20px;
+    border-top: 1px solid #333;
+}
+.tool-card.expanded .card-details {
+    display: block;
+}
+.detail-section {
+    margin-bottom: 15px;
+}
+.detail-section h4 {
+    color: #888;
+    font-size: 11px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+.states-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.state-tag {
+    padding: 4px 10px;
+    background: #2a2a4a;
+    border-radius: 12px;
+    font-size: 11px;
+    color: #ccc;
+}
+.state-tag.entry { background: #00d4ff; color: #000; }
+.state-tag.terminal { background: #ff6b6b; color: #fff; }
+
+/* Mermaid Preview */
+.mermaid-preview {
+    background: #0d0d1a;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 15px;
+    overflow-x: auto;
+    margin-top: 10px;
+}
+.mermaid-preview .mermaid {
+    text-align: center;
+}
+.mermaid-preview svg {
+    max-width: 100%;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+.empty-state h3 {
+    margin-bottom: 10px;
+    color: #888;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .main {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        max-height: none;
+        border-right: none;
+        border-bottom: 1px solid #333;
+    }
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+    .tool-card.expanded {
+        grid-column: span 1;
+    }
+}
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>L++ Tools Dashboard</h1>
+    <div class="subtitle">Interactive overview of all L++ utility blueprints and visualizations</div>
+    <div style="margin-top:12px">
+        <a href="function_graph.html" style="display:inline-block;padding:8px 16px;background:#00d4ff;color:#000;text-decoration:none;border-radius:4px;font-weight:bold;margin-right:10px">📊 Overall Function Graph</a>
+        <a href="refactor_summary.json" style="display:inline-block;padding:8px 16px;background:#3a3a5a;color:#fff;text-decoration:none;border-radius:4px;font-size:12px">📄 Summary JSON</a>
+    </div>
+</div>
+
+<div class="stats-bar" id="stats-bar"></div>
+
+<div class="controls">
+    <div class="search-box">
+        <input type="text" id="search-input" placeholder="Search tools by name or description..." oninput="filterTools()">
+    </div>
+    <div class="filter-buttons">
+        <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All Tools</button>
+        <button class="filter-btn" data-filter="with-viz" onclick="setFilter('with-viz')">With Visualizations</button>
+        <button class="filter-btn" data-filter="blueprint" onclick="setFilter('blueprint')">Blueprint Tools</button>
+    </div>
+</div>
+
+<div class="main">
+    <div class="sidebar">
+        <h3>Categories</h3>
+        <div id="categories-list"></div>
+    </div>
+    <div class="content">
+        <h2 id="content-title">All Tools</h2>
+        <div class="tools-grid" id="tools-grid"></div>
+    </div>
+</div>
+
+<script>
+// Initialize mermaid
+mermaid.initialize({
+    startOnLoad: false,
+    theme: 'dark',
+    themeVariables: {
+        primaryColor: '#16213e',
+        primaryTextColor: '#fff',
+        primaryBorderColor: '#333',
+        lineColor: '#00d4ff',
+        secondaryColor: '#1a1a2e',
+        tertiaryColor: '#0f0f23'
+    }
+});
+
+// Data from Python
+const tools = [{"id": "blueprint_builder", "name": "Blueprint Builder", "description": "Builds L++ blueprints from extracted patterns and modules", "version": "1.0.0", "stats": {"statesCount": 4, "transitionsCount": 3, "gatesCount": 2, "actionsCount": 8, "entryState": "idle", "terminalStates": {"complete": {}, "error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "building", "complete", "error"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "blueprint_builder/blueprint.json", "dir": "blueprint_builder", "sourceType": "utils"}, {"id": "blueprint_composer", "name": "L++ Blueprint Composer", "description": "Hierarchical composition tool for L++ blueprints - embeds sub-blueprints as macro states", "version": "1.0.0", "stats": {"statesCount": 7, "transitionsCount": 28, "gatesCount": 11, "actionsCount": 21, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "parent_loaded", "child_loaded", "defining_embedding", "embedding_ready", "composed", "validated"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "blueprint_composer/blueprint.json", "dir": "blueprint_composer", "sourceType": "utils"}, {"id": "blueprint_debugger", "name": "L++ Blueprint Debugger", "description": "Step-through debugging for L++ blueprints with breakpoints, inspection, and time-travel debugging", "version": "1.0.0", "stats": {"statesCount": 4, "transitionsCount": 49, "gatesCount": 15, "actionsCount": 27, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "loaded", "debugging", "paused"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "blueprint_debugger/blueprint.json", "dir": "blueprint_debugger", "sourceType": "utils"}, {"id": "blueprint_differ", "name": "L++ Blueprint Diff & Merge", "description": "Semantic diff and merge tool for L++ blueprints", "version": "1.0.0", "stats": {"statesCount": 8, "transitionsCount": 28, "gatesCount": 10, "actionsCount": 18, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "left_loaded", "ready", "diffing", "diff_complete", "merging", "merge_complete", "conflict"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "blueprint_differ/blueprint.json", "dir": "blueprint_differ", "sourceType": "utils"}, {"id": "blueprint_linter", "name": "L++ Blueprint Linter", "description": "Static analysis tool for L++ blueprints - detects issues and suggests improvements", "version": "1.0.0", "stats": {"statesCount": 3, "transitionsCount": 24, "gatesCount": 5, "actionsCount": 20, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}, "complete": {}}}, "states": ["idle", "loaded", "linting"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "blueprint_linter/blueprint.json", "dir": "blueprint_linter", "sourceType": "utils"}, {"id": "blueprint_playground", "name": "L++ Blueprint Playground", "description": "Interactive web-based environment for editing and testing L++ blueprints", "version": "1.0.0", "stats": {"statesCount": 3, "transitionsCount": 21, "gatesCount": 10, "actionsCount": 17, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "editing", "simulating"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "blueprint_playground/blueprint.json", "dir": "blueprint_playground", "sourceType": "utils"}, {"id": "blueprint_registry", "name": "L++ Blueprint Registry", "description": "Centralized blueprint management with version control, dependency tracking, and discovery", "version": "1.0.0", "stats": {"statesCount": 5, "transitionsCount": 29, "gatesCount": 12, "actionsCount": 24, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "ready", "viewing", "searching", "comparing"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "blueprint_registry/blueprint.json", "dir": "blueprint_registry", "sourceType": "utils"}, {"id": "compliance_checker", "name": "L++ Compliance Checker", "description": "Verifies L++ blueprints against compliance policies", "version": "1.0.0", "stats": {"statesCount": 5, "transitionsCount": 23, "gatesCount": 14, "actionsCount": 16, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "blueprint_loaded", "ready", "checking", "report_ready"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "compliance_checker/blueprint.json", "dir": "compliance_checker", "sourceType": "utils"}, {"id": "coverage_analyzer", "name": "L++ Coverage Analyzer", "description": "Tracks runtime coverage of blueprints during execution", "version": "1.0.0", "stats": {"statesCount": 5, "transitionsCount": 37, "gatesCount": 13, "actionsCount": 18, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "loaded", "tracking", "analyzing", "reporting"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "coverage_analyzer/blueprint.json", "dir": "coverage_analyzer", "sourceType": "utils"}, {"id": "dashboard", "name": "L++ Tools Dashboard", "description": "Aggregates and visualizes all L++ utility tools with interactive search, filtering, and quick access to visualizations.", "version": "1.0.0", "stats": {"statesCount": 6, "transitionsCount": 10, "gatesCount": 5, "actionsCount": 5, "entryState": "idle", "terminalStates": {"complete": {}, "error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "scanning", "analyzing", "categorizing", "generating", "complete"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "dashboard/blueprint.json", "dir": "dashboard", "sourceType": "utils"}, {"id": "doc_generator", "name": "Documentation Generator", "description": "Generates all documentation artifacts for L++ blueprints including graphs, Mermaid diagrams, and analysis reports", "version": "1.0.0", "stats": {"statesCount": 11, "transitionsCount": 20, "gatesCount": 11, "actionsCount": 10, "entryState": "idle", "terminalStates": {"complete": {}, "error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "discovering", "generating_graphs", "generating_logic", "generating_functions", "generating_mermaid", "updating_readmes", "generating_report", "generating_dashboard", "complete", "error"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "doc_generator/blueprint.json", "dir": "doc_generator", "sourceType": "utils"}, {"id": "event_simulator", "name": "L++ Event Sequence Simulator", "description": "Interactive simulation of L++ blueprints for what-if analysis and state space exploration", "version": "1.0.0", "stats": {"statesCount": 3, "transitionsCount": 26, "gatesCount": 15, "actionsCount": 27, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "ready", "simulating"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "event_simulator/blueprint.json", "dir": "event_simulator", "sourceType": "utils"}, {"id": "execution_tracer", "name": "L++ Execution Tracer", "description": "Structured logging and tracing for L++ blueprint execution with OpenTelemetry support", "version": "1.0.0", "stats": {"statesCount": 5, "transitionsCount": 34, "gatesCount": 14, "actionsCount": 22, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "configured", "tracing", "paused", "completed"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "execution_tracer/blueprint.json", "dir": "execution_tracer", "sourceType": "utils"}, {"id": "function_decoder", "name": "Python Function Decoder", "description": "Analyze Python scripts to extract inbound/outbound function interfaces and build modular dependency graphs", "version": "1.0.0", "stats": {"statesCount": 5, "transitionsCount": 10, "gatesCount": 6, "actionsCount": 9, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}, "complete": {}}}, "states": ["idle", "parsing", "extracting", "tracing", "computing"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "function_decoder/blueprint.json", "dir": "function_decoder", "sourceType": "utils"}, {"id": "graph_visualizer", "name": "Graph Visualizer", "description": "Generates an interactive HTML/SVG state machine diagram from an L++ blueprint.", "version": "1.0.0", "stats": {"statesCount": 4, "transitionsCount": 3, "gatesCount": 2, "actionsCount": 1, "entryState": "idle", "terminalStates": {"done": {}, "error": {}}}, "states": ["idle", "generating", "done", "error"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "graph_visualizer/blueprint.json", "dir": "graph_visualizer", "sourceType": "utils"}, {"id": "interactive_search", "name": "Refined Interactive Search", "description": "Interactive search tool with iterative refinement, context-aware results, and drill-down capabilities", "version": "1.0.0", "stats": {"statesCount": 8, "transitionsCount": 17, "gatesCount": 8, "actionsCount": 8, "entryState": "idle", "terminalStates": {"done": {"output_schema": {"results": {"type": "array"}, "queryHistory": {"type": "array"}}}, "error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "searching", "viewing", "drilling", "refining", "exporting", "done", "error"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "interactive_search/blueprint.json", "dir": "interactive_search", "sourceType": "utils"}, {"id": "legacy_extractor", "name": "Legacy Code State Machine Extractor", "description": "Extract state machine patterns from legacy Python code and convert to L++ blueprints", "version": "1.0.0", "stats": {"statesCount": 12, "transitionsCount": 19, "gatesCount": 14, "actionsCount": 17, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}, "complete": {}}}, "states": ["idle", "loading", "parsing", "detecting", "extracting_states", "extracting_transitions", "extracting_gates", "extracting_actions", "analyzing_events", "inferring_entry", "generating", "mapping"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "legacy_extractor/blueprint.json", "dir": "legacy_extractor", "sourceType": "utils"}, {"id": "llm_assistant", "name": "L++ LLM Schema Assistant", "description": "LLM-powered assistant for understanding and working with L++ blueprints. Automation agent building block.", "version": "1.0.0", "stats": {"statesCount": 3, "transitionsCount": 13, "gatesCount": 6, "actionsCount": 11, "entryState": "init", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["init", "ready", "querying"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "llm_assistant/blueprint.json", "dir": "llm_assistant", "sourceType": "utils"}, {"id": "logic_decoder", "name": "Python Logic Decoder", "description": "Decode Python files into L++ blueprints by analyzing AST, control flow, and import semantics", "version": "1.0.0", "stats": {"statesCount": 5, "transitionsCount": 10, "gatesCount": 6, "actionsCount": 13, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}, "complete": {}}}, "states": ["idle", "parsing", "analyzing", "inferring", "generating"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "logic_decoder/blueprint.json", "dir": "logic_decoder", "sourceType": "utils"}, {"id": "research_scraper", "name": "Research Scraper", "description": "Scrape academic papers from arXiv, Semantic Scholar, and web", "version": "1.0.1", "stats": {"statesCount": 2, "transitionsCount": 11, "gatesCount": 5, "actionsCount": 15, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "hasResults"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "research_scraper/blueprint.json", "dir": "research_scraper", "sourceType": "utils"}, {"id": "schema_migrator", "name": "L++ Schema Migrator", "description": "Tool for migrating L++ blueprints between schema versions", "version": "1.0.0", "stats": {"statesCount": 7, "transitionsCount": 29, "gatesCount": 9, "actionsCount": 20, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}, "complete": {}}}, "states": ["idle", "loaded", "planning", "planned", "migrating", "validating", "batch_mode"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "schema_migrator/blueprint.json", "dir": "schema_migrator", "sourceType": "utils"}, {"id": "scholar_chat", "name": "Scholar Chatbot", "description": "LLM-powered research assistant with deep search capabilities", "version": "1.0.0", "stats": {"statesCount": 5, "transitionsCount": 13, "gatesCount": 8, "actionsCount": 12, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "searching", "reviewing", "analyzing", "chatting"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "scholar_chat/blueprint.json", "dir": "scholar_chat", "sourceType": "utils"}, {"id": "skill_contractor", "name": "Skill Contractor", "description": "Autonomous L++ skill generator. Continuously iterates on logic to achieve coding targets with self-evaluation. Two-phase workflow: (1) Blueprint phase generates and validates JSON until TLC passes, (2) Implementation phase generates compute+interactive with auto-sanitization (fixes literal newlines in strings) and enhanced validation (content checks, AST parsing, import validation, structure checks). Features auto-correction of schema issues with logging. Enforces L++ schema v0.1.2 and build_rules.md for skill creation.", "version": "1.7.0", "stats": {"statesCount": 12, "transitionsCount": 59, "gatesCount": 42, "actionsCount": 30, "entryState": "idle", "terminalStates": {"complete": {}, "error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "planning", "executing", "parsing", "correcting", "stepping", "validating", "eval_interactive", "evaluating", "refining", "reviewing", "complete"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "skill_contractor/blueprint.json", "dir": "skill_contractor", "sourceType": "utils"}, {"id": "skill_registry", "name": "Skill Registry", "description": "Scan and document L++ skills for agent blueprint generation", "version": "1.0.0", "stats": {"statesCount": 3, "transitionsCount": 11, "gatesCount": 6, "actionsCount": 8, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "scanned", "viewing"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "skill_registry/blueprint.json", "dir": "skill_registry", "sourceType": "utils"}, {"id": "task_orchestrator", "name": "Hierarchical Task Orchestrator", "description": "Hierarchical feature analysis with atomic compute units.", "version": "2.0.0", "stats": {"statesCount": 10, "transitionsCount": 28, "gatesCount": 15, "actionsCount": 14, "entryState": "idle", "terminalStates": {"complete": {}, "error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "analyzing", "expanding", "planning", "building", "executing", "traversing", "reflecting", "evaluating", "complete"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "task_orchestrator/blueprint.json", "dir": "task_orchestrator", "sourceType": "utils"}, {"id": "test_generator", "name": "L++ Test Case Generator", "description": "Auto-generates test cases from L++ blueprints for comprehensive testing", "version": "1.0.0", "stats": {"statesCount": 4, "transitionsCount": 19, "gatesCount": 10, "actionsCount": 18, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}, "complete": {}}}, "states": ["idle", "loaded", "analyzing", "generating"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "test_generator/blueprint.json", "dir": "test_generator", "sourceType": "utils"}, {"id": "tlaps_prover", "name": "TLAPS Proof Generator", "description": "Generates TLAPS-ready TLA+ specifications with proofs", "version": "1.0.0", "stats": {"statesCount": 5, "transitionsCount": 5, "gatesCount": 4, "actionsCount": 2, "entryState": "idle", "terminalStates": {"done": {}, "error": {}}}, "states": ["idle", "generating", "verifying", "done", "error"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "tlaps_prover/blueprint.json", "dir": "tlaps_prover", "sourceType": "utils"}, {"id": "tlaps_seal", "name": "TLAPS Seal Certifier", "description": "Certify L++ blueprints with formal verification - transition from empirical to axiomatic certainty", "version": "1.0.0", "stats": {"statesCount": 9, "transitionsCount": 14, "gatesCount": 8, "actionsCount": 12, "entryState": "idle", "terminalStates": {"certified": {}, "rejected": {}, "error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "loading", "auditing", "generating_tla", "tlc_verifying", "tlc_verified", "tlaps_proving", "certified", "rejected"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "tlaps_seal/blueprint.json", "dir": "tlaps_seal", "sourceType": "utils"}, {"id": "visualizer", "name": "L++ Blueprint Visualizer", "description": "L++ visualizing itself - a meta-example demonstrating self-reference", "version": "1.1.0", "stats": {"statesCount": 3, "transitionsCount": 26, "gatesCount": 18, "actionsCount": 26, "entryState": "idle", "terminalStates": {"error": {"output_schema": {"error": {"type": "string", "non_null": true}}}}}, "states": ["idle", "loaded", "viewing"], "visualizations": {"stateGraph": null, "logicGraph": null, "functionsGraph": null, "mermaidDiagram": null}, "mermaidContent": null, "blueprintPath": "visualizer/blueprint.json", "dir": "visualizer", "sourceType": "utils"}];
+const categories = {"Blueprint Tools": ["blueprint_builder", "blueprint_composer", "blueprint_debugger", "blueprint_differ", "blueprint_linter", "blueprint_playground", "blueprint_registry"], "Code Analysis": ["coverage_analyzer", "function_decoder", "legacy_extractor", "logic_decoder"], "Documentation": ["doc_generator"], "LLM Integration": ["llm_assistant"], "Migration & Schema": ["schema_migrator"], "Orchestration": ["event_simulator", "execution_tracer", "task_orchestrator"], "Registry & Discovery": ["skill_contractor", "skill_registry"], "Research": ["research_scraper", "scholar_chat"], "Testing & Quality": ["compliance_checker", "test_generator"], "Verification": ["tlaps_prover", "tlaps_seal"], "Visualization": ["graph_visualizer"], "Other Tools": ["dashboard", "interactive_search", "visualizer"]};
+const stats = {"toolCount": 29, "totalStates": 166, "totalTransitions": 619, "totalGates": 304, "totalActions": 449, "withVisualizations": 0};
+
+// Current state
+let currentFilter = 'all';
+let currentCategory = null;
+let searchQuery = '';
+let expandedCards = new Set();
+
+// Render stats bar
+function renderStats() {
+    const bar = document.getElementById('stats-bar');
+    bar.innerHTML = `
+        <div class="stat-item">
+            <div class="stat-value">${stats.toolCount || 0}</div>
+            <div class="stat-label">Total Tools</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">${stats.totalStates || 0}</div>
+            <div class="stat-label">States</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">${stats.totalTransitions || 0}</div>
+            <div class="stat-label">Transitions</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">${stats.totalGates || 0}</div>
+            <div class="stat-label">Gates</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">${stats.totalActions || 0}</div>
+            <div class="stat-label">Actions</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">${stats.withVisualizations || 0}</div>
+            <div class="stat-label">With Visualizations</div>
+        </div>
+    `;
+}
+
+// Render categories sidebar
+function renderCategories() {
+    const list = document.getElementById('categories-list');
+    list.innerHTML = `
+        <div class="category-item ${currentCategory === null ? 'active' : ''}" onclick="selectCategory(null)">
+            <span>All Tools</span>
+            <span class="category-count">${tools.length}</span>
+        </div>
+    `;
+
+    Object.entries(categories).forEach(([cat, toolIds]) => {
+        list.innerHTML += `
+            <div class="category-item ${currentCategory === cat ? 'active' : ''}" onclick="selectCategory('${cat}')">
+                <span>${cat}</span>
+                <span class="category-count">${toolIds.length}</span>
+            </div>
+        `;
+    });
+}
+
+// Render tools grid
+function renderTools() {
+    const grid = document.getElementById('tools-grid');
+    const title = document.getElementById('content-title');
+
+    let filteredTools = tools;
+
+    // Apply category filter
+    if (currentCategory) {
+        const catToolIds = categories[currentCategory] || [];
+        filteredTools = filteredTools.filter(t => catToolIds.includes(t.id));
+        title.textContent = currentCategory;
+    } else {
+        title.textContent = 'All Tools';
+    }
+
+    // Apply search filter
+    if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        filteredTools = filteredTools.filter(t =>
+            t.name.toLowerCase().includes(q) ||
+            t.description.toLowerCase().includes(q) ||
+            t.id.toLowerCase().includes(q)
+        );
+    }
+
+    // Apply type filter
+    if (currentFilter === 'with-viz') {
+        filteredTools = filteredTools.filter(t =>
+            Object.values(t.visualizations).some(v => v !== null)
+        );
+    } else if (currentFilter === 'blueprint') {
+        filteredTools = filteredTools.filter(t => t.id.includes('blueprint'));
+    }
+
+    if (filteredTools.length === 0) {
+        grid.innerHTML = `
+            <div class="empty-state">
+                <h3>No tools found</h3>
+                <p>Try adjusting your search or filters</p>
+            </div>
+        `;
+        return;
+    }
+
+    grid.innerHTML = filteredTools.map(tool => renderToolCard(tool)).join('');
+
+    // Initialize mermaid for expanded cards
+    expandedCards.forEach(id => {
+        const card = document.querySelector(`[data-tool-id="${id}"]`);
+        if (card && card.classList.contains('expanded')) {
+            initMermaid(id);
+        }
+    });
+}
+
+function renderToolCard(tool) {
+    const isExpanded = expandedCards.has(tool.id);
+    const stats = tool.stats || {};
+    const vizs = tool.visualizations || {};
+
+    return `
+        <div class="tool-card ${isExpanded ? 'expanded' : ''}" data-tool-id="${tool.id}">
+            <div class="card-header" onclick="toggleCard('${tool.id}')">
+                <div class="card-title">
+                    <h3>${tool.name}</h3>
+                    <span class="card-version">${tool.version || ''}</span>
+                </div>
+                <div class="card-description">${tool.description || 'No description available'}</div>
+            </div>
+
+            <div class="card-stats">
+                <div class="card-stat">
+                    <div class="card-stat-value">${stats.statesCount || 0}</div>
+                    <div class="card-stat-label">States</div>
+                </div>
+                <div class="card-stat">
+                    <div class="card-stat-value">${stats.transitionsCount || 0}</div>
+                    <div class="card-stat-label">Transitions</div>
+                </div>
+                <div class="card-stat">
+                    <div class="card-stat-value">${stats.gatesCount || 0}</div>
+                    <div class="card-stat-label">Gates</div>
+                </div>
+                <div class="card-stat">
+                    <div class="card-stat-value">${stats.actionsCount || 0}</div>
+                    <div class="card-stat-label">Actions</div>
+                </div>
+            </div>
+
+            <div class="card-links">
+                <a class="viz-link state ${vizs.stateGraph ? '' : 'disabled'}"
+                   href="${vizs.stateGraph || '#'}" target="_blank">State Graph</a>
+                <a class="viz-link logic ${vizs.logicGraph ? '' : 'disabled'}"
+                   href="${vizs.logicGraph || '#'}" target="_blank">Logic Graph</a>
+                <a class="viz-link functions ${vizs.functionsGraph ? '' : 'disabled'}"
+                   href="${vizs.functionsGraph || '#'}" target="_blank">Functions</a>
+                <a class="viz-link mermaid ${vizs.mermaidDiagram ? '' : 'disabled'}"
+                   href="${vizs.mermaidDiagram || '#'}" target="_blank">Mermaid</a>
+            </div>
+
+            <div class="card-details">
+                <div class="detail-section">
+                    <h4>States</h4>
+                    <div class="states-list">
+                        ${(tool.states || []).map(s => `
+                            <span class="state-tag ${s === stats.entryState ? 'entry' : ''} ${(stats.terminalStates || []).includes(s) ? 'terminal' : ''}">${s}</span>
+                        `).join('')}
+                    </div>
+                </div>
+
+                ${tool.mermaidContent ? `
+                    <div class="detail-section">
+                        <h4>State Diagram</h4>
+                        <div class="mermaid-preview">
+                            <pre class="mermaid" id="mermaid-${tool.id}">${escapeHtml(tool.mermaidContent)}</pre>
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div class="detail-section">
+                    <h4>Files</h4>
+                    <div style="font-size: 11px; color: #666;">
+                        <div>Blueprint: <a href="${tool.blueprintPath}" target="_blank" style="color: #00d4ff;">${tool.blueprintPath}</a></div>
+                        <div>Directory: ${tool.dir}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function toggleCard(toolId) {
+    if (expandedCards.has(toolId)) {
+        expandedCards.delete(toolId);
+    } else {
+        expandedCards.add(toolId);
+        setTimeout(() => initMermaid(toolId), 100);
+    }
+    renderTools();
+}
+
+function initMermaid(toolId) {
+    const elem = document.getElementById(`mermaid-${toolId}`);
+    if (elem && !elem.dataset.processed) {
+        elem.dataset.processed = 'true';
+        try {
+            mermaid.init(undefined, elem);
+        } catch(e) {
+            console.warn('Mermaid init failed for', toolId, e);
+        }
+    }
+}
+
+function selectCategory(cat) {
+    currentCategory = cat;
+    renderCategories();
+    renderTools();
+}
+
+function setFilter(filter) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
+    });
+    renderTools();
+}
+
+function filterTools() {
+    searchQuery = document.getElementById('search-input').value;
+    renderTools();
+}
+
+// Initialize
+renderStats();
+renderCategories();
+renderTools();
+</script>
+</body>
+</html>

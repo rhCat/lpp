@@ -1361,18 +1361,21 @@ def _getMethodBody(astDict: dict, className: Optional[str],
 
 # Registry
 EXTRACT_REGISTRY = {
-    "extract:loadSource": loadSource,
-    "extract:parseAst": parseAst,
-    "extract:findStatePatterns": findStatePatterns,
-    "extract:extractStates": extractStates,
-    "extract:extractTransitions": extractTransitions,
-    "extract:extractGates": extractGates,
-    "extract:extractActions": extractActions,
-    "extract:analyzeEventHandlers": analyzeEventHandlers,
-    "extract:inferEntryState": inferEntryState,
-    "extract:generateBlueprint": generateBlueprint,
-    "extract:generateMapping": generateMapping,
-    "extract:exportBlueprint": exportBlueprint,
-    "extract:exportReport": exportReport,
-    "extract:clearState": clearState,
+    ("extract", "loadSource"): loadSource,
+    ("extract", "parseAst"): parseAst,
+    ("extract", "findStatePatterns"): findStatePatterns,
+    ("extract", "extractStates"): extractStates,
+    ("extract", "extractTransitions"): extractTransitions,
+    ("extract", "extractGates"): extractGates,
+    ("extract", "extractActions"): extractActions,
+    ("extract", "analyzeEventHandlers"): analyzeEventHandlers,
+    ("extract", "inferEntryState"): inferEntryState,
+    ("extract", "generateBlueprint"): generateBlueprint,
+    ("extract", "generateMapping"): generateMapping,
+    ("extract", "exportBlueprint"): exportBlueprint,
+    ("extract", "exportReport"): exportReport,
+    ("extract", "clearState"): clearState,
 }
+
+# Alias for standard import pattern
+COMPUTE_REGISTRY = EXTRACT_REGISTRY

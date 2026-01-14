@@ -614,16 +614,16 @@ def checkTlapsPassed(params: dict) -> dict:
 
 # Compute unit registry
 COMPUTE_REGISTRY = {
-    "seal:loadBlueprint": loadBlueprint,
-    "seal:auditTrinity": auditTrinity,
-    "seal:auditFlange": auditFlange,
-    "seal:generateTla": generateTla,
-    "seal:runTlc": runTlc,
-    "seal:runTlaps": runTlaps,
-    "seal:generateCertificate": generateCertificate,
-    "seal:resetContext": resetContext,
-    "seal:checkTrinityValid": checkTrinityValid,
-    "seal:checkFlangeValid": checkFlangeValid,
-    "seal:checkTlcPassed": checkTlcPassed,
-    "seal:checkTlapsPassed": checkTlapsPassed,
+    ("seal", "loadBlueprint"): loadBlueprint,
+    ("seal", "auditTrinity"): auditTrinity,
+    ("seal", "auditFlange"): auditFlange,
+    ("seal", "generateTla"): generateTla,
+    ("seal", "runTlc"): runTlc,
+    ("seal", "runTlaps"): runTlaps,
+    ("seal", "generateCertificate"): generateCertificate,
+    ("seal", "resetContext"): resetContext,
+    ("seal", "checkTrinityValid"): checkTrinityValid,
+    ("seal", "checkFlangeValid"): checkFlangeValid,
+    ("seal", "checkTlcPassed"): checkTlcPassed,
+    ("seal", "checkTlapsPassed"): checkTlapsPassed,
 }

@@ -31,7 +31,7 @@ def run(params: dict) -> dict:
     
     # Dispatch START event
     new_state, new_ctx, traces, err = run_frame(
-        blueprint, context, "START", {}, COMPUTE_REGISTRY
+        blueprint, context, "INIT", {}, COMPUTE_REGISTRY
     )
     
     if err:

@@ -18,25 +18,38 @@ def run(params: dict) -> dict:
     """Run the event_simulator utility with given parameters."""
     from lpp.core import load_blueprint, run_frame
     import json
-    
+
     with open(BLUEPRINT_PATH) as f:
         bp_raw = json.load(f)
-    
+
     blueprint, error = load_blueprint(bp_raw)
     if error:
         return {"error": error}
-    
-    # Initialize context from params
-    context = params.copy()
-    
-    # Dispatch START event
-    new_state, new_ctx, traces, err = run_frame(
-        blueprint, context, "START", {}, COMPUTE_REGISTRY
+
+    # Initialize context with required variables
+    context = {
+        "blueprint": None,
+        "trace": None,
+        "forks": None,
+        "sequence": None,
+        "sequence_index": 0,
+        "state_space": None,
+        "path_result": None,
+        "error": None,
+    }
+    context.update(params)
+    state = blueprint.entry_state
+
+    # Get blueprint path from params
+    bp_path = params.get("blueprint_path")
+
+    # LOAD expects path in event payload
+    state, context, traces, err = run_frame(
+        blueprint, context, "LOAD", {"path": bp_path}, COMPUTE_REGISTRY
     )
-    
     if err:
-        return {"error": err, "state": new_state}
-    
-    return {"state": new_state, "context": new_ctx}
+        return {"error": err, "state": state}
+
+    return {"state": state, "context": context}
 
 __all__ = ["BLUEPRINT_PATH", "COMPUTE_REGISTRY", "run"]

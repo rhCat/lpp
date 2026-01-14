@@ -715,15 +715,15 @@ def export_blueprint(params: Dict[str, Any]) -> Dict[str, Any]:
 # =============================================================================
 
 COMPUTE_REGISTRY = {
-    "play:load_blueprint": load_blueprint,
-    "play:validate_json": validate_json,
-    "play:validate_blueprint": validate_blueprint,
-    "play:format_blueprint": format_blueprint,
-    "play:generate_diagram": generate_diagram,
-    "play:init_simulation": init_simulation,
-    "play:dispatch_event": dispatch_event,
-    "play:get_available_events": get_available_events,
-    "play:encode_share_url": encode_share_url,
-    "play:decode_share_url": decode_share_url,
-    "play:export_blueprint": export_blueprint,
+    ("play", "load_blueprint"): load_blueprint,
+    ("play", "validate_json"): validate_json,
+    ("play", "validate_blueprint"): validate_blueprint,
+    ("play", "format_blueprint"): format_blueprint,
+    ("play", "generate_diagram"): generate_diagram,
+    ("play", "init_simulation"): init_simulation,
+    ("play", "dispatch_event"): dispatch_event,
+    ("play", "get_available_events"): get_available_events,
+    ("play", "encode_share_url"): encode_share_url,
+    ("play", "decode_share_url"): decode_share_url,
+    ("play", "export_blueprint"): export_blueprint,
 }

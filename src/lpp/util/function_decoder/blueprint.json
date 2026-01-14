@@ -209,10 +209,9 @@
       "description": "Generate final linkable module graph JSON"
     },
     "setError": {
-      "type": "assign",
-      "assignments": {
-        "error": "error"
-      },
+      "type": "set",
+      "target": "error",
+      "value_from": "event.payload.error",
       "description": "Record error message"
     }
   },

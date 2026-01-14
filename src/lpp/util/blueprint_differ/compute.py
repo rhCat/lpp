@@ -778,12 +778,12 @@ def export_merged(params: Dict[str, Any]) -> Dict[str, Any]:
 # =============================================================================
 
 COMPUTE_REGISTRY = {
-    "diff:load_blueprint": load_blueprint,
-    "diff:clear_all": clear_all,
-    "diff:compute_diff": compute_diff,
-    "diff:format_diff": format_diff,
-    "diff:generate_json_patch": generate_json_patch,
-    "diff:detect_conflicts": detect_conflicts,
-    "diff:merge_blueprints": merge_blueprints,
-    "diff:export_merged": export_merged,
+    ("diff", "load_blueprint"): load_blueprint,
+    ("diff", "clear_all"): clear_all,
+    ("diff", "compute_diff"): compute_diff,
+    ("diff", "format_diff"): format_diff,
+    ("diff", "generate_json_patch"): generate_json_patch,
+    ("diff", "detect_conflicts"): detect_conflicts,
+    ("diff", "merge_blueprints"): merge_blueprints,
+    ("diff", "export_merged"): export_merged,
 }

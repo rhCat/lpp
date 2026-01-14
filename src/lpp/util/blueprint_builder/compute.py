@@ -402,15 +402,15 @@ def _generate_transitions(states: dict, module: dict) -> list:
 
 
 COMPUTE_REGISTRY = {
-    "blueprint:init": init,
-    "blueprint:buildFromClass": buildFromClass,
-    "blueprint:buildFromPatterns": buildFromPatterns,
-    "blueprint:addStates": addStates,
-    "blueprint:addTransitions": addTransitions,
-    "blueprint:addGates": addGates,
-    "blueprint:addActions": addActions,
-    "blueprint:validate": validate,
-    "blueprint:toJson": toJson,
-    "blueprint:getBlueprint": getBlueprint,
-    "blueprint:listBlueprints": listBlueprints,
+    ("blueprint", "init"): init,
+    ("blueprint", "buildFromClass"): buildFromClass,
+    ("blueprint", "buildFromPatterns"): buildFromPatterns,
+    ("blueprint", "addStates"): addStates,
+    ("blueprint", "addTransitions"): addTransitions,
+    ("blueprint", "addGates"): addGates,
+    ("blueprint", "addActions"): addActions,
+    ("blueprint", "validate"): validate,
+    ("blueprint", "toJson"): toJson,
+    ("blueprint", "getBlueprint"): getBlueprint,
+    ("blueprint", "listBlueprints"): listBlueprints,
 }

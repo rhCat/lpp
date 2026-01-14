@@ -310,8 +310,8 @@ def fetchDetail(params: Dict[str, Any]) -> Dict[str, Any]:
 
 
 COMPUTE_REGISTRY = {
-    "scraper:arxiv": arxiv,
-    "scraper:semanticScholar": semanticScholar,
-    "scraper:web": web,
-    "scraper:fetchDetail": fetchDetail,
+    ("scraper", "arxiv"): arxiv,
+    ("scraper", "semanticScholar"): semanticScholar,
+    ("scraper", "web"): web,
+    ("scraper", "fetchDetail"): fetchDetail,
 }

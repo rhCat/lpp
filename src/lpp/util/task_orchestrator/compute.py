@@ -615,16 +615,16 @@ def reset_exec(params: Dict[str, Any]) -> Dict[str, Any]:
 # =========================================================================
 
 COMPUTE_REGISTRY = {
-    "orch:init": init,
-    "orch:analyze_root": analyze_root,
-    "orch:expand": expand,
-    "orch:collect": collect,
-    "orch:plan_leaf": plan_leaf,
-    "orch:build": build,
-    "orch:exec_leaf": exec_leaf,
-    "orch:next_leaf": next_leaf,
-    "orch:reflect": reflect,
-    "orch:evaluate": evaluate,
-    "orch:incr": incr,
-    "orch:reset_exec": reset_exec,
+    ("orch", "init"): init,
+    ("orch", "analyze_root"): analyze_root,
+    ("orch", "expand"): expand,
+    ("orch", "collect"): collect,
+    ("orch", "plan_leaf"): plan_leaf,
+    ("orch", "build"): build,
+    ("orch", "exec_leaf"): exec_leaf,
+    ("orch", "next_leaf"): next_leaf,
+    ("orch", "reflect"): reflect,
+    ("orch", "evaluate"): evaluate,
+    ("orch", "incr"): incr,
+    ("orch", "reset_exec"): reset_exec,
 }

@@ -82,31 +82,31 @@
     },
     "wants_graphs": {
       "type": "expression",
-      "expression": "options.get('graphs') or options.get('all')"
+      "expression": "options['graphs'] or options['all']"
     },
     "wants_logic": {
       "type": "expression",
-      "expression": "options.get('logic') or options.get('all')"
+      "expression": "options['logic'] or options['all']"
     },
     "wants_functions": {
       "type": "expression",
-      "expression": "options.get('functions') or options.get('all')"
+      "expression": "options['functions'] or options['all']"
     },
     "wants_mermaid": {
       "type": "expression",
-      "expression": "options.get('mermaid') or options.get('all')"
+      "expression": "options['mermaid'] or options['all']"
     },
     "wants_readme": {
       "type": "expression",
-      "expression": "options.get('readme') or options.get('all')"
+      "expression": "options['readme'] or options['all']"
     },
     "wants_report": {
       "type": "expression",
-      "expression": "options.get('report') or options.get('all')"
+      "expression": "options['report'] or options['all']"
     },
     "wants_dashboard": {
       "type": "expression",
-      "expression": "options.get('dashboard') or options.get('all')"
+      "expression": "options['dashboard'] or options['all']"
     },
     "has_error": {
       "type": "expression",
@@ -120,63 +120,114 @@
   "actions": {
     "init": {
       "type": "compute",
-      "unit": "docgen:init",
-      "input_map": {},
+      "compute_unit": "docgen:init",
+      "input_map": {
+        "options": "options"
+      },
       "output_map": {}
     },
     "discover": {
       "type": "compute",
-      "unit": "docgen:discoverBlueprints",
-      "input_map": {},
-      "output_map": {}
+      "compute_unit": "docgen:discoverBlueprints",
+      "input_map": {
+        "utilsPath": "utilsPath"
+      },
+      "output_map": {
+        "blueprints": "blueprints"
+      }
     },
     "gen_graphs": {
       "type": "compute",
-      "unit": "docgen:generateGraphs",
-      "input_map": {},
-      "output_map": {}
+      "compute_unit": "docgen:generateGraphs",
+      "input_map": {
+        "blueprints": "blueprints",
+        "outputPath": "outputPath",
+        "results": "results"
+      },
+      "output_map": {
+        "results": "results"
+      }
     },
     "gen_logic": {
       "type": "compute",
-      "unit": "docgen:generateLogicGraphs",
-      "input_map": {},
-      "output_map": {}
+      "compute_unit": "docgen:generateLogicGraphs",
+      "input_map": {
+        "blueprints": "blueprints",
+        "outputPath": "outputPath",
+        "results": "results"
+      },
+      "output_map": {
+        "results": "results"
+      }
     },
     "gen_functions": {
       "type": "compute",
-      "unit": "docgen:generateFunctionGraphs",
-      "input_map": {},
-      "output_map": {}
+      "compute_unit": "docgen:generateFunctionGraphs",
+      "input_map": {
+        "blueprints": "blueprints",
+        "outputPath": "outputPath",
+        "results": "results"
+      },
+      "output_map": {
+        "results": "results"
+      }
     },
     "gen_mermaid": {
       "type": "compute",
-      "unit": "docgen:generateMermaid",
-      "input_map": {},
-      "output_map": {}
+      "compute_unit": "docgen:generateMermaid",
+      "input_map": {
+        "blueprints": "blueprints",
+        "outputPath": "outputPath",
+        "results": "results"
+      },
+      "output_map": {
+        "results": "results"
+      }
     },
     "update_readmes": {
       "type": "compute",
-      "unit": "docgen:updateReadmes",
-      "input_map": {},
-      "output_map": {}
+      "compute_unit": "docgen:updateReadmes",
+      "input_map": {
+        "blueprints": "blueprints",
+        "results": "results"
+      },
+      "output_map": {
+        "results": "results"
+      }
     },
     "gen_report": {
       "type": "compute",
-      "unit": "docgen:generateReport",
-      "input_map": {},
-      "output_map": {}
+      "compute_unit": "docgen:generateReport",
+      "input_map": {
+        "blueprints": "blueprints",
+        "outputPath": "outputPath",
+        "results": "results"
+      },
+      "output_map": {
+        "results": "results"
+      }
     },
     "gen_dashboard": {
       "type": "compute",
-      "unit": "docgen:generateDashboard",
-      "input_map": {},
-      "output_map": {}
+      "compute_unit": "docgen:generateDashboard",
+      "input_map": {
+        "blueprints": "blueprints",
+        "outputPath": "outputPath",
+        "results": "results"
+      },
+      "output_map": {
+        "results": "results"
+      }
     },
     "finalize": {
       "type": "compute",
-      "unit": "docgen:finalize",
-      "input_map": {},
-      "output_map": {}
+      "compute_unit": "docgen:finalize",
+      "input_map": {
+        "results": "results"
+      },
+      "output_map": {
+        "results": "results"
+      }
     }
   },
   "transitions": [

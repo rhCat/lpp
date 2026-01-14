@@ -240,15 +240,15 @@ def load_tree(params: Dict[str, Any]) -> Dict[str, Any]:
 # =============================================================================
 
 COMPUTE_REGISTRY = {
-    "viz:load_blueprint": load_blueprint,
-    "viz:zoom": zoom,
-    "viz:toggle": toggle,
-    "viz:init_defaults": init_defaults,
-    "viz:render_graph": render_graph,
-    "viz:render_table": render_table,
-    "viz:render_mermaid": render_mermaid,
+    ("viz", "load_blueprint"): load_blueprint,
+    ("viz", "zoom"): zoom,
+    ("viz", "toggle"): toggle,
+    ("viz", "init_defaults"): init_defaults,
+    ("viz", "render_graph"): render_graph,
+    ("viz", "render_table"): render_table,
+    ("viz", "render_mermaid"): render_mermaid,
     # Hierarchical tree visualization
-    "viz:load_tree": load_tree,
-    "viz:render_tree": render_tree,
-    "viz:render_tree_mermaid": render_tree_mermaid,
+    ("viz", "load_tree"): load_tree,
+    ("viz", "render_tree"): render_tree,
+    ("viz", "render_tree_mermaid"): render_tree_mermaid,
 }

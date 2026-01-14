@@ -257,12 +257,12 @@ Output the complete JSON in a code block."""
 # COMPUTE REGISTRY - namespace:operation -> function
 # =============================================================================
 COMPUTE_REGISTRY = {
-    "llm:init_config": init_config,
-    "llm:load_schema": load_schema,
-    "llm:load_blueprint": load_blueprint,
-    "llm:query": query,
-    "llm:explain_blueprint": explain_blueprint,
-    "llm:validate_blueprint": validate_blueprint,
-    "llm:suggest_improvements": suggest_improvements,
-    "llm:generate_blueprint": generate_blueprint,
+    ("llm", "init_config"): init_config,
+    ("llm", "load_schema"): load_schema,
+    ("llm", "load_blueprint"): load_blueprint,
+    ("llm", "query"): query,
+    ("llm", "explain_blueprint"): explain_blueprint,
+    ("llm", "validate_blueprint"): validate_blueprint,
+    ("llm", "suggest_improvements"): suggest_improvements,
+    ("llm", "generate_blueprint"): generate_blueprint,
 }

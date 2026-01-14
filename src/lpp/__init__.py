@@ -19,7 +19,7 @@ CLI Tools:
     lpp workflow <workflow_name> [args]
 """
 
-__version__ = "1.2.1"
+__version__ = "1.2.3"
 
 # Convenience re-exports from lpp.core
 from lpp.core import (

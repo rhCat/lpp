@@ -1049,8 +1049,8 @@ renderTools();
 
 # Compute registry for L++ dispatcher
 COMPUTE_REGISTRY = {
-    "dashboard:scanTools": scanTools,
-    "dashboard:analyzeTools": analyzeTools,
-    "dashboard:categorizeTools": categorizeTools,
-    "dashboard:generateDashboard": generateDashboard
+    ("dashboard", "scanTools"): scanTools,
+    ("dashboard", "analyzeTools"): analyzeTools,
+    ("dashboard", "categorizeTools"): categorizeTools,
+    ("dashboard", "generateDashboard"): generateDashboard
 }
