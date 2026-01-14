@@ -29,9 +29,9 @@ def run(params: dict) -> dict:
     # Initialize context from params
     context = params.copy()
     
-    # Dispatch START event
+    # Dispatch CERTIFY event
     new_state, new_ctx, traces, err = run_frame(
-        blueprint, context, "START", {}, COMPUTE_REGISTRY
+        blueprint, context, "CERTIFY", {}, COMPUTE_REGISTRY
     )
     
     if err:

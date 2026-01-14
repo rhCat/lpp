@@ -74,7 +74,7 @@ class InteractiveSearch:
         self.compute = COMPUTE_REGISTRY
 
         # Initialize
-        result = self.compute["search:init"]({"searchPath": str(self.search_path)})
+        result = self.compute[("search", "init")]({"searchPath": str(self.search_path)})
         self.search_path = Path(result["path"])
         self.exclude_patterns = result["excludes"]
         self.context_lines = result["context"]
@@ -93,7 +93,7 @@ class InteractiveSearch:
         if self.file_pattern != "*":
             print(colored(f"Files: {self.file_pattern}", Colors.DIM))
 
-        result = self.compute["search:execute"]({
+        result = self.compute[("search", "execute")]({
             "searchPath": str(self.search_path),
             "query": query,
             "filePattern": self.file_pattern,
@@ -113,7 +113,7 @@ class InteractiveSearch:
         self.file_count = result["files"]
 
         # Record in history
-        self.compute["search:recordQuery"]({
+        self.compute[("search", "recordQuery")]({
             "query": query,
             "history": self.query_history,
             "count": self.result_count,
@@ -203,7 +203,7 @@ class InteractiveSearch:
 
     def refine(self, ref_type: str, value: str) -> None:
         """Apply refinement to search."""
-        result = self.compute["search:refine"]({
+        result = self.compute[("search", "refine")]({
             "query": self.query,
             "type": ref_type,
             "value": value,
@@ -219,7 +219,7 @@ class InteractiveSearch:
 
     def export(self, path: str, fmt: str = "json") -> None:
         """Export results."""
-        result = self.compute["search:export"]({
+        result = self.compute[("search", "export")]({
             "results": self.results,
             "query": self.query,
             "path": path,

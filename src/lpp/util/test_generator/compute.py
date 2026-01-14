@@ -12,7 +12,7 @@ from collections import deque
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from frame_py.loader import BlueprintLoader
+from lpp.core import BlueprintLoader
 
 
 # =============================================================================
@@ -310,6 +310,9 @@ def analyze_gates(params: Dict[str, Any]) -> Dict[str, Any]:
 
 def _extractBoundaries(expr: str) -> List[Dict]:
     """Extract numeric boundary conditions from expression."""
+    if not expr:
+        return []
+
     boundaries = []
 
     # Match patterns like: x > 10, x >= 5, x < 100, x <= 50, x == 42
@@ -359,6 +362,9 @@ def _genBoundaryValues(op: str, val: float) -> List[float]:
 
 def _extractBooleans(expr: str) -> List[Dict]:
     """Extract boolean conditions from expression."""
+    if not expr:
+        return []
+
     booleans = []
 
     # Match patterns like: flag, not flag, flag == True
@@ -375,6 +381,9 @@ def _extractBooleans(expr: str) -> List[Dict]:
 
 def _extractNullChecks(expr: str) -> List[Dict]:
     """Extract null/None check conditions from expression."""
+    if not expr:
+        return []
+
     nullChecks = []
 
     # Match patterns like: x is not None, x is None
@@ -399,6 +408,9 @@ def _extractNullChecks(expr: str) -> List[Dict]:
 
 def _extractVariables(expr: str) -> List[str]:
     """Extract all variable names from expression."""
+    if not expr:
+        return []
+
     # Match word characters that aren't Python keywords
     keywords = {"and", "or", "not", "is", "in", "True", "False", "None",
                 "if", "else", "for", "while", "return", "len"}

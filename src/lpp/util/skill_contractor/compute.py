@@ -1546,3 +1546,6 @@ COMPUTE_UNITS = {
     # Backwards compatibility
     ("agent", "execute_step"): generate_step_output,
 }
+
+# Alias for lpp.util convention
+COMPUTE_REGISTRY = COMPUTE_UNITS

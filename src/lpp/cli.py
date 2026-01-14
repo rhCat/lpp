@@ -479,18 +479,66 @@ def cmd_util(args: List[str]) -> int:
     if hasattr(util, "run"):
         # Parse args as key=value pairs
         params = {}
+        positional_args = []
         for arg in util_args:
             if "=" in arg:
                 key, value = arg.split("=", 1)
                 params[key] = value
             else:
-                # Positional arg - use as target/project_path
-                params["target"] = arg
-                params["project_path"] = arg
+                positional_args.append(arg)
+
+        # Map positional args to expected parameter names based on utility
+        if positional_args:
+            first_arg = positional_args[0]
+            # Utilities expecting blueprint_path
+            if util_name in ["compliance_checker", "blueprint_debugger",
+                             "coverage_analyzer", "event_simulator",
+                             "tlaps_prover", "test_generator", "tlaps_seal",
+                             "blueprint_builder", "blueprint_composer",
+                             "blueprint_differ", "blueprint_linter",
+                             "blueprint_playground", "schema_migrator",
+                             "execution_tracer", "visualizer",
+                             "graph_visualizer"]:
+                params["blueprint_path"] = first_arg
+            # Utilities expecting file_path
+            elif util_name in ["logic_decoder", "legacy_extractor",
+                               "function_decoder"]:
+                params["file_path"] = first_arg
+            # Utilities expecting utilsPath
+            elif util_name in ["doc_generator", "skill_registry",
+                               "blueprint_registry", "dashboard"]:
+                params["utilsPath"] = first_arg
+                params["options"] = {"all": True}
+            # Utilities expecting query
+            elif util_name in ["interactive_search", "research_scraper",
+                               "scholar_chat"]:
+                params["query"] = first_arg
+                params["search_path"] = "."
+                params["source"] = "arxiv"
+            # Default fallback
+            else:
+                params["target"] = first_arg
+                params["project_path"] = first_arg
+                params["blueprint_path"] = first_arg
+                params["file_path"] = first_arg
 
         result = util.run(params)
-        print(result)
-        return 0 if "error" not in result else 1
+        state = result.get("state", "unknown")
+        error = result.get("error")
+        if error:
+            print(f"Error: {error}")
+            return 1
+        print(f"State: {state}")
+        if result.get("context"):
+            ctx = result["context"]
+            # Print relevant outputs based on utility
+            if "blueprint" in ctx and ctx["blueprint"]:
+                print(f"Blueprint loaded: {ctx['blueprint'].get('id', 'yes')}")
+            if "blueprints" in ctx:
+                print(f"Total: {len(ctx.get('blueprints', []))} blueprints")
+            if "results" in ctx and isinstance(ctx["results"], dict):
+                print(f"Generated: {ctx['results'].get('generated', 0)}")
+        return 0
 
     print(f"Utility '{util_name}' has no CLI or run function")
     return 1

@@ -28,9 +28,23 @@ def run(params: dict) -> dict:
         return {"error": error}
 
     # Initialize context with defaults for required variables
+    # All option keys are required for gate evaluation
+    default_options = {
+        "all": True,
+        "graphs": False,
+        "logic": False,
+        "functions": False,
+        "mermaid": False,
+        "readme": False,
+        "report": False,
+        "dashboard": False,
+    }
+    user_options = params.get("options", {})
+    default_options.update(user_options)
+
     context = {
         "blueprints": [],
-        "options": params.get("options", {"all": True}),
+        "options": default_options,
         "utilsPath": params.get("utilsPath", "."),
         "outputPath": params.get("outputPath", "./results"),
         "results": {"generated": 0, "errors": []},

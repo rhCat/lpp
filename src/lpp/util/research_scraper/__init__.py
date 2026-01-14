@@ -29,9 +29,17 @@ def run(params: dict) -> dict:
     # Initialize context from params
     context = params.copy()
     
-    # Dispatch START event
+    # Dispatch search event based on source parameter
+    source = params.get("source", "arxiv").lower()
+    event_map = {
+        "arxiv": "SEARCH_ARXIV",
+        "scholar": "SEARCH_SCHOLAR",
+        "web": "SEARCH_WEB",
+    }
+    event = event_map.get(source, "SEARCH_ARXIV")
+
     new_state, new_ctx, traces, err = run_frame(
-        blueprint, context, "START", {}, COMPUTE_REGISTRY
+        blueprint, context, event, {}, COMPUTE_REGISTRY
     )
     
     if err:
