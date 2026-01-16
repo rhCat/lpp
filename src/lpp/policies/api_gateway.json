@@ -1,0 +1,138 @@
+{
+  "$schema": "lpp/policy/v0.1.0",
+  "id": "api_gateway",
+  "name": "API Gateway Policy",
+  "version": "1.0.0",
+  "description": "Request-Response pattern with validation, processing, and error handling",
+
+  "context_schema": {
+    "type": "object",
+    "properties": {
+      "request": {"type": "object", "description": "Incoming request payload"},
+      "validated": {"type": "boolean", "description": "Validation result"},
+      "validationErrors": {"type": "array", "description": "Validation error list"},
+      "response": {"type": "object", "description": "Processed response"},
+      "error": {"type": "object", "description": "Error details if any"},
+      "metadata": {"type": "object", "description": "Request metadata (timing, tracing)"}
+    }
+  },
+
+  "states": {
+    "idle": {"description": "Awaiting request"},
+    "validating": {"description": "Validating incoming request"},
+    "processing": {"description": "Processing validated request"},
+    "responding": {"description": "Formatting response"},
+    "error_handling": {"description": "Handling error condition"},
+    "complete": {"description": "Request complete - success"},
+    "error": {"description": "Request complete - error"}
+  },
+
+  "entry_state": "idle",
+
+  "terminal_states": {
+    "complete": {
+      "output_schema": {
+        "response": {"type": "object", "non_null": true},
+        "metadata": {"type": "object"}
+      },
+      "invariants_guaranteed": ["response_valid", "request_logged"]
+    },
+    "error": {
+      "output_schema": {
+        "error": {"type": "object", "non_null": true},
+        "metadata": {"type": "object"}
+      },
+      "invariants_guaranteed": ["error_logged"]
+    }
+  },
+
+  "gates": {
+    "has_request": "request is not None",
+    "is_valid": "validated == True",
+    "is_invalid": "validated == False",
+    "has_response": "response is not None",
+    "has_error": "error is not None"
+  },
+
+  "slots": {
+    "validate": {
+      "description": "Validate incoming request",
+      "input": ["request"],
+      "output": ["validated", "validationErrors"],
+      "contract": {
+        "pre": "request is not None",
+        "post": "validated in [True, False]"
+      }
+    },
+    "process": {
+      "description": "Process validated request",
+      "input": ["request"],
+      "output": ["response"],
+      "contract": {
+        "pre": "validated == True",
+        "post": "response is not None"
+      }
+    },
+    "format_response": {
+      "description": "Format response for output",
+      "input": ["response"],
+      "output": ["response"],
+      "contract": {
+        "pre": "response is not None",
+        "post": "response is not None"
+      }
+    },
+    "handle_error": {
+      "description": "Handle error condition",
+      "input": ["error", "validationErrors"],
+      "output": ["error"],
+      "contract": {
+        "pre": "True",
+        "post": "error is not None"
+      }
+    }
+  },
+
+  "actions": {
+    "do_validate": {
+      "type": "slot",
+      "slot": "validate",
+      "input_map": {"request": "request"},
+      "output_map": {"validated": "validated", "validationErrors": "validationErrors"}
+    },
+    "do_process": {
+      "type": "slot",
+      "slot": "process",
+      "input_map": {"request": "request"},
+      "output_map": {"response": "response"}
+    },
+    "do_format": {
+      "type": "slot",
+      "slot": "format_response",
+      "input_map": {"response": "response"},
+      "output_map": {"response": "response"}
+    },
+    "do_handle_error": {
+      "type": "slot",
+      "slot": "handle_error",
+      "input_map": {"error": "error", "validationErrors": "validationErrors"},
+      "output_map": {"error": "error"}
+    }
+  },
+
+  "transitions": [
+    {"id": "t_receive", "from": "idle", "to": "validating", "on_event": "REQUEST", "guard": "has_request", "action": "do_validate"},
+    {"id": "t_valid", "from": "validating", "to": "processing", "on_event": "VALIDATED", "guard": "is_valid", "action": "do_process"},
+    {"id": "t_invalid", "from": "validating", "to": "error_handling", "on_event": "VALIDATED", "guard": "is_invalid", "action": "do_handle_error"},
+    {"id": "t_processed", "from": "processing", "to": "responding", "on_event": "PROCESSED", "guard": "has_response", "action": "do_format"},
+    {"id": "t_process_error", "from": "processing", "to": "error_handling", "on_event": "ERROR", "guard": "has_error", "action": "do_handle_error"},
+    {"id": "t_respond", "from": "responding", "to": "complete", "on_event": "FORMATTED"},
+    {"id": "t_error_done", "from": "error_handling", "to": "error", "on_event": "HANDLED"}
+  ],
+
+  "invariants": {
+    "response_valid": "state = complete => response is not None",
+    "error_logged": "state = error => error is not None",
+    "request_logged": "state in [complete, error] => metadata.logged == True"
+  }
+}

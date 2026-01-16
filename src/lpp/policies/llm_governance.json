@@ -1,0 +1,189 @@
+{
+  "$schema": "lpp/policy/v0.1.0",
+  "id": "llm_governance",
+  "name": "LLM Governance Policy",
+  "version": "1.0.0",
+  "description": "AI safety pattern with input/output guards and content filtering",
+
+  "context_schema": {
+    "type": "object",
+    "properties": {
+      "prompt": {"type": "string", "description": "User input prompt"},
+      "input_safe": {"type": "boolean", "description": "Input guard result"},
+      "input_risk": {"type": "object", "description": "Input risk assessment"},
+      "model_response": {"type": "string", "description": "Raw model output"},
+      "output_safe": {"type": "boolean", "description": "Output guard result"},
+      "output_risk": {"type": "object", "description": "Output risk assessment"},
+      "filtered_response": {"type": "string", "description": "Filtered safe output"},
+      "block_reason": {"type": "string", "description": "Reason for blocking"},
+      "audit": {"type": "object", "description": "Full audit trail"}
+    }
+  },
+
+  "states": {
+    "idle": {"description": "Awaiting prompt"},
+    "input_guard": {"description": "Checking input safety"},
+    "blocked": {"description": "Input blocked - unsafe"},
+    "inference": {"description": "Calling LLM"},
+    "output_guard": {"description": "Checking output safety"},
+    "filtering": {"description": "Applying content filter"},
+    "complete": {"description": "Safe response delivered"},
+    "error": {"description": "System error"}
+  },
+
+  "entry_state": "idle",
+
+  "terminal_states": {
+    "complete": {
+      "output_schema": {
+        "filtered_response": {"type": "string", "non_null": true},
+        "audit": {"type": "object", "non_null": true}
+      },
+      "invariants_guaranteed": ["output_safe_or_filtered", "audit_complete"]
+    },
+    "blocked": {
+      "output_schema": {
+        "block_reason": {"type": "string", "non_null": true},
+        "audit": {"type": "object", "non_null": true}
+      },
+      "invariants_guaranteed": ["input_blocked_logged"]
+    },
+    "error": {
+      "output_schema": {
+        "error": {"type": "object", "non_null": true}
+      }
+    }
+  },
+
+  "gates": {
+    "has_prompt": "prompt is not None and prompt != ''",
+    "input_is_safe": "input_safe == True",
+    "input_is_unsafe": "input_safe == False",
+    "has_response": "model_response is not None",
+    "output_is_safe": "output_safe == True",
+    "output_needs_filter": "output_safe == False"
+  },
+
+  "slots": {
+    "check_input": {
+      "description": "Evaluate input prompt for safety risks",
+      "input": ["prompt"],
+      "output": ["input_safe", "input_risk"],
+      "contract": {
+        "pre": "prompt is not None",
+        "post": "input_safe in [True, False] and input_risk is not None"
+      }
+    },
+    "call_model": {
+      "description": "Call the LLM with the prompt",
+      "input": ["prompt"],
+      "output": ["model_response"],
+      "contract": {
+        "pre": "input_safe == True",
+        "post": "model_response is not None"
+      }
+    },
+    "check_output": {
+      "description": "Evaluate model output for safety risks",
+      "input": ["model_response"],
+      "output": ["output_safe", "output_risk"],
+      "contract": {
+        "pre": "model_response is not None",
+        "post": "output_safe in [True, False] and output_risk is not None"
+      }
+    },
+    "apply_filter": {
+      "description": "Filter unsafe content from output",
+      "input": ["model_response", "output_risk"],
+      "output": ["filtered_response"],
+      "contract": {
+        "pre": "model_response is not None",
+        "post": "filtered_response is not None"
+      }
+    },
+    "create_block_response": {
+      "description": "Create response explaining why input was blocked",
+      "input": ["input_risk"],
+      "output": ["block_reason"],
+      "contract": {
+        "pre": "input_safe == False",
+        "post": "block_reason is not None"
+      }
+    },
+    "log_audit": {
+      "description": "Log complete audit trail",
+      "input": ["prompt", "input_risk", "model_response", "output_risk", "filtered_response"],
+      "output": ["audit"],
+      "contract": {
+        "pre": "True",
+        "post": "audit is not None"
+      }
+    }
+  },
+
+  "actions": {
+    "do_check_input": {
+      "type": "slot",
+      "slot": "check_input",
+      "input_map": {"prompt": "prompt"},
+      "output_map": {"input_safe": "input_safe", "input_risk": "input_risk"}
+    },
+    "do_call_model": {
+      "type": "slot",
+      "slot": "call_model",
+      "input_map": {"prompt": "prompt"},
+      "output_map": {"model_response": "model_response"}
+    },
+    "do_check_output": {
+      "type": "slot",
+      "slot": "check_output",
+      "input_map": {"model_response": "model_response"},
+      "output_map": {"output_safe": "output_safe", "output_risk": "output_risk"}
+    },
+    "do_filter": {
+      "type": "slot",
+      "slot": "apply_filter",
+      "input_map": {"model_response": "model_response", "output_risk": "output_risk"},
+      "output_map": {"filtered_response": "filtered_response"}
+    },
+    "do_block": {
+      "type": "slot",
+      "slot": "create_block_response",
+      "input_map": {"input_risk": "input_risk"},
+      "output_map": {"block_reason": "block_reason"}
+    },
+    "do_passthrough": {
+      "type": "mutate",
+      "mutations": {"filtered_response": "model_response"}
+    },
+    "do_audit": {
+      "type": "slot",
+      "slot": "log_audit",
+      "input_map": {
+        "prompt": "prompt",
+        "input_risk": "input_risk",
+        "model_response": "model_response",
+        "output_risk": "output_risk",
+        "filtered_response": "filtered_response"
+      },
+      "output_map": {"audit": "audit"}
+    }
+  },
+
+  "transitions": [
+    {"id": "t_receive", "from": "idle", "to": "input_guard", "on_event": "PROMPT", "guard": "has_prompt", "action": "do_check_input"},
+    {"id": "t_input_safe", "from": "input_guard", "to": "inference", "on_event": "CHECKED", "guard": "input_is_safe", "action": "do_call_model"},
+    {"id": "t_input_unsafe", "from": "input_guard", "to": "blocked", "on_event": "CHECKED", "guard": "input_is_unsafe", "action": "do_block"},
+    {"id": "t_inferred", "from": "inference", "to": "output_guard", "on_event": "RESPONSE", "guard": "has_response", "action": "do_check_output"},
+    {"id": "t_output_safe", "from": "output_guard", "to": "complete", "on_event": "CHECKED", "guard": "output_is_safe", "action": "do_passthrough"},
+    {"id": "t_output_unsafe", "from": "output_guard", "to": "filtering", "on_event": "CHECKED", "guard": "output_needs_filter", "action": "do_filter"},
+    {"id": "t_filtered", "from": "filtering", "to": "complete", "on_event": "FILTERED", "action": "do_audit"}
+  ],
+
+  "invariants": {
+    "output_safe_or_filtered": "state = complete => (output_safe == True or filtered_response != model_response)",
+    "audit_complete": "state = complete => audit is not None",
+    "input_blocked_logged": "state = blocked => block_reason is not None and audit is not None",
+    "never_raw_unsafe": "state = complete and output_safe == False => filtered_response != model_response"
+  }
+}
