@@ -82,10 +82,19 @@ validate_blueprints() {
     local target_dir="${PROJECT_PATH:-${SCRIPT_DIR}/utils}"
     echo -e "${GREEN}Validating blueprints in ${target_dir}...${NC}"
 
-    if ! command -v tla2sany &> /dev/null; then
-        echo -e "${RED}Error: TLA+ tools not found. Install TLA+ toolbox.${NC}"
+    # Check for available TLA+ tools
+    local TLA2TOOLS_JAR="${HOME}/.local/share/tlaplus/tla2tools.jar"
+
+    if command -v tla2sany &> /dev/null; then
+        TLA_CMD="tla2sany"
+    elif [ -f "${TLA2TOOLS_JAR}" ]; then
+        TLA_CMD="java -cp ${TLA2TOOLS_JAR} tla2sany.SANY"
+    else
+        echo -e "${RED}Error: TLA+ tools not found.${NC}"
+        echo -e "${RED}  Expected: tla2sany command or ${TLA2TOOLS_JAR}${NC}"
         exit 1
     fi
+    echo -e "  Using: SANY (TLA+ syntax checker)"
 
     find "${target_dir}" -name "*.json" -type f | while read -r bp; do
         # Skip non-blueprint files
@@ -97,8 +106,12 @@ validate_blueprints() {
         tla_file="${dir}/tla/${name}.tla"
 
         if [ -f "$tla_file" ]; then
-            echo "  Validating: $name"
-            tla2sany "$tla_file" 2>/dev/null || echo -e "${RED}  Failed: $name${NC}"
+            echo -n "  Validating: $name ... "
+            if ${TLA_CMD} "$tla_file" >/dev/null 2>&1; then
+                echo -e "${GREEN}OK${NC}"
+            else
+                echo -e "${RED}FAILED${NC}"
+            fi
         fi
     done
 }
