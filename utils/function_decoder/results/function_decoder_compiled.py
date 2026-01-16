@@ -23,7 +23,7 @@ BLUEPRINT_ID = 'function_decoder'
 BLUEPRINT_NAME = 'Python Function Decoder'
 BLUEPRINT_VERSION = '1.0.0'
 ENTRY_STATE = 'idle'
-TERMINAL_STATES = set()
+TERMINAL_STATES = {'error', 'complete'}
 
 STATES = {
     'idle': 'idle',  # Awaiting file path
@@ -31,8 +31,6 @@ STATES = {
     'extracting': 'extracting',  # Extracting exports and imports
     'tracing': 'tracing',  # Tracing function call graph
     'computing': 'computing',  # Computing coupling metrics
-    'complete': 'complete',  # Module graph generated
-    'error': 'error',  # Analysis failed
 }
 
 GATES = {
@@ -213,8 +211,7 @@ class Operator:
     """
 
     def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'filePath': None, 'sourceCode': None, 'ast': None, 'exports': None, 'imports': None,
-                        'internalCalls': None, 'externalCalls': None, 'localCalls': None, 'coupling': None, 'moduleGraph': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'filePath': None, 'sourceCode': None, 'ast': None, 'exports': None, 'imports': None, 'internalCalls': None, 'externalCalls': None, 'localCalls': None, 'coupling': None, 'moduleGraph': None, 'error': None}
         self.traces: list[TransitionTrace] = []
         self.compute_registry = compute_registry or {}
 
@@ -306,8 +303,7 @@ class Operator:
                             self.context, _ = atom_MUTATE(
                                 self.context, ctx_path, result[res_key]
                             )
-                    # Sync scope for chained actions
-                    scope.update(self.context)
+                    scope.update(self.context)  # Sync scope for chained actions
 
         # TRANSITION
         (new_state, trace), _ = atom_TRANSITION(current, trans['to'])
@@ -343,8 +339,7 @@ class Operator:
 
     def reset(self):
         """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'filePath': None, 'sourceCode': None, 'ast': None, 'exports': None, 'imports': None,
-                        'internalCalls': None, 'externalCalls': None, 'localCalls': None, 'coupling': None, 'moduleGraph': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'filePath': None, 'sourceCode': None, 'ast': None, 'exports': None, 'imports': None, 'internalCalls': None, 'externalCalls': None, 'localCalls': None, 'coupling': None, 'moduleGraph': None, 'error': None}
         self.traces = []
 
     def save_state(self, path: str = None):
@@ -415,8 +410,7 @@ class Operator:
 
             # Validate blueprint ID matches
             if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(
-                    f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
+                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
                 return False
 
             self.context = state_data.get('context', {})

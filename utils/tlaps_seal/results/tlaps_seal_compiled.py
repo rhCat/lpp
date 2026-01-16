@@ -23,7 +23,7 @@ BLUEPRINT_ID = 'tlaps_seal'
 BLUEPRINT_NAME = 'TLAPS Seal Certifier'
 BLUEPRINT_VERSION = '1.0.0'
 ENTRY_STATE = 'idle'
-TERMINAL_STATES = {'certified', 'rejected'}
+TERMINAL_STATES = {'error', 'rejected', 'certified'}
 
 STATES = {
     'idle': 'idle',  # Ready to receive blueprint for certification
@@ -32,11 +32,9 @@ STATES = {
     'generating_tla': 'generating_tla',  # Generating TLA+ specification
     'tlc_verifying': 'tlc_verifying',  # Running TLC model checker (empirical)
     'tlc_verified': 'tlc_verified',  # TLC verification passed
-    # Running TLAPS theorem prover (axiomatic)
-    'tlaps_proving': 'tlaps_proving',
+    'tlaps_proving': 'tlaps_proving',  # Running TLAPS theorem prover (axiomatic)
     'certified': 'certified',  # TLAPS certification complete - Seal granted
     'rejected': 'rejected',  # Blueprint failed verification
-    'error': 'error',  # Error during certification process
 }
 
 GATES = {
@@ -112,6 +110,11 @@ ACTIONS = {
     'clearError': {
         'type': 'set',
         'target': 'error',
+    },
+    'log_error': {
+        'type': 'set',
+        'target': 'sealStatus',
+        'value': 'rejected',
     },
     'resetContext': {
         'type': 'compute',
@@ -215,7 +218,7 @@ TRANSITIONS = [
         'to': 'error',
         'on_event': 'ERROR',
         'gates': ['hasError'],
-        'actions': [],
+        'actions': ['log_error'],
     },
     {
         'id': 't13_reset',
@@ -264,8 +267,7 @@ class Operator:
     """
 
     def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'blueprintPath': None, 'blueprint': None, 'tlaPath': None, 'tlaSpec': None, 'tlcResult': None,
-                        'tlapsResult': None, 'trinityAudit': None, 'flangeAudit': None, 'invariants': None, 'sealStatus': None, 'sealCertificate': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'blueprintPath': None, 'blueprint': None, 'tlaPath': None, 'tlaSpec': None, 'tlcResult': None, 'tlapsResult': None, 'trinityAudit': None, 'flangeAudit': None, 'invariants': None, 'sealStatus': None, 'sealCertificate': None, 'error': None}
         self.traces: list[TransitionTrace] = []
         self.compute_registry = compute_registry or {}
 
@@ -357,8 +359,7 @@ class Operator:
                             self.context, _ = atom_MUTATE(
                                 self.context, ctx_path, result[res_key]
                             )
-                    # Sync scope for chained actions
-                    scope.update(self.context)
+                    scope.update(self.context)  # Sync scope for chained actions
 
         # TRANSITION
         (new_state, trace), _ = atom_TRANSITION(current, trans['to'])
@@ -394,8 +395,7 @@ class Operator:
 
     def reset(self):
         """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'blueprintPath': None, 'blueprint': None, 'tlaPath': None, 'tlaSpec': None, 'tlcResult': None,
-                        'tlapsResult': None, 'trinityAudit': None, 'flangeAudit': None, 'invariants': None, 'sealStatus': None, 'sealCertificate': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'blueprintPath': None, 'blueprint': None, 'tlaPath': None, 'tlaSpec': None, 'tlcResult': None, 'tlapsResult': None, 'trinityAudit': None, 'flangeAudit': None, 'invariants': None, 'sealStatus': None, 'sealCertificate': None, 'error': None}
         self.traces = []
 
     def save_state(self, path: str = None):
@@ -466,8 +466,7 @@ class Operator:
 
             # Validate blueprint ID matches
             if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(
-                    f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
+                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
                 return False
 
             self.context = state_data.get('context', {})

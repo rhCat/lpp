@@ -23,7 +23,7 @@ BLUEPRINT_ID = 'lpp_canvas'
 BLUEPRINT_NAME = 'L++ Canvas'
 BLUEPRINT_VERSION = '1.0.0'
 ENTRY_STATE = 'idle'
-TERMINAL_STATES = set()
+TERMINAL_STATES = {'error'}
 
 STATES = {
     'idle': 'idle',  # No blueprint loaded
@@ -37,7 +37,6 @@ STATES = {
     'llm_assist': 'llm_assist',  # Getting LLM assistance
     'generating': 'generating',  # Generating outputs (graph, mermaid)
     'saving': 'saving',  # Saving blueprint to file
-    'error': 'error',  # Error state
 }
 
 GATES = {

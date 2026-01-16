@@ -23,17 +23,14 @@ BLUEPRINT_ID = 'logic_decoder'
 BLUEPRINT_NAME = 'Python Logic Decoder'
 BLUEPRINT_VERSION = '1.0.0'
 ENTRY_STATE = 'idle'
-TERMINAL_STATES = set()
+TERMINAL_STATES = {'complete', 'error'}
 
 STATES = {
     'idle': 'Idle',  # Awaiting file path or source code
     'parsing': 'Parsing',  # Parsing Python source into AST
     'analyzing': 'Analyzing',  # Analyzing imports, functions, and control flow
-    # Inferring states, transitions, gates from code patterns
-    'inferring': 'Inferring Logic',
+    'inferring': 'Inferring Logic',  # Inferring states, transitions, gates from code patterns
     'generating': 'Generating Blueprint',  # Assembling final L++ blueprint
-    'complete': 'Complete',  # Blueprint generated successfully
-    'error': 'Error',  # Decoding failed
 }
 
 GATES = {
@@ -108,6 +105,11 @@ ACTIONS = {
         'target': 'error',
         'value_from': 'event.payload.message',
     },
+    'log_error': {
+        'type': 'set',
+        'target': 'analysisReport',
+        'value_from': 'event.payload.message',
+    },
     'clearError': {
         'type': 'set',
         'target': 'error',
@@ -166,7 +168,7 @@ TRANSITIONS = [
         'to': 'error',
         'on_event': 'ERROR',
         'gates': [],
-        'actions': ['setError'],
+        'actions': ['setError', 'log_error'],
     },
     {
         'id': 't7_error_analyze',
@@ -174,7 +176,7 @@ TRANSITIONS = [
         'to': 'error',
         'on_event': 'ERROR',
         'gates': [],
-        'actions': ['setError'],
+        'actions': ['setError', 'log_error'],
     },
     {
         'id': 't8_error_infer',
@@ -182,7 +184,7 @@ TRANSITIONS = [
         'to': 'error',
         'on_event': 'ERROR',
         'gates': [],
-        'actions': ['setError'],
+        'actions': ['setError', 'log_error'],
     },
     {
         'id': 't9_reset',
@@ -231,8 +233,7 @@ class Operator:
     """
 
     def __init__(self, compute_registry: dict = None):
-        self.context = {'_state': ENTRY_STATE, 'filePath': None, 'sourceCode': None, 'ast': None, 'imports': None, 'functions': None, 'classes': None, 'controlFlow': None,
-                        'inferredStates': None, 'inferredTransitions': None, 'inferredActions': None, 'inferredGates': None, 'blueprint': None, 'blueprintJson': None, 'analysisReport': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'filePath': None, 'sourceCode': None, 'ast': None, 'imports': None, 'functions': None, 'classes': None, 'controlFlow': None, 'inferredStates': None, 'inferredTransitions': None, 'inferredActions': None, 'inferredGates': None, 'blueprint': None, 'blueprintJson': None, 'analysisReport': None, 'error': None}
         self.traces: list[TransitionTrace] = []
         self.compute_registry = compute_registry or {}
 
@@ -324,8 +325,7 @@ class Operator:
                             self.context, _ = atom_MUTATE(
                                 self.context, ctx_path, result[res_key]
                             )
-                    # Sync scope for chained actions
-                    scope.update(self.context)
+                    scope.update(self.context)  # Sync scope for chained actions
 
         # TRANSITION
         (new_state, trace), _ = atom_TRANSITION(current, trans['to'])
@@ -361,8 +361,7 @@ class Operator:
 
     def reset(self):
         """Reset to initial state."""
-        self.context = {'_state': ENTRY_STATE, 'filePath': None, 'sourceCode': None, 'ast': None, 'imports': None, 'functions': None, 'classes': None, 'controlFlow': None,
-                        'inferredStates': None, 'inferredTransitions': None, 'inferredActions': None, 'inferredGates': None, 'blueprint': None, 'blueprintJson': None, 'analysisReport': None, 'error': None}
+        self.context = {'_state': ENTRY_STATE, 'filePath': None, 'sourceCode': None, 'ast': None, 'imports': None, 'functions': None, 'classes': None, 'controlFlow': None, 'inferredStates': None, 'inferredTransitions': None, 'inferredActions': None, 'inferredGates': None, 'blueprint': None, 'blueprintJson': None, 'analysisReport': None, 'error': None}
         self.traces = []
 
     def save_state(self, path: str = None):
@@ -433,8 +432,7 @@ class Operator:
 
             # Validate blueprint ID matches
             if state_data.get('blueprint_id') != BLUEPRINT_ID:
-                print(
-                    f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
+                print(f'[L++ WARNING] Blueprint ID mismatch: {state_data.get("blueprint_id")}')
                 return False
 
             self.context = state_data.get('context', {})
