@@ -178,9 +178,10 @@ def generate_tla(
             lines.append(f"{domain_name} == {{{', '.join(escaped)}}}")
         lines.append("")
 
-    # States
+    # States (include terminal states for TypeInvariant)
     lines.append("\\* States")
-    state_set = ", ".join(f'"{s}"' for s in states)
+    all_states = sorted(set(states) | set(terminal))
+    state_set = ", ".join(f'"{s}"' for s in all_states)
     lines.append(f"States == {{{state_set}}}")
     lines.append("")
 

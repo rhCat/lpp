@@ -473,9 +473,13 @@ def runTlaps(params: dict) -> dict:
 
         output = proc.stdout + proc.stderr
 
-        # Parse TLAPS output
-        if "All obligations proved" in output:
+        # Parse TLAPS output - handle both "All N obligations proved" patterns
+        import re
+        match = re.search(r'All (\d+) obligations? proved', output)
+        if match:
             result["passed"] = True
+            result["proofObligations"] = int(match.group(1))
+            result["provedObligations"] = int(match.group(1))
             for t in result["theorems"]:
                 result["theorems"][t] = "proved"
 

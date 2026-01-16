@@ -1,0 +1,258 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "policy_generator",
+  "name": "Policy Generator",
+  "version": "1.0.0",
+  "description": "Generate L++ policies from decoded blueprints or source repositories with provenance tracking",
+  "context_schema": {
+    "properties": {
+      "source_path": {"type": "string", "description": "Path to source repo or decoded JSON"},
+      "source_type": {"type": "string", "description": "Type: repo, decoded_json, or pattern"},
+      "source_repo": {"type": "string", "description": "Git URL if from repository"},
+      "policy_name": {"type": "string", "description": "Name for generated policy"},
+      "decoded_blueprints": {"type": "array", "description": "Decoded blueprints from logic_decoder"},
+      "function_analysis": {"type": "object", "description": "Function coupling from function_decoder"},
+      "extracted_states": {"type": "array", "description": "States extracted from source"},
+      "extracted_slots": {"type": "object", "description": "Customization slots identified"},
+      "extracted_terminals": {"type": "object", "description": "Terminal states with contracts"},
+      "provenance": {"type": "object", "description": "Source tracking metadata"},
+      "policy": {"type": "object", "description": "Generated policy JSON"},
+      "tla_spec": {"type": "string", "description": "Generated TLA+ specification"},
+      "output_path": {"type": "string", "description": "Where to write policy"},
+      "state_definitions": {"type": "object", "description": "State definitions with metadata"},
+      "state_sources": {"type": "object", "description": "Source mapping for states"},
+      "entry_state": {"type": "string", "description": "Entry state for policy"},
+      "validation_errors": {"type": "array", "description": "Policy validation errors"},
+      "valid": {"type": "boolean", "description": "Policy validation result"},
+      "tla_path": {"type": "string", "description": "Path to generated TLA+ file"},
+      "error": {"type": "string", "description": "Error message if any"}
+    }
+  },
+  "states": {
+    "idle": {"description": "Awaiting source input"},
+    "analyzing": {"description": "Running decoders on source"},
+    "extracting_states": {"description": "Identifying state patterns"},
+    "extracting_slots": {"description": "Finding customization points"},
+    "extracting_terminals": {"description": "Identifying terminal states and contracts"},
+    "composing": {"description": "Building policy structure"},
+    "generating_tla": {"description": "Creating TLA+ specification"},
+    "validating": {"description": "Verifying policy correctness"},
+    "writing": {"description": "Saving policy to disk"},
+    "complete": {"description": "Policy generation complete"},
+    "error": {"description": "Error occurred during generation"}
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "complete": {
+      "output_schema": {
+        "policy": {"type": "object", "non_null": true},
+        "output_path": {"type": "string", "non_null": true}
+      },
+      "invariants_guaranteed": ["policy_valid", "provenance_tracked"]
+    },
+    "error": {
+      "output_schema": {
+        "error": {"type": "string", "non_null": true}
+      }
+    }
+  },
+  "gates": {
+    "has_source": {
+      "type": "expression",
+      "expression": "source_path is not None"
+    },
+    "has_states": {
+      "type": "expression",
+      "expression": "extracted_states is not None"
+    },
+    "has_terminals": {
+      "type": "expression",
+      "expression": "extracted_terminals is not None"
+    },
+    "policy_valid": {
+      "type": "expression",
+      "expression": "policy is not None"
+    }
+  },
+  "actions": {
+    "analyze_source": {
+      "type": "compute",
+      "compute_unit": "policy_gen:analyzeSource",
+      "input_map": {
+        "source_path": "source_path",
+        "source_repo": "source_repo",
+        "source_type": "source_type"
+      },
+      "output_map": {
+        "decoded_blueprints": "decoded_blueprints",
+        "function_analysis": "function_analysis",
+        "provenance": "provenance",
+        "source_type": "source_type"
+      }
+    },
+    "extract_states": {
+      "type": "compute",
+      "compute_unit": "policy_gen:extractStates",
+      "input_map": {
+        "decoded_blueprints": "decoded_blueprints"
+      },
+      "output_map": {
+        "extracted_states": "extracted_states",
+        "state_definitions": "state_definitions",
+        "state_sources": "state_sources",
+        "entry_state": "entry_state"
+      }
+    },
+    "extract_slots": {
+      "type": "compute",
+      "compute_unit": "policy_gen:extractSlots",
+      "input_map": {
+        "decoded_blueprints": "decoded_blueprints",
+        "function_analysis": "function_analysis"
+      },
+      "output_map": {
+        "extracted_slots": "extracted_slots"
+      }
+    },
+    "extract_terminals": {
+      "type": "compute",
+      "compute_unit": "policy_gen:extractTerminals",
+      "input_map": {
+        "decoded_blueprints": "decoded_blueprints",
+        "extracted_states": "extracted_states"
+      },
+      "output_map": {
+        "extracted_terminals": "extracted_terminals"
+      }
+    },
+    "compose_policy": {
+      "type": "compute",
+      "compute_unit": "policy_gen:composePolicy",
+      "input_map": {
+        "policy_name": "policy_name",
+        "state_definitions": "state_definitions",
+        "entry_state": "entry_state",
+        "extracted_terminals": "extracted_terminals",
+        "extracted_slots": "extracted_slots",
+        "provenance": "provenance"
+      },
+      "output_map": {
+        "policy": "policy"
+      }
+    },
+    "generate_tla": {
+      "type": "compute",
+      "compute_unit": "policy_gen:generateTla",
+      "input_map": {
+        "policy": "policy"
+      },
+      "output_map": {
+        "tla_spec": "tla_spec"
+      }
+    },
+    "validate_policy": {
+      "type": "compute",
+      "compute_unit": "policy_gen:validatePolicy",
+      "input_map": {
+        "policy": "policy"
+      },
+      "output_map": {
+        "validation_errors": "validation_errors",
+        "valid": "valid"
+      }
+    },
+    "write_policy": {
+      "type": "compute",
+      "compute_unit": "policy_gen:writePolicy",
+      "input_map": {
+        "policy": "policy",
+        "tla_spec": "tla_spec",
+        "output_path": "output_path"
+      },
+      "output_map": {
+        "output_path": "output_path",
+        "tla_path": "tla_path"
+      }
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_start",
+      "from": "idle",
+      "to": "analyzing",
+      "on_event": "GENERATE",
+      "gates": ["has_source"],
+      "actions": ["analyze_source"]
+    },
+    {
+      "id": "t_analyzed",
+      "from": "analyzing",
+      "to": "extracting_states",
+      "on_event": "ANALYZED",
+      "actions": ["extract_states"]
+    },
+    {
+      "id": "t_states_done",
+      "from": "extracting_states",
+      "to": "extracting_slots",
+      "on_event": "STATES_EXTRACTED",
+      "gates": ["has_states"],
+      "actions": ["extract_slots"]
+    },
+    {
+      "id": "t_slots_done",
+      "from": "extracting_slots",
+      "to": "extracting_terminals",
+      "on_event": "SLOTS_EXTRACTED",
+      "actions": ["extract_terminals"]
+    },
+    {
+      "id": "t_terminals_done",
+      "from": "extracting_terminals",
+      "to": "composing",
+      "on_event": "TERMINALS_EXTRACTED",
+      "gates": ["has_terminals"],
+      "actions": ["compose_policy"]
+    },
+    {
+      "id": "t_composed",
+      "from": "composing",
+      "to": "generating_tla",
+      "on_event": "COMPOSED",
+      "actions": ["generate_tla"]
+    },
+    {
+      "id": "t_tla_done",
+      "from": "generating_tla",
+      "to": "validating",
+      "on_event": "TLA_GENERATED",
+      "actions": ["validate_policy"]
+    },
+    {
+      "id": "t_validated",
+      "from": "validating",
+      "to": "writing",
+      "on_event": "VALIDATED",
+      "gates": ["policy_valid"],
+      "actions": ["write_policy"]
+    },
+    {
+      "id": "t_written",
+      "from": "writing",
+      "to": "complete",
+      "on_event": "WRITTEN"
+    },
+    {
+      "id": "t_error",
+      "from": "*",
+      "to": "error",
+      "on_event": "ERROR"
+    },
+    {
+      "id": "t_reset",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ]
+}

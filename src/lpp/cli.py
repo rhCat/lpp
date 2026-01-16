@@ -226,10 +226,9 @@ def cmd_tla(args: List[str]) -> int:
 
     if check:
         print("Running TLC model checker...")
-        errs = validate_with_tlc(str(tla_file))
-        if errs:
-            for e in errs:
-                print(f"  Error: {e}")
+        success, output = validate_with_tlc(bp)
+        if not success:
+            print(f"  Error: {output}")
             return 1
         print("TLC: No errors found!")
 
@@ -504,6 +503,9 @@ def cmd_util(args: List[str]) -> int:
             elif util_name in ["logic_decoder", "legacy_extractor",
                                "function_decoder"]:
                 params["file_path"] = first_arg
+            # Utilities expecting source_path
+            elif util_name in ["policy_generator"]:
+                params["source_path"] = first_arg
             # Utilities expecting utilsPath
             elif util_name in ["doc_generator", "skill_registry",
                                "blueprint_registry", "dashboard"]:

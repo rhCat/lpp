@@ -1,0 +1,218 @@
+{
+  "$schema": "lpp/v0.2.0",
+  "id": "service_router",
+  "name": "Service Router Policy",
+  "version": "1.0.0",
+  "description": {
+    "summary": "Config-driven service proxy router with explicit error handling",
+    "provenance": {
+      "source_repo": "https://github.com/rhCat/datum_open",
+      "source_files": [
+        "app.py",
+        "src/datum_core/proxy_core.py",
+        "src/datum_core/service_registry.py"
+      ],
+      "extracted_date": "2026-01-15",
+      "extracted_by": "lpp util logic_decoder",
+      "original_pattern": "Chatty not crashy - never raises, always returns (status, headers, body)"
+    },
+    "design_philosophy": [
+      "Config-driven: All routing defined in JSON, not code",
+      "Discoverable: Endpoints self-describe via metadata",
+      "Defensive: Every path terminates, no exceptions leak",
+      "Passthrough: Upstream status/headers/body preserved"
+    ],
+    "use_cases": [
+      "API Gateway routing",
+      "Service mesh proxy",
+      "LLM tool routing",
+      "Multi-tenant service dispatch"
+    ]
+  },
+  "context_schema": {
+    "properties": {
+      "service_name": {"type": "string", "description": "Target service identifier"},
+      "endpoint_name": {"type": "string", "description": "Target endpoint name"},
+      "path": {"type": "string", "description": "Request path"},
+      "method": {"type": "string", "description": "HTTP method"},
+      "headers": {"type": "object", "description": "Request headers"},
+      "body": {"type": "string", "description": "Request body"},
+      "query": {"type": "string", "description": "Query string"},
+      "service_config": {"type": "object", "description": "Resolved service configuration"},
+      "endpoint_config": {"type": "object", "description": "Resolved endpoint configuration"},
+      "upstream_response": {"type": "object", "description": "Response from upstream"},
+      "status": {"type": "integer", "description": "HTTP status code"},
+      "error": {"type": "string", "description": "Error message if any"}
+    }
+  },
+  "states": {
+    "idle": {
+      "description": "Awaiting request"
+    },
+    "resolving_service": {
+      "description": "Looking up service in registry"
+    },
+    "resolving_endpoint": {
+      "description": "Looking up endpoint metadata"
+    },
+    "proxying": {
+      "description": "Forwarding request to upstream"
+    }
+  },
+  "entry_state": "idle",
+  "terminal_states": {
+    "complete": {
+      "output_schema": {
+        "status": {"type": "integer", "non_null": true},
+        "headers": {"type": "object", "non_null": true},
+        "body": {"type": "string", "non_null": true}
+      },
+      "invariants_guaranteed": ["response_delivered"]
+    },
+    "service_error": {
+      "output_schema": {
+        "status": {"type": "integer", "non_null": true, "value": 404},
+        "error": {"type": "string", "non_null": true}
+      },
+      "invariants_guaranteed": ["error_reported"]
+    },
+    "endpoint_error": {
+      "output_schema": {
+        "status": {"type": "integer", "non_null": true, "value": 404},
+        "error": {"type": "string", "non_null": true}
+      },
+      "invariants_guaranteed": ["error_reported"]
+    },
+    "upstream_error": {
+      "output_schema": {
+        "status": {"type": "integer", "non_null": true},
+        "error": {"type": "string", "non_null": true}
+      },
+      "invariants_guaranteed": ["error_reported"]
+    },
+    "config_error": {
+      "output_schema": {
+        "status": {"type": "integer", "non_null": true, "value": 500},
+        "error": {"type": "string", "non_null": true}
+      },
+      "invariants_guaranteed": ["error_reported"]
+    }
+  },
+  "slots": {
+    "resolve_service": {
+      "description": "Look up service configuration by name",
+      "input": ["service_name"],
+      "output": ["service_config", "base_url"],
+      "on_error": "service_error"
+    },
+    "resolve_endpoint": {
+      "description": "Look up endpoint metadata",
+      "input": ["service_name", "endpoint_name"],
+      "output": ["endpoint_config", "path", "method"],
+      "on_error": "endpoint_error"
+    },
+    "proxy_request": {
+      "description": "Forward request to upstream service",
+      "input": ["base_url", "path", "method", "headers", "body", "query"],
+      "output": ["status", "headers", "body"],
+      "on_error": "upstream_error"
+    },
+    "handle_error": {
+      "description": "Format error response",
+      "input": ["error", "status"],
+      "output": ["status", "headers", "body"]
+    }
+  },
+  "gates": {
+    "service_found": {
+      "type": "expression",
+      "expression": "context.service_config is not None"
+    },
+    "endpoint_found": {
+      "type": "expression",
+      "expression": "context.endpoint_config is not None"
+    },
+    "proxy_success": {
+      "type": "expression",
+      "expression": "context.status < 500"
+    }
+  },
+  "actions": {
+    "lookup_service": {
+      "type": "slot",
+      "slot": "resolve_service"
+    },
+    "lookup_endpoint": {
+      "type": "slot",
+      "slot": "resolve_endpoint"
+    },
+    "forward_request": {
+      "type": "slot",
+      "slot": "proxy_request"
+    },
+    "format_error": {
+      "type": "slot",
+      "slot": "handle_error"
+    }
+  },
+  "transitions": [
+    {
+      "id": "t_receive",
+      "from": "idle",
+      "to": "resolving_service",
+      "on_event": "REQUEST",
+      "actions": ["lookup_service"]
+    },
+    {
+      "id": "t_service_ok",
+      "from": "resolving_service",
+      "to": "resolving_endpoint",
+      "on_event": "SERVICE_RESOLVED",
+      "gates": ["service_found"],
+      "actions": ["lookup_endpoint"]
+    },
+    {
+      "id": "t_service_fail",
+      "from": "resolving_service",
+      "to": "service_error",
+      "on_event": "SERVICE_RESOLVED",
+      "gates": ["!service_found"],
+      "actions": ["format_error"]
+    },
+    {
+      "id": "t_endpoint_ok",
+      "from": "resolving_endpoint",
+      "to": "proxying",
+      "on_event": "ENDPOINT_RESOLVED",
+      "gates": ["endpoint_found"],
+      "actions": ["forward_request"]
+    },
+    {
+      "id": "t_endpoint_fail",
+      "from": "resolving_endpoint",
+      "to": "endpoint_error",
+      "on_event": "ENDPOINT_RESOLVED",
+      "gates": ["!endpoint_found"],
+      "actions": ["format_error"]
+    },
+    {
+      "id": "t_proxy_ok",
+      "from": "proxying",
+      "to": "complete",
+      "on_event": "PROXY_DONE"
+    },
+    {
+      "id": "t_proxy_upstream_fail",
+      "from": "proxying",
+      "to": "upstream_error",
+      "on_event": "PROXY_ERROR",
+      "actions": ["format_error"]
+    },
+    {
+      "id": "t_reset",
+      "from": "*",
+      "to": "idle",
+      "on_event": "RESET"
+    }
+  ]
+}

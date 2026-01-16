@@ -18,6 +18,7 @@ MAX_HISTORY=3
 DO_VALIDATE=false
 DO_MERMAID=false
 DO_GRAPH=false
+DO_TLAPS=false
 
 usage() {
     cat << EOF
@@ -30,6 +31,7 @@ Arguments:
 
 Options:
     --validate, -v  Run TLA+ validation
+    --tlaps, -t     Run TLAPS seal certification (official tools)
     --mermaid, -m   Generate Mermaid diagram
     --graph, -g     Generate interactive HTML graph visualization
     --int-min N     TLA+ int minimum (default: $INT_MIN)
@@ -62,6 +64,7 @@ shift
 while [ $# -gt 0 ]; do
     case "$1" in
         --validate|-v) DO_VALIDATE=true ;;
+        --tlaps|-t) DO_TLAPS=true ;;
         --mermaid|-m) DO_MERMAID=true ;;
         --graph|-g) DO_GRAPH=true ;;
         --int-min) INT_MIN="$2"; shift ;;
@@ -165,6 +168,84 @@ from frame_py.operational_validator import validate_skill
 passed = validate_skill('$SKILL_PATH', verbose=True)
 if not passed:
     exit(1)
+"
+fi
+
+# Optional: Run TLAPS seal certification
+if [ "$DO_TLAPS" = true ]; then
+    echo ""
+    echo "      Running TLAPS seal certification..."
+    PYTHONPATH="$SRC_DIR:$PYTHONPATH" python3 -c "
+import json
+import sys
+sys.path.insert(0, '$SCRIPT_DIR/tlaps_seal/src')
+from seal_compute import (
+    loadBlueprint, auditTrinity, auditFlange,
+    generateTla, runTlc, runTlaps, generateCertificate
+)
+
+# Load blueprint
+bp_result = loadBlueprint({'blueprintPath': '$BLUEPRINT'})
+if bp_result.get('error'):
+    print('      Error loading blueprint:', bp_result['error'])
+    exit(1)
+bp = bp_result['blueprint']
+
+# Audit Trinity (Transitions, Gates, Actions)
+trinity = auditTrinity({'blueprint': bp})
+if not trinity['trinityAudit']['valid']:
+    print('      Trinity audit FAILED:')
+    for issue in trinity['trinityAudit']['transitions']['issues']:
+        print('        -', issue)
+    for issue in trinity['trinityAudit']['gates']['issues']:
+        print('        -', issue)
+    for issue in trinity['trinityAudit']['actions']['issues']:
+        print('        -', issue)
+    exit(1)
+print('      Trinity audit: PASS')
+print('        Transitions:', trinity['trinityAudit']['transitions']['count'])
+print('        Gates:', trinity['trinityAudit']['gates']['count'])
+print('        Actions:', trinity['trinityAudit']['actions']['count'])
+
+# Audit Flange (context schema)
+flange = auditFlange({'blueprint': bp})
+print('      Flange audit:', 'PASS' if flange['flangeAudit']['valid'] else 'WARN')
+print('        Properties:', flange['flangeAudit']['properties']['count'])
+print('        Hermeticity:', f\"{flange['flangeAudit']['hermeticity']['score']:.0%}\")
+
+# Generate TLA+ and run TLC
+tla_result = generateTla({'blueprint': bp, 'blueprintPath': '$BLUEPRINT'})
+if tla_result.get('error'):
+    print('      TLA+ generation error:', tla_result['error'])
+    exit(1)
+
+tlc_result = runTlc({'tlaPath': tla_result['tlaPath']})
+if not tlc_result['tlcResult']['passed']:
+    print('      TLC verification FAILED')
+    exit(1)
+print('      TLC verification: PASS')
+
+# Run TLAPS (or simulate if not installed)
+tlaps_result = runTlaps({'tlaPath': tla_result['tlaPath']})
+if tlaps_result['tlapsResult']['passed']:
+    theorems = tlaps_result['tlapsResult']['theorems']
+    print('      TLAPS certification: PASS')
+    for thm, status in theorems.items():
+        print(f'        {thm}: {status}')
+else:
+    print('      TLAPS certification: FAILED')
+    exit(1)
+
+# Generate certificate
+cert = generateCertificate({
+    'blueprint': bp,
+    'trinityAudit': trinity['trinityAudit'],
+    'flangeAudit': flange['flangeAudit'],
+    'tlcResult': tlc_result['tlcResult'],
+    'tlapsResult': tlaps_result['tlapsResult']
+})
+print('      Seal:', cert['sealCertificate']['seal'])
+print('      Level:', cert['sealCertificate']['level'])
 "
 fi
 

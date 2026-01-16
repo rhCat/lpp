@@ -1,7 +1,7 @@
 """
 L++ Utility Tools
 
-A collection of 29 utility tools for L++ development.
+A collection of 30 utility tools for L++ development.
 
 Categories:
     Blueprint Tools:
@@ -47,6 +47,9 @@ Categories:
     Migration:
         schema_migrator     - Blueprint schema migration
 
+    Policy:
+        policy_generator    - Generate policies from source code
+
     Search:
         interactive_search  - Refined interactive search with drill-down
 
@@ -82,6 +85,7 @@ UTILITIES = [
     "legacy_extractor",
     "llm_assistant",
     "logic_decoder",
+    "policy_generator",
     "research_scraper",
     "schema_migrator",
     "scholar_chat",
