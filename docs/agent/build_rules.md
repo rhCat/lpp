@@ -23,7 +23,7 @@ L++ (Logic Plus Plus) is a deterministic framework that separates Eternal Logic 
 - **Goal:** Generate a hierarchical feature tree. This prevents "Logic Bloat" by breaking the problem into atomic sub-assemblies.
 
 ### 1. The Bone: {skill_name}.json
-- Schema: Must strictly adhere to `docs/schema/schema_v0.1.2.md` (The Trinity).
+- Schema: Must strictly adhere to `docs/schema/schema_v0.2.0.md` (The Trinity).
 - Traceability: Every transition MUST have a unique id.
 - Logic Stacking: Align `input_map` with existing "Flanges" discovered in Step 0.
 
@@ -47,3 +47,72 @@ L++ (Logic Plus Plus) is a deterministic framework that separates Eternal Logic 
 7. **EXTRUDE:** Generate the `interactive.py` wrapper.
 8. **DOCUMENT:** Run `./build_skill.sh <dir> --mermaid` for `README.md`.
 9. **SIGN-OFF:** Present the Mermaid diagram to the Human (Engineer of Record).
+
+## L++ Development Requirements (MANDATORY)
+
+These rules MUST be followed for all development work:
+
+### 1. Blueprint-First Development
+
+**Always update logic into blueprint if it can be defined as a state node.**
+
+- State transitions, conditional logic, and workflow orchestration -> **blueprint states/transitions**
+- Heavy-lifting operations, I/O, external calls -> **compute actions**
+- The blueprint ("bone") defines WHAT happens; compute functions ("flesh") define HOW
+
+```
+Logic type          -> Blueprint element
+---------------------------------------------
+Workflow state      -> states
+Conditional branch  -> gates
+Data transformation -> compute action
+API call            -> compute action
+File I/O            -> compute action
+```
+
+### 2. Always Compile and Use Compiled Logic
+
+**After any blueprint change, compile immediately and use the compiled output.**
+
+```bash
+# Compile blueprint to Python state machine
+lpp compile <blueprint.json> <output.py>
+
+# Example
+lpp compile utils/logic_decoder/logic_decoder.json utils/logic_decoder/results/compiled.py
+```
+
+All code that interacts with blueprint logic MUST use the compiled state machine, not direct JSON parsing.
+
+### 3. Always Validate and Document
+
+**Every blueprint update requires validation and documentation regeneration.**
+
+```bash
+# Validate blueprint structure
+lpp validate <blueprint.json>
+
+# Generate/update documentation
+lpp util doc_generator <utils_dir/>
+
+# For full validation pipeline
+./deploy.sh validate
+./deploy.sh docs
+```
+
+### Quick Reference: After Blueprint Changes
+
+```bash
+# 1. Validate the blueprint
+lpp validate path/to/blueprint.json
+
+# 2. Compile to state machine
+lpp compile path/to/blueprint.json path/to/results/compiled.py
+
+# 3. Regenerate documentation
+./deploy.sh docs
+
+# 4. Run tests
+./deploy.sh tests
+pytest
+```

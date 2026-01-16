@@ -14,6 +14,41 @@ Operates and manages L++ workflows and applications following the L++ framework 
 - Schema v0.2.0: file:./docs/schema/schema_v0.2.0.md
 - Build rules: file:./docs/agent/build_rules.md
 
+## L++ Development Requirements (MANDATORY)
+
+### 1. Blueprint-First Development
+
+**Always update logic into blueprint if it can be defined as a state node.**
+
+| Logic type          | Blueprint element |
+|---------------------|-------------------|
+| Workflow state      | states            |
+| Conditional branch  | gates             |
+| Data transformation | compute action    |
+| API call            | compute action    |
+| File I/O            | compute action    |
+
+The blueprint ("bone") defines WHAT happens; compute functions ("flesh") define HOW.
+
+### 2. Always Compile and Use Compiled Logic
+
+**After any blueprint change, compile immediately:**
+
+```bash
+lpp compile <blueprint.json> <output.py>
+```
+
+All code that interacts with blueprint logic MUST use the compiled state machine, not direct JSON parsing.
+
+### 3. Always Validate and Document
+
+```bash
+lpp validate <blueprint.json>        # Validate structure
+lpp util doc_generator <utils_dir/>  # Regenerate docs
+./deploy.sh validate                 # TLA+ validation
+./deploy.sh docs                     # Full documentation
+```
+
 ## Available Workflows
 
 ### 1. Logic Vulnerability Pointer (LVP)
