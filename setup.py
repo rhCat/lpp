@@ -11,8 +11,8 @@ from pathlib import Path
 HERE = Path(__file__).parent
 README = (HERE / "README.md").read_text(encoding="utf-8")
 
-# Extract version from package
-VERSION = "1.0.0"
+# Extract version from package (sync with pyproject.toml)
+VERSION = "1.2.8"
 
 setup(
     name="lpp",
