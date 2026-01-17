@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "lpp"
+name = "logic-plus-plus"
 version = "1.2.8"
 description = "L++ Dev Suite - The Universal Deterministic Logic Workflow Machine"
 readme = "README.md"
@@ -80,10 +80,10 @@ lpp-lvp = "lpp.workflow.logic_vulnerability_pointer.cli:main"
 lpp-agent = "lpp.agent.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/lpp-project/lpp"
-Documentation = "https://github.com/lpp-project/lpp#readme"
-Repository = "https://github.com/lpp-project/lpp"
-Issues = "https://github.com/lpp-project/lpp/issues"
+Homepage = "https://github.com/rhCat/lpp"
+Documentation = "https://github.com/rhCat/lpp#readme"
+Repository = "https://github.com/rhCat/lpp"
+Issues = "https://github.com/rhCat/lpp/issues"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

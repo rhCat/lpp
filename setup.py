@@ -15,7 +15,7 @@ README = (HERE / "README.md").read_text(encoding="utf-8")
 VERSION = "1.2.8"
 
 setup(
-    name="lpp",
+    name="logic-plus-plus",
     version=VERSION,
     author="L++ Team",
     author_email="lpp@example.com",
