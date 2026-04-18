@@ -246,12 +246,27 @@ def generate_tla(
     lines.append("")
 
     # Initial state
+    # Boolean context props (branch conditions) are initialised nondeterministically
+    # so TLC explores all possible truth values — both the "then" and "else" branches.
+    # Enum props are likewise drawn from their full domain.  Numeric and string props
+    # start as NULL (unknown) and may be constrained via StateConstraint.
     lines.append("\\* Initial state")
     lines.append("Init ==")
     lines.append(f'    /\\ state = "{entry}"')
-    for prop in properties.keys():
+    for prop, info in domains.items():
         safe_prop = _to_tla_safe(prop)
-        lines.append(f"    /\\ {safe_prop} = NULL")
+        ptype = info.get("type", "string")
+        if ptype == "boolean":
+            # Nondeterministic: TLC will fork and explore both TRUE and FALSE branches
+            lines.append(f"    /\\ {safe_prop} \\in {{TRUE, FALSE}}")
+        elif ptype == "enum":
+            domain_name = info.get("domain_name")
+            if domain_name:
+                lines.append(f"    /\\ {safe_prop} \\in {domain_name}")
+            else:
+                lines.append(f"    /\\ {safe_prop} = NULL")
+        else:
+            lines.append(f"    /\\ {safe_prop} = NULL")
     lines.append("    /\\ event_history = <<>>")
     lines.append("")
 
@@ -275,9 +290,13 @@ def generate_tla(
 
         # Gate conditions
         for gid in gate_ids:
-            gate = gates.get(gid, {})
+            negated = gid.startswith("~")
+            actual_gid = gid[1:] if negated else gid
+            gate = gates.get(actual_gid, {})
             expr = gate.get("expression", "TRUE")
             tla_expr = _python_to_tla(expr, properties, domains)
+            if negated:
+                tla_expr = f"~({tla_expr})"
             lines.append(f"    /\\ {tla_expr}  \\* gate: {gid}")
 
         # State transition
