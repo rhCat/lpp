@@ -230,3 +230,8 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Generated test summaries and blueprint snapshots (contain local absolute paths)
+tests/generated/*_test_summary.json
+src/blueprints/all_blueprints.txt
+utils/task_orchestrator/results/orchestrator_compute_functions.json
